@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { SankeyInput } from '../models';
+import { SankeyLink } from '../models';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../data.service';
@@ -29,29 +29,29 @@ export class SankeyChartComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    const nodes = this.generateNodesFromLinks(this.dataService.userDefinedLinks)
+    // const nodes = this.generateNodesFromLinks(this.dataService.userDefinedLinks)
 
-    this.sankeyOption = {
-      tooltip: {
-        trigger: 'item',
-        triggerOn: 'mousemove'
-      },
-      series: [
-        {
-          type: 'sankey',
-          data: nodes, // Auto-generated nodes
-          links: this.dataService.userDefinedLinks, // User-defined links
-          emphasis: { focus: 'adjacency' },
-          label: { fontSize: 12 },
-          nodeGap: 15,
-          lineStyle: { color: 'gradient', curveness: 0.5 }
-        }
-      ]
-    }
+    // this.sankeyOption = {
+    //   tooltip: {
+    //     trigger: 'item',
+    //     triggerOn: 'mousemove'
+    //   },
+    //   series: [
+    //     {
+    //       type: 'sankey',
+    //       data: nodes, // Auto-generated nodes
+    //       links: this.dataService.userDefinedLinks, // User-defined links
+    //       emphasis: { focus: 'adjacency' },
+    //       label: { fontSize: 12 },
+    //       nodeGap: 15,
+    //       lineStyle: { color: 'gradient', curveness: 0.5 }
+    //     }
+    //   ]
+    // }
   }
 
 
-  generateNodesFromLinks(links: SankeyInput[]): SankeyNode[] {
+  generateNodesFromLinks(links: SankeyLink[]): SankeyNode[] {
     const nodeSet = new Set<string>();
   
     links.forEach(link => {

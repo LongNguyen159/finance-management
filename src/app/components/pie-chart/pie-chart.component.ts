@@ -21,7 +21,7 @@ export class PieChartComponent implements OnInit {
 
   ngOnInit(): void {
     const expenseData = this.dataService.userDefinedLinks
-      .filter(link => link.source === 'Net Income' || link.source === 'Housing') // Filter expense links
+      .filter(link => link.type == 'expense' || link.type == 'tax') // Filter expense links
       .map(link => ({ name: link.target, value: link.value })); // Map to name and value
 
 
