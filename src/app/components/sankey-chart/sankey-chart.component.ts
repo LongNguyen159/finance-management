@@ -29,25 +29,29 @@ export class SankeyChartComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    // const nodes = this.generateNodesFromLinks(this.dataService.userDefinedLinks)
+    const { nodes, links } = this.dataService.processInputData(this.dataService.userDefinedLinks);
 
-    // this.sankeyOption = {
-    //   tooltip: {
-    //     trigger: 'item',
-    //     triggerOn: 'mousemove'
-    //   },
-    //   series: [
-    //     {
-    //       type: 'sankey',
-    //       data: nodes, // Auto-generated nodes
-    //       links: this.dataService.userDefinedLinks, // User-defined links
-    //       emphasis: { focus: 'adjacency' },
-    //       label: { fontSize: 12 },
-    //       nodeGap: 15,
-    //       lineStyle: { color: 'gradient', curveness: 0.5 }
-    //     }
-    //   ]
-    // }
+    console.log('links:', links);
+
+    console.log('nodes:', nodes);
+
+    this.sankeyOption = {
+      tooltip: {
+        trigger: 'item',
+        triggerOn: 'mousemove'
+      },
+      series: [
+        {
+          type: 'sankey',
+          data: nodes.map(node => ({ name: node.name })),
+          links: links,
+          emphasis: { focus: 'adjacency' },
+          label: { fontSize: 12 },
+          nodeGap: 15,
+          lineStyle: { color: 'gradient', curveness: 0.5 }
+        }
+      ]
+    }
   }
 
 

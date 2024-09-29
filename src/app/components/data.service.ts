@@ -36,40 +36,38 @@ export class DataService {
 
 
   userDefinedLinks: UserDefinedLink[] = [
-    { type: 'income', target: 'Main Salary', value: 3000 },
-    { type: 'income', target: 'Freelance Job', value: 1200 },
-    { type: 'tax', target: 'Taxes', value: 500 },
-    { type: 'expense', target: 'Housing', value: 1200 },
-    { type: 'expense', target: 'Groceries', value: 400 },
-    { type: 'expense', target: 'Commute', value: 150 },
-    { type: 'expense', target: 'Electricity', value: 100, source: 'Housing' }, // Specified source
-    { type: 'expense', target: 'Water', value: 30, source: 'Housing' },       // Specified source
-    { type: 'expense', target: 'Wifi', value: 40, source: 'Housing' }         // Specified source
+    { type: 'income', target: 'Main income', value: 1027 },
+    { type: 'income', target: 'Roommate Contribution', value: 565 },
+    { type: 'tax', target: 'Taxes', value: 208, source: 'Total Income' },
+    { type: 'expense', target: 'Housing', value: 1096 },
+    { type: 'expense', target: 'Groceries', value: 150 },
+    { type: 'expense', target: 'Commute', value: 50 },
+    { type: 'expense', target: 'Electricity', value: 108, source: 'Housing' },
+    { type: 'expense', target: 'Water', value: 35, source: 'Housing' },      
+    { type: 'expense', target: 'Rent', value: 833, source: 'Housing' },
+    { type: 'expense', target: 'Wifi', value: 40, source: 'Housing' },
+    { type: 'expense', target: 'Kitchen', value: 80, source: 'Housing' },
+    { type: 'expense', target: 'Sport', value: 20 },
+    { type: 'expense', target: 'Sim Card', value: 20 },
+    { type: 'expense', target: 'Radio Fees', value: 20 },
   ];
 
   
 
 
   
-  constructor() {
-
-
-    const { nodes, links } = this.processInputData(this.userDefinedLinks);
-
-    // Output the result
-    console.log('Nodes:', nodes);
-    console.log('Links:', links);
-  }
+  constructor() {}
 
 
   processInputData(userDefinedLinks: UserDefinedLink[]): { nodes: Node[], links: Link[] } {
     const nodesMap = new Map<string, number>(); // Map to hold unique nodes and their total values
     const links: Link[] = []; // Array to hold links between nodes
     const incomeNodes: string[] = []; // Track income nodes
-    let totalIncomeNodeCreated = false; // Flag to check if total income node is created
     let totalIncomeValue = 0; // Variable to store total income value
+    let singleIncome = false; // Flag to check if there is only one income source
+    const hasTax = userDefinedLinks.some(link => link.type === 'tax'); // Check if there is any tax link
 
-    // Process links and group income, expenses, and tax
+    // Step 1: Process links and group income, taxes, and expenses
     userDefinedLinks.forEach(link => {
         if (link.type === 'income') {
             incomeNodes.push(link.target); // Collect income nodes
@@ -77,88 +75,85 @@ export class DataService {
         } else if (link.type === 'tax') {
             nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
         } else if (link.type === 'expense') {
-            // Create the node for the expense target
             nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
         }
     });
 
-    // Create Total Income node if there are multiple income nodes
+    // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
     if (incomeNodes.length > 1) {
         totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node) || 0), 0);
         nodesMap.set('Total Income', totalIncomeValue);
-        totalIncomeNodeCreated = true; // Mark that the Total Income node has been created
     } else if (incomeNodes.length === 1) {
-        totalIncomeValue = nodesMap.get(incomeNodes[0]) || 0; // Only one income source
+        singleIncome = true; // Only one income source, no need for a "Total Income" node
+        totalIncomeValue = nodesMap.get(incomeNodes[0]) || 0;
     }
 
-    // Calculate Usable Income
-    const taxNode = userDefinedLinks.find(link => link.type === 'tax');
-    let usableIncome = totalIncomeValue; // Default to total income if no taxes
+    // Step 3: Handle Usable Income if there's a tax link, otherwise use the full income directly
+    const incomeSource = singleIncome ? incomeNodes[0] : 'Total Income';
 
-    if (taxNode) {
-        const taxValue = nodesMap.get(taxNode.target) || 0;
-        usableIncome = totalIncomeValue - taxValue; // Calculate usable income by deducting tax
-    }
-    nodesMap.set('Usable Income', usableIncome); // Store usable income in nodes map
+    if (hasTax) {
+        const taxLink = userDefinedLinks.find(link => link.type === 'tax');
+        let usableIncome = totalIncomeValue;
 
-    // Create links based on income, taxes, and expenses
-    userDefinedLinks.forEach(link => {
-        let sourceNode: string;
+        if (taxLink) {
+            const taxValue = nodesMap.get(taxLink.target) || 0;
+            usableIncome -= taxValue; // Subtract taxes
+            nodesMap.set('Usable Income', usableIncome); // Set Usable Income node
 
-        if (link.type === 'income') {
-            // Check if there is only one income node
-            if (incomeNodes.length === 1) {
-                sourceNode = link.target; // If only one income, link directly
-            } else {
-                sourceNode = 'Total Income'; // If multiple incomes, link to total income
-            }
-            // Create link for income
+            // Step 4: Create links from Income to Usable Income and Taxes
             links.push({
-                source: link.target,
-                target: sourceNode,
-                value: link.value
+                source: incomeSource,
+                target: taxLink.target,
+                value: taxLink.value
             });
-        } else if (link.type === 'tax') {
-            // Create link from total income or specific income source
-            if (incomeNodes.length > 1) {
+
+            links.push({
+                source: incomeSource,
+                target: 'Usable Income',
+                value: usableIncome
+            });
+        }
+    }
+
+    // Step 5: Create links for individual incomes and expenses
+    userDefinedLinks.forEach(link => {
+        if (link.type === 'income') {
+            if (!singleIncome) {
                 links.push({
-                    source: 'Total Income',
-                    target: link.target,
-                    value: link.value
-                });
-            } else {
-                links.push({
-                    source: incomeNodes[0], // Source is the only income node
-                    target: link.target,
+                    source: link.target,
+                    target: 'Total Income',
                     value: link.value
                 });
             }
         } else if (link.type === 'expense') {
-            // Link expenses from Usable Income by default
-            links.push({
-                source: 'Usable Income',
-                target: link.target,
-                value: link.value
-            });
+            // If there's no tax, expenses should directly come from the main income source
+            const expenseSource = hasTax ? 'Usable Income' : incomeSource;
+
+            // Check if the user explicitly defined a source for the expense
+            if (link.source) {
+                links.push({
+                    source: link.source, // Use user-defined source
+                    target: link.target,
+                    value: link.value
+                });
+            } else {
+                // Link expenses from Usable Income (if taxes exist) or from main income if no taxes
+                links.push({
+                    source: expenseSource,
+                    target: link.target,
+                    value: link.value
+                });
+            }
         }
     });
 
-    // Create a link from Total Income to Usable Income
-    if (totalIncomeNodeCreated) {
-        links.push({
-            source: 'Total Income',
-            target: 'Usable Income',
-            value: usableIncome
-        });
-    }
-
-    // Convert nodesMap to an array of nodes
+    // Step 6: Convert nodesMap to an array of nodes
     const nodes: Node[] = Array.from(nodesMap.entries()).map(([name, totalValue]) => ({ name, totalValue }));
 
-    // Remove duplicate links
+    // Step 7: Remove duplicate links
     const uniqueLinks: Link[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as Link);
 
     return { nodes, links: uniqueLinks };
 }
-  
+
 }
