@@ -1,5 +1,4 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { SankeyLink } from '../models';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../data.service';
@@ -29,11 +28,13 @@ export class SankeyChartComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    const { nodes, links } = this.dataService.processInputData(this.dataService.userDefinedLinks);
+    const { nodes, links, remainingBalance } = this.dataService.processInputData(this.dataService.userDefinedLinks);
 
     console.log('links:', links);
 
     console.log('nodes:', nodes);
+
+    console.log('remainingBalance:', remainingBalance);
 
     this.sankeyOption = {
       tooltip: {
@@ -52,17 +53,5 @@ export class SankeyChartComponent implements OnInit{
         }
       ]
     }
-  }
-
-
-  generateNodesFromLinks(links: SankeyLink[]): SankeyNode[] {
-    const nodeSet = new Set<string>();
-  
-    links.forEach(link => {
-      nodeSet.add(link.source);
-      nodeSet.add(link.target);
-    });
-  
-    return Array.from(nodeSet).map(name => ({ name }))
   }
 }

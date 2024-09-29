@@ -1,11 +1,3 @@
-export interface SankeyLink {
-    source: string;
-    target: string;
-    value: number;
-    type: string;
-}
-
-
 export interface UserDefinedLink {
     type: 'income' | 'expense' | 'tax';
     target: string;   // The name of the current node
