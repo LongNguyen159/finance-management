@@ -37,10 +37,9 @@ export class DataService {
 
   userDefinedLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Income', value: 1027 },
-    // { type: 'expense', target: 'Net Income', value: 819, source: 'Total Income' },
     { type: 'income', target: 'Roommate Contribution', value: 565 },
-    { type: 'tax', target: 'Taxes', value: 208, source: 'Housing' },
-    { type: 'expense', target: 'Housing', value: 1096 },
+    { type: 'tax', target: 'Taxes', value: 208 },
+    { type: 'expense', target: 'Housing', value: 1100 },
     { type: 'expense', target: 'Groceries', value: 150 },
     { type: 'expense', target: 'Commute', value: 50 },
     { type: 'expense', target: 'Electricity', value: 108, source: 'Housing' },
@@ -59,46 +58,50 @@ export class DataService {
 
 
   processInputData(userDefinedLinks: UserDefinedLink[]): { nodes: Node[], links: Link[], remainingBalance: string } {
-    const nodesMap = new Map<string, number>(); // Map to hold unique nodes and their total values
+    const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
     const links: Link[] = []; // Array to hold links between nodes
     const incomeNodes: string[] = []; // Track income nodes
     let totalIncomeValue = 0; // Variable to store total income value
     let totalTaxValue = 0; // Variable to store total tax value
     let singleIncome = false; // Flag to check if there is only one income source
     const hasTax = userDefinedLinks.some(link => link.type === 'tax'); // Check if there is any tax link
-    const parentExpenseMap = new Map<string, number>(); // Map to track parent expenses and their children sum
-    const childExpenses = new Set<string>(); // Set to keep track of all child expenses
 
-    // Step 1: Process links and group income, taxes, and expenses
+
+    // Step 1: Initialize the nodes without adding values yet
     userDefinedLinks.forEach(link => {
-        if (link.type === 'income') {
-            incomeNodes.push(link.target); // Collect income nodes
-            nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
-        } else if (link.type === 'tax') {
-            nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
-            totalTaxValue += link.value; // Accumulate total tax value
-        } else if (link.type === 'expense') {
-            // Check if this expense has a parent (i.e., it's a child expense)
-            if (link.source) {
-                // Add child expense to the set to identify later
-                childExpenses.add(link.target);
-
-                // Add the child expense value to its parent node
-                parentExpenseMap.set(link.source, (parentExpenseMap.get(link.source) || 0) + link.value);
-            } else {
-                // If it's a top-level expense (no source), treat it as a normal expense
-                nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
-            }
+        if (!nodesMap.has(link.target)) {
+            nodesMap.set(link.target, { value: 0, type: link.type });
         }
     });
 
+    // Step 1.2: Process links to accumulate income, taxes, and expenses
+    userDefinedLinks.forEach(link => {
+        if (link.type === 'income') {
+            incomeNodes.push(link.target);
+            nodesMap.get(link.target)!.value += link.value; // Add income only once
+        } else if (link.type === 'tax') {
+            nodesMap.get(link.target)!.value += link.value;
+            totalTaxValue += link.value;
+        } else if (link.type === 'expense') {
+            if (!link.source) {
+                // Top-level expenses (those without a source)
+                nodesMap.get(link.target)!.value += link.value;
+            } else {
+                // Child expenses (those with a source)
+                nodesMap.get(link.source)!.value += link.value; // Update parent value
+                nodesMap.get(link.target)!.value += link.value; // Update child value
+            }
+        }
+    });
+    console.log('nodesMap init:', nodesMap);
+
     // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
     if (incomeNodes.length > 1) {
-        totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node) || 0), 0);
-        nodesMap.set('Total Income', totalIncomeValue);
+        totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node)?.value || 0), 0);
+        nodesMap.set('Total Income', { value: totalIncomeValue, type: 'income' });
     } else if (incomeNodes.length === 1) {
         singleIncome = true; // Only one income source, no need for a "Total Income" node
-        totalIncomeValue = nodesMap.get(incomeNodes[0]) || 0;
+        totalIncomeValue = nodesMap.get(incomeNodes[0])?.value || 0;
     }
 
     // Step 3: Handle Usable Income if there's a tax link, otherwise use the full income directly
@@ -109,9 +112,9 @@ export class DataService {
         let usableIncome = totalIncomeValue;
 
         if (taxLink) {
-            const taxValue = nodesMap.get(taxLink.target) || 0;
+            const taxValue = nodesMap.get(taxLink.target)?.value || 0;
             usableIncome -= taxValue; // Subtract taxes
-            nodesMap.set('Usable Income', usableIncome); // Set Usable Income node
+            nodesMap.set('Usable Income', { value: usableIncome, type: 'income' }); // Set Usable Income node
 
             // Step 4: Create links from Income to Usable Income and Taxes
             links.push({
@@ -128,17 +131,62 @@ export class DataService {
         }
     }
 
-    // Step 5: Calculate the total expenses (only top-level) by summing the top-level expenses and parent group expenses
-    let totalExpenseValue = 0;
-    userDefinedLinks.forEach(link => {
-        if (link.type === 'expense' && !childExpenses.has(link.target)) {
-            // Only count top-level expenses and group sums
-            const expenseValue = parentExpenseMap.get(link.target) || link.value;
-            totalExpenseValue += expenseValue;
-        }
-    });
+    /**____________________________________________________________________________________ */
+// Step 5: Calculate total expenses
+let totalExpenseValue = 0;
 
-    // Step 6: Create links for individual incomes and expenses
+// Maps to track sums of child expenses and parent values
+const parentLeafSums = new Map<string, number>(); 
+const parentValues = new Map<string, number>(); 
+
+// Step 1: Calculate sums for leaves and get parent values
+userDefinedLinks.forEach(link => {
+    if (link.type === 'expense') {
+        const parentNode = link.source;
+
+        // If the link has a source, it's a leaf
+        if (parentNode) {
+            // Accumulate leaf values under their respective parents
+            const leafValue = link.value;
+            parentLeafSums.set(parentNode, (parentLeafSums.get(parentNode) || 0) + leafValue);
+        } else {
+            // If there's no source, it's a top-level expense (assumed parent)
+            parentValues.set(link.target, link.value);
+        }
+    }
+});
+
+// Step 2: Calculate the effective value for each parent node
+const finalValues = new Map<string, number>();
+
+parentLeafSums.forEach((leafSum, parentNode) => {
+    const parentValue = parentValues.get(parentNode) || 0; // Get the parent's defined value
+    const valueToLog = leafSum > parentValue ? leafSum : parentValue; // Choose the higher value
+    finalValues.set(parentNode, valueToLog); // Store the effective value
+});
+
+// Log the final values for verification
+console.log('Final Values for Parent Nodes:', Array.from(finalValues.entries()));
+
+// Step 3: Calculate total expenses from final values
+finalValues.forEach(value => {
+    totalExpenseValue += value; // Sum the grouped values
+});
+
+// Step 4: Add any remaining individual expenses that are not linked to a parent
+userDefinedLinks.forEach(link => {
+    if (link.type === 'expense' && !link.source && !finalValues.has(link.target)) {
+        totalExpenseValue += link.value; // Only add expenses that are not accounted for in groups
+    }
+});
+
+// Log the final total expense
+console.log('Final Total Expense Value:', totalExpenseValue);
+
+/**____________________________________________________________________________________ */
+
+
+    // Step 6: Create links for individual incomes and expenses (no need to modify nodesMap again)
     userDefinedLinks.forEach(link => {
         if (link.type === 'income') {
             if (!singleIncome) {
@@ -149,40 +197,26 @@ export class DataService {
                 });
             }
         } else if (link.type === 'expense') {
-            // If there's no tax, expenses should directly come from the main income source
             const expenseSource = hasTax ? 'Usable Income' : incomeSource;
 
-            // Check if the user explicitly defined a source for the expense
-            if (link.source) {
-                links.push({
-                    source: link.source, // Use user-defined source
-                    target: link.target,
-                    value: link.value
-                });
-
-                // Ensure that child expenses are added to the nodes
-                nodesMap.set(link.target, (nodesMap.get(link.target) || 0) + link.value);
-            } else {
-                // Link expenses from Usable Income (if taxes exist) or from main income if no taxes
-                links.push({
-                    source: expenseSource,
-                    target: link.target,
-                    value: link.value
-                });
-            }
+            links.push({
+                source: link.source || expenseSource, // Use user-defined source or default to income source
+                target: link.target,
+                value: link.value
+            });
         }
     });
+
 
     // Step 7: Calculate remaining balance
     const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
-    const nodes: Node[] = Array.from(nodesMap.entries()).map(([name, totalValue]) => ({ name, totalValue }));
-
+    const nodes: Node[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, totalValue: value }));
+    console.log('nodes', nodes)
     // Step 9: Remove duplicate links
     const uniqueLinks: Link[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as Link);
 
     return { nodes, links: uniqueLinks, remainingBalance };
 }
-
 }
