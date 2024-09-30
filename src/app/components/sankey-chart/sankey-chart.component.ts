@@ -4,10 +4,6 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../data.service';
 
 
-interface SankeyNode {
-  name: string;
-}
-
 @Component({
   selector: 'app-sankey-chart',
   standalone: true,
@@ -23,18 +19,20 @@ export class SankeyChartComponent implements OnInit{
 
   sankeyOption: EChartsOption = {}
 
+  remainingBalance: string = ''
+
 
   constructor() {
   }
 
   ngOnInit(): void {
+    this.updateSankeyChart()
+  }
+
+
+  updateSankeyChart() {
     const { nodes, links, remainingBalance } = this.dataService.processInputData(this.dataService.userDefinedLinks);
-
-    console.log('links:', links);
-
-    console.log('nodes:', nodes);
-
-    console.log('remainingBalance:', remainingBalance);
+    this.remainingBalance = remainingBalance
 
     this.sankeyOption = {
       tooltip: {

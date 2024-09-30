@@ -58,7 +58,7 @@ export class DataService {
   constructor() {}
 
 
-  processInputData(userDefinedLinks: UserDefinedLink[]): { nodes: Node[], links: Link[], remainingBalance: number } {
+  processInputData(userDefinedLinks: UserDefinedLink[]): { nodes: Node[], links: Link[], remainingBalance: string } {
     const nodesMap = new Map<string, number>(); // Map to hold unique nodes and their total values
     const links: Link[] = []; // Array to hold links between nodes
     const incomeNodes: string[] = []; // Track income nodes
@@ -174,7 +174,7 @@ export class DataService {
     });
 
     // Step 7: Calculate remaining balance
-    const remainingBalance = totalIncomeValue - totalExpenseValue - totalTaxValue;
+    const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
     const nodes: Node[] = Array.from(nodesMap.entries()).map(([name, totalValue]) => ({ name, totalValue }));
