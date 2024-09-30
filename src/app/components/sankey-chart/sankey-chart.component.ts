@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { DataService } from '../data.service';
+import { DataService, ProcessedOutputData } from '../data.service';
+import { SankeyData } from '../models';
 
 
 @Component({
@@ -20,20 +21,25 @@ export class SankeyChartComponent implements OnInit{
   sankeyOption: EChartsOption = {}
 
   remainingBalance: string = ''
+  sankeyData: SankeyData = {
+    nodes: [],
+    links: []
+  }
 
 
   constructor() {
   }
 
   ngOnInit(): void {
-    this.updateSankeyChart()
+    this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
+      this.sankeyData = data.sanekeyData
+      this.remainingBalance = data.remainingBalance
+      this.updateSankeyChart()
+    })
   }
 
 
   updateSankeyChart() {
-    const { nodes, links, remainingBalance } = this.dataService.processInputData(this.dataService.userDefinedLinks);
-    this.remainingBalance = remainingBalance
-
     this.sankeyOption = {
       tooltip: {
         trigger: 'item',
@@ -42,8 +48,8 @@ export class SankeyChartComponent implements OnInit{
       series: [
         {
           type: 'sankey',
-          data: nodes.map(node => ({ name: node.name })),
-          links: links,
+          data: this.sankeyData.nodes.map(node => ({ name: node.name })),
+          links: this.sankeyData.links,
           emphasis: { focus: 'adjacency' },
           label: { fontSize: 12 },
           nodeGap: 15,

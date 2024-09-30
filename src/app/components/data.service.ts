@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
+import { BehaviorSubject } from 'rxjs';
 
 
 
 export interface ProcessedOutputData {
     sanekeyData: SankeyData;
     remainingBalance: string;
-    pieData: {name: string, value: number}[];
+    pieData: any;
 }
 
 @Injectable({
@@ -38,13 +39,23 @@ export class DataService {
 
   remainingBalance: string = '-';
 
-  pieData: any = []
+
+  processedData: ProcessedOutputData = {
+    sanekeyData: this.sankeyData,
+    remainingBalance: this.remainingBalance,
+    pieData: []
+  }
+
+  processedData$ = new BehaviorSubject<ProcessedOutputData>(this.processedData)
 
 
-  constructor() {}
+
+  constructor() {
+    this.processInputData(this.userDefinedLinks)
+  }
 
 
-  processInputData(userDefinedLinks: UserDefinedLink[]) {
+  processInputData(userDefinedLinks: UserDefinedLink[]): void {
     const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
     const links: SankeyLink[] = []; // Array to hold links between nodes
     const incomeNodes: string[] = []; // Track income nodes
@@ -201,26 +212,29 @@ export class DataService {
 
 
     // Update params
-    this.sankeyData = {
+    const sankeyData = {
         nodes: nodes,
         links: uniqueLinks
     }
-    this.remainingBalance = remainingBalance
-    this.pieData = pieData
+
+
+    this.processedData = {
+        sanekeyData: sankeyData,
+        remainingBalance: remainingBalance,
+        pieData: pieData
+    }
+
+    this.processedData$.next(this.processedData)
 
 
     
 
-    return { nodes, links: uniqueLinks, remainingBalance, pieData };
+    // return { nodes, links: uniqueLinks, remainingBalance, pieData };
     }
 
 
 
-    getProcessedData(): ProcessedOutputData {
-        return {
-            sanekeyData: this.sankeyData,
-            remainingBalance: this.remainingBalance,
-            pieData: this.pieData
-        }
+    getProcessedData() {
+        return this.processedData$.asObservable()
     }
 }
