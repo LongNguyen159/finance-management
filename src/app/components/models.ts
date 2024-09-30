@@ -4,3 +4,21 @@ export interface UserDefinedLink {
     value: number;    // Amount associated with the link
     source?: string;  // Optional source node (only for expenses)
 }
+
+
+
+export interface SankeyNode {
+    name: string;
+    totalValue: number;
+  }
+  
+  export interface SankeyLink {
+    source: string;   // Source node
+    target: string;   // Target node
+    value: number;    // Value of the link
+  }
+  
+export interface SankeyData {
+    nodes: SankeyNode[];
+    links: SankeyLink[];
+}

@@ -20,15 +20,21 @@ export class PieChartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const expenseData = this.dataService.userDefinedLinks
-      .filter(link => link.type == 'expense' || link.type == 'tax') // Filter expense links
-      .map(link => ({ name: link.target, value: link.value })); // Map to name and value
+    // const expenseData = this.dataService.userDefinedLinks
+    //   .filter(link => link.type == 'expense' || link.type == 'tax') // Filter expense links
+    //   .map(link => ({ name: link.target, value: link.value })); // Map to name and value
 
-
+    const expenseData = this.dataService.getProcessedData().pieData
+    
+    
     this.pieOption = {
       tooltip: {
         trigger: 'item',
-        formatter: '{b}: {c} ({d}%)' // Shows label, value, and percentage
+        formatter: (params: any) => {
+          // Use toLocaleString to format the value
+          const value = params.data.value.toLocaleString(); // Format the value
+          return `${params.name}: ${value} (${params.percent}%)`; // Use template literals for string interpolation
+        }
       },
       legend: {
         orient: 'vertical',

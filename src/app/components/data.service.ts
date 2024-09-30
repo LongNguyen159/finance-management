@@ -1,47 +1,25 @@
 import { Injectable } from '@angular/core';
-import { UserDefinedLink } from './models';
+import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
 
 
-interface Node {
-  name: string;
-  totalValue: number;
-}
 
-interface Link {
-  source: string;   // Source node
-  target: string;   // Target node
-  value: number;    // Value of the link
+export interface ProcessedOutputData {
+    sanekeyData: SankeyData;
+    remainingBalance: string;
+    pieData: {name: string, value: number}[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  /** TODO:
-   * - Create a `financialData` object that group types into income, expenses, and savings.
-   * - Generate expenses links from Type of input data.
-   * - Generate income links from type of input data.
-   * - Generate savings: Savings will be the remaining amount after all expenses and taxes.
-   * 
-   * 
-   * OBJECTIVE:
-   * - User enter least amount of input as possible.
-   * That means: on our side, we will perform calculations to generate the rest of the data.
-   * 
-   * 
-   * What user need to input: Type of input (income, expenses, savings), and the amount (and an optional
-   * parameter called `expandFrom`: Expects a previous node. If specified, new node will be extended from it.).
-   */
-
-
-
   userDefinedLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Income', value: 1027 },
     { type: 'income', target: 'Roommate Contribution', value: 565 },
     { type: 'tax', target: 'Taxes', value: 208 },
-    { type: 'expense', target: 'Housing', value: 1100 },
-    { type: 'expense', target: 'Groceries', value: 150 },
-    { type: 'expense', target: 'Commute', value: 50 },
+    { type: 'expense', target: 'Housing', value: 1096 },
+    { type: 'expense', target: 'Groceries', value: 160 },
+    { type: 'expense', target: 'Commute', value: 49 },
     { type: 'expense', target: 'Electricity', value: 108, source: 'Housing' },
     { type: 'expense', target: 'Water', value: 35, source: 'Housing' },      
     { type: 'expense', target: 'Rent', value: 833, source: 'Housing' },
@@ -49,17 +27,26 @@ export class DataService {
     { type: 'expense', target: 'Kitchen', value: 80, source: 'Housing' },
     { type: 'expense', target: 'Sport', value: 20 },
     { type: 'expense', target: 'Sim Card', value: 20 },
-    { type: 'expense', target: 'Radio Fees', value: 20 },
+    { type: 'expense', target: 'Radio Fees', value: 19 },
   ]
 
-  remainingBalance: number = 0
+  
+  sankeyData: SankeyData = {
+    nodes: [],
+    links: []
+  }
+
+  remainingBalance: string = '-';
+
+  pieData: any = []
+
 
   constructor() {}
 
 
-  processInputData(userDefinedLinks: UserDefinedLink[]): { nodes: Node[], links: Link[], remainingBalance: string } {
+  processInputData(userDefinedLinks: UserDefinedLink[]) {
     const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
-    const links: Link[] = []; // Array to hold links between nodes
+    const links: SankeyLink[] = []; // Array to hold links between nodes
     const incomeNodes: string[] = []; // Track income nodes
     let totalIncomeValue = 0; // Variable to store total income value
     let totalTaxValue = 0; // Variable to store total tax value
@@ -72,10 +59,8 @@ export class DataService {
         if (!nodesMap.has(link.target)) {
             nodesMap.set(link.target, { value: 0, type: link.type });
         }
-    });
 
-    // Step 1.2: Process links to accumulate income, taxes, and expenses
-    userDefinedLinks.forEach(link => {
+        // Step 1.2: Process links to accumulate income, taxes, and expenses
         if (link.type === 'income') {
             incomeNodes.push(link.target);
             nodesMap.get(link.target)!.value += link.value; // Add income only once
@@ -92,8 +77,8 @@ export class DataService {
                 nodesMap.get(link.target)!.value += link.value; // Update child value
             }
         }
-    });
-    console.log('nodesMap init:', nodesMap);
+    })
+
 
     // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
     if (incomeNodes.length > 1) {
@@ -132,61 +117,57 @@ export class DataService {
     }
 
     /**____________________________________________________________________________________ */
-// Step 5: Calculate total expenses
-let totalExpenseValue = 0;
+    // Step 4: Calculate total expenses
+    let totalExpenseValue = 0;
 
-// Maps to track sums of child expenses and parent values
-const parentLeafSums = new Map<string, number>(); 
-const parentValues = new Map<string, number>(); 
+    // Maps to track sums of child expenses and parent values
+    const parentLeafSums = new Map<string, number>(); 
+    const parentValues = new Map<string, number>(); 
 
-// Step 1: Calculate sums for leaves and get parent values
-userDefinedLinks.forEach(link => {
-    if (link.type === 'expense') {
-        const parentNode = link.source;
+    // Step 4.1: Calculate sums for leaves and get parent values
+    userDefinedLinks.forEach(link => {
+        if (link.type === 'expense') {
+            const parentNode = link.source;
 
-        // If the link has a source, it's a leaf
-        if (parentNode) {
-            // Accumulate leaf values under their respective parents
-            const leafValue = link.value;
-            parentLeafSums.set(parentNode, (parentLeafSums.get(parentNode) || 0) + leafValue);
-        } else {
-            // If there's no source, it's a top-level expense (assumed parent)
-            parentValues.set(link.target, link.value);
+            // If the link has a source, it's a leaf expense
+            if (parentNode) {
+                // Accumulate leaf values under their respective parents
+                parentLeafSums.set(parentNode, (parentLeafSums.get(parentNode) || 0) + link.value);
+            } else {
+                // If there's no source, it's a top-level expense (assumed parent)
+                parentValues.set(link.target, link.value);
+            }
         }
-    }
-});
+    });
 
-// Step 2: Calculate the effective value for each parent node
-const finalValues = new Map<string, number>();
+    // Step 4.2: Calculate the effective total expenses in one loop
+    parentLeafSums.forEach((leafSum, parentNode) => {
+        const parentValue = parentValues.get(parentNode) || 0; // Get the parent's defined value
+        totalExpenseValue += Math.max(leafSum, parentValue); // Add the maximum of leafSum or parentValue
+    });
 
-parentLeafSums.forEach((leafSum, parentNode) => {
-    const parentValue = parentValues.get(parentNode) || 0; // Get the parent's defined value
-    const valueToLog = leafSum > parentValue ? leafSum : parentValue; // Choose the higher value
-    finalValues.set(parentNode, valueToLog); // Store the effective value
-});
+    // Step 4.3: Add any remaining individual expenses that are not linked to a parent
+    userDefinedLinks.forEach(link => {
+        if (link.type === 'expense' && !link.source && !parentLeafSums.has(link.target)) {
+            totalExpenseValue += link.value; // Only add expenses that are not accounted for in groups
+        }
+    });
 
-// Log the final values for verification
-console.log('Final Values for Parent Nodes:', Array.from(finalValues.entries()));
 
-// Step 3: Calculate total expenses from final values
-finalValues.forEach(value => {
-    totalExpenseValue += value; // Sum the grouped values
-});
+    const groupedExpenses =  Array.from(parentLeafSums.entries())
+    const restExpenses = userDefinedLinks.filter(link => link.type === 'expense' && !link.source && !parentLeafSums.has(link.target)).map(link => [link.target, link.value])
+    
+    const pieData = [...groupedExpenses, ...restExpenses].map(([name, value]) => ({name, value}))
 
-// Step 4: Add any remaining individual expenses that are not linked to a parent
-userDefinedLinks.forEach(link => {
-    if (link.type === 'expense' && !link.source && !finalValues.has(link.target)) {
-        totalExpenseValue += link.value; // Only add expenses that are not accounted for in groups
-    }
-});
+    
 
-// Log the final total expense
-console.log('Final Total Expense Value:', totalExpenseValue);
+    // Log the final total expense
+    console.log('Final Total Expense Value:', totalExpenseValue);
 
 /**____________________________________________________________________________________ */
 
 
-    // Step 6: Create links for individual incomes and expenses (no need to modify nodesMap again)
+    // Step 5: Create links for individual incomes and expenses (no need to modify nodesMap again)
     userDefinedLinks.forEach(link => {
         if (link.type === 'income') {
             if (!singleIncome) {
@@ -212,11 +193,34 @@ console.log('Final Total Expense Value:', totalExpenseValue);
     const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
-    const nodes: Node[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, totalValue: value }));
+    const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, totalValue: value }));
     console.log('nodes', nodes)
     // Step 9: Remove duplicate links
-    const uniqueLinks: Link[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as Link);
+    const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
 
-    return { nodes, links: uniqueLinks, remainingBalance };
-}
+
+
+    // Update params
+    this.sankeyData = {
+        nodes: nodes,
+        links: uniqueLinks
+    }
+    this.remainingBalance = remainingBalance
+    this.pieData = pieData
+
+
+    
+
+    return { nodes, links: uniqueLinks, remainingBalance, pieData };
+    }
+
+
+
+    getProcessedData(): ProcessedOutputData {
+        return {
+            sanekeyData: this.sankeyData,
+            remainingBalance: this.remainingBalance,
+            pieData: this.pieData
+        }
+    }
 }
