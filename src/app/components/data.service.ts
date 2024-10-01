@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 
 
 export interface ProcessedOutputData {
-    sanekeyData: SankeyData;
+    sankeyData: SankeyData;
     remainingBalance: string;
     pieData: any;
 }
@@ -23,7 +23,7 @@ export class DataService {
 
 
   processedData: ProcessedOutputData = {
-    sanekeyData: this.sankeyData,
+    sankeyData: this.sankeyData,
     remainingBalance: this.remainingBalance,
     pieData: []
   }
@@ -210,7 +210,7 @@ export class DataService {
 
 
         this.processedData = {
-            sanekeyData: sankeyData,
+            sankeyData: sankeyData,
             remainingBalance: remainingBalance,
             pieData: pieSeriesData
         }

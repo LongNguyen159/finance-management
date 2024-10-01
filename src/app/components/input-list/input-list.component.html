@@ -22,9 +22,25 @@
         </mat-form-field>
   
         <!-- Source (Optional) -->
-        <mat-form-field appearance="fill">
+        <!-- <mat-form-field appearance="fill">
           <mat-label>Source from (optional)</mat-label>
           <input matInput formControlName="source" placeholder="Source from" />
+        </mat-form-field> -->
+
+
+        <mat-form-field appearance="fill">
+          <mat-label>Source from (optional)</mat-label>
+          <input type="text"
+                 matInput
+                 [matAutocomplete]="auto"
+                 [formControlName]="'source'" 
+                 placeholder="Source from" />
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
+            A node cannot source itself!
+          </mat-error>
         </mat-form-field>
   
         <!-- Remove Button -->

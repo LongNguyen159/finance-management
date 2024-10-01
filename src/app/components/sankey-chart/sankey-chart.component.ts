@@ -32,7 +32,7 @@ export class SankeyChartComponent implements OnInit{
 
   ngOnInit(): void {
     this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
-      this.sankeyData = data.sanekeyData
+      this.sankeyData = data.sankeyData
       this.remainingBalance = data.remainingBalance
       this.updateSankeyChart()
     })

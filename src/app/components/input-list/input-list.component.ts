@@ -9,7 +9,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import { debounceTime, filter } from 'rxjs';
-
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-input-list',
@@ -20,15 +20,14 @@ import { debounceTime, filter } from 'rxjs';
     MatInputModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatIconModule
+    MatIconModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
 export class InputListComponent implements OnInit {
   dataService = inject(DataService)
-
-
   userDefinedLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Salary', value: 1400 },
     { type: 'tax', target: 'Taxes', value: 220},
@@ -40,6 +39,10 @@ export class InputListComponent implements OnInit {
   
   linkTypes = ['income', 'expense', 'tax']
 
+  existingNodes: string[] = []; // To hold existing node names
+  filteredNodes: string[] = []; // To hold filtered suggestions for auto-complete
+
+
 
   constructor(private fb: FormBuilder) {
     this.linkForm = this.fb.group({
@@ -49,11 +52,8 @@ export class InputListComponent implements OnInit {
 
   ngOnInit(): void {
     this.dataService.getProcessedData().subscribe(data => {
-      console.log('data', data)
-    })
-    this.handleTypeChange()
-    this.dataService.processInputData(this.userDefinedLinks)
-
+      this.existingNodes = data.sankeyData.nodes.map(node => node.name)
+    });
 
     /** Update Chart every time user changes the form input */
     this.linkForm.valueChanges
@@ -71,26 +71,72 @@ export class InputListComponent implements OnInit {
   // Method to initialize the links with predefined data
   initializeLinks(): void {
     this.linkArray.clear()
+    this.dataService.processInputData(this.userDefinedLinks)
     this.userDefinedLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
   }
 
+
+
   createLinkGroup(link?: UserDefinedLink): FormGroup {
-    if (link) {
-      return this.fb.group({
-        type: [link.type, Validators.required],
-        target: [link.target, Validators.required],
-        value: [link.value, [Validators.required, Validators.min(0)]],
-        source: [link.source]
+    const linkGroup = this.fb.group({
+      type: [link ? link.type : '', Validators.required],
+      target: [link ? link.target : '', Validators.required],
+      value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
+      source: [link ? link.source : ''] // Optional
+    });
+
+    // Disable the source field if type is 'income'
+    if (linkGroup.get('type')?.value === 'income') {
+      linkGroup.get('source')?.disable();
+    }
+
+    console.log('linkGroup', linkGroup.value)
+
+    // Subscribe to changes in the type field
+    linkGroup.get('type')?.valueChanges.subscribe(value => {
+      console.log('value', value)
+      if (value === 'income') {
+        linkGroup.get('source')?.disable(); // Disable source if income
+      } else {
+        linkGroup.get('source')?.enable();  // Enable source otherwise
+      }
+    });
+
+
+    // Listen to changes in the source field for filtering options
+    linkGroup.get('source')?.valueChanges.subscribe(value => {
+      if (value) {
+        this.filterNodes(value);
+        this.checkForCycle(value, linkGroup.get('target')?.value);
+      }
+      
+      
+    });
+
+
+    return linkGroup;
+  }
+
+  // Check for cycle and set error on source control if needed
+  private checkForCycle(source: string, target: string | undefined | null): void {
+    if (source.toLowerCase() === target?.toLowerCase()) {
+      this.linkArray.controls.forEach((group) => {
+        group.get('source')?.setErrors({ cycle: true });
       });
     } else {
-      return this.fb.group({
-        type: ['', Validators.required],
-        target: ['', Validators.required],
-        value: [0, [Validators.required, Validators.min(0)]],
-        source: [''] // Optional
-      });  
+      this.linkArray.controls.forEach((group) => {
+        group.get('source')?.setErrors(null); // Clear the error
+      });
     }
+  }
+
+  // Filter nodes based on user input
+  private filterNodes(value: string): void {
+    const filterValue = value.toLowerCase();
     
+    // Filter nodes, excluding the current node if it matches
+    this.filteredNodes = this.existingNodes
+      .filter(node => node.toLowerCase().includes(filterValue) && node.toLowerCase() !== filterValue);
   }
 
   // Add a new input row
@@ -101,6 +147,7 @@ export class InputListComponent implements OnInit {
   // Remove an input row
   removeLink(index: number): void {
     this.linkArray.removeAt(index);
+    // Update chart when input changed
     this.dataService.processInputData(this.linkForm.value.links)
   }
 
@@ -108,27 +155,6 @@ export class InputListComponent implements OnInit {
   get linkArray(): FormArray {
     return this.linkForm.get('links') as FormArray;
   }
-
-  handleTypeChange(): void {
-    // For each link in the form array, subscribe to type changes
-    const linksArray = this.linkForm.get('links') as FormArray;
-    linksArray.controls.forEach(control => {
-      const typeControl = control.get('type');
-      
-      const sourceControl = control.get('source');
-  
-      if (typeControl) {
-        typeControl.valueChanges.subscribe(value => {
-          if (value === 'income') {
-            sourceControl?.disable(); // Disable source field if type is 'income'
-          } else {
-            sourceControl?.enable();  // Enable source field otherwise
-          }
-        });
-      }
-    })
-  }
-
 
   // Submit form and emit the data (to parent component or a service)
   onSubmit(): void {
@@ -138,8 +164,4 @@ export class InputListComponent implements OnInit {
     }
   }
 
-
-  updateInput() {
-    this.dataService.processInputData(this.userDefinedLinks)
-  }
 }
