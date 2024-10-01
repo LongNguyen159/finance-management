@@ -40,6 +40,7 @@ export class SankeyChartComponent implements OnInit{
 
 
   updateSankeyChart() {
+    console.log('sankey chart updated')
     this.sankeyOption = {
       tooltip: {
         trigger: 'item',

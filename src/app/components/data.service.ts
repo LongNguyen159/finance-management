@@ -168,7 +168,8 @@ export class DataService {
     const groupedExpenses =  Array.from(parentLeafSums.entries())
     const restExpenses = userDefinedLinks.filter(link => link.type === 'expense' && !link.source && !parentLeafSums.has(link.target)).map(link => [link.target, link.value])
     
-    const pieData = [...groupedExpenses, ...restExpenses].map(([name, value]) => ({name, value}))
+    let pieData = [...groupedExpenses, ...restExpenses].map(([name, value]) => ({name, value}))
+
 
     
 
@@ -202,6 +203,7 @@ export class DataService {
 
     // Step 7: Calculate remaining balance
     const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
+    pieData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenseValue - totalTaxValue})
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
     const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, totalValue: value }));

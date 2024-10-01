@@ -29,6 +29,8 @@ export class PieChartComponent implements OnInit {
       console.log(data)
       this.pieSeriesData = data.pieData
 
+      console.log('pie chart updated')
+
       this.pieOption = {
         tooltip: {
           trigger: 'item',
