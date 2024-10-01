@@ -1,3 +1,53 @@
-<button mat-flat-button (click)="updateInput()">
-    Update Input
-</button>
+<div [formGroup]="linkForm" class="link-form-container">
+    <div formArrayName="links">
+      <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
+        
+        <!-- Type (Income, Expense, Tax) -->
+        <mat-form-field appearance="fill">
+          <mat-select formControlName="type" placeholder="Type">
+            <mat-option *ngFor="let type of linkTypes" [value]="type">{{ type | titlecase }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+  
+        <!-- Target -->
+        <mat-form-field appearance="fill">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="target" placeholder="Target name" />
+        </mat-form-field>
+  
+        <!-- Value -->
+        <mat-form-field appearance="fill">
+          <mat-label>Value</mat-label>
+          <input matInput formControlName="value" type="number" placeholder="Value" />
+        </mat-form-field>
+  
+        <!-- Source (Optional) -->
+        <mat-form-field appearance="fill">
+          <mat-label>Source from (optional)</mat-label>
+          <input matInput formControlName="source" placeholder="Source from" />
+        </mat-form-field>
+  
+        <!-- Remove Button -->
+        <button mat-icon-button color="warn" (click)="removeLink(i)" *ngIf="linkArray.length > 1">
+          <mat-icon>delete</mat-icon>
+        </button>
+  
+      </div>
+    </div>
+  
+    <div class="flex flex-row gap-4 w-full text-center justify-center">
+        <!-- Add New Link Button -->
+        <div class="add-link-button">
+            <button mat-stroked-button color="primary" (click)="addLink()">Add New Link</button>
+        </div>
+
+        <!-- Submit Button -->
+        <!-- <div class="submit-button">
+            <button mat-raised-button color="accent" (click)="onSubmit()" [disabled]="!linkForm.valid">
+            Submit
+            </button>
+        </div> -->
+    </div>
+    
+  </div>
+  
