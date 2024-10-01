@@ -207,7 +207,7 @@ export class DataService {
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
     const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
-    console.log('nodes', nodes)
+
     // Step 9: Remove duplicate links
     const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
 

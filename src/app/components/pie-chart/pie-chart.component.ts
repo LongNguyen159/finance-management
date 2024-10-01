@@ -26,7 +26,6 @@ export class PieChartComponent implements OnInit {
     //   .map(link => ({ name: link.target, value: link.value })); // Map to name and value
 
     this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
-      console.log(data)
       this.pieSeriesData = data.pieData
 
       console.log('pie chart updated')
@@ -42,7 +41,7 @@ export class PieChartComponent implements OnInit {
         },
         legend: {
           orient: 'vertical',
-          left: 'left'
+          left: 'left',
         },
         series: [
           {
