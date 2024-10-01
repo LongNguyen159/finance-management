@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService } from '../data.service';
 import { UserDefinedLink } from '../models';
@@ -10,7 +10,7 @@ import { UserDefinedLink } from '../models';
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
-export class InputListComponent {
+export class InputListComponent implements OnInit {
   dataService = inject(DataService)
 
 
@@ -33,6 +33,12 @@ export class InputListComponent {
 
 
   constructor() { }
+
+  ngOnInit(): void {
+    this.dataService.getProcessedData().subscribe(data => {
+      console.log('data', data)
+    })
+  }
 
 
   updateInput() {

@@ -24,7 +24,7 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 $dark-theme: mat.define-theme((
   color: (
     theme-type: dark,
-    primary: mat.$violet-palette,
+    primary: mat.$azure-palette,
   ),
 ));
 
@@ -32,7 +32,7 @@ $dark-theme: mat.define-theme((
 $light-theme: mat.define-theme((
   color: (
     theme-type: light,
-    primary: mat.$violet-palette,
+    primary: mat.$azure-palette,
   ),
 ));
 
