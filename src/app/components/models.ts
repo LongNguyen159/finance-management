@@ -9,7 +9,7 @@ export interface UserDefinedLink {
 
 export interface SankeyNode {
     name: string;
-    totalValue: number;
+    value: number;
   }
   
   export interface SankeyLink {

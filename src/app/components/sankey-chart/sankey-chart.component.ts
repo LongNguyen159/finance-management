@@ -49,7 +49,7 @@ export class SankeyChartComponent implements OnInit{
       series: [
         {
           type: 'sankey',
-          data: this.sankeyData.nodes.map(node => ({ name: node.name, value: node.totalValue })),
+          data: this.sankeyData.nodes,
           links: this.sankeyData.links,
           emphasis: { focus: 'adjacency' },
           label: { fontSize: 12 },

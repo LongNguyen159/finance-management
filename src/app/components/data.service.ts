@@ -206,7 +206,7 @@ export class DataService {
     pieData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenseValue - totalTaxValue})
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
-    const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, totalValue: value }));
+    const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
     console.log('nodes', nodes)
     // Step 9: Remove duplicate links
     const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
