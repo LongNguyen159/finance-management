@@ -14,24 +14,6 @@ export interface ProcessedOutputData {
   providedIn: 'root'
 })
 export class DataService {
-  userDefinedLinks: UserDefinedLink[] = [
-    { type: 'income', target: 'Income', value: 1027 },
-    // { type: 'income', target: 'Roommate Contribution', value: 565 },
-    // { type: 'tax', target: 'Taxes', value: 208 },
-    // { type: 'expense', target: 'Housing', value: 1096 },
-    { type: 'expense', target: 'Groceries', value: 160 },
-    { type: 'expense', target: 'Commute', value: 49 },
-    // { type: 'expense', target: 'Electricity', value: 108, source: 'Housing' },
-    // { type: 'expense', target: 'Water', value: 35, source: 'Housing' },      
-    // { type: 'expense', target: 'Rent', value: 833, source: 'Housing' },
-    // { type: 'expense', target: 'Wifi', value: 40, source: 'Housing' },
-    // { type: 'expense', target: 'Kitchen', value: 80, source: 'Housing' },
-    // { type: 'expense', target: 'Sport', value: 20 },
-    // { type: 'expense', target: 'Sim Card', value: 20 },
-    // { type: 'expense', target: 'Radio Fees', value: 19 },
-  ]
-
-  
   sankeyData: SankeyData = {
     nodes: [],
     links: []
@@ -50,9 +32,7 @@ export class DataService {
 
 
 
-  constructor() {
-    this.processInputData(this.userDefinedLinks)
-  }
+  constructor() {}
 
 
   processInputData(userDefinedLinks: UserDefinedLink[]): void {
@@ -84,8 +64,8 @@ export class DataService {
                 nodesMap.get(link.target)!.value += link.value;
             } else {
                 // Child expenses (those with a source)
-                nodesMap.get(link.source)!.value += link.value; // Update parent value
-                nodesMap.get(link.target)!.value += link.value; // Update child value
+                // nodesMap.get(link.source)!.value += link.value; // Update parent value
+                // nodesMap.get(link.target)!.value += link.value; // Update child value
             }
         }
     })
@@ -165,10 +145,20 @@ export class DataService {
     });
 
 
-    const groupedExpenses =  Array.from(parentLeafSums.entries())
-    const restExpenses = userDefinedLinks.filter(link => link.type === 'expense' && !link.source && !parentLeafSums.has(link.target)).map(link => [link.target, link.value])
+    // Step 4.4: Generate Pie Chart data
+    let pieSeriesData: {name: string, value: number}[] = []
+
+    const uniqueKeys = new Set<string>([...parentLeafSums.keys(), ...parentValues.keys()])
+    uniqueKeys.forEach(key => {
+        const value1 = parentLeafSums.get(key) || 0; // Get value from map1, default to 0 if not present
+        const value2 = parentValues.get(key) || 0; // Get value from map2, default to 0 if not present
     
-    let pieData = [...groupedExpenses, ...restExpenses].map(([name, value]) => ({name, value}))
+        // Determine the larger value
+        const largerValue = Math.max(value1, value2);
+    
+        // Push the result object into the array
+        pieSeriesData.push({ name: key, value: largerValue });
+    });
 
 
     
@@ -203,7 +193,7 @@ export class DataService {
 
     // Step 7: Calculate remaining balance
     const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
-    pieData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenseValue - totalTaxValue})
+    pieSeriesData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenseValue - totalTaxValue})
 
     // Step 8: Convert nodesMap to an array of nodes (including child nodes)
     const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
@@ -223,7 +213,7 @@ export class DataService {
     this.processedData = {
         sanekeyData: sankeyData,
         remainingBalance: remainingBalance,
-        pieData: pieData
+        pieData: pieSeriesData
     }
 
     this.processedData$.next(this.processedData)
