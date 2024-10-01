@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService } from '../data.service';
 import { UserDefinedLink } from '../models';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -10,7 +10,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import { debounceTime, filter } from 'rxjs';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
-
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -22,6 +22,7 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
     MatSelectModule,
     MatIconModule,
     MatAutocompleteModule,
+    NgxMatSelectSearchModule,
   ],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
@@ -36,7 +37,8 @@ export class InputListComponent implements OnInit {
   ]
 
   linkForm: FormGroup; // FormGroup to manage input fields
-  
+  sourceSearchControl = new FormControl(); // Search control for the dropdown
+
   linkTypes = ['income', 'expense', 'tax']
 
   existingNodes: string[] = []; // To hold existing node names
@@ -53,16 +55,22 @@ export class InputListComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.getProcessedData().subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
+      console.log('data', data)
     });
 
     /** Update Chart every time user changes the form input */
     this.linkForm.valueChanges
     .pipe(
-      debounceTime(500),
+      debounceTime(400),
       filter(() => this.linkForm.valid) // Only proceed if the form is valid
     )
     .subscribe(formData => {
       this.dataService.processInputData(formData.links);
+    });
+
+     // Listen to changes in the search control to filter the dropdown
+     this.sourceSearchControl.valueChanges.subscribe((searchTerm) => {
+      this.filteredNodes = this.filterNodes(searchTerm);
     });
 
     this.initializeLinks()
@@ -131,11 +139,11 @@ export class InputListComponent implements OnInit {
   }
 
   // Filter nodes based on user input
-  private filterNodes(value: string): void {
+  private filterNodes(value: string): string[] {
     const filterValue = value.toLowerCase();
     
     // Filter nodes, excluding the current node if it matches
-    this.filteredNodes = this.existingNodes
+    return this.filteredNodes = this.existingNodes
       .filter(node => node.toLowerCase().includes(filterValue) && node.toLowerCase() !== filterValue);
   }
 

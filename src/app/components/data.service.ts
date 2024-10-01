@@ -64,7 +64,7 @@ export class DataService {
                 } else {
                     // Child expenses (those with a source)
                     // nodesMap.get(link.source)!.value += link.value; // Update parent value
-                    // nodesMap.get(link.target)!.value += link.value; // Update child value
+                    nodesMap.get(link.target)!.value = link.value; // Update child value
                 }
             }
         })

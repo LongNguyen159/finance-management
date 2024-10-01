@@ -22,13 +22,8 @@
         </mat-form-field>
   
         <!-- Source (Optional) -->
+        <!-- input with auto complete -->
         <!-- <mat-form-field appearance="fill">
-          <mat-label>Source from (optional)</mat-label>
-          <input matInput formControlName="source" placeholder="Source from" />
-        </mat-form-field> -->
-
-
-        <mat-form-field appearance="fill">
           <mat-label>Source from (optional)</mat-label>
           <input type="text"
                  matInput
@@ -41,8 +36,30 @@
           <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
             A node cannot source itself!
           </mat-error>
-        </mat-form-field>
+        </mat-form-field> -->
   
+
+        <!-- Select with search -->
+        <mat-form-field appearance="fill">
+          <mat-label>Source from (optional)</mat-label>
+          <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel">
+            <mat-select-trigger>
+              {{ linkGroup.get('source')?.value || 'Select a source' }}
+            </mat-select-trigger>
+            <mat-option>
+              <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search nodes..." noEntriesFoundLabel="No matching nodes"></ngx-mat-select-search>
+            </mat-option>
+            <mat-option *ngFor="let node of filteredNodes" [value]="node">
+              {{ node }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
+            A node cannot source itself!
+          </mat-error>
+        </mat-form-field>
+
+
+
         <!-- Remove Button -->
         <button mat-icon-button color="warn" (click)="removeLink(i)" *ngIf="linkArray.length > 1">
           <mat-icon>delete</mat-icon>
