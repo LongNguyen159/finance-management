@@ -140,12 +140,6 @@ export class DataService {
         });
 
 
-
- 
-
-
-        
-
         // Step 8: Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
 
@@ -155,16 +149,16 @@ export class DataService {
 
         let pieSeriesData: {name: string, value: number}[] = []
 
-       /** CALCULATE TOTAL EXPENSES. */
-        const totalExpenses = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length)
-        const remainingBalance2 = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();
-        console.log('Total Expenses new function:', totalExpenses)
-        console.log('Remaining Balance new function:', remainingBalance2)
+       // Calculate return params
+        const totalExpenses = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).totalExpenses;
+        const pieData = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).topLevelexpenses;
+        const remainingBalance: string = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();
+        pieSeriesData.push(...pieData)
 
         pieSeriesData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenses - totalTaxValue})
 
 
-        // Update params
+        // Update return params
         const sankeyData = {
             nodes: nodes,
             links: uniqueLinks
@@ -173,7 +167,7 @@ export class DataService {
             sankeyData: sankeyData,
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalExpenses: totalExpenses,
-            remainingBalance: remainingBalance2,
+            remainingBalance: remainingBalance,
             pieData: pieSeriesData
         }
 
@@ -233,14 +227,15 @@ export class DataService {
      * It compares the value of each node to the sum of its children, and returns the higher value.
      */
     private _calculateNodeExpense(node: TreeNode, isRoot: boolean = false): number {
+        /** TODO:
+         * - Tooltip for Sankey: show the % of each node compared to total expenses. */
         // If the node has no children, it's a leaf node, so we return its value directly
         if (node.children.length === 0) {
-            console.log('Leaf node:', node.name, node.value);
             return node.value;
         }
     
         // Otherwise, recursively calculate the total of all child nodes
-        const childrenSum = node.children.reduce((sum, child) => {
+        const childrenSum: number = node.children.reduce((sum, child) => {
             return sum + this._calculateNodeExpense(child);
         }, 0);
     
@@ -251,21 +246,31 @@ export class DataService {
         }
     
         // For non-root nodes, compare the current node's value to the sum of its children
-        const maxExpense = Math.max(node.value, childrenSum);
+        const maxExpense: number = Math.max(node.value, childrenSum);
     
     
         return maxExpense;
     }
 
-    getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): number {
+    getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): {totalExpenses: number, topLevelexpenses: any} {
         // Step 1: Determine the root node based on the conditions
-        const rootNodeName = this._determineRootNode(links, hasTax, incomeSources);
+        const rootNodeName: string = this._determineRootNode(links, hasTax, incomeSources);
     
         // Step 2: Build the tree from the root node
         const treeFromRootNode = this._buildTree(links, rootNodeName);
+
+        const pieData = treeFromRootNode.children.map(child => {
+            return {
+                name: child.name,
+                value: child.value
+            }
+        })
     
         // Step 3: Calculate total expenses from the root
-        return this._calculateNodeExpense(treeFromRootNode, true);
+        return {
+            totalExpenses: this._calculateNodeExpense(treeFromRootNode, true),
+            topLevelexpenses: pieData
+        }
     }
     
 
