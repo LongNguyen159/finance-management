@@ -6,8 +6,16 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface ProcessedOutputData {
     sankeyData: SankeyData;
+    totalUsableIncome: number;
+    totalExpenses: number;
     remainingBalance: string;
     pieData: any;
+}
+
+export interface TreeNode {
+    name: string;
+    value: number;
+    children: TreeNode[];
 }
 
 @Injectable({
@@ -24,6 +32,8 @@ export class DataService {
 
   processedData: ProcessedOutputData = {
     sankeyData: this.sankeyData,
+    totalUsableIncome: 0,
+    totalExpenses: 0,
     remainingBalance: this.remainingBalance,
     pieData: []
   }
@@ -106,67 +116,7 @@ export class DataService {
             }
         }
 
-        /**____________________________________________________________________________________ */
-        // Step 4: Calculate total expenses
-        let totalExpenseValue = 0;
-
-        // Maps to track sums of child expenses and parent values
-        const parentLeafSums = new Map<string, number>(); 
-        const parentValues = new Map<string, number>(); 
-
-        // Step 4.1: Calculate sums for leaves and get parent values
-        userDefinedLinks.forEach(link => {
-            if (link.type === 'expense') {
-                const parentNode = link.source;
-
-                // If the link has a source, it's a leaf expense
-                if (parentNode) {
-                    // Accumulate leaf values under their respective parents
-                    parentLeafSums.set(parentNode, (parentLeafSums.get(parentNode) || 0) + link.value);
-                } else {
-                    // If there's no source, it's a top-level expense (assumed parent)
-                    parentValues.set(link.target, link.value);
-                }
-            }
-        });
-
-        // Step 4.2: Calculate the effective total expenses in one loop
-        parentLeafSums.forEach((leafSum, parentNode) => {
-            const parentValue = parentValues.get(parentNode) || 0; // Get the parent's defined value
-            totalExpenseValue += Math.max(leafSum, parentValue); // Add the maximum of leafSum or parentValue
-        });
-
-        // Step 4.3: Add any remaining individual expenses that are not linked to a parent
-        userDefinedLinks.forEach(link => {
-            if (link.type === 'expense' && !link.source && !parentLeafSums.has(link.target)) {
-                totalExpenseValue += link.value; // Only add expenses that are not accounted for in groups
-            }
-        });
-
-
-        // Step 4.4: Generate Pie Chart data
-        let pieSeriesData: {name: string, value: number}[] = []
-
-        const uniqueKeys = new Set<string>([...parentLeafSums.keys(), ...parentValues.keys()])
-        uniqueKeys.forEach(key => {
-            const value1 = parentLeafSums.get(key) || 0; // Get value from map1, default to 0 if not present
-            const value2 = parentValues.get(key) || 0; // Get value from map2, default to 0 if not present
         
-            // Determine the larger value
-            const largerValue = Math.max(value1, value2);
-        
-            // Push the result object into the array
-            pieSeriesData.push({ name: key, value: largerValue });
-        });
-
-
-        
-
-        // Log the final total expense
-        console.log('Final Total Expense Value:', totalExpenseValue);
-
-        /**____________________________________________________________________________________ */
-
 
         // Step 5: Create links for individual incomes and expenses (no need to modify nodesMap again)
         userDefinedLinks.forEach(link => {
@@ -190,9 +140,11 @@ export class DataService {
         });
 
 
-        // Step 7: Calculate remaining balance
-        const remainingBalance = (totalIncomeValue - totalExpenseValue - totalTaxValue).toLocaleString();
-        pieSeriesData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenseValue - totalTaxValue})
+
+ 
+
+
+        
 
         // Step 8: Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
@@ -201,22 +153,121 @@ export class DataService {
         const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
 
 
+        let pieSeriesData: {name: string, value: number}[] = []
+
+       /** CALCULATE TOTAL EXPENSES. */
+        const totalExpenses = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length)
+        const remainingBalance2 = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();
+        console.log('Total Expenses new function:', totalExpenses)
+        console.log('Remaining Balance new function:', remainingBalance2)
+
+        pieSeriesData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenses - totalTaxValue})
+
 
         // Update params
         const sankeyData = {
             nodes: nodes,
             links: uniqueLinks
         }
-
-
         this.processedData = {
             sankeyData: sankeyData,
-            remainingBalance: remainingBalance,
+            totalUsableIncome: totalIncomeValue - totalTaxValue,
+            totalExpenses: totalExpenses,
+            remainingBalance: remainingBalance2,
             pieData: pieSeriesData
         }
 
+        // Emit the processed data
         this.processedData$.next(this.processedData)
     }
+
+
+    /** Helper function to determine root node of sankey.
+     * Root node will be the income node.
+     * Root node will be used as the starting point to build the expense tree.
+     */
+    private _determineRootNode(links: SankeyLink[], hasTax: boolean, incomeSources: number): string {
+        if (hasTax) {
+            return "Usable Income";
+        } else if (!hasTax && incomeSources === 1) {
+            // Find the node that only appears as a source, never as a target
+            const sourceNodes = new Set(links.map(link => link.source));
+            const targetNodes = new Set(links.map(link => link.target));
+    
+            for (const source of sourceNodes) {
+                if (!targetNodes.has(source)) {
+                    return source;
+                }
+            }
+        } else if (!hasTax && incomeSources > 1) {
+            return "Total Income";
+        }
+        throw new Error("Root node could not be determined.");
+    }
+
+    /** Function to generate a tree structure from Sankey data (source, target, value) => Tree with name, value and children */
+    private _buildTree(links: SankeyLink[], rootNodeName: string): TreeNode {
+        const nodeMap = new Map<string, TreeNode>();
+    
+        // Create nodes for all source and target in the links
+        links.forEach(link => {
+            if (!nodeMap.has(link.source)) {
+                nodeMap.set(link.source, { name: link.source, value: 0, children: [] });
+            }
+            if (!nodeMap.has(link.target)) {
+                nodeMap.set(link.target, { name: link.target, value: link.value, children: [] });
+            }
+    
+            // Add the target node as a child of the source node
+            const sourceNode = nodeMap.get(link.source)!;
+            const targetNode = nodeMap.get(link.target)!;
+            sourceNode.children.push(targetNode);
+        });
+    
+        // Return the root node as the entry point to the tree
+        return nodeMap.get(rootNodeName)!;
+    }
+
+
+    /** This function uses the tree structure to recursively calculate the total expenses.
+     * It compares the value of each node to the sum of its children, and returns the higher value.
+     */
+    private _calculateNodeExpense(node: TreeNode, isRoot: boolean = false): number {
+        // If the node has no children, it's a leaf node, so we return its value directly
+        if (node.children.length === 0) {
+            console.log('Leaf node:', node.name, node.value);
+            return node.value;
+        }
+    
+        // Otherwise, recursively calculate the total of all child nodes
+        const childrenSum = node.children.reduce((sum, child) => {
+            return sum + this._calculateNodeExpense(child);
+        }, 0);
+    
+        
+        // If this is the root node (income), we only consider the children and ignore the root value
+        if (isRoot) {
+            return childrenSum;
+        }
+    
+        // For non-root nodes, compare the current node's value to the sum of its children
+        const maxExpense = Math.max(node.value, childrenSum);
+    
+    
+        return maxExpense;
+    }
+
+    getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): number {
+        // Step 1: Determine the root node based on the conditions
+        const rootNodeName = this._determineRootNode(links, hasTax, incomeSources);
+    
+        // Step 2: Build the tree from the root node
+        const treeFromRootNode = this._buildTree(links, rootNodeName);
+    
+        // Step 3: Calculate total expenses from the root
+        return this._calculateNodeExpense(treeFromRootNode, true);
+    }
+    
 
 
 

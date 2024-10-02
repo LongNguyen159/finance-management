@@ -43,9 +43,9 @@
         <mat-form-field appearance="fill">
           <mat-label>Source from (optional)</mat-label>
           <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel">
-            <mat-select-trigger>
+            <!-- <mat-select-trigger>
               {{ linkGroup.get('source')?.value || 'Select a source' }}
-            </mat-select-trigger>
+            </mat-select-trigger> -->
             <mat-option>
               <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search nodes..." noEntriesFoundLabel="No matching nodes"></ngx-mat-select-search>
             </mat-option>

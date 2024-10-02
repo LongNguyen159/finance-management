@@ -27,13 +27,22 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
+
+/**
+ * TODO:
+ * - Fix: Source from field not reflecting the selected value of the form.
+ * 
+ */
 export class InputListComponent implements OnInit {
   dataService = inject(DataService)
   userDefinedLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Salary', value: 1400 },
+    { type: 'income', target: 'Salary2', value: 1000 },
     { type: 'tax', target: 'Taxes', value: 220},
     { type: 'expense', target: 'Housing', value: 800},
     { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
+    { type: 'expense', target: 'Gardening', value: 300, source: 'Housing'},
+    { type: 'expense', target: 'Utils', value: 100, source: 'Gardening'},
   ]
 
   linkForm: FormGroup; // FormGroup to manage input fields
@@ -98,7 +107,6 @@ export class InputListComponent implements OnInit {
       linkGroup.get('source')?.disable();
     }
 
-    console.log('linkGroup', linkGroup.value)
 
     // Subscribe to changes in the type field
     linkGroup.get('type')?.valueChanges.subscribe(value => {
