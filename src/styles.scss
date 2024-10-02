@@ -7,6 +7,9 @@
 
 
 @include mat.core();
+h1, h2, h3, h4, h5, h6 {
+  color:rgb(38,38,38);
+}
 h1 {
     font-size: xx-large;
 }
@@ -15,6 +18,9 @@ h2 {
 }
 h3 {
     font-size: large;
+}
+p {
+  color: rgb(64,64,64);
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
@@ -49,15 +55,15 @@ html {
     @include mat.button-color($light-theme);
   }
 
-  // @media (prefers-color-scheme: dark) {
-  //   // Use the `-color` mixins to only apply color styles without reapplying the same
-  //   // typography and density styles.
+  @media (prefers-color-scheme: dark) {
+    // Use the `-color` mixins to only apply color styles without reapplying the same
+    // typography and density styles.
 
-  //   body {
-  //     background-color: #333;
-  //     color: whitesmoke;
-  //   }
-  //   @include mat.core-color($dark-theme);
-  //   @include mat.button-color($dark-theme);
-  // }
+    body {
+      background-color: #333;
+      color: whitesmoke;
+    }
+    @include mat.core-color($dark-theme);
+    @include mat.button-color($dark-theme);
+  }
 }
