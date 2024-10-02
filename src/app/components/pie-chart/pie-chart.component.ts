@@ -21,10 +21,6 @@ export class PieChartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // const expenseData = this.dataService.userDefinedLinks
-    //   .filter(link => link.type == 'expense' || link.type == 'tax') // Filter expense links
-    //   .map(link => ({ name: link.target, value: link.value })); // Map to name and value
-
     this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
       this.pieSeriesData = data.pieData
 
@@ -36,7 +32,7 @@ export class PieChartComponent implements OnInit {
           formatter: (params: any) => {
             // Use toLocaleString to format the value
             const value = params.data.value.toLocaleString(); // Format the value
-            return `${params.name}: ${value} (${params.percent}%)`; // Use template literals for string interpolation
+            return `${params.name}: <b>${value} (${params.percent}%)</b>`; // Bold the params.name
           }
         },
         legend: {
