@@ -73,7 +73,7 @@ export class DataService {
                     nodesMap.get(link.target)!.value += link.value;
                 } else {
                     // Child expenses (those with a source)
-                    // nodesMap.get(link.source)!.value += link.value; // Update parent value
+                    // nodesMap.get(link.source)!.value = link.value; // Update parent value
                     nodesMap.get(link.target)!.value = link.value; // Update child value
                 }
             }
@@ -118,7 +118,7 @@ export class DataService {
 
         
 
-        // Step 5: Create links for individual incomes and expenses (no need to modify nodesMap again)
+        // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
         userDefinedLinks.forEach(link => {
             if (link.type === 'income') {
                 if (!singleIncome) {
@@ -140,16 +140,16 @@ export class DataService {
         });
 
 
-        // Step 8: Convert nodesMap to an array of nodes (including child nodes)
+        // Step 5: Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
 
-        // Step 9: Remove duplicate links
+        // Step 6: Remove duplicate links
         const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
+ 
 
+       // Step 7: Calculate return params
+       let pieSeriesData: {name: string, value: number}[] = []
 
-        let pieSeriesData: {name: string, value: number}[] = []
-
-       // Calculate return params
         const totalExpenses = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).totalExpenses;
         const pieData = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).topLevelexpenses;
         const remainingBalance: string = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();

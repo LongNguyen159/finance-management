@@ -94,7 +94,6 @@ export class InputListComponent implements OnInit {
   }
 
 
-
   createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
@@ -124,26 +123,20 @@ export class InputListComponent implements OnInit {
     linkGroup.get('source')?.valueChanges.subscribe(value => {
       if (value) {
         this.filterNodes(value);
-        this.checkForCycle(value, linkGroup.get('target')?.value);
+        this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup);
       }
       
       
     });
-
-
     return linkGroup;
   }
 
   // Check for cycle and set error on source control if needed
-  private checkForCycle(source: string, target: string | undefined | null): void {
+  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup): void {
     if (source.toLowerCase() === target?.toLowerCase()) {
-      this.linkArray.controls.forEach((group) => {
-        group.get('source')?.setErrors({ cycle: true });
-      });
+      linkGroup.get('source')?.setErrors({ cycle: true });
     } else {
-      this.linkArray.controls.forEach((group) => {
-        group.get('source')?.setErrors(null); // Clear the error
-      });
+      linkGroup.get('source')?.setErrors(null); // Clear the error
     }
   }
 
