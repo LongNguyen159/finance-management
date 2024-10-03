@@ -9,12 +9,12 @@ import { CommonModule } from '@angular/common';
 import { DataService } from './components/data.service';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
+import { InputDialogComponent } from "./components/input-dialog/input-dialog.component";
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
-    MatButtonModule, CommonModule, MatIconModule, MatMenuModule
-  ],
+    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, InputDialogComponent],
   providers: [
     provideEcharts(),
   ],
