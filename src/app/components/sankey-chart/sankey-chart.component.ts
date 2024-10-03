@@ -45,24 +45,10 @@ export class SankeyChartComponent implements OnInit{
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
-        // formatter: (params: any) => {
-        //   const value = params.data.value.toLocaleString(); // Format the value
-        //   const nodeName = params.name;
-        //   console.log(params)
-      
-        //   // Check if the node type is 'expense'
-        //   if (params.data.type === 'expense') {
-        //     // Calculate percentage compared to total expenses
-        //     const percentOfTotal = ((params.data.value / 1200) * 100).toFixed(2);
-        //     return `<b>${nodeName}</b>: ${value} (${percentOfTotal}%) of total expenses`;
-        //   }
-          
-        //   // For non-expense nodes, just return the name and value
-        //   return `<b>${nodeName}</b>: ${value}`;
-        // }
       },
       series: [
         {
+          nodeAlign: 'left',
           type: 'sankey',
           data: this.sankeyData.nodes,
           links: this.sankeyData.links,
