@@ -16,6 +16,8 @@ export class PieChartComponent implements OnInit {
   dataService = inject(DataService)
   pieOption: EChartsOption = {}
   pieSeriesData: any[] = []
+  totalExpenses: number = 0
+  totalIncome: number = 0
 
   constructor() {
   }
@@ -23,6 +25,8 @@ export class PieChartComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
       this.pieSeriesData = data.pieData
+      this.totalExpenses = data.totalExpenses
+      this.totalIncome = data.totalUsableIncome
 
       console.log('pie chart updated')
 

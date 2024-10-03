@@ -1,9 +1,13 @@
-<div class="flex flex-col w-full justify-center items-center">
-    <h2 class="font-bold">
+<div class="flex flex-col w-full justify-center items-center space-y-2">
+    <h2 class="text-2xl font-bold">
         Expense Distribution
     </h2>
-    <p>
-        (Whole pie is your total net income)
+    <p class="text-base font-medium">
+        Total expenses: {{ totalExpenses.toLocaleString() }} of {{ totalIncome.toLocaleString() }} 
+        (<span class="font-semibold">{{ ((totalExpenses / totalIncome) * 100).toFixed(2) }}%</span>)
+    </p>
+    <p class="text-sm italic text-gray-500">
+        (The whole pie represents your total net income)
     </p>
 </div>
 <div

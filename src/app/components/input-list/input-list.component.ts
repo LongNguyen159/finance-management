@@ -35,13 +35,13 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
  */
 export class InputListComponent implements OnInit {
   dataService = inject(DataService)
-  userDefinedLinks: UserDefinedLink[] = [
-    { type: 'income', target: 'Salary', value: 2200 },
-    { type: 'income', target: 'Salary2', value: 800 },
-    // { type: 'tax', target: 'Taxes', value: 220},
+  demoLinks: UserDefinedLink[] = [
+    { type: 'income', target: 'Main Salary', value: 2200 },
+    { type: 'income', target: 'Side hustle', value: 800 },
+    { type: 'tax', target: 'Taxes', value: 220},
     { type: 'expense', target: 'Housing', value: 800},
     { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
-    { type: 'expense', target: 'Gardening', value: 300, source: 'Housing'},
+    { type: 'expense', target: 'Operation costs', value: 300, source: 'Housing'},
     { type: 'expense', target: 'Shopping', value: 100},
     { type: 'expense', target: 'Groceries', value: 300},
   ]
@@ -89,8 +89,8 @@ export class InputListComponent implements OnInit {
   // Method to initialize the links with predefined data
   initializeLinks(): void {
     this.linkArray.clear()
-    this.dataService.processInputData(this.userDefinedLinks)
-    this.userDefinedLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
+    this.dataService.processInputData(this.demoLinks)
+    this.demoLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
   }
 
 
