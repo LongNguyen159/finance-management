@@ -26,16 +26,17 @@
         <mat-form-field appearance="fill">
           <mat-label>Source from (optional)</mat-label>
           <input type="text"
-                 matInput
-                 [matAutocomplete]="auto"
-                 [formControlName]="'source'" 
-                 placeholder="Source from" />
-          <mat-autocomplete #auto="matAutocomplete">
-            <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
-          </mat-autocomplete>
+            matInput
+            [matAutocomplete]="auto"
+            [formControlName]="'source'" 
+            placeholder="Existing node e.g. Housing"
+          />
           <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
             A node cannot source itself!
           </mat-error>
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
+          </mat-autocomplete>  
         </mat-form-field>
   
 
