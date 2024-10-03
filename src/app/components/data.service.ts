@@ -196,7 +196,7 @@ export class DataService {
         } else if (!hasTax && incomeSources > 1) {
             return "Total Income";
         }
-        throw new Error("Root node could not be determined.");
+        return '';
     }
 
     /** Function to generate a tree structure from Sankey data (source, target, value) => Tree with name, value and children */
@@ -254,7 +254,15 @@ export class DataService {
 
     getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): {totalExpenses: number, topLevelexpenses: any} {
         // Step 1: Determine the root node based on the conditions
+        
         const rootNodeName: string = this._determineRootNode(links, hasTax, incomeSources);
+
+        if (!rootNodeName) {
+            return {
+                totalExpenses: 0,
+                topLevelexpenses: []
+            }
+        }
     
         // Step 2: Build the tree from the root node
         const treeFromRootNode = this._buildTree(links, rootNodeName);
