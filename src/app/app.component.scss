@@ -1,0 +1,28 @@
+::ng-deep .mat-mdc-menu-panel {
+    padding: 16px;
+    max-height: 80vh;
+    max-width: none !important;
+    width: 80vw !important;
+    backdrop-filter: blur(24px);
+    background-color: rgb(239 237 240 / 76%);
+}
+
+
+// ::ng-deep .cdk-overlay-transparent-backdrop .cdk-overlay-backdrop-showing {
+//     background-color: rgba(0, 0, 0, 0.5);
+//     opacity: 0.5 !important;
+//     transition: visibility 500ms linear, opacity 500ms linear !important;
+// }
+
+// ::ng-deep .cdk-overlay-transparent-backdrop.cdk-overlay-backdrop-showing {
+//     background-color: rgba(0, 0, 0, 0.5); /* Desired color */
+//     opacity: 0.8 !important; /* Start with opacity 0 */
+//     transition:  opacity 0.4s linear; /* Transition for opacity */
+// }
+
+/* This class is added when the backdrop is showing */
+// ::ng-deep .cdk-overlay-backdrop-showing.cdk-overlay-backdrop-showing {
+//     opacity: 1 !important; /* Change to fully visible */
+//     visibility: none !important; /* Hide the backdrop */
+//     transition: visibility 2s linear, opacity 2s linear; /* Transition for opacity */
+// }

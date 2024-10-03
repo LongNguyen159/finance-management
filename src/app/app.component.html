@@ -1,13 +1,38 @@
-<router-outlet />
-<div class="flex flex-col gap-8 p-4">
-    <div>
-        <app-input-list></app-input-list>
-    </div>
-    <div>
-        <app-sankey-chart></app-sankey-chart>
+<router-outlet></router-outlet>
+
+<div class="p-4">
+    <!-- <button mat-flat-button (click)="toggleLayout()">
+        Change Layout
+    </button> -->
+
+    <!-- <button mat-flat-button (click)="dataService.openDialog()">
+        Open Dialog
+    </button> -->
+
+
+    <div class="flex flex-row w-full justify-end">
+        <button mat-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+            <div class="flex flex-row justify-center items-center gap-2">
+                <mat-icon>more_vert</mat-icon>
+                <span>Add input</span>
+            </div>
+            
+          </button>
+          <mat-menu #menu="matMenu">
+            <app-input-list></app-input-list>
+          </mat-menu>
     </div>
     
-    <div>
-        <app-pie-chart></app-pie-chart>
+    <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">
+        <!-- INPUT SECTION -->
+        <div>
+            <!-- <app-input-list></app-input-list> -->
+        </div>
+    
+        <!-- CHART SECTION -->
+        <div class="flex flex-col gap-8">
+            <app-sankey-chart></app-sankey-chart>
+            <app-pie-chart></app-pie-chart>
+        </div>
     </div>
 </div>

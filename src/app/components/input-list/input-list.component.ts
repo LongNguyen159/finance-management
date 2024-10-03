@@ -35,16 +35,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
  */
 export class InputListComponent implements OnInit {
   dataService = inject(DataService)
-  demoLinks: UserDefinedLink[] = [
-    { type: 'income', target: 'Main Salary', value: 2200 },
-    { type: 'income', target: 'Side hustle', value: 800 },
-    { type: 'tax', target: 'Taxes', value: 220},
-    { type: 'expense', target: 'Housing', value: 800},
-    { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
-    { type: 'expense', target: 'Operation costs', value: 300, source: 'Housing'},
-    { type: 'expense', target: 'Shopping', value: 100},
-    { type: 'expense', target: 'Groceries', value: 300},
-  ]
+  demoLinks: UserDefinedLink[] = this.dataService.demoLinks;
 
   linkForm: FormGroup; // FormGroup to manage input fields
   sourceSearchControl = new FormControl(); // Search control for the dropdown

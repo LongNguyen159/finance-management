@@ -1,4 +1,4 @@
-<div [formGroup]="linkForm" class="link-form-container">
+<div [formGroup]="linkForm" class="link-form-container" (focus)="$event.stopPropagation()" (click)="$event.stopPropagation()">
     <div formArrayName="links">
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         

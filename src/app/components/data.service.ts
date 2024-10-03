@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
 import { BehaviorSubject } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { InputDialogComponent } from './input-dialog/input-dialog.component';
 
 
 
@@ -26,10 +28,7 @@ export class DataService {
     nodes: [],
     links: []
   }
-
   remainingBalance: string = '-';
-
-
   processedData: ProcessedOutputData = {
     sankeyData: this.sankeyData,
     totalUsableIncome: 0,
@@ -40,9 +39,21 @@ export class DataService {
 
   processedData$ = new BehaviorSubject<ProcessedOutputData>(this.processedData)
 
+  demoLinks: UserDefinedLink[] = [
+    { type: 'income', target: 'Main Salary', value: 2200 },
+    { type: 'income', target: 'Side hustle', value: 800 },
+    { type: 'tax', target: 'Taxes', value: 220},
+    { type: 'expense', target: 'Housing', value: 800},
+    { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
+    { type: 'expense', target: 'Operation costs', value: 300, source: 'Housing'},
+    { type: 'expense', target: 'Shopping', value: 100},
+    { type: 'expense', target: 'Groceries', value: 300},
+  ]
 
-
-  constructor() {}
+  readonly dialog = inject(MatDialog)
+  constructor() {
+    this.processInputData(this.demoLinks)
+  }
 
     processInputData(userDefinedLinks: UserDefinedLink[]): void {
         const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
@@ -279,6 +290,17 @@ export class DataService {
             totalExpenses: this._calculateNodeExpense(treeFromRootNode, true),
             topLevelexpenses: pieData
         }
+    }
+
+
+    openDialog() {
+        const dialogRef = this.dialog.open(InputDialogComponent, {
+            width: '1000px',
+        });
+    
+        dialogRef.afterClosed().subscribe(result => {
+          console.log(`Dialog result: ${result}`);
+        });
     }
     
 
