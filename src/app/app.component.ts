@@ -1,14 +1,21 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-
+import { Component, inject } from '@angular/core';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { InputListComponent } from './components/input-list/input-list.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, MatMenuModule, MatIconModule, MatButtonModule, InputListComponent, RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'finance-management';
-  
+  constructor(private router: Router) {}
+
+  navigateToMainPage() {
+    this.router.navigate(['/main-page']);
+  }
 }

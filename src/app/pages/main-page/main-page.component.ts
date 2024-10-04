@@ -11,6 +11,8 @@ import { InputDialogComponent } from '../../components/input-dialog/input-dialog
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, ProcessedOutputData } from '../../components/data.service';
+import { takeUntil } from 'rxjs';
+import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 
 @Component({
   selector: 'app-main-page',
@@ -24,7 +26,7 @@ import { DataService, ProcessedOutputData } from '../../components/data.service'
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss'
 })
-export class MainPageComponent implements OnInit{
+export class MainPageComponent extends BasePageComponent implements OnInit{
   isVerticalLayout = true;
 
   dataService = inject(DataService)
@@ -37,9 +39,11 @@ export class MainPageComponent implements OnInit{
 
   pieChartDataBrutto: any[] = []
   pieChartDataNetto: any[] = []
-
+  constructor() {
+    super();
+  }
   ngOnInit(): void {
-    this.dataService.getProcessedData().subscribe(data => {
+    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
 
       this.processedOutputData = data
       this.pieChartDataNetto = data.pieData

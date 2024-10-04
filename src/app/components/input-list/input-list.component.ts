@@ -8,9 +8,10 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import { debounceTime, filter } from 'rxjs';
+import { debounceTime, filter, take, takeUntil } from 'rxjs';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -33,7 +34,7 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
  * - Fix: Source from field not reflecting the selected value of the form.
  * 
  */
-export class InputListComponent implements OnInit {
+export class InputListComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   demoLinks: UserDefinedLink[] = this.dataService.demoLinks;
 
@@ -49,13 +50,14 @@ export class InputListComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder) {
+    super();
     this.linkForm = this.fb.group({
       links: this.fb.array([this.createLinkGroup()])
     });
   }
 
   ngOnInit(): void {
-    this.dataService.getProcessedData().subscribe(data => {
+    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       console.log('data', data)
     });
@@ -63,6 +65,7 @@ export class InputListComponent implements OnInit {
     /** Update Chart every time user changes the form input */
     this.linkForm.valueChanges
     .pipe(
+      takeUntil(this.componentDestroyed$),
       debounceTime(400),
       filter(() => this.linkForm.valid) // Only proceed if the form is valid
     )
@@ -71,8 +74,8 @@ export class InputListComponent implements OnInit {
       this.taxNodeExists = this.hasTaxNode(formData.links);
     });
 
-     // Listen to changes in the search control to filter the dropdown
-     this.sourceSearchControl.valueChanges.subscribe((searchTerm) => {
+    // Listen to changes in the search control to filter the dropdown
+    this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
       this.filteredNodes = this.filterNodes(searchTerm);
     });
 
@@ -107,7 +110,7 @@ export class InputListComponent implements OnInit {
 
 
     // Subscribe to changes in the type field
-    linkGroup.get('type')?.valueChanges.subscribe(value => {
+    linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       console.log('value', value)
       if (value === 'income') {
         linkGroup.get('source')?.disable(); // Disable source if income
@@ -118,7 +121,7 @@ export class InputListComponent implements OnInit {
 
 
     // Listen to changes in the source field for filtering options
-    linkGroup.get('source')?.valueChanges.subscribe(value => {
+    linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
         this.filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup);
