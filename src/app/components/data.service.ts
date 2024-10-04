@@ -14,6 +14,7 @@ export interface ProcessedOutputData {
     totalExpenses: number;
     remainingBalance: string;
     pieData: any;
+    rawInput: UserDefinedLink[];
 }
 
 export interface TreeNode {
@@ -31,17 +32,19 @@ export class DataService {
     links: []
   }
   remainingBalance: string = '-';
-  processedData: ProcessedOutputData = {
+  savedData: ProcessedOutputData = {
     sankeyData: this.sankeyData,
     totalUsableIncome: -1,
     totalTax: -1,
     totalGrossIncome: -1,
     totalExpenses: -1,
     remainingBalance: this.remainingBalance,
-    pieData: []
+    pieData: [],
+    rawInput: []
   }
 
-  processedData$ = new BehaviorSubject<ProcessedOutputData>(this.processedData)
+  processedData$ = new BehaviorSubject<ProcessedOutputData>(this.savedData)
+  isDemo: boolean = false
 
   demoLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Main Salary', value: 2200 },
@@ -56,10 +59,10 @@ export class DataService {
 
   readonly dialog = inject(MatDialog)
   constructor() {
-    this.processInputData(this.demoLinks)
+    this.processInputData(this.demoLinks, true)
   }
 
-    processInputData(userDefinedLinks: UserDefinedLink[]): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], demo: boolean = false): void {
         const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
         const incomeNodes: string[] = []; // Track income nodes
@@ -67,6 +70,12 @@ export class DataService {
         let totalTaxValue = 0; // Variable to store total tax value
         let singleIncome = false; // Flag to check if there is only one income source
         const hasTax = userDefinedLinks.some(link => link.type === 'tax'); // Check if there is any tax link
+
+        if (demo) {
+            this.isDemo = true;
+        } else {
+            this.isDemo = false;
+        }
 
 
         // Step 1: Initialize the nodes without adding values yet
@@ -179,18 +188,24 @@ export class DataService {
             nodes: nodes,
             links: uniqueLinks
         }
-        this.processedData = {
+        this.savedData = {
             sankeyData: sankeyData,
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
             remainingBalance: remainingBalance.toLocaleString(),
-            pieData: pieSeriesData
+            pieData: pieSeriesData,
+            rawInput: userDefinedLinks
         }
 
         // Emit the processed data
-        this.processedData$.next(this.processedData)
+        this.processedData$.next(this.savedData)
+        this.saveData()
+    }
+
+    saveData() {
+        console.log('Data saved', this.savedData)
     }
 
 
@@ -299,13 +314,10 @@ export class DataService {
 
 
     openDialog() {
-        const dialogRef = this.dialog.open(DidYouKnowDialogComponent);
-    
-        dialogRef.afterClosed().subscribe(result => {
-          console.log(`Dialog result: ${result}`);
-        });
+        this.dialog.open(DidYouKnowDialogComponent);
     }
     
+
 
 
 

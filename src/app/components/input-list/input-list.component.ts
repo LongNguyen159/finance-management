@@ -59,7 +59,6 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
-      console.log('data', data)
     });
 
     /** Update Chart every time user changes the form input */
@@ -90,8 +89,11 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   // Method to initialize the links with predefined data
   initializeLinks(): void {
     this.linkArray.clear()
-    this.dataService.processInputData(this.demoLinks)
-    this.demoLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
+    if (this.dataService.isDemo) {
+      this.demoLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
+    } else {
+      this.dataService.savedData.rawInput.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
+    }
   }
 
 
@@ -111,7 +113,6 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
     // Subscribe to changes in the type field
     linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
-      console.log('value', value)
       if (value === 'income') {
         linkGroup.get('source')?.disable(); // Disable source if income
       } else {
