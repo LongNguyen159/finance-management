@@ -42,7 +42,7 @@ export class DataService {
   demoLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Main Salary', value: 2200 },
     { type: 'income', target: 'Side hustle', value: 800 },
-    { type: 'tax', target: 'Taxes', value: 220},
+    { type: 'tax', target: 'Taxes', value: 1100},
     { type: 'expense', target: 'Housing', value: 800},
     { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
     { type: 'expense', target: 'Operation costs', value: 300, source: 'Housing'},
@@ -161,13 +161,14 @@ export class DataService {
        // Step 7: Calculate return params
        let pieSeriesData: {name: string, value: number}[] = []
 
-        const totalExpenses = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).totalExpenses;
-        const pieData = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length).topLevelexpenses;
+        const { totalExpenses, topLevelexpenses: pieData } = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length);
         const remainingBalance: string = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();
-        pieSeriesData.push(...pieData)
 
-        pieSeriesData.push({name: 'Remaining Balance', value: totalIncomeValue - totalExpenses - totalTaxValue})
-
+        pieSeriesData = [
+            ...pieData,
+            { name: 'Remaining Balance', value: remainingBalance },
+            { name: 'Taxes', value: totalTaxValue }
+        ];
 
         // Update return params
         const sankeyData = {
