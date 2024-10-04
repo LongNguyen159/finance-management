@@ -299,9 +299,7 @@ export class DataService {
 
 
     openDialog() {
-        const dialogRef = this.dialog.open(InputDialogComponent, {
-            width: '1000px',
-        });
+        const dialogRef = this.dialog.open(InputDialogComponent);
     
         dialogRef.afterClosed().subscribe(result => {
           console.log(`Dialog result: ${result}`);

@@ -1,7 +1,16 @@
-<h2 mat-dialog-title>Input Data</h2>
+<h2 mat-dialog-title class="!font-bold text-xl">Financial Management Tip: The 50-30-20 Rule</h2>
 <mat-dialog-content class="mat-typography">
-    <app-input-list></app-input-list>
+  <div class="p-6 bg-blue-50 rounded-lg max-w-md mx-auto">
+    <p class="mb-3 text-lg">Budgeting Made Simple!</p>
+    <p class="mb-4 text-base">The 50-30-20 rule is a straightforward guideline for managing your finances effectively:</p>
+    <ul class="list-disc list-inside mb-4 text-base">
+        <li><strong>50% Needs:</strong> Allocate half of your income to essential expenses such as housing, utilities, groceries, and transportation.</li>
+        <li><strong>30% Wants:</strong> Spend 30% on non-essential items that enhance your quality of life, like dining out, entertainment, and hobbies.</li>
+        <li><strong>20% Savings:</strong> Set aside 20% for savings and debt repayment, helping you build a secure financial future.</li>
+    </ul>
+    <p class="text-base">Remember: Adjust these percentages based on your unique financial situation. Regularly review and tweak your budget to stay on track!</p>
+  </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Ok</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Got it!</button>
 </mat-dialog-actions>

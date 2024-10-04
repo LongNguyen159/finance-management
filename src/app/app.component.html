@@ -12,23 +12,8 @@
             <app-input-list></app-input-list>
           </mat-menu>
     </div>
-    <div class="p-4 pt-0">
-        <!-- <button mat-flat-button (click)="toggleLayout()">
-            Change Layout
-        </button> -->
-    
-        <!-- <button mat-flat-button (click)="dataService.openDialog()">
-            Open Dialog
-        </button> -->
-    
-        
-        
+    <div class="p-4 pt-0">        
         <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">
-            <!-- INPUT SECTION -->
-            <div>
-                <!-- <app-input-list></app-input-list> -->
-            </div>
-        
             <!-- CHART SECTION -->
             <div class="flex flex-col gap-8">
                 <app-sankey-chart
@@ -37,6 +22,13 @@
                 ></app-sankey-chart>
                 <mat-divider class="!border-gray-300"></mat-divider>
                 <!-- NETTO CHART -->
+                
+                <div class="flex flex-row w-full items-center justify-end">
+                    <button mat-button (click)="dataService.openDialog()" class="flex items-center">
+                        <mat-icon class="mr-1">lightbulb_outline</mat-icon>
+                        <span>Did You Know?</span>
+                    </button>
+                </div>
                 <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
                     [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
                 ></app-pie-chart>
@@ -50,5 +42,6 @@
             </div>
         </div>
     </div>
+    <app-user-manual></app-user-manual>
     
 </div>

@@ -11,12 +11,14 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import { InputDialogComponent } from "./components/input-dialog/input-dialog.component";
 import {MatDividerModule} from '@angular/material/divider';
+import { UserManualComponent } from './components/user-manual/user-manual.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
-    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, InputDialogComponent, MatDividerModule],
+    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, InputDialogComponent, MatDividerModule,
+    UserManualComponent],
   providers: [
     provideEcharts(),
   ],
