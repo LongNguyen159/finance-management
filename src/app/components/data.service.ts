@@ -238,8 +238,6 @@ export class DataService {
      * It compares the value of each node to the sum of its children, and returns the higher value.
      */
     private _calculateNodeExpense(node: TreeNode, isRoot: boolean = false): number {
-        /** TODO:
-         * - Tooltip for Sankey: show the % of each node compared to total expenses. */
         // If the node has no children, it's a leaf node, so we return its value directly
         if (node.children.length === 0) {
             return node.value;
