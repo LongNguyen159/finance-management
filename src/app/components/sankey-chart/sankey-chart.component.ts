@@ -15,7 +15,7 @@ import { SankeyData } from '../models';
   templateUrl: './sankey-chart.component.html',
   styleUrl: './sankey-chart.component.scss'
 })
-export class SankeyChartComponent implements OnInit, OnChanges {
+export class SankeyChartComponent implements OnChanges {
 
   @Input() sankeyData: SankeyData
   @Input() remainingBalance: string = '-'
@@ -28,11 +28,15 @@ export class SankeyChartComponent implements OnInit, OnChanges {
   constructor() {
   }
 
-  ngOnInit(): void {
-    this.initChart()
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['sankeyData']) {
+      this.updateSankeyChart()
+    }
   }
 
-  initChart() {
+
+  updateSankeyChart() {
+    console.log('sankey chart updated')
     this.sankeyOption = {
       tooltip: {
         trigger: 'item',
@@ -44,32 +48,6 @@ export class SankeyChartComponent implements OnInit, OnChanges {
           saveAsImage: {},
         },
       },
-      series: [
-        {
-          nodeAlign: 'left',
-          type: 'sankey',
-          data: [],
-          links: [],
-          emphasis: { focus: 'adjacency' },
-          label: { fontSize: 12 },
-          nodeGap: 15,
-          lineStyle: { color: 'gradient', curveness: 0.5 }
-        }
-      ]
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes && changes['sankeyData']) {
-      this.updateSankeyChart()
-    }
-  }
-
-
-  updateSankeyChart() {
-    console.log('sankey chart updated')
-    this.mergeOption = {
-      ...this.sankeyOption,
       series: [
         {
           nodeAlign: 'left',
