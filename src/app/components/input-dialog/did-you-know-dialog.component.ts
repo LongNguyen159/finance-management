@@ -10,8 +10,8 @@ import { InputListComponent } from '../input-list/input-list.component';
     InputListComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './input-dialog.component.html',
-  styleUrl: './input-dialog.component.scss'
+  templateUrl: './did-you-know-dialog.component.html',
+  styleUrl: './did-you-know-dialog.component.scss'
 })
-export class InputDialogComponent {
+export class DidYouKnowDialogComponent {
 }

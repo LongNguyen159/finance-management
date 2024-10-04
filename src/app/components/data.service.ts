@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { InputDialogComponent } from './input-dialog/input-dialog.component';
+import { DidYouKnowDialogComponent } from './input-dialog/did-you-know-dialog.component';
 
 
 
@@ -299,7 +299,7 @@ export class DataService {
 
 
     openDialog() {
-        const dialogRef = this.dialog.open(InputDialogComponent);
+        const dialogRef = this.dialog.open(DidYouKnowDialogComponent);
     
         dialogRef.afterClosed().subscribe(result => {
           console.log(`Dialog result: ${result}`);

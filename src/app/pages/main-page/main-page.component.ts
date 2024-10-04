@@ -7,7 +7,7 @@ import { InputListComponent } from '../../components/input-list/input-list.compo
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { InputDialogComponent } from '../../components/input-dialog/input-dialog.component';
+import { DidYouKnowDialogComponent } from '../../components/input-dialog/did-you-know-dialog.component';
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, ProcessedOutputData } from '../../components/data.service';
@@ -18,7 +18,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
   selector: 'app-main-page',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
-    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, InputDialogComponent, MatDividerModule,
+    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
     UserManualComponent],
   providers: [
     provideEcharts(),
