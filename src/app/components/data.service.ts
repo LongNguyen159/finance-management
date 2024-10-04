@@ -9,6 +9,8 @@ import { InputDialogComponent } from './input-dialog/input-dialog.component';
 export interface ProcessedOutputData {
     sankeyData: SankeyData;
     totalUsableIncome: number;
+    totalGrossIncome: number;
+    totalTax: number;
     totalExpenses: number;
     remainingBalance: string;
     pieData: any;
@@ -31,8 +33,10 @@ export class DataService {
   remainingBalance: string = '-';
   processedData: ProcessedOutputData = {
     sankeyData: this.sankeyData,
-    totalUsableIncome: 0,
-    totalExpenses: 0,
+    totalUsableIncome: -1,
+    totalTax: -1,
+    totalGrossIncome: -1,
+    totalExpenses: -1,
     remainingBalance: this.remainingBalance,
     pieData: []
   }
@@ -167,7 +171,7 @@ export class DataService {
         pieSeriesData = [
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
-            { name: 'Taxes', value: totalTaxValue }
+            // { name: 'Taxes', value: totalTaxValue }
         ];
 
         // Update return params
@@ -178,6 +182,8 @@ export class DataService {
         this.processedData = {
             sankeyData: sankeyData,
             totalUsableIncome: totalIncomeValue - totalTaxValue,
+            totalGrossIncome: totalIncomeValue,
+            totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
             remainingBalance: remainingBalance,
             pieData: pieSeriesData
