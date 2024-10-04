@@ -166,7 +166,7 @@ export class DataService {
        let pieSeriesData: {name: string, value: number}[] = []
 
         const { totalExpenses, topLevelexpenses: pieData } = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length);
-        const remainingBalance: string = (totalIncomeValue - totalExpenses - totalTaxValue).toLocaleString();
+        const remainingBalance: number = (totalIncomeValue - totalExpenses - totalTaxValue)
 
         pieSeriesData = [
             ...pieData,
@@ -185,7 +185,7 @@ export class DataService {
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
-            remainingBalance: remainingBalance,
+            remainingBalance: remainingBalance.toLocaleString(),
             pieData: pieSeriesData
         }
 

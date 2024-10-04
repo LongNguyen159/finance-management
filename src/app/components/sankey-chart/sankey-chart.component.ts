@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
@@ -15,32 +15,24 @@ import { SankeyData } from '../models';
   templateUrl: './sankey-chart.component.html',
   styleUrl: './sankey-chart.component.scss'
 })
-export class SankeyChartComponent implements OnInit{
+export class SankeyChartComponent implements OnInit, OnChanges {
+
+  @Input() sankeyData: SankeyData
+  @Input() remainingBalance: string = '-'
+
   dataService = inject(DataService)
 
   sankeyOption: EChartsOption = {}
-
-  remainingBalance: string = ''
-  sankeyData: SankeyData = {
-    nodes: [],
-    links: []
-  }
-
+  mergeOption: EChartsOption = {}
 
   constructor() {
   }
 
   ngOnInit(): void {
-    this.dataService.getProcessedData().subscribe((data: ProcessedOutputData) => {
-      this.sankeyData = data.sankeyData
-      this.remainingBalance = data.remainingBalance
-      this.updateSankeyChart()
-    })
+    this.initChart()
   }
 
-
-  updateSankeyChart() {
-    console.log('sankey chart updated')
+  initChart() {
     this.sankeyOption = {
       tooltip: {
         trigger: 'item',
@@ -52,6 +44,32 @@ export class SankeyChartComponent implements OnInit{
           saveAsImage: {},
         },
       },
+      series: [
+        {
+          nodeAlign: 'left',
+          type: 'sankey',
+          data: [],
+          links: [],
+          emphasis: { focus: 'adjacency' },
+          label: { fontSize: 12 },
+          nodeGap: 15,
+          lineStyle: { color: 'gradient', curveness: 0.5 }
+        }
+      ]
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['sankeyData']) {
+      this.updateSankeyChart()
+    }
+  }
+
+
+  updateSankeyChart() {
+    console.log('sankey chart updated')
+    this.mergeOption = {
+      ...this.sankeyOption,
       series: [
         {
           nodeAlign: 'left',

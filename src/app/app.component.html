@@ -31,7 +31,10 @@
         
             <!-- CHART SECTION -->
             <div class="flex flex-col gap-8">
-                <app-sankey-chart></app-sankey-chart>
+                <app-sankey-chart
+                    [sankeyData]="processedOutputData.sankeyData"
+                    [remainingBalance]="processedOutputData.remainingBalance"
+                ></app-sankey-chart>
                 <mat-divider class="!border-gray-300"></mat-divider>
                 <!-- NETTO CHART -->
                 <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
