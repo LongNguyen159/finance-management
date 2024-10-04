@@ -11,14 +11,14 @@
 
 
     <div class="flex flex-row w-full justify-end">
-        <button mat-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+        <button mat-button [matMenuTriggerFor]="menu" [matMenuTriggerRestoreFocus]="false">
             <div class="flex flex-row justify-center items-center gap-2">
                 <mat-icon>add_circle_outline</mat-icon>
                 <span>Add input</span>
             </div>
             
           </button>
-          <mat-menu #menu="matMenu">
+          <mat-menu #menu="matMenu" [overlapTrigger]="false">
             <app-input-list></app-input-list>
           </mat-menu>
     </div>
