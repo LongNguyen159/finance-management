@@ -13,13 +13,14 @@ import { UserManualComponent } from '../../components/user-manual/user-manual.co
 import { DataService, ProcessedOutputData } from '../../components/data.service';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
+import { NavbarComponent } from "../../components/navbar/navbar.component";
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
-    UserManualComponent],
+    UserManualComponent, NavbarComponent],
   providers: [
     provideEcharts(),
   ],
