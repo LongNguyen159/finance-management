@@ -46,6 +46,12 @@ export class SankeyChartComponent implements OnInit{
         trigger: 'item',
         triggerOn: 'mousemove',
       },
+      toolbox: {
+        right: 20,
+        feature: {
+          saveAsImage: {},
+        },
+      },
       series: [
         {
           nodeAlign: 'left',

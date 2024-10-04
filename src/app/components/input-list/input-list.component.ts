@@ -45,6 +45,7 @@ export class InputListComponent implements OnInit {
   existingNodes: string[] = []; // To hold existing node names
   filteredNodes: string[] = []; // To hold filtered suggestions for auto-complete
 
+  taxNodeExists = false; // Flag to check if a tax node exists
 
 
   constructor(private fb: FormBuilder) {
@@ -67,6 +68,7 @@ export class InputListComponent implements OnInit {
     )
     .subscribe(formData => {
       this.dataService.processInputData(formData.links);
+      this.taxNodeExists = this.hasTaxNode(formData.links);
     });
 
      // Listen to changes in the search control to filter the dropdown
@@ -75,6 +77,11 @@ export class InputListComponent implements OnInit {
     });
 
     this.initializeLinks()
+  }
+
+  hasTaxNode(data: UserDefinedLink[]): boolean {
+    return data.some(item => item.type === 'tax')
+
   }
   
   // Method to initialize the links with predefined data

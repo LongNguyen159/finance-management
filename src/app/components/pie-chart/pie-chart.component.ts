@@ -43,6 +43,12 @@ export class PieChartComponent implements OnInit {
           orient: 'vertical',
           left: 'left',
         },
+        toolbox: {
+          right: 20,
+          feature: {
+            saveAsImage: {},
+          },
+        },
         series: [
           {
             type: 'pie',

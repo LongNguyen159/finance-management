@@ -2,19 +2,20 @@
     <div formArrayName="links">
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         
-        <!-- Type (Income, Expense, Tax) -->
-        <mat-form-field appearance="fill">
-          <mat-select formControlName="type" placeholder="Type">
-            <mat-option *ngFor="let type of linkTypes" [value]="type">{{ type | titlecase }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-  
         <!-- Target -->
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
           <input matInput formControlName="target" placeholder="Target name" />
         </mat-form-field>
-  
+        
+        <!-- Type (Income, Expense, Tax) -->
+        <mat-form-field appearance="fill">
+          <mat-select formControlName="type" placeholder="Type">
+            <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists" [value]="type">{{ type | titlecase }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+
         <!-- Value -->
         <mat-form-field appearance="fill">
           <mat-label>Value</mat-label>
