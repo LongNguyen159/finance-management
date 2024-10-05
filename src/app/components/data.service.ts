@@ -73,6 +73,18 @@ export class DataService {
         let singleIncome = false; // Flag to check if there is only one income source
         const hasTax = userDefinedLinks.some(link => link.type === 'tax'); // Check if there is any tax link
 
+        /** Demo flag: Only set to true when the app loads for the first time to show our demo
+         * graph for first time users.
+         * 
+         * TODO:
+         * - Later, we will save user's data in localStorage. That mean before calling this function,
+         * we will check localStorage if there is any data saved by the user. If there is, we will
+         * cancel the demo call in the contructor above.
+         * 
+         * 
+         * - Update the parents value to be the sum of all children, so user doesn't have to calculate it
+         * => Modify rawInput data and return it. Since InputListComponent uses rawInput to display the data.
+         */
         if (demo) {
             this.isDemo = true;
         } else {
@@ -99,7 +111,6 @@ export class DataService {
                     nodesMap.get(link.target)!.value += link.value;
                 } else {
                     // Child expenses (those with a source)
-                    // nodesMap.get(link.source)!.value = link.value; // Update parent value
                     nodesMap.get(link.target)!.value = link.value; // Update child value
                 }
             }
@@ -174,6 +185,12 @@ export class DataService {
  
 
        // Step 7: Calculate return params
+
+       /** Pie data will be generated based on Tree Structure generated from Sankey.
+        * Not from Sankey links.
+        * 
+        * => If you want to modify pie chart data, modify tree structure.
+        */
        let pieSeriesData: {name: string, value: number}[] = []
 
         const { totalExpenses, topLevelexpenses: pieData } = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length);
@@ -182,7 +199,6 @@ export class DataService {
         pieSeriesData = [
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
-            // { name: 'Taxes', value: totalTaxValue }
         ];
 
         // Update return params
@@ -206,11 +222,13 @@ export class DataService {
         this.saveData()
     }
 
+    /** Save user data in localStorage. Data will be retrieved on app Init. */
     saveData() {
-        console.log('Data saved', this.savedData)
+        // console.log('Data saved', this.savedData)
     }
 
 
+    //#region Create Tree from Sankey
     /** Helper function to determine root node of sankey.
      * Root node will be the income node.
      * Root node will be used as the starting point to build the expense tree.
@@ -257,7 +275,10 @@ export class DataService {
         return nodeMap.get(rootNodeName)!;
     }
 
+    //#endregion
 
+
+    //#region Calculate Total Expenses
     /** This function uses the tree structure to recursively calculate the total expenses.
      * It compares the value of each node to the sum of its children, and returns the higher value.
      */
@@ -280,14 +301,14 @@ export class DataService {
     
         // For non-root nodes, compare the current node's value to the sum of its children
         const maxExpense: number = Math.max(node.value, childrenSum);
-    
-    
+        node.value = maxExpense; // Update the parent node if children's total is higher.
+
         return maxExpense;
     }
 
+
     getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): {totalExpenses: number, topLevelexpenses: any} {
         // Step 1: Determine the root node based on the conditions
-        
         const rootNodeName: string = this._determineRootNode(links, hasTax, incomeSources);
 
         if (!rootNodeName) {
@@ -298,8 +319,8 @@ export class DataService {
         }
     
         // Step 2: Build the tree from the root node
-        const treeFromRootNode = this._buildTree(links, rootNodeName);
-
+        let treeFromRootNode = this._buildTree(links, rootNodeName);
+        const totalExpenses = this._calculateNodeExpense(treeFromRootNode, true);
         const pieData = treeFromRootNode.children.map(child => {
             return {
                 name: child.name,
@@ -309,12 +330,14 @@ export class DataService {
     
         // Step 3: Calculate total expenses from the root
         return {
-            totalExpenses: this._calculateNodeExpense(treeFromRootNode, true),
+            totalExpenses: totalExpenses,
             topLevelexpenses: pieData
         }
     }
 
+    //#endregion
 
+    //#region Dialogs
     openDidYouKnowDialog() {
         this.dialog.open(DidYouKnowDialogComponent);
     }
@@ -331,6 +354,8 @@ export class DataService {
     toggleAdvanced() {
         this.isAdvancedShown = !this.isAdvancedShown;
     }
+
+    //#endregion
     
 
 
