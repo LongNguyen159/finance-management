@@ -3,6 +3,7 @@ import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DidYouKnowDialogComponent } from './did-you-know-dialog/did-you-know-dialog.component';
+import { InputListDialogComponent } from './input-list-dialog/input-list-dialog.component';
 
 
 
@@ -313,8 +314,17 @@ export class DataService {
     }
 
 
-    openDialog() {
+    openDidYouKnowDialog() {
         this.dialog.open(DidYouKnowDialogComponent);
+    }
+
+
+    openInputListDialog() {
+        const dialogRef = this.dialog.open(InputListDialogComponent, {
+            width: '70vw',
+            height: '40rem',
+            maxWidth: '90vw',
+        });
     }
     
 
