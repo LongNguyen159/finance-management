@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { DidYouKnowDialogComponent } from './input-dialog/did-you-know-dialog.component';
+import { DidYouKnowDialogComponent } from './did-you-know-dialog/did-you-know-dialog.component';
 
 
 

@@ -7,7 +7,7 @@ import { InputListComponent } from '../../components/input-list/input-list.compo
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { DidYouKnowDialogComponent } from '../../components/input-dialog/did-you-know-dialog.component';
+import { DidYouKnowDialogComponent } from '../../components/did-you-know-dialog/did-you-know-dialog.component';
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, ProcessedOutputData } from '../../components/data.service';
