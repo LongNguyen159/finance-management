@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService } from '../data.service';
 import { UserDefinedLink } from '../models';
@@ -9,7 +9,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import { debounceTime, filter, take, takeUntil } from 'rxjs';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 @Component({
@@ -36,6 +36,9 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
  */
 export class InputListComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
+  @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
+
+
   demoLinks: UserDefinedLink[] = this.dataService.demoLinks;
 
   linkForm: FormGroup; // FormGroup to manage input fields
@@ -84,6 +87,13 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   hasTaxNode(data: UserDefinedLink[]): boolean {
     return data.some(item => item.type === 'tax')
 
+  }
+
+  closeAutoComplete(index: number): void {
+    const trigger = this.autocompleteTriggers.toArray()[index];
+    setTimeout(() => {
+      trigger.closePanel();
+    }, 0);
   }
   
   // Method to initialize the links with predefined data

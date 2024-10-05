@@ -1,4 +1,4 @@
-<div [formGroup]="linkForm" class="link-form-container" cdkTrapFocus (click)="$event.stopPropagation()">
+<div [formGroup]="linkForm" class="link-form-container" (click)="$event.stopPropagation()">
     <div formArrayName="links">
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         
@@ -18,26 +18,27 @@
 
         <!-- Value -->
         <mat-form-field appearance="fill">
-          <mat-label>Value</mat-label>
+          <mat-label>Amount</mat-label>
           <input matInput formControlName="value" type="number" placeholder="Value" />
         </mat-form-field>
   
         <!-- Source (Optional) -->
         <!-- input with auto complete -->
         <mat-form-field appearance="fill">
-          <mat-label>Source from (optional)</mat-label>
+          <mat-label>Part of (optional)</mat-label>
           <input type="text"
             matInput
             [matAutocomplete]="auto"
-            [formControlName]="'source'" 
-            placeholder="Existing node e.g. Housing"
+            formControlName="source"
+            placeholder="Existing entry e.g. Housing"
+            (blur)="closeAutoComplete(i)"
           />
           <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
             A node cannot source itself!
           </mat-error>
-          <mat-autocomplete #auto="matAutocomplete">
+          <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
             <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
-          </mat-autocomplete>  
+          </mat-autocomplete>
         </mat-form-field>
   
 
