@@ -1,4 +1,10 @@
-<div [formGroup]="linkForm" class="link-form-container" (click)="$event.stopPropagation()">
+<div [formGroup]="linkForm" class="link-form-container">
+    <div class="flex flex-row w-full items-center justify-end gap-1">
+      <p>Show advanced</p>
+      <p>
+        <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
+      </p>
+    </div>
     <div formArrayName="links">
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         
@@ -11,7 +17,7 @@
         <!-- Type (Income, Expense, Tax) -->
         <mat-form-field appearance="fill">
           <mat-select formControlName="type" placeholder="Type">
-            <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists" [value]="type">{{ type | titlecase }}</mat-option>
+            <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
           </mat-select>
         </mat-form-field>
 
@@ -24,7 +30,7 @@
   
         <!-- Source (Optional) -->
         <!-- input with auto complete -->
-        <mat-form-field appearance="fill">
+        <!-- <mat-form-field appearance="fill">
           <mat-label>Part of (optional)</mat-label>
           <input type="text"
             matInput
@@ -39,33 +45,29 @@
           <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
             <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
           </mat-autocomplete>
-        </mat-form-field>
-  
-
+        </mat-form-field> -->
+        
         <!-- Select with search -->
-        <!-- <mat-form-field appearance="fill">
-          <mat-label>Source from (optional)</mat-label>
+        <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
+          <mat-label>Part of (optional)</mat-label>
           <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel">
-            <mat-select-trigger>
-              {{ linkGroup.get('source')?.value || 'Select a source' }}
-            </mat-select-trigger>
             <mat-option>
-              <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search nodes..." noEntriesFoundLabel="No matching nodes"></ngx-mat-select-search>
+              <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search entries..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
             </mat-option>
             <mat-option *ngFor="let node of filteredNodes" [value]="node">
               {{ node }}
             </mat-option>
           </mat-select>
           <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
-            A node cannot source itself!
+            An entry can't be its own source!
           </mat-error>
-        </mat-form-field> -->
+        </mat-form-field>
 
 
 
         <!-- Remove Button -->
         <button mat-icon-button color="warn" (click)="removeLink(i)" *ngIf="linkArray.length > 1">
-          <mat-icon>delete</mat-icon>
+          <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
         </button>
   
       </div>

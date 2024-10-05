@@ -46,6 +46,7 @@ export class DataService {
 
   processedData$ = new BehaviorSubject<ProcessedOutputData>(this.savedData)
   isDemo: boolean = false
+  isAdvancedShown: boolean = false
 
   demoLinks: UserDefinedLink[] = [
     { type: 'income', target: 'Main Salary', value: 2200 },
@@ -321,10 +322,14 @@ export class DataService {
 
     openInputListDialog() {
         const dialogRef = this.dialog.open(InputListDialogComponent, {
-            width: '70vw',
+            width: '75rem',
             height: '40rem',
             maxWidth: '90vw',
         });
+    }
+
+    toggleAdvanced() {
+        this.isAdvancedShown = !this.isAdvancedShown;
     }
     
 

@@ -12,6 +12,8 @@ import { debounceTime, filter, take, takeUntil } from 'rxjs';
 import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -24,6 +26,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
     MatIconModule,
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
@@ -62,6 +65,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
+      this.filteredNodes = [...this.existingNodes];
     });
 
     /** Update Chart every time user changes the form input */
@@ -78,7 +82,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
     // Listen to changes in the search control to filter the dropdown
     this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
-      this.filteredNodes = this.filterNodes(searchTerm);
+      this.filteredNodes = this._filterNodes(searchTerm);
     });
 
     this.initializeLinks()
@@ -116,7 +120,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     });
 
     // Disable the source field if type is 'income'
-    if (linkGroup.get('type')?.value === 'income') {
+    if (linkGroup.get('type')?.value === 'income' || linkGroup.get('type')?.value === 'tax') {
       linkGroup.get('source')?.disable();
     }
 
@@ -134,7 +138,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     // Listen to changes in the source field for filtering options
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
-        this.filterNodes(value);
+        this._filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup);
       }
       
@@ -153,7 +157,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
 
   // Filter nodes based on user input
-  private filterNodes(value: string): string[] {
+  private _filterNodes(value: string): string[] {
     const filterValue = value.toLowerCase();
     
     // Filter nodes, excluding the current node if it matches
@@ -185,5 +189,4 @@ export class InputListComponent extends BasePageComponent implements OnInit {
       this.dataService.processInputData(formData)
     }
   }
-
 }
