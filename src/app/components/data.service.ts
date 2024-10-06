@@ -21,7 +21,14 @@ export interface ProcessedOutputData {
 export interface TreeNode {
     name: string;
     value: number;
+    isValueChangedDuringCalc: boolean
     children: TreeNode[];
+}
+
+export interface ExpenseData {
+    totalExpenses: number;
+    topLevelexpenses: any;
+    changedExpensesDuringCalculation: TreeNode[];
 }
 
 @Injectable({
@@ -193,13 +200,26 @@ export class DataService {
         */
        let pieSeriesData: {name: string, value: number}[] = []
 
-        const { totalExpenses, topLevelexpenses: pieData } = this.getTotalExpensesFromLinks(uniqueLinks, hasTax, incomeNodes.length);
+        const { totalExpenses, topLevelexpenses: pieData, changedExpensesDuringCalculation: changedExpensesDuringCalculation } = this._getExpensesData(uniqueLinks, hasTax, incomeNodes.length);
         const remainingBalance: number = (totalIncomeValue - totalExpenses - totalTaxValue)
 
         pieSeriesData = [
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
         ];
+
+
+        console.log('changed expenses:', changedExpensesDuringCalculation)
+        let updatedRawInput: UserDefinedLink[] = [...userDefinedLinks]
+
+        changedExpensesDuringCalculation.forEach(node => {
+            console.log('Node:', node.name, '/ Value:', node.value)
+            const link = updatedRawInput.find(link => link.target === node.name)
+            if (link) {
+                link.value = node.value
+            }
+        })
+
 
         // Update return params
         const sankeyData = {
@@ -214,7 +234,7 @@ export class DataService {
             totalExpenses: totalExpenses,
             remainingBalance: remainingBalance.toLocaleString(),
             pieData: pieSeriesData,
-            rawInput: userDefinedLinks
+            rawInput: updatedRawInput
         }
 
         // Emit the processed data
@@ -224,7 +244,7 @@ export class DataService {
 
     /** Save user data in localStorage. Data will be retrieved on app Init. */
     saveData() {
-        // console.log('Data saved', this.savedData)
+        console.log('Data saved', this.savedData)
     }
 
 
@@ -259,10 +279,10 @@ export class DataService {
         // Create nodes for all source and target in the links
         links.forEach(link => {
             if (!nodeMap.has(link.source)) {
-                nodeMap.set(link.source, { name: link.source, value: 0, children: [] });
+                nodeMap.set(link.source, { name: link.source, value: 0, children: [], isValueChangedDuringCalc: false });
             }
             if (!nodeMap.has(link.target)) {
-                nodeMap.set(link.target, { name: link.target, value: link.value, children: [] });
+                nodeMap.set(link.target, { name: link.target, value: link.value, children: [], isValueChangedDuringCalc: false });
             }
     
             // Add the target node as a child of the source node
@@ -301,38 +321,75 @@ export class DataService {
     
         // For non-root nodes, compare the current node's value to the sum of its children
         const maxExpense: number = Math.max(node.value, childrenSum);
+
+        if (maxExpense !== node.value) {
+            node.isValueChangedDuringCalc = true; // Mark as changed
+        } else {
+            node.isValueChangedDuringCalc = false; // Mark as unchanged
+        }
+
         node.value = maxExpense; // Update the parent node if children's total is higher.
 
         return maxExpense;
     }
 
 
-    getTotalExpensesFromLinks(links: SankeyLink[], hasTax: boolean, incomeSources: number): {totalExpenses: number, topLevelexpenses: any} {
+    private _getExpensesData(links: SankeyLink[], hasTax: boolean, incomeSources: number): ExpenseData {
         // Step 1: Determine the root node based on the conditions
         const rootNodeName: string = this._determineRootNode(links, hasTax, incomeSources);
 
         if (!rootNodeName) {
             return {
                 totalExpenses: 0,
-                topLevelexpenses: []
+                topLevelexpenses: [],
+                changedExpensesDuringCalculation: []
             }
         }
     
         // Step 2: Build the tree from the root node
-        let treeFromRootNode = this._buildTree(links, rootNodeName);
-        const totalExpenses = this._calculateNodeExpense(treeFromRootNode, true);
+        let treeFromRootNode: TreeNode = this._buildTree(links, rootNodeName);
+
+        const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
+        const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
         const pieData = treeFromRootNode.children.map(child => {
             return {
                 name: child.name,
                 value: child.value
             }
         })
+
+        console.log('tree from root', treeFromRootNode)
+        // console.log('changed nodes', changedNodes)
+
     
         // Step 3: Calculate total expenses from the root
         return {
             totalExpenses: totalExpenses,
-            topLevelexpenses: pieData
+            topLevelexpenses: pieData,
+            changedExpensesDuringCalculation: changedNodes
         }
+    }
+
+    /** Recursively transverse the tree to find the modified nodes. Returns an array of changed nodes. */
+    private _getChangedNodes(node: TreeNode, changedNodes: TreeNode[] = []): TreeNode[] {
+        console.log('Visiting node:', node.name, '/ isValueChangedDuringCalc:', node.isValueChangedDuringCalc);
+    
+        // Check if the node has been modified
+        if (node.isValueChangedDuringCalc) {
+            console.log('Node has changed:', node.name);
+            changedNodes.push(node); // Add node to changed nodes array
+        }
+    
+        // Recursively check each child
+        node.children.forEach(child => {
+            this._getChangedNodes(child, changedNodes); // Recursively collect changed nodes
+        });
+    
+        return changedNodes;
+    }
+
+    updateUserInput() {
+
     }
 
     //#endregion
@@ -348,6 +405,7 @@ export class DataService {
             width: '75rem',
             height: '40rem',
             maxWidth: '90vw',
+            disableClose: true
         });
     }
 
