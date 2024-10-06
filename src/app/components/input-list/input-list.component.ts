@@ -54,6 +54,9 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   taxNodeExists = false; // Flag to check if a tax node exists
 
+  updateFromService = false; // Flag to control value changes
+
+
 
   constructor(private fb: FormBuilder) {
     super();
@@ -66,6 +69,8 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];
+
+      this.updateFormFromRawInput(data.rawInput);
     });
 
     /** Update Chart every time user changes the form input */
@@ -73,7 +78,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     .pipe(
       takeUntil(this.componentDestroyed$),
       debounceTime(400),
-      filter(() => this.linkForm.valid) // Only proceed if the form is valid
+      filter(() => this.linkForm.valid && !this.updateFromService) // Only proceed if the form is valid
     )
     .subscribe(formData => {
       this.dataService.processInputData(formData.links);
@@ -87,6 +92,30 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
     this.initializeLinks()
   }
+
+  updateFormFromRawInput(rawInput: UserDefinedLink[]): void {
+    // Check if the new data is different from the current values
+    const currentLinks = this.linkArray.controls.map(control => control.value);
+    const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
+  
+    if (!isDifferent) {
+      return; // Don't proceed if data hasn't changed
+    }
+  
+    this.updateFromService = true; // Set the flag to true
+  
+    // Clear current form array
+    this.linkArray.clear();
+  
+    // Populate the form with the new data
+    rawInput.forEach(link => {
+      this.linkArray.push(this.createLinkGroup(link));
+    });
+
+  
+    this.updateFromService = false; // Reset the flag
+  }
+  
 
   hasTaxNode(data: UserDefinedLink[]): boolean {
     return data.some(item => item.type === 'tax')

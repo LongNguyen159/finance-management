@@ -207,19 +207,7 @@ export class DataService {
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
         ];
-
-
-        console.log('changed expenses:', changedExpensesDuringCalculation)
-        let updatedRawInput: UserDefinedLink[] = [...userDefinedLinks]
-
-        changedExpensesDuringCalculation.forEach(node => {
-            console.log('Node:', node.name, '/ Value:', node.value)
-            const link = updatedRawInput.find(link => link.target === node.name)
-            if (link) {
-                link.value = node.value
-            }
-        })
-
+        let updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
 
         // Update return params
         const sankeyData = {
@@ -240,6 +228,15 @@ export class DataService {
         // Emit the processed data
         this.processedData$.next(this.savedData)
         this.saveData()
+    }
+
+    private _updateUserInput(oldInput: UserDefinedLink[], changedExpenses: TreeNode[]): UserDefinedLink[] {
+        return oldInput.map(link => {
+            // Check if the current link's target matches any of the changed expenses
+            const updatedExpense = changedExpenses.find(node => node.name === link.target);
+            // If it matches, return a new link object with the updated value; otherwise, return the original link
+            return updatedExpense ? { ...link, value: updatedExpense.value } : link;
+        });
     }
 
     /** Save user data in localStorage. Data will be retrieved on app Init. */
@@ -358,9 +355,6 @@ export class DataService {
             }
         })
 
-        console.log('tree from root', treeFromRootNode)
-        // console.log('changed nodes', changedNodes)
-
     
         // Step 3: Calculate total expenses from the root
         return {
@@ -371,12 +365,9 @@ export class DataService {
     }
 
     /** Recursively transverse the tree to find the modified nodes. Returns an array of changed nodes. */
-    private _getChangedNodes(node: TreeNode, changedNodes: TreeNode[] = []): TreeNode[] {
-        console.log('Visiting node:', node.name, '/ isValueChangedDuringCalc:', node.isValueChangedDuringCalc);
-    
+    private _getChangedNodes(node: TreeNode, changedNodes: TreeNode[] = []): TreeNode[] {    
         // Check if the node has been modified
         if (node.isValueChangedDuringCalc) {
-            console.log('Node has changed:', node.name);
             changedNodes.push(node); // Add node to changed nodes array
         }
     
@@ -386,10 +377,6 @@ export class DataService {
         });
     
         return changedNodes;
-    }
-
-    updateUserInput() {
-
     }
 
     //#endregion
