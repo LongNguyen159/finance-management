@@ -87,10 +87,6 @@ export class DataService {
          * - Later, we will save user's data in localStorage. That mean before calling this function,
          * we will check localStorage if there is any data saved by the user. If there is, we will
          * cancel the demo call in the contructor above.
-         * 
-         * 
-         * - Update the parents value to be the sum of all children, so user doesn't have to calculate it
-         * => Modify rawInput data and return it. Since InputListComponent uses rawInput to display the data.
          */
         if (demo) {
             this.isDemo = true;
@@ -123,7 +119,7 @@ export class DataService {
             }
         })
 
-
+        //#region: Handle Income & Taxes
         // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
         if (incomeNodes.length > 1) {
             totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node)?.value || 0), 0);
@@ -135,32 +131,33 @@ export class DataService {
 
         // Step 3: Handle Usable Income if there's a tax link, otherwise use the full income directly
         const incomeSource = singleIncome ? incomeNodes[0] : 'Total Income';
+        const taxLink = userDefinedLinks.find(link => link.type === 'tax');
 
-        if (hasTax) {
-            const taxLink = userDefinedLinks.find(link => link.type === 'tax');
+        if (hasTax && taxLink) {
             let usableIncome = totalIncomeValue;
+            const taxValue = nodesMap.get(taxLink.target)?.value || 0;
+            usableIncome -= taxValue; // Subtract taxes
+            nodesMap.set('Usable Income', { value: usableIncome, type: 'income' }); // Set Usable Income node
 
-            if (taxLink) {
-                const taxValue = nodesMap.get(taxLink.target)?.value || 0;
-                usableIncome -= taxValue; // Subtract taxes
-                nodesMap.set('Usable Income', { value: usableIncome, type: 'income' }); // Set Usable Income node
+            // Step 4: Create links from Income to Usable Income and Taxes
+            links.push({
+                source: incomeSource,
+                target: taxLink.target,
+                value: taxLink.value
+            });
 
-                // Step 4: Create links from Income to Usable Income and Taxes
-                links.push({
-                    source: incomeSource,
-                    target: taxLink.target,
-                    value: taxLink.value
-                });
-
-                links.push({
-                    source: incomeSource,
-                    target: 'Usable Income',
-                    value: usableIncome
-                });
-            }
+            links.push({
+                source: incomeSource,
+                target: 'Usable Income',
+                value: usableIncome
+            });
         }
+        //#endregion
 
-        
+
+        //#region: Handle Expenses
+        // Default root node for the sankey chart
+        const expenseSource = hasTax ? 'Usable Income' : incomeSource;
 
         // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
         userDefinedLinks.forEach(link => {
@@ -173,17 +170,27 @@ export class DataService {
                     });
                 }
             } else if (link.type === 'expense') {
-                const expenseSource = hasTax ? 'Usable Income' : incomeSource;
-
+                const sourceNode = link.source || expenseSource;
+        
+                // Check if the source node exists in the nodesMap; if not, use the default expenseSource
+                const isSourceValid: boolean = nodesMap.has(sourceNode)
+                const validSource = isSourceValid ? sourceNode : expenseSource;
+                if (!isSourceValid) {
+                    link.source = '';
+                }
+        
                 links.push({
-                    source: link.source || expenseSource, // Use user-defined source or default to income source
+                    source: validSource, // Use either the user-defined source or the default expenseSource
                     target: link.target,
                     value: link.value
                 });
             }
         });
 
+        //#endregion
 
+
+        //#region: Handle Return params
         // Step 5: Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
 
@@ -192,7 +199,6 @@ export class DataService {
  
 
        // Step 7: Calculate return params
-
        /** Pie data will be generated based on Tree Structure generated from Sankey.
         * Not from Sankey links.
         * 
@@ -207,7 +213,7 @@ export class DataService {
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
         ];
-        let updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+        const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
 
         // Update return params
         const sankeyData = {
@@ -228,6 +234,8 @@ export class DataService {
         // Emit the processed data
         this.processedData$.next(this.savedData)
         this.saveData()
+
+        //#endregion
     }
 
     private _updateUserInput(oldInput: UserDefinedLink[], changedExpenses: TreeNode[]): UserDefinedLink[] {
@@ -346,8 +354,10 @@ export class DataService {
         // Step 2: Build the tree from the root node
         let treeFromRootNode: TreeNode = this._buildTree(links, rootNodeName);
 
+        /** Tree might be modified here. So if you want to use the tree structure, use it after these lines. */
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
+        
         const pieData = treeFromRootNode.children.map(child => {
             return {
                 name: child.name,
