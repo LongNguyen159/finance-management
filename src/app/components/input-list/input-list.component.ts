@@ -2,7 +2,7 @@ import { Component, inject, OnInit, QueryList, ViewChild, ViewChildren } from '@
 import {MatButtonModule} from '@angular/material/button';
 import { DataService } from '../data.service';
 import { UserDefinedLink } from '../models';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -14,6 +14,13 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
+/** Prevent user to define a certain node name that coincides with our system generated node name. */
+function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const forbidden = restrictedNames.includes(control.value);
+    return forbidden ? { restrictedNodeName: { value: control.value } } : null;
+  };
+}
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -72,7 +79,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];
-
+      this._addDefaultNode();
       this.updateFormValueReactively(data.rawInput);
     });
 
@@ -91,9 +98,21 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     // Listen to changes in the search control to filter the dropdown
     this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
       this.filteredNodes = this._filterNodes(searchTerm);
+      this._addDefaultNode();
     });
 
     this.initializeLinks()
+  }
+
+  /** This is used to 'remove' the source from the field. It will be linked to default income node.
+   * In our service, we already have a logic that handles if source node is not found, link to default income node.
+   * We don't have 'default income' node, so it's understood that it'll be linked to default income node.
+   * Unless user defines 'default income' node, it'll be linked to default income node.
+   */
+  private _addDefaultNode() {
+    if (!this.filteredNodes.includes('default')) {
+      this.filteredNodes.unshift('default income');
+    }
   }
 
   /** Update form value to correctly reflect the value of children sum in their parent */
@@ -143,7 +162,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
-      target: [link ? link.target : '', Validators.required],
+      target: [link ? link.target : '', [Validators.required, restrictedNodeNamesValidator(['default income', 'Total Income', 'Usable Income'])]],
       value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
       source: [link ? link.source : ''] // Optional
     });
@@ -193,9 +212,11 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
   
   // Step 2: Find all descendants of a node using DFS
-  private findDescendants(node: string, adjacencyList: Map<string, string[]>): Set<string> {
+  private findDescendants(node: string, links: UserDefinedLink[]): Set<string> {
     const descendants = new Set<string>();
     const stack = [node];  // Use a stack for DFS
+
+    const adjacencyList = this.buildAdjacencyList(links);
   
     while (stack.length > 0) {
       const currentNode = stack.pop();
@@ -212,8 +233,16 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     return descendants;
   }
   
-  // Step 3: Check for cycles by validating if the source is a descendant
-  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup, links: any[]): void {
+  /** Check for cycle in the links.
+   * @param source Source node
+   * @param target Target node
+   * @param linkGroup FormGroup containing the source and target fields
+   * @param links Array of links
+   * 
+   * @if source = target, it's a cycle error
+   * @if source is sourcing its descendants, it's a cycle error
+   */
+  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup, links: UserDefinedLink[]): void {
     if (!target) {
       return;
     }
@@ -226,10 +255,10 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     }
   
     // Build adjacency list from existing links
-    const adjacencyList = this.buildAdjacencyList(links);
+    // const adjacencyList = this.buildAdjacencyList(links);
   
     // Find all descendants of the target
-    const descendants = this.findDescendants(target, adjacencyList);
+    const descendants = this.findDescendants(target, links);
 
     
     /** Check if a node is sourcing its decendants. If yes, return cycle error */
@@ -250,7 +279,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     
     // Filter nodes, excluding the current node if it matches
     return this.filteredNodes = this.existingNodes
-      .filter(node => node.toLowerCase().includes(filterValue) && node.toLowerCase() !== filterValue);
+      .filter(nodeName => nodeName.toLowerCase().includes(filterValue) && nodeName.toLowerCase() !== filterValue);
   }
 
   // Add a new input row

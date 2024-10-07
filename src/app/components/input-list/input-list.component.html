@@ -11,7 +11,10 @@
         <!-- Target -->
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
-          <input matInput formControlName="target" placeholder="Target name" />
+          <input matInput formControlName="target" placeholder="Entry name" />
+          <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
+            This name is not allowed.
+          </mat-error>
         </mat-form-field>
         
         <!-- Type (Income, Expense, Tax) -->
