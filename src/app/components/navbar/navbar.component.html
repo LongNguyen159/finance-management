@@ -10,6 +10,18 @@
             </a>
         </div>
     }
+    
+    @if (showLogo) {
+        <div class="flex flex-row w-full items-center gap-2 pl-4">
+            <span class="material-symbols-outlined" style="color: rgb(38, 91, 181)">
+                network_node
+            </span>
+            <h1 class="font-bold text-xl" style="color: rgb(38, 91, 181)">
+                Easy Sankey
+            </h1>
+        </div>
+    }
+    
 
     <div class="flex flex-row w-full justify-end">
         @if (showAddInput) {
