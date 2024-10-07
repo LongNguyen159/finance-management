@@ -15,8 +15,10 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'finance-management';
-  constructor(private router: Router) {}
+  title = 'Easy Sankey';
+  constructor(private router: Router) {
+    // this.router.navigate(['/']);
+  }
 
   navigateToMainPage() {
     this.router.navigate(['/main-page']);

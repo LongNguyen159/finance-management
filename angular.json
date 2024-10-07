@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "finance-management": {
+    "easy-sankey": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/finance-management",
+            "outputPath": "dist/easy-sankey",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -65,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "finance-management:build:production"
+              "buildTarget": "easy-sankey:build:production"
             },
             "development": {
-              "buildTarget": "finance-management:build:development"
+              "buildTarget": "easy-sankey:build:development"
             }
           },
           "defaultConfiguration": "development"

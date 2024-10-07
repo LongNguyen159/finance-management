@@ -401,6 +401,7 @@ export class DataService {
         const dialogRef = this.dialog.open(InputListDialogComponent, {
             width: '75rem',
             height: '40rem',
+            maxHeight: '90vh',
             maxWidth: '90vw',
             disableClose: true
         });
