@@ -66,11 +66,14 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    /** On response from service, update forms to reflect correct amount if children expenses
+     * exceed their parent.
+     */
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];
 
-      this.updateFormFromRawInput(data.rawInput);
+      this.updateFormValueReactively(data.rawInput);
     });
 
     /** Update Chart every time user changes the form input */
@@ -82,7 +85,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     )
     .subscribe(formData => {
       this.dataService.processInputData(formData.links);
-      this.taxNodeExists = this.hasTaxNode(formData.links);
+      this.taxNodeExists = this._hasTaxNode(formData.links);
     });
 
     // Listen to changes in the search control to filter the dropdown
@@ -93,7 +96,8 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.initializeLinks()
   }
 
-  updateFormFromRawInput(rawInput: UserDefinedLink[]): void {
+  /** Update form value to correctly reflect the value of children sum in their parent */
+  updateFormValueReactively(rawInput: UserDefinedLink[]): void {
     // Check if the new data is different from the current values
     const currentLinks = this.linkArray.controls.map(control => control.value);
     const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
@@ -117,19 +121,15 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
   
 
-  hasTaxNode(data: UserDefinedLink[]): boolean {
+
+  /** Helper function to determine tax node in links */
+  private _hasTaxNode(data: UserDefinedLink[]): boolean {
     return data.some(item => item.type === 'tax')
-
   }
 
-  closeAutoComplete(index: number): void {
-    const trigger = this.autocompleteTriggers.toArray()[index];
-    setTimeout(() => {
-      trigger.closePanel();
-    }, 0);
-  }
+
   
-  // Method to initialize the links with predefined data
+  /** Initiliase/Populate the form with predefined data */
   initializeLinks(): void {
     this.linkArray.clear()
     if (this.dataService.isDemo) {
@@ -139,7 +139,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     }
   }
 
-
+  /** Popuplate the form */
   createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
@@ -168,7 +168,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
         this._filterNodes(value);
-        this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup);
+        this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
       }
       
       
@@ -176,15 +176,74 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     return linkGroup;
   }
 
-  // Check for cycle and set error on source control if needed
-  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup): void {
-    if (source.toLowerCase() === target?.toLowerCase()) {
+  //#region Cycle Detection
+  private buildAdjacencyList(links: UserDefinedLink[]): Map<string, string[]> {
+    const adjacencyList = new Map<string, string[]>();
+  
+    links.forEach(link => {
+      if (link.source && link.target) {
+        if (!adjacencyList.has(link.source)) {
+          adjacencyList.set(link.source, []);
+        }
+        adjacencyList.get(link.source)?.push(link.target);
+      }
+    });
+  
+    return adjacencyList;
+  }
+  
+  // Step 2: Find all descendants of a node using DFS
+  private findDescendants(node: string, adjacencyList: Map<string, string[]>): Set<string> {
+    const descendants = new Set<string>();
+    const stack = [node];  // Use a stack for DFS
+  
+    while (stack.length > 0) {
+      const currentNode = stack.pop();
+      const children = adjacencyList.get(currentNode || '') || [];
+  
+      children.forEach(child => {
+        if (!descendants.has(child)) {
+          descendants.add(child);
+          stack.push(child);  // Keep searching for deeper descendants
+        }
+      });
+    }
+  
+    return descendants;
+  }
+  
+  // Step 3: Check for cycles by validating if the source is a descendant
+  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup, links: any[]): void {
+    if (!target) {
+      return;
+    }
+
+
+    /** If source = value, it's a cycle error, exit the function early. */
+    if (source.toLowerCase() === target.toLowerCase()) {
       linkGroup.get('source')?.setErrors({ cycle: true });
+      return;
+    }
+  
+    // Build adjacency list from existing links
+    const adjacencyList = this.buildAdjacencyList(links);
+  
+    // Find all descendants of the target
+    const descendants = this.findDescendants(target, adjacencyList);
+
+    
+    /** Check if a node is sourcing its decendants. If yes, return cycle error */
+    if (descendants.has(source)) {
+      linkGroup.get('source')?.setErrors({ cycle: true }); // Cycle detected
     } else {
-      linkGroup.get('source')?.setErrors(null); // Clear the error
+      linkGroup.get('source')?.setErrors(null);  // No cycle
     }
   }
 
+  //#endregion
+
+
+  //#region Link Controls
   // Filter nodes based on user input
   private _filterNodes(value: string): string[] {
     const filterValue = value.toLowerCase();
@@ -211,11 +270,20 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     return this.linkForm.get('links') as FormArray;
   }
 
+  //#endregion
+
   // Submit form and emit the data (to parent component or a service)
   onSubmit(): void {
     if (this.linkForm.valid) {
       const formData: UserDefinedLink[] = this.linkForm.value.links;
       this.dataService.processInputData(formData)
     }
+  }
+
+  closeAutoComplete(index: number): void {
+    const trigger = this.autocompleteTriggers.toArray()[index];
+    setTimeout(() => {
+      trigger.closePanel();
+    }, 0);
   }
 }

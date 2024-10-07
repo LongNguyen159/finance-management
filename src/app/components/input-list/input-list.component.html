@@ -59,7 +59,7 @@
             </mat-option>
           </mat-select>
           <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
-            An entry can't be its own source!
+            This creates a cycle!
           </mat-error>
         </mat-form-field>
 
