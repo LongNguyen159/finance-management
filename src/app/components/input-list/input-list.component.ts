@@ -111,7 +111,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
    */
   private _addDefaultNode() {
     if (!this.filteredNodes.includes('default')) {
-      this.filteredNodes.unshift('default income');
+      this.filteredNodes.unshift('Default income');
     }
   }
 

@@ -61,14 +61,20 @@ export class DataService {
     { type: 'tax', target: 'Taxes', value: 1100},
     { type: 'expense', target: 'Housing', value: 800},
     { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
-    { type: 'expense', target: 'Operation costs', value: 300, source: 'Housing'},
-    { type: 'expense', target: 'Shopping', value: 100},
+    { type: 'expense', target: 'WiFi', value: 40, source: 'Housing'},
     { type: 'expense', target: 'Groceries', value: 300},
   ]
 
   readonly dialog = inject(MatDialog)
   constructor() {
-    this.processInputData(this.demoLinks, true)
+    const savedData = this.loadData();
+    if (savedData) {
+      this.savedData = savedData; // Load saved data
+      this.processedData$.next(this.savedData); // Emit saved data
+    } else {
+      // Process demo data if no saved data found
+      this.processInputData(this.demoLinks, true);
+    }
   }
 
     processInputData(userDefinedLinks: UserDefinedLink[], demo: boolean = false): void {
@@ -82,11 +88,6 @@ export class DataService {
 
         /** Demo flag: Only set to true when the app loads for the first time to show our demo
          * graph for first time users.
-         * 
-         * TODO:
-         * - Later, we will save user's data in localStorage. That mean before calling this function,
-         * we will check localStorage if there is any data saved by the user. If there is, we will
-         * cancel the demo call in the contructor above.
          */
         if (demo) {
             this.isDemo = true;
@@ -248,8 +249,19 @@ export class DataService {
     }
 
     /** Save user data in localStorage. Data will be retrieved on app Init. */
-    saveData() {
-        console.log('Data saved', this.savedData)
+    private saveData() {
+        localStorage.setItem('userFinancialData', JSON.stringify(this.savedData));
+    }
+
+    // Load data from LocalStorage
+    private loadData(): ProcessedOutputData | null {
+        const data = localStorage.getItem('userFinancialData');
+        return data ? JSON.parse(data) as ProcessedOutputData : null;
+    }
+
+    private clearData() {
+        localStorage.removeItem('userFinancialData');
+        console.log('User data cleared from LocalStorage');
     }
 
 

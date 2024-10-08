@@ -32,8 +32,13 @@
             <li style="margin-bottom: 0.5rem;">
                 <strong>Amount:</strong> Enter the amount of money (e.g., "800" for rent).
             </li>
-            <li>
-                <strong>Part of (optional):</strong> This field lets you break down expenses. For example, for "Housing," you can specify that it includes "Rent" and "Utilities," both of which is a part of "Housing."
+            <li style="margin-bottom: 0.5rem;">
+                <strong>Part of (optional):</strong> This field lets you break down expenses.
+                <ul class="list-disc list-inside mt-1" style="margin-left: 1.5rem;">
+                    <li><strong>Example:</strong> For "Housing," you can specify that it includes "Rent" and "Utilities," both of which are part of "Housing."</li>
+                    <li><strong>Default behavior:</strong> If no "Part of" is specified for an expense, it will automatically be linked to your income.</li>
+                    <li><strong>"Default income" option:</strong> Choose this option if you want the expense to link from your assumed default income.</li>
+                </ul>
             </li>
         </ul>
     </section>
@@ -49,9 +54,12 @@
     </section>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Notes</h2>
-        <p class="mt-2">Your data stays on your device! Everything is processed locally, so you don't need to worry about privacy. Your information is completely safe.</p>
-        <p>(And no, there isn't even a server involved!)</p>
+        <h2 class="text-2xl font-semibold">Notes from Developer</h2>
+        <p class="mt-2">This app runs locally on your device, so your data stays safe with you! No need to worry about privacy issues.
+            Don't believe me? Try turning off your internet connection and see if the app still works!
+        </p>
+        <p>(Heck, I don't even have a server)</p>
+        <p>For the technical folks, this app uses LocalStorage to save your data.</p>
     </section>
 
     <footer class="text-center mt-8">
