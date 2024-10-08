@@ -64,10 +64,14 @@
       "output": "release"
     },
     "mac": {
-      "icon": "public/icons/EasySankey.icns"
+      "icon": "public/icons/easy-sankey.icns"
     },
     "win": {
-      "icon": "public/icons/EasySankey.ico"
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "public/icons/easy-sankey.ico"
     }
   }
 }
