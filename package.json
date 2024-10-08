@@ -13,7 +13,6 @@
     "electron": "electron .",
     "electron-build": "ng build --prod && electron ."
   },
-  
   "private": true,
   "dependencies": {
     "@angular/animations": "^18.0.0",
@@ -42,6 +41,7 @@
     "autoprefixer": "^10.4.20",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
+    "electron-updater": "^6.3.9",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
@@ -64,7 +64,7 @@
       "output": "release"
     },
     "mac": {
-      "icon": "public/icons/easy-sankey.icns"
+      "icon": "public/icons/easy-sankey-128.icns"
     },
     "win": {
       "target": [

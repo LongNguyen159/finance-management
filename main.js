@@ -1,18 +1,24 @@
 const { app, BrowserWindow } = require('electron');
+const { screen } = require('electron');
+
 const path = require('path');
 
 let win;
 
 function createWindow() {
   // Create the browser window.
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: width,
+    height: height,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false
-    }
+    },
+    frame: true,         // Show the window frame (this allows you to drag and resize the window)
+    resizable: true,     // Allow resizing the window (optional)
   });
 
   // Load the Angular app (dist folder)
