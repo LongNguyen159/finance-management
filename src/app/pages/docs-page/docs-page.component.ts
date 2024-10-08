@@ -16,4 +16,8 @@ import { MatMenuModule } from '@angular/material/menu';
 })
 export class DocsPageComponent {
 
+
+  clearLocalStorage() {
+    localStorage.clear();
+  }
 }
