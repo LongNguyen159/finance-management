@@ -1,0 +1,25 @@
+<div class="container mx-auto p-6">
+    <header class="text-center mb-10 mt-20">
+        <h1 class="text-3xl font-bold">Welcome to Easy Sankey 1st version!</h1>
+        <p class="mt-2 text-lg text-gray-600">Easily Visualise Your Financial Data</p>
+    </header>
+
+    <section class="mb-6">
+        <!-- <h2 class="text-2xl font-semibold">About Easy Sankey</h2>
+        <p class="mt-2">Easy Sankey helps you create clear and simple financial visualisations without the need for Excel or technical skills. Just a few easy inputs, and you can see where your money goes!</p> -->
+
+        <div class="flex flex-row w-full items-center justify-center gap-4 mb-4">
+            <div>
+                <button mat-stroked-button>
+                    <a routerLink="/">Go to chart</a>
+                </button>
+            </div>
+            <div>
+                <button mat-flat-button color="primary" (click)="navigateToDocs()">
+                    How to use?
+                </button>
+            </div>
+        </div>
+        <app-demo-chart></app-demo-chart>
+    </section>
+</div>
