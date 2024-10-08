@@ -6,6 +6,16 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
+## Build and and deploy Desktop app for MacOS and Windows:
+
+1. Run `ng build` (if you changed the source code)
+2. Run `npx electron-builder --mac --win`
+
+### edit build config
+
+Edit buid config at `package.json` and `angular.json`
+
+
 ## Code scaffolding
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
