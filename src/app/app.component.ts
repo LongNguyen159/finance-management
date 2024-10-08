@@ -17,5 +17,14 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
 export class AppComponent {
   title = 'Easy Sankey';
   constructor(private router: Router) {
+    if (localStorage.getItem('firstTime') === null || localStorage.getItem('firstTime') === 'true') {
+      localStorage.setItem('firstTime', 'true');
+      this.navigateToWelcome()
+    }
+  }
+
+  navigateToWelcome() {
+    this.router.navigate(['/welcome']);
+    localStorage.setItem('firstTime', 'false');
   }
 }
