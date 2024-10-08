@@ -21,6 +21,15 @@ function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
     return forbidden ? { restrictedNodeName: { value: control.value } } : null;
   };
 }
+
+
+/** Custom Validator to ensure the field is not empty or only spaces */
+function nonEmptyValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value?.trim();
+    return value ? null : { emptyOrWhitespace: { value: control.value } };
+  };
+}
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -162,7 +171,11 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
-      target: [link ? link.target : '', [Validators.required, restrictedNodeNamesValidator(['default income', 'Total Income', 'Usable Income'])]],
+      target: [link ? link.target : '', [
+        Validators.required,
+        nonEmptyValidator(),  // Add this validator to ensure the target is not empty or whitespace
+        restrictedNodeNamesValidator(['Default income', 'Total Income', 'Usable Income'])
+      ]],
       value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
       source: [link ? link.source : ''] // Optional
     });

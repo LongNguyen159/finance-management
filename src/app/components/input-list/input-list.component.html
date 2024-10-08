@@ -15,6 +15,10 @@
           <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
             This name is not allowed.
           </mat-error>
+
+          <mat-error *ngIf="linkGroup.get('target')?.hasError('emptyOrWhitespace')">
+            Name cannot be empty.
+          </mat-error>
         </mat-form-field>
         
         <!-- Type (Income, Expense, Tax) -->
@@ -29,6 +33,10 @@
         <mat-form-field appearance="fill">
           <mat-label>Amount</mat-label>
           <input matInput formControlName="value" type="number" placeholder="Value" />
+
+          <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
+            Amount must be greater than or equal 0.
+          </mat-error>
         </mat-form-field>
   
         <!-- Source (Optional) -->

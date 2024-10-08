@@ -17,10 +17,5 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
 export class AppComponent {
   title = 'Easy Sankey';
   constructor(private router: Router) {
-    // this.router.navigate(['/']);
-  }
-
-  navigateToMainPage() {
-    this.router.navigate(['/main-page']);
   }
 }
