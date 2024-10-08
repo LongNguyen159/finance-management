@@ -11,7 +11,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 1. Run `ng build` (if you changed the source code)
 2. Run `npx electron-builder --mac --win`
 
-### edit build config
+### Edit build config
 
 Edit buid config at `package.json` and `angular.json`
 
