@@ -71,7 +71,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         right: 20,
         feature: {
           saveAsImage: {
-            name: `${this.chartTitle}_${this.dataService.getTodaysDate()}`
+            name: `${this.chartTitle}_${this.dataService.getTodaysDate()}`,
+            backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary,
           },
         },
       },
