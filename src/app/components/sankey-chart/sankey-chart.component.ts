@@ -1,4 +1,4 @@
-import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
@@ -26,10 +26,12 @@ export class SankeyChartComponent implements OnChanges {
 
   sankeyOption: EChartsOption = {}
   mergeOption: EChartsOption = {}
+  
 
   constructor() {
     effect(() => {
       this.updateSankeyChart();
+      
     });
   }
   ngOnChanges(changes: SimpleChanges): void {

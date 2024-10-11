@@ -1,19 +1,20 @@
-import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
 import { ColorService } from '../../services/color.service';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
-  imports: [NgxEchartsDirective],
+  imports: [NgxEchartsDirective, CommonModule],
   providers: [
     provideEcharts(),
   ],
   templateUrl: './pie-chart.component.html',
   styleUrl: './pie-chart.component.scss'
 })
-export class PieChartComponent implements OnChanges {
+export class PieChartComponent implements OnChanges, OnDestroy {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   @Input() pieChartData: any[] = []
@@ -25,8 +26,14 @@ export class PieChartComponent implements OnChanges {
 
   pieOption: EChartsOption = {}
   pieMergeOption: EChartsOption = {}
+  
+  @ViewChild(NgxEchartsDirective, { static: false }) chartDirective?: NgxEchartsDirective;
+
 
   constructor() {
+    if (this.chartDirective) {
+      this.chartDirective.refreshChart()
+    }
     effect(() => {
       this.updateChart();
     });
@@ -40,8 +47,6 @@ export class PieChartComponent implements OnChanges {
   }
 
   updateChart() {
-    // const isDarkMode = this.colorService.getIsDarkMode()(); // Call the signal
-
     this.pieOption = {
       tooltip: {
         trigger: 'item',
@@ -86,5 +91,12 @@ export class PieChartComponent implements OnChanges {
         }
       ]
     }
+  }
+
+  ngOnDestroy(): void {
+    // Dispose chart
+    // if (this.chartDirective) {
+    //   this.chartDirective.refreshChart();  // Dispose the chart instance
+    // }
   }
 }

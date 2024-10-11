@@ -1,6 +1,6 @@
 <h2 mat-dialog-title class="!font-bold text-xl">Financial Management Tip: The 50-30-20 Rule</h2>
 <mat-dialog-content class="mat-typography">
-  <div class="p-6 bg-blue-50 rounded-lg max-w-md mx-auto">
+  <div class="p-6 rounded-lg max-w-md mx-auto" [ngClass]="colorService.isDarkMode() ? 'bg-neutral-800' : 'bg-blue-50' ">
     <p class="mb-3 text-lg">Budgeting Made Simple!</p>
     <p class="mb-4 text-base">The 50-30-20 rule is a straightforward guideline for managing your finances effectively:</p>
     <ul class="list-disc list-inside mb-4 text-base">

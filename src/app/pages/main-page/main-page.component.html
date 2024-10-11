@@ -8,7 +8,7 @@
                     [sankeyData]="processedOutputData.sankeyData"
                     [remainingBalance]="processedOutputData.remainingBalance"
                 ></app-sankey-chart>
-                <mat-divider class="!border-gray-300"></mat-divider>
+                <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
                 <!-- NETTO CHART -->
                 
                 <div class="flex flex-row w-full items-center justify-end">
@@ -21,7 +21,7 @@
                     [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
                 ></app-pie-chart>
                 @if (showGrossIncomePieChart) {
-                    <mat-divider class="!border-gray-300"></mat-divider>
+                    <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
                     <!-- BRUTTO CHART -->
                     <app-pie-chart [pieChartData]="pieChartDataBrutto" [chartTitle]="'Total Income Distribution'" [chartDescription]="'(The whole pie represents your total gross income)'"
                         [totalIncome]="totalGrossIncome"
