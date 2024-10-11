@@ -55,7 +55,12 @@ export class PieChartComponent implements OnChanges {
             radius: '50%',
             data: this.pieChartData,
             emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
-            label: { formatter: '{b}: {c} ({d}%)', fontSize: 12 }
+            label: {
+              formatter: (params: any) =>  {
+                return `${params.name}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
+              },
+              fontSize: 12
+            }
           }
         ]
       }
