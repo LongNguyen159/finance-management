@@ -68,13 +68,28 @@ export class SankeyChartComponent implements OnChanges {
           data: this.sankeyData.nodes,
           links: this.sankeyData.links,
           emphasis: { focus: 'adjacency' },
-          label: {   
+          label: {
             fontSize: 12,
             color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            // Use rich text for formatting
+            rich: {
+              bold: {
+                fontWeight: 'bold',
+                fontSize: 12,
+                color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+              },
+              normal: {
+                fontSize: 12,
+                color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+              }
+            },
             formatter: (params: any) => {
-              return `${params.name}\n${params.value.toLocaleString()}`; // Show value in label
+              return [
+                `{bold|${params.name}}`, // Bold name
+                `{normal|${params.value.toLocaleString()}}`, // Normal value
+              ].join('\n'); // Join with a newline
             }
-           },
+          },
           nodeGap: 28,
           lineStyle: { color: 'gradient', curveness: 0.5 }
         }
