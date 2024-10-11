@@ -1,5 +1,5 @@
 <!-- Navbar -->
-<div class="flex flex-row w-full p-3 gap-2 bg-blue-50 sticky top-0 z-[100]">
+<div class="flex flex-row w-full p-3 gap-2 sticky top-0 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-neutral-800' : 'bg-blue-50' ">
     <!-- input list menu -->
 
     @if (showBackButton) {
@@ -13,10 +13,10 @@
     
     @if (showLogo) {
         <div class="flex flex-row w-full items-center gap-2 pl-4">
-            <span class="material-symbols-outlined" style="color: rgb(38, 91, 181)">
+            <span class="material-symbols-outlined" [ngClass]="colorService.isDarkMode() ? 'dark-text' : 'light-text'">
                 network_node
             </span>
-            <h1 class="font-bold text-xl" style="color: rgb(38, 91, 181)">
+            <h1 class="font-bold text-xl" [ngClass]="colorService.isDarkMode() ? 'dark-text' : 'light-text'">
                 Easy Sankey
             </h1>
         </div>

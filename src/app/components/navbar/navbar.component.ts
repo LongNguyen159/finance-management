@@ -6,12 +6,13 @@ import { InputListComponent } from '../input-list/input-list.component';
 import { RouterModule } from '@angular/router';
 import { DataService } from '../data.service';
 import { ColorService } from '../../services/color.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [MatMenuModule, MatIconModule, MatButtonModule, InputListComponent, RouterModule, NavbarComponent,
-    NavbarComponent
+    NavbarComponent, CommonModule
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
