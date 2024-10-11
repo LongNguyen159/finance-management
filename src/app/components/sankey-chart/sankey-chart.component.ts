@@ -42,9 +42,9 @@ export class SankeyChartComponent implements OnChanges {
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
-        backgroundColor: this.colorService.isDarkmode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: this.colorService.isDarkMode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
         
       },
@@ -65,7 +65,7 @@ export class SankeyChartComponent implements OnChanges {
           emphasis: { focus: 'adjacency' },
           label: {   
             fontSize: 12,
-            color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
             formatter: (params: any) => {
               return `${params.name}\n${params.value.toLocaleString()}`; // Show value in label
             }

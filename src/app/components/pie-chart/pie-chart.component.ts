@@ -40,9 +40,9 @@ export class PieChartComponent implements OnChanges {
     this.pieOption = {
       tooltip: {
         trigger: 'item',
-        backgroundColor: this.colorService.isDarkmode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: this.colorService.isDarkMode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
         formatter: (params: any) => {
           // Use toLocaleString to format the value
@@ -54,7 +54,7 @@ export class PieChartComponent implements OnChanges {
         orient: 'vertical',
         left: 'left',
         textStyle: {
-          color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         }
       },
       toolbox: {
@@ -76,7 +76,7 @@ export class PieChartComponent implements OnChanges {
               return `${params.name}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
             },
             fontSize: 12,
-            color: this.colorService.isDarkmode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
+            color: this.colorService.isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
           }
         }
       ]

@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { InputListComponent } from '../input-list/input-list.component';
 import { RouterModule } from '@angular/router';
 import { DataService } from '../data.service';
+import { ColorService } from '../../services/color.service';
 
 @Component({
   selector: 'app-navbar',
@@ -22,4 +23,5 @@ export class NavbarComponent {
   @Input() showLogo: boolean = true;
 
   dataService = inject(DataService)
+  colorService = inject(ColorService)
 }

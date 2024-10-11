@@ -8,6 +8,7 @@
 
 
 @include mat.core();
+
 h1, h2, h3, h4, h5, h6 {
   color:rgb(38,38,38);
 }
@@ -24,14 +25,16 @@ p {
   color: rgb(64,64,64);
 }
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
+body { 
+  margin: 0;font-family: Roboto, "Helvetica Neue", sans-serif;
+}
 
 // Define a dark theme
 $dark-theme: mat.define-theme((
   color: (
     theme-type: dark,
-    primary: mat.$azure-palette,
+    primary: mat.$cyan-palette,
+    tertiary: mat.$orange-palette,
   ),
 ));
 
@@ -44,7 +47,7 @@ $light-theme: mat.define-theme((
 ));
 
 html {
-  // Apply the dark theme by default
+  // Apply the light theme by default
   @include mat.core-theme($light-theme);
   @include mat.button-theme($light-theme);
 
@@ -62,7 +65,9 @@ html {
 
     body {
       background-color: rgb(34,34,34);
-      // color: whitesmoke;
+    }
+    h1, h2, h3, h4, h5, h6, p {
+      color:rgb(204,204,204);
     }
     @include mat.core-color($dark-theme);
     @include mat.button-color($dark-theme);
