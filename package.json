@@ -65,7 +65,7 @@
       "output": "release"
     },
     "mac": {
-      "icon": "public/icons/easy-sankey-128.icns"
+      "icon": "public/icons/easy-sankey-128@3x.icns"
     },
     "win": {
       "target": [

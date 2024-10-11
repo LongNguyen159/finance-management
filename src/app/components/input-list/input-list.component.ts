@@ -96,7 +96,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.linkForm.valueChanges
     .pipe(
       takeUntil(this.componentDestroyed$),
-      debounceTime(400),
+      debounceTime(1400),
       filter(() => this.linkForm.valid && !this.updateFromService) // Only proceed if the form is valid
     )
     .subscribe(formData => {

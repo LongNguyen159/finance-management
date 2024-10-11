@@ -75,7 +75,7 @@ export class SankeyChartComponent implements OnChanges {
               return `${params.name}\n${params.value.toLocaleString()}`; // Show value in label
             }
            },
-          nodeGap: 15,
+          nodeGap: 28,
           lineStyle: { color: 'gradient', curveness: 0.5 }
         }
       ]
