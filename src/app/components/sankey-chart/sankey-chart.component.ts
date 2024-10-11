@@ -44,7 +44,9 @@ export class SankeyChartComponent implements OnChanges {
       toolbox: {
         right: 20,
         feature: {
-          saveAsImage: {},
+          saveAsImage: {
+            name: `Financial Flow Sankey_${this.dataService.getTodaysDate()}`
+          },
         },
       },
       series: [

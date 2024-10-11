@@ -76,7 +76,13 @@ export class DataService {
       this.processInputData(this.demoLinks, true);
     }
   }
+  
+    getTodaysDate() {
+        const now = new Date();
+        return now.toISOString().slice(0, 10);
+    }
 
+    //#region: Process Input Data
     processInputData(userDefinedLinks: UserDefinedLink[], demo: boolean = false): void {
         const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
@@ -263,6 +269,8 @@ export class DataService {
         localStorage.removeItem('userFinancialData');
         console.log('User data cleared from LocalStorage');
     }
+
+    //#endregion
 
 
     //#region Create Tree from Sankey

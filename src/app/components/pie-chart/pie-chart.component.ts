@@ -46,7 +46,9 @@ export class PieChartComponent implements OnChanges {
         toolbox: {
           right: 20,
           feature: {
-            saveAsImage: {},
+            saveAsImage: {
+              name: `${this.chartTitle}_${this.dataService.getTodaysDate()}`
+            },
           },
         },
         series: [
