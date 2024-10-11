@@ -88,6 +88,12 @@ export class PieChartComponent implements OnChanges, OnDestroy {
             },
             fontSize: 12,
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
+          },
+          itemStyle: {
+            borderWidth: 1, // Adjust thickness for the gap
+            borderColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary, // Use a contrasting color for the gap
+            borderRadius: 6,
+            borderJoin: "round"
           }
         }
       ]
