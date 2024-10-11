@@ -14,6 +14,7 @@ import { DataService, ProcessedOutputData } from '../../components/data.service'
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";
+import { ColorService } from '../../services/color.service';
 
 @Component({
   selector: 'app-main-page',
@@ -31,6 +32,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
   isVerticalLayout = true;
 
   dataService = inject(DataService)
+  colorService = inject(ColorService)
 
   processedOutputData: ProcessedOutputData
   totalExpenses: number = -1
@@ -40,10 +42,17 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
 
   pieChartDataBrutto: any[] = []
   pieChartDataNetto: any[] = []
+
+  isDarkmode: boolean = false
   constructor() {
     super();
   }
   ngOnInit(): void {
+    // this.colorService.getIsDarkMode().pipe(takeUntil(this.componentDestroyed$)).subscribe((isDarkmode: boolean) => {
+    //   this.isDarkmode = isDarkmode
+    //   console.log('isDarkmode', isDarkmode)
+    // })
+  
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
 
       this.processedOutputData = data

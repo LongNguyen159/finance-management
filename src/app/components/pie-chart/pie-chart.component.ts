@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
@@ -27,6 +27,9 @@ export class PieChartComponent implements OnChanges {
   pieMergeOption: EChartsOption = {}
 
   constructor() {
+    effect(() => {
+      this.updateChart();
+    });
   }
 
 
@@ -37,12 +40,14 @@ export class PieChartComponent implements OnChanges {
   }
 
   updateChart() {
+    // const isDarkMode = this.colorService.getIsDarkMode()(); // Call the signal
+
     this.pieOption = {
       tooltip: {
         trigger: 'item',
-        backgroundColor: this.colorService.isDarkMode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
         formatter: (params: any) => {
           // Use toLocaleString to format the value
@@ -54,7 +59,7 @@ export class PieChartComponent implements OnChanges {
         orient: 'vertical',
         left: 'left',
         textStyle: {
-          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         }
       },
       toolbox: {
@@ -76,7 +81,7 @@ export class PieChartComponent implements OnChanges {
               return `${params.name}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
             },
             fontSize: 12,
-            color: this.colorService.isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
+            color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
           }
         }
       ]

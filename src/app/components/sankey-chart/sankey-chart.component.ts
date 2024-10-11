@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
@@ -28,8 +28,10 @@ export class SankeyChartComponent implements OnChanges {
   mergeOption: EChartsOption = {}
 
   constructor() {
+    effect(() => {
+      this.updateSankeyChart();
+    });
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['sankeyData']) {
       this.updateSankeyChart()
@@ -38,15 +40,16 @@ export class SankeyChartComponent implements OnChanges {
 
 
   updateSankeyChart() {
+    const isDarkMode = this.colorService.isDarkMode(); // Call the signal
+
     this.sankeyOption = {
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
-        backgroundColor: this.colorService.isDarkMode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: isDarkMode ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
-        
       },
       toolbox: {
         right: 20,
@@ -65,7 +68,7 @@ export class SankeyChartComponent implements OnChanges {
           emphasis: { focus: 'adjacency' },
           label: {   
             fontSize: 12,
-            color: this.colorService.isDarkMode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
             formatter: (params: any) => {
               return `${params.name}\n${params.value.toLocaleString()}`; // Show value in label
             }
