@@ -48,11 +48,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
     super();
   }
   ngOnInit(): void {
-    // this.colorService.getIsDarkMode().pipe(takeUntil(this.componentDestroyed$)).subscribe((isDarkmode: boolean) => {
-    //   this.isDarkmode = isDarkmode
-    //   console.log('isDarkmode', isDarkmode)
-    // })
-  
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
 
       this.processedOutputData = data
