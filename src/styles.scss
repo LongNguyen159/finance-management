@@ -56,15 +56,15 @@ html {
     @include mat.button-color($light-theme);
   }
 
-  // @media (prefers-color-scheme: dark) {
-  //   // Use the `-color` mixins to only apply color styles without reapplying the same
-  //   // typography and density styles.
+  @media (prefers-color-scheme: dark) {
+    // Use the `-color` mixins to only apply color styles without reapplying the same
+    // typography and density styles.
 
-  //   body {
-  //     background-color: #333;
-  //     color: whitesmoke;
-  //   }
-  //   @include mat.core-color($dark-theme);
-  //   @include mat.button-color($dark-theme);
-  // }
+    body {
+      background-color: rgb(34,34,34);
+      // color: whitesmoke;
+    }
+    @include mat.core-color($dark-theme);
+    @include mat.button-color($dark-theme);
+  }
 }

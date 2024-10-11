@@ -3,6 +3,7 @@ import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService, ProcessedOutputData } from '../data.service';
 import { SankeyData } from '../models';
+import { ColorService } from '../../services/color.service';
 
 
 @Component({
@@ -21,6 +22,7 @@ export class SankeyChartComponent implements OnChanges {
   @Input() remainingBalance: string = '-'
 
   dataService = inject(DataService)
+  colorService = inject(ColorService)
 
   sankeyOption: EChartsOption = {}
   mergeOption: EChartsOption = {}
@@ -40,6 +42,11 @@ export class SankeyChartComponent implements OnChanges {
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
+        backgroundColor: this.colorService.isDarkmode? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        textStyle: {
+          color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
+        
       },
       toolbox: {
         right: 20,
@@ -56,7 +63,13 @@ export class SankeyChartComponent implements OnChanges {
           data: this.sankeyData.nodes,
           links: this.sankeyData.links,
           emphasis: { focus: 'adjacency' },
-          label: { fontSize: 12 },
+          label: {   
+            fontSize: 12,
+            color: this.colorService.isDarkmode? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            formatter: (params: any) => {
+              return `${params.name}\n${params.value.toLocaleString()}`; // Show value in label
+            }
+           },
           nodeGap: 15,
           lineStyle: { color: 'gradient', curveness: 0.5 }
         }

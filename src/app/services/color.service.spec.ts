@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DataService } from './data.service';
+import { ColorService } from './color.service';
 
-describe('DataService', () => {
-  let service: DataService;
+describe('ColorService', () => {
+  let service: ColorService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(DataService);
+    service = TestBed.inject(ColorService);
   });
 
   it('should be created', () => {
