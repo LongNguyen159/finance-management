@@ -1,7 +1,7 @@
 import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { DataService, ProcessedOutputData } from '../data.service';
+import { DataService, ProcessedOutputData } from '../../services/data.service';
 import { SankeyData } from '../models';
 import { ColorService } from '../../services/color.service';
 

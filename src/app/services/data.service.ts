@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from './models';
+import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { DidYouKnowDialogComponent } from './did-you-know-dialog/did-you-know-dialog.component';
-import { InputListDialogComponent } from './input-list-dialog/input-list-dialog.component';
+import { DidYouKnowDialogComponent } from '../components/did-you-know-dialog/did-you-know-dialog.component';
+import { InputListDialogComponent } from '../components/input-list-dialog/input-list-dialog.component';
 
 
 

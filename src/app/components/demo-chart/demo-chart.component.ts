@@ -1,7 +1,7 @@
 import { Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { DataService, ProcessedOutputData } from '../data.service';
+import { DataService, ProcessedOutputData } from '../../services/data.service';
 import { SankeyData } from '../models';
 
 @Component({

@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DidYouKnowDialogComponent } from '../../components/did-you-know-dialog/did-you-know-dialog.component';
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
-import { DataService, ProcessedOutputData } from '../../components/data.service';
+import { DataService, ProcessedOutputData } from '../../services/data.service';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";

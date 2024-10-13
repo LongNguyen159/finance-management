@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { InputListComponent } from '../input-list/input-list.component';
 import { RouterModule } from '@angular/router';
-import { DataService } from '../data.service';
+import { DataService } from '../../services/data.service';
 import { ColorService } from '../../services/color.service';
 import { CommonModule } from '@angular/common';
 
