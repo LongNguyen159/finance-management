@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, model, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -7,10 +7,7 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatMomentDateModule, provideMomentDateAdapter } from '@angular/material-moment-adapter';
-import { MatDatepicker } from '@angular/material/datepicker';
-import { MatCalendar } from '@angular/material/datepicker';
 import * as _moment from 'moment';
 import { default as _rollupMoment, Moment } from 'moment';
 
@@ -37,8 +34,8 @@ export const MY_FORMATS = {
     provideNativeDateAdapter()
   ],
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
-    CommonModule, MatButtonModule, FormsModule, ReactiveFormsModule,
-    MatDatepickerModule, MatNativeDateModule, MatMomentDateModule, MatCalendar
+    CommonModule, MatButtonModule,
+    MatDatepickerModule, MatNativeDateModule, MatMomentDateModule
   ],
   templateUrl: './month-picker.component.html',
   styleUrl: './month-picker.component.scss'
@@ -47,21 +44,9 @@ export class MonthPickerComponent implements OnInit {
   selectedDate = signal(new Date());
   calendarVisible = signal(false);
 
-
-  readonly date = new FormControl(moment());
-
-
   ngOnInit(): void {
     
   }
-
-  // setMonthAndYear(normalizedMonthAndYear: Moment, datepicker: MatDatepicker<Moment>) {
-  //   const ctrlValue = this.date.value ?? moment();
-  //   ctrlValue.month(normalizedMonthAndYear.month());
-  //   ctrlValue.year(normalizedMonthAndYear.year());
-  //   this.date.setValue(ctrlValue);
-  //   datepicker.close();
-  // }
 
   previousMonth() {
     const currentDate = this.selectedDate();
