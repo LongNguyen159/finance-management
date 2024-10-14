@@ -265,6 +265,22 @@ export class DataService {
         return data ? JSON.parse(data) as ProcessedOutputData : null;
     }
 
+    /** Only keep data of last X years in local storage. 
+     * Local Storage limits data to 5MB.
+     */
+    private cleanUpLocalStorage() {
+        const now = new Date();
+        const threeYearsAgo = new Date(now.getFullYear() - 3, now.getMonth());
+        Object.keys(localStorage).forEach(key => {
+          if (key.match(/^\d{4}-\d{2}$/)) {  // Checks if key matches "YYYY-MM" format
+            const date = new Date(key);
+            if (date < threeYearsAgo) {
+              localStorage.removeItem(key);
+            }
+          }
+        });
+    }
+
     private clearData() {
         localStorage.removeItem('userFinancialData');
         console.log('User data cleared from LocalStorage');
