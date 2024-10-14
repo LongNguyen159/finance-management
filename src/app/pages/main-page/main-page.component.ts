@@ -15,13 +15,14 @@ import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";
 import { ColorService } from '../../services/color.service';
+import { MonthPickerComponent } from "../../components/month-picker/month-picker.component";
 
 @Component({
   selector: 'app-main-page',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
-    UserManualComponent, NavbarComponent],
+    UserManualComponent, NavbarComponent, MonthPickerComponent],
   providers: [
     provideEcharts(),
   ],
