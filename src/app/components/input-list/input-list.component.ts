@@ -96,10 +96,11 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.linkForm.valueChanges
     .pipe(
       takeUntil(this.componentDestroyed$),
-      debounceTime(1400),
+      debounceTime(400),
       filter(() => this.linkForm.valid && !this.updateFromService) // Only proceed if the form is valid
     )
     .subscribe(formData => {
+      console.log('updating chart from form')
       this.dataService.processInputData(formData.links, this.dataMonth);
       this.taxNodeExists = this._hasTaxNode(formData.links);
     });
@@ -159,12 +160,12 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   /** Initiliase/Populate the form with predefined data */
   populateInputFields(selectedMonthData: ProcessedOutputData): void {
-    this.linkArray.clear()
-    if (this.dataService.isDemo) {
-      this.demoLinks.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
-    } else {
-      selectedMonthData.rawInput.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
-    }
+    this.linkArray.clear();
+    
+    const links = this.dataService.isDemo ? this.demoLinks : selectedMonthData.rawInput;
+    
+    // Populate form without emitting valueChanges
+    links.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
   }
   //#endregion
 
@@ -309,6 +310,11 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     this.linkArray.removeAt(index);
     // Update chart when input changed
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth)
+  }
+
+  clearAllLinks() {
+    this.linkArray.clear();
+    this.dataService.processInputData([], this.dataMonth)
   }
 
   // Getter to easily access the FormArray

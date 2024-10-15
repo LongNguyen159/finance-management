@@ -1,13 +1,18 @@
 <div [formGroup]="linkForm" class="link-form-container">
     <div class="flex flex-row w-full items-center justify-end gap-1">
-      <p>Show advanced</p>
-      <p>
+      <div>Show advanced</div>
+      <div>
         <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
-      </p>
+      </div>
     </div>
     <div formArrayName="links">
+      <!-- <div class="flex flex-row w-full justify-end items-center">
+        <span>clear all</span>
+        <button mat-icon-button color="warn" (click)="clearAllLinks()">
+          <mat-icon fontSet="material-symbols-outlined">delete_sweep</mat-icon>
+        </button>
+      </div> -->
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
-        
         <!-- Target -->
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
@@ -77,18 +82,16 @@
 
 
         <!-- Remove Button -->
-        <button mat-icon-button color="warn" (click)="removeLink(i)" *ngIf="linkArray.length > 1">
+        <button mat-icon-button color="warn" (click)="removeLink(i)">
           <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
         </button>
-  
       </div>
     </div>
   
-    <div class="flex flex-row gap-4 w-full text-center justify-center">
-        <!-- Add New Link Button -->
-        <div class="add-link-button">
-            <button mat-stroked-button color="primary" (click)="addLink()">Add New Link</button>
-        </div>
+    <div class="flex flex-row gap-4 mt-4 w-full text-center justify-center">
+      <div>
+        <button mat-flat-button color="primary" (click)="addLink()">Add New Link</button>
+      </div>
 
         <!-- Submit Button -->
         <!-- <div class="submit-button">
