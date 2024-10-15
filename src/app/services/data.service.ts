@@ -490,7 +490,7 @@ export class DataService {
             height: '40rem',
             maxHeight: '90vh',
             maxWidth: '90vw',
-            disableClose: true
+            disableClose: false
         });
     }
 
