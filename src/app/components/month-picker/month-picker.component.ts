@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -41,11 +41,13 @@ export const MY_FORMATS = {
   styleUrl: './month-picker.component.scss'
 })
 export class MonthPickerComponent implements OnInit {
+  @Output() monthSelected = new EventEmitter<Date>()
+
   selectedDate = signal(new Date());
   calendarVisible = signal(false);
 
   ngOnInit(): void {
-    
+    this.monthSelected.emit(this.selectedDate());
   }
 
   previousMonth() {
@@ -53,6 +55,7 @@ export class MonthPickerComponent implements OnInit {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() - 1);
     this.selectedDate.set(newDate);
+    this.monthSelected.emit(newDate);
   }
 
   // Navigate to the next month
@@ -61,6 +64,7 @@ export class MonthPickerComponent implements OnInit {
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + 1);
     this.selectedDate.set(newDate);
+    this.monthSelected.emit(newDate);
   }
 
   // Toggle calendar visibility
@@ -74,7 +78,7 @@ export class MonthPickerComponent implements OnInit {
     const newDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
     this.selectedDate.set(newDate);
     this.calendarVisible.set(false); // Hide calendar after selection
-    console.log(this.selectedDate());
+    this.monthSelected.emit(newDate);
   }
 
   // Handle year selection (optional)
@@ -82,6 +86,5 @@ export class MonthPickerComponent implements OnInit {
     const currentDate = this.selectedDate();
     const newDate = new Date(selectedYear.getFullYear(), currentDate.getMonth(), 1);
     this.selectedDate.set(newDate);
-    console.log(this.selectedDate());
   }
 }

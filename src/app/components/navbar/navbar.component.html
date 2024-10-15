@@ -26,18 +26,6 @@
     <div class="flex flex-row w-full justify-end">
         @if (showAddInput) {
             <div>
-                <!-- <button mat-button [matMenuTriggerFor]="menu" [matMenuTriggerRestoreFocus]="false">
-                    <div class="flex flex-row justify-center items-center gap-2">
-                        <mat-icon>add_circle_outline</mat-icon>
-                        <span>Add input</span>
-                    </div>
-                    
-                </button>
-                <mat-menu #menu="matMenu" [overlapTrigger]="false">
-                    <app-input-list></app-input-list>
-                </mat-menu> -->
-
-
                 <button mat-button (click)="dataService.openInputListDialog()">
                     <div class="flex flex-row justify-center items-center gap-2">
                         <mat-icon>add_circle_outline</mat-icon>

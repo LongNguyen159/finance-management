@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import { DataService } from '../../services/data.service';
+import { DataService, ProcessedOutputData } from '../../services/data.service';
 import { UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -48,11 +48,6 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
-/**
- * TODO:
- * - Fix: Source from field not reflecting the selected value of the form.
- * 
- */
 export class InputListComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
@@ -72,12 +67,13 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   updateFromService = false; // Flag to control value changes
 
+  dataMonth: string = ''
 
 
   constructor(private fb: FormBuilder) {
     super();
     this.linkForm = this.fb.group({
-      links: this.fb.array([this.createLinkGroup()])
+      links: this.fb.array([])
     });
   }
 
@@ -86,8 +82,12 @@ export class InputListComponent extends BasePageComponent implements OnInit {
      * exceed their parent.
      */
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
+      this.dataMonth = data.month
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];
+
+      /** Populate links with predefined data */
+      this.populateInputFields(data)
       this._addDefaultNode();
       this.updateFormValueReactively(data.rawInput);
     });
@@ -100,7 +100,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
       filter(() => this.linkForm.valid && !this.updateFromService) // Only proceed if the form is valid
     )
     .subscribe(formData => {
-      this.dataService.processInputData(formData.links);
+      this.dataService.processInputData(formData.links, this.dataMonth);
       this.taxNodeExists = this._hasTaxNode(formData.links);
     });
 
@@ -109,66 +109,14 @@ export class InputListComponent extends BasePageComponent implements OnInit {
       this.filteredNodes = this._filterNodes(searchTerm);
       this._addDefaultNode();
     });
-
-    this.initializeLinks()
   }
 
-  /** This is used to 'remove' the source from the field. It will be linked to default income node.
-   * In our service, we already have a logic that handles if source node is not found, link to default income node.
-   * We don't have 'default income' node, so it's understood that it'll be linked to default income node.
-   * Unless user defines 'default income' node, it'll be linked to default income node.
+  //#region Form Initialisation
+  /** Function to create form input.
+   * @param link Optional parameter to populate the form with existing data
+   * if no `link` param is provided, an empty form with default values '' will be created.
    */
-  private _addDefaultNode() {
-    if (!this.filteredNodes.includes('default')) {
-      this.filteredNodes.unshift('Default income');
-    }
-  }
-
-  /** Update form value to correctly reflect the value of children sum in their parent */
-  updateFormValueReactively(rawInput: UserDefinedLink[]): void {
-    // Check if the new data is different from the current values
-    const currentLinks = this.linkArray.controls.map(control => control.value);
-    const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
-  
-    if (!isDifferent) {
-      return; // Don't proceed if data hasn't changed
-    }
-  
-    this.updateFromService = true; // Set the flag to true
-  
-    // Clear current form array
-    this.linkArray.clear();
-  
-    // Populate the form with the new data
-    rawInput.forEach(link => {
-      this.linkArray.push(this.createLinkGroup(link));
-    });
-
-  
-    this.updateFromService = false; // Reset the flag
-  }
-  
-
-
-  /** Helper function to determine tax node in links */
-  private _hasTaxNode(data: UserDefinedLink[]): boolean {
-    return data.some(item => item.type === 'tax')
-  }
-
-
-  
-  /** Initiliase/Populate the form with predefined data */
-  initializeLinks(): void {
-    this.linkArray.clear()
-    if (this.dataService.isDemo) {
-      this.demoLinks.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
-    } else {
-      this.dataService.savedData.rawInput.forEach(link => this.linkArray.push(this.createLinkGroup(link)));
-    }
-  }
-
-  /** Popuplate the form */
-  createLinkGroup(link?: UserDefinedLink): FormGroup {
+  private _createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
@@ -207,6 +155,62 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     });
     return linkGroup;
   }
+
+
+  /** Initiliase/Populate the form with predefined data */
+  populateInputFields(selectedMonthData: ProcessedOutputData): void {
+    this.linkArray.clear()
+    if (this.dataService.isDemo) {
+      this.demoLinks.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
+    } else {
+      selectedMonthData.rawInput.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
+    }
+  }
+  //#endregion
+
+
+  /** This is used to 'remove' the source from the field. It will be linked to default income node.
+   * In our service, we already have a logic that handles if source node is not found, link to default income node.
+   * We don't have 'default income' node, so it's understood that it'll be linked to default income node.
+   * Unless user defines 'default income' node, it'll be linked to default income node.
+   */
+  private _addDefaultNode() {
+    if (!this.filteredNodes.includes('default')) {
+      this.filteredNodes.unshift('Default income');
+    }
+  }
+
+  /** Update form value to correctly reflect the value of children sum in their parent */
+  updateFormValueReactively(rawInput: UserDefinedLink[]): void {
+    // Check if the new data is different from the current values
+    const currentLinks = this.linkArray.controls.map(control => control.value);
+    const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
+  
+    if (!isDifferent) {
+      return; // Don't proceed if data hasn't changed
+    }
+  
+    this.updateFromService = true; // Set the flag to true
+  
+    // Clear current form array
+    this.linkArray.clear();
+  
+    // Populate the form with the new data
+    rawInput.forEach(link => {
+      this.linkArray.push(this._createLinkGroup(link));
+    });
+
+    this.updateFromService = false; // Reset the flag
+  }
+  
+
+
+  /** Helper function to determine tax node in links */
+  private _hasTaxNode(data: UserDefinedLink[]): boolean {
+    return data.some(item => item.type === 'tax')
+  }
+
+  
 
   //#region Cycle Detection
   private buildAdjacencyList(links: UserDefinedLink[]): Map<string, string[]> {
@@ -297,14 +301,14 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   // Add a new input row
   addLink(): void {
-    this.linkArray.push(this.createLinkGroup());
+    this.linkArray.push(this._createLinkGroup());
   }
 
   // Remove an input row
   removeLink(index: number): void {
     this.linkArray.removeAt(index);
     // Update chart when input changed
-    this.dataService.processInputData(this.linkForm.value.links)
+    this.dataService.processInputData(this.linkForm.value.links, this.dataMonth)
   }
 
   // Getter to easily access the FormArray
@@ -315,12 +319,12 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   //#endregion
 
   // Submit form and emit the data (to parent component or a service)
-  onSubmit(): void {
-    if (this.linkForm.valid) {
-      const formData: UserDefinedLink[] = this.linkForm.value.links;
-      this.dataService.processInputData(formData)
-    }
-  }
+  // onSubmit(): void {
+  //   if (this.linkForm.valid) {
+  //     const formData: UserDefinedLink[] = this.linkForm.value.links;
+  //     this.dataService.processInputData(formData, this.currentMonthTest)
+  //   }
+  // }
 
   closeAutoComplete(index: number): void {
     const trigger = this.autocompleteTriggers.toArray()[index];

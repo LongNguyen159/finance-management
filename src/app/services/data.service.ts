@@ -5,7 +5,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { DidYouKnowDialogComponent } from '../components/did-you-know-dialog/did-you-know-dialog.component';
 import { InputListDialogComponent } from '../components/input-list-dialog/input-list-dialog.component';
 
-
+export interface MonthlyData {
+    [month: string]: ProcessedOutputData;
+}
 
 export interface ProcessedOutputData {
     sankeyData: SankeyData;
@@ -16,6 +18,7 @@ export interface ProcessedOutputData {
     remainingBalance: string;
     pieData: any;
     rawInput: UserDefinedLink[];
+    month: string
 }
 
 export interface TreeNode {
@@ -35,55 +38,65 @@ export interface ExpenseData {
   providedIn: 'root'
 })
 export class DataService {
-  sankeyData: SankeyData = {
-    nodes: [],
-    links: []
-  }
-  remainingBalance: string = '-';
-  savedData: ProcessedOutputData = {
-    sankeyData: this.sankeyData,
-    totalUsableIncome: -1,
-    totalTax: -1,
-    totalGrossIncome: -1,
-    totalExpenses: -1,
-    remainingBalance: this.remainingBalance,
-    pieData: [],
-    rawInput: []
-  }
+    readonly dialog = inject(MatDialog)
 
-  processedData$ = new BehaviorSubject<ProcessedOutputData>(this.savedData)
-  isDemo: boolean = false
-  isAdvancedShown: boolean = false
-
-  demoLinks: UserDefinedLink[] = [
-    { type: 'income', target: 'Main Salary', value: 2200 },
-    { type: 'income', target: 'Side hustle', value: 800 },
-    { type: 'tax', target: 'Taxes', value: 1100},
-    { type: 'expense', target: 'Housing', value: 800},
-    { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
-    { type: 'expense', target: 'WiFi', value: 40, source: 'Housing'},
-    { type: 'expense', target: 'Groceries', value: 300},
-  ]
-
-  readonly dialog = inject(MatDialog)
-  constructor() {
-    const savedData = this.loadData();
-    if (savedData) {
-      this.savedData = savedData; // Load saved data
-      this.processedData$.next(this.savedData); // Emit saved data
-    } else {
-      // Process demo data if no saved data found
-      this.processInputData(this.demoLinks, true);
+    monthlyData: MonthlyData = {};
+    private sankeyData: SankeyData = {
+        nodes: [],
+        links: []
     }
-  }
+    private remainingBalance: string = '-';
+    singleMonthEntries: ProcessedOutputData = {
+        sankeyData: this.sankeyData,
+        totalUsableIncome: -1,
+        totalTax: -1,
+        totalGrossIncome: -1,
+        totalExpenses: -1,
+        remainingBalance: this.remainingBalance,
+        pieData: [],
+        rawInput: [],
+        month: ''
+    }
+
+    processedSingleMonthEntries$ = new BehaviorSubject<ProcessedOutputData>(this.singleMonthEntries)
+    multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
+
+
+    isDemo: boolean = false
+    isAdvancedShown: boolean = false
+
+    demoLinks: UserDefinedLink[] = [
+        { type: 'income', target: 'Main Salary', value: 2200 },
+        { type: 'income', target: 'Side hustle', value: 800 },
+        { type: 'tax', target: 'Taxes', value: 1100},
+        { type: 'expense', target: 'Housing', value: 800},
+        { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
+        { type: 'expense', target: 'WiFi', value: 40, source: 'Housing'},
+        { type: 'expense', target: 'Groceries', value: 300},
+    ]
+
+    constructor() {
+        const savedData = this.loadData();
+        if (savedData) {
+        this.monthlyData = savedData; // Load saved data
+        this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']); // Emit saved data
+        } else {
+        // Process demo data if no saved data found
+        this.processInputData(this.demoLinks, '2024-09', true);
+        }
+    }
   
+    /** TODO refactor this to utils file.
+     * This function is used by charts to get the current date in the format "YYYY-MM-DD".
+     * The date will be shown when user exports the chart as image.
+     */
     getTodaysDate() {
         const now = new Date();
         return now.toISOString().slice(0, 10);
     }
 
     //#region: Process Input Data
-    processInputData(userDefinedLinks: UserDefinedLink[], demo: boolean = false): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false): void {
         const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
         const incomeNodes: string[] = []; // Track income nodes
@@ -222,24 +235,22 @@ export class DataService {
         ];
         const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
 
-        // Update return params
-        const sankeyData = {
-            nodes: nodes,
-            links: uniqueLinks
-        }
-        this.savedData = {
-            sankeyData: sankeyData,
+        this.monthlyData[month] = {
+            sankeyData: { nodes, links: uniqueLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
             remainingBalance: remainingBalance.toLocaleString(),
             pieData: pieSeriesData,
-            rawInput: updatedRawInput
+            rawInput: updatedRawInput,
+            month: month
         }
 
         // Emit the processed data
-        this.processedData$.next(this.savedData)
+        this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+        this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
+        this.isDemo = false; // Reset demo flag
         this.saveData()
 
         //#endregion
@@ -256,13 +267,17 @@ export class DataService {
 
     /** Save user data in localStorage. Data will be retrieved on app Init. */
     private saveData() {
-        localStorage.setItem('userFinancialData', JSON.stringify(this.savedData));
+        localStorage.setItem('monthlyData', JSON.stringify(this.monthlyData));
     }
 
     // Load data from LocalStorage
-    private loadData(): ProcessedOutputData | null {
-        const data = localStorage.getItem('userFinancialData');
-        return data ? JSON.parse(data) as ProcessedOutputData : null;
+    loadData(): MonthlyData | null {
+        const saved = localStorage.getItem('monthlyData');
+        return saved ? JSON.parse(saved) as MonthlyData: null;
+    }
+
+    getAllMonthsData() {
+        return this.multiMonthEntries$.asObservable()
     }
 
     /** Only keep data of last X years in local storage. 
@@ -454,6 +469,6 @@ export class DataService {
 
 
     getProcessedData() {
-        return this.processedData$.asObservable()
+        return this.processedSingleMonthEntries$.asObservable()
     }
 }
