@@ -10,6 +10,7 @@ import {MatInputModule} from '@angular/material/input';
 import { MatMomentDateModule, provideMomentDateAdapter } from '@angular/material-moment-adapter';
 import * as _moment from 'moment';
 import { default as _rollupMoment, Moment } from 'moment';
+import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
 
 
 const moment = _rollupMoment || _moment;
@@ -35,7 +36,8 @@ export const MY_FORMATS = {
   ],
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
     CommonModule, MatButtonModule,
-    MatDatepickerModule, MatNativeDateModule, MatMomentDateModule
+    MatDatepickerModule, MatNativeDateModule, MatMomentDateModule,
+    MonthPickerHeaderComponent
   ],
   templateUrl: './month-picker.component.html',
   styleUrl: './month-picker.component.scss'
@@ -45,6 +47,7 @@ export class MonthPickerComponent implements OnInit {
 
   selectedDate = signal(new Date());
   calendarVisible = signal(false);
+  customHeaderComponent = MonthPickerHeaderComponent
 
   ngOnInit(): void {
     this.emitSelectedDate()
