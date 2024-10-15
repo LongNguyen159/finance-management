@@ -57,6 +57,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   linkForm: FormGroup; // FormGroup to manage input fields
   sourceSearchControl = new FormControl(); // Search control for the dropdown
+  initialFormState: UserDefinedLink[] = []; // Initial form state to compare with new data
 
   linkTypes = ['income', 'expense', 'tax']
 
@@ -101,12 +102,22 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
 
   updateInput() {
-    if (this.linkForm.valid && !this.updateFromService) {
-      console.log('User input changed!')
-      const formData: UserDefinedLink[] = this.linkForm.value.links;
-      this.taxNodeExists = this._hasTaxNode(formData);
-      this.dataService.processInputData(formData, this.dataMonth)
+    if (!this.linkForm.valid && this.updateFromService) return;
+  
+    const formData: UserDefinedLink[] = this.linkForm.value.links;
+  
+    // Early exit if there are no changes compared to the initial form state
+    if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
+      return; // No changes, don't proceed
     }
+  
+    console.log('User input changed!');
+    
+    this.taxNodeExists = this._hasTaxNode(formData);
+    this.dataService.processInputData(formData, this.dataMonth);
+  
+    // After processing, update the initial form state to the new one
+    this.initialFormState = [...formData]; // Update the stored form state
   }
 
   //#region Form Initialisation
@@ -157,12 +168,6 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   /** Initiliase/Populate the form with predefined data */
   populateInputFields(selectedMonthData: ProcessedOutputData): void {
-    // const currentLinks = this.linkArray.controls.map(control => control.value);
-    // const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(selectedMonthData.rawInput);
-    // if (!isDifferent) {
-    //   return
-    // }
-    
     console.log('populating input fields...', selectedMonthData.rawInput)
 
     this.linkArray.clear({ emitEvent: false });
@@ -171,6 +176,8 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     
     // Populate form without emitting valueChanges
     links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));
+    // Shallow copy to avoid mutations
+    this.initialFormState = [...links];
   }
   //#endregion
 
@@ -186,33 +193,6 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     }
   }
 
-  /** Update form value to correctly reflect the value of children sum in their parent */
-  // updateFormValueReactively(rawInput: UserDefinedLink[]): void {
-  //   // Check if the new data is different from the current values
-  //   const currentLinks = this.linkArray.controls.map(control => control.value);
-  //   const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
-  
-  //   if (!isDifferent) {
-  //     console.log('no difference to update the form')
-  //     return; // Don't proceed if data hasn't changed
-  //   }
-    
-  //   console.log('difference detected, updating form...')
-  //   this.updateFromService = true; // Set the flag to true
-  
-  //   // Clear current form array
-  //   this.linkArray.clear({ emitEvent: false });
-  
-  //   // // Populate the form with the new data
-  //   // rawInput.forEach(link => {
-  //   //   this.linkArray.push(this._createLinkGroup(link), { emitEvent: false });
-  //   // });
-
-  //   // this.updateFromService = false; // Reset the flag
-  //   // console.log('new raw input', rawInput)
-  //   this.dataService.processInputData(rawInput, this.dataMonth);
-  // }
-  
 
 
   /** Helper function to determine tax node in links */
