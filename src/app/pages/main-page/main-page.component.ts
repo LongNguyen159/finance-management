@@ -53,7 +53,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
     super();
   }
   ngOnInit(): void {
-
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.monthlyData = data
       console.log('all months data', data)
@@ -83,7 +82,13 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
     })
   }
 
-  onMonthChanges(selectedMonth: Date) {
+
+  onMonthChanges(selectedMonth: Date) {    
+    if (Object.keys(this.monthlyData).length == 0) {
+      console.warn('month data is not ready by the time on month changes is called')
+      return
+    }
+
     const monthString = formatDateToString(selectedMonth);
     
     // Check if the month exists in the MonthlyData
@@ -101,8 +106,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
       console.log(`No data for ${monthString}. Initialized new entry.`);
       this.dataService.processInputData([], monthString);
     }
-    
-    // Further logic as required...
   }
 
   // Initialize empty data for a month
@@ -119,8 +122,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
       month: monthString
     };
   }
-
-
 
   toggleLayout() {
     this.isVerticalLayout = !this.isVerticalLayout;

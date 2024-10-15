@@ -76,14 +76,18 @@ export class DataService {
     ]
 
     constructor() {
+        //#region Retrieve data
+        /** Retrieve data from LocalStorage on App start */
         const savedData = this.loadData();
         if (savedData) {
         this.monthlyData = savedData; // Load saved data
         this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']); // Emit saved data
+        this.multiMonthEntries$.next(this.monthlyData) // Emit all months data
         } else {
         // Process demo data if no saved data found
         this.processInputData(this.demoLinks, '2024-09', true);
         }
+        //#endregion
     }
   
     /** TODO refactor this to utils file.

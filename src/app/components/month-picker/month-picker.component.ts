@@ -47,6 +47,10 @@ export class MonthPickerComponent implements OnInit {
   calendarVisible = signal(false);
 
   ngOnInit(): void {
+    this.emitSelectedDate()
+  }
+
+  emitSelectedDate() {
     this.monthSelected.emit(this.selectedDate());
   }
 
