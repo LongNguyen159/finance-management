@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -11,6 +11,7 @@ import { MatMomentDateModule, provideMomentDateAdapter } from '@angular/material
 import * as _moment from 'moment';
 import { default as _rollupMoment, Moment } from 'moment';
 import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 
 
 const moment = _rollupMoment || _moment;
@@ -37,13 +38,16 @@ export const MY_FORMATS = {
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
     CommonModule, MatButtonModule,
     MatDatepickerModule, MatNativeDateModule, MatMomentDateModule,
-    MonthPickerHeaderComponent
+    MonthPickerHeaderComponent, MatMenuModule
   ],
   templateUrl: './month-picker.component.html',
   styleUrl: './month-picker.component.scss'
 })
 export class MonthPickerComponent implements OnInit {
   @Output() monthSelected = new EventEmitter<Date>()
+
+  @ViewChild(MatMenuTrigger) calendarMenuTrigger!: MatMenuTrigger; // Inject MatMenuTrigger
+
 
   selectedDate = signal(new Date());
   calendarVisible = signal(false);
@@ -77,6 +81,7 @@ export class MonthPickerComponent implements OnInit {
   // Toggle calendar visibility
   toggleCalendar() {
     this.calendarVisible.set(!this.calendarVisible());
+    this.calendarVisible() ? this.calendarMenuTrigger.openMenu() : this.calendarMenuTrigger.closeMenu();
   }
 
   // Handle month selection
@@ -85,6 +90,7 @@ export class MonthPickerComponent implements OnInit {
     const newDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
     this.selectedDate.set(newDate);
     this.calendarVisible.set(false); // Hide calendar after selection
+    this.calendarMenuTrigger.closeMenu();
     this.monthSelected.emit(newDate);
   }
 

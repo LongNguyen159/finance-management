@@ -3,7 +3,7 @@
       <mat-icon>chevron_left</mat-icon>
     </button>
   
-    <button mat-button (click)="toggleCalendar()">
+    <button mat-button (click)="toggleCalendar()" [matMenuTriggerFor]="calendarMenu">
       <span class="px-4">
         {{ selectedDate() | date: 'MMM yyyy' }}
       </span>
@@ -14,12 +14,16 @@
     </button>
 </div>
 <div class="flex flex-row w-full justify-center">
-    <mat-calendar class="w-80" *ngIf="calendarVisible()" startView="year"
+  <mat-menu #calendarMenu="matMenu" class="centered-menu" (closed)="calendarVisible.set(false)">
+    <mat-calendar class="w-80" startView="year"
+        *ngIf="calendarVisible()"
         [selected]="selectedDate()"
-        (monthSelected)="onMonthSelected($event)" 
+        (monthSelected)="onMonthSelected($event);"
         (yearSelected)="yearSelected($event)"
         [startAt]="selectedDate()"
         [headerComponent]="customHeaderComponent"
+        (click)="$event.stopPropagation();"
         >
     </mat-calendar>
+  </mat-menu>
 </div>
