@@ -89,20 +89,8 @@ export class InputListComponent extends BasePageComponent implements OnInit {
       /** Populate links with predefined data */
       this.populateInputFields(data)
       this._addDefaultNode();
-      this.updateFormValueReactively(data.rawInput);
-    });
 
-    /** Update Chart every time user changes the form input */
-    this.linkForm.valueChanges
-    .pipe(
-      takeUntil(this.componentDestroyed$),
-      debounceTime(400),
-      filter(() => this.linkForm.valid && !this.updateFromService) // Only proceed if the form is valid
-    )
-    .subscribe(formData => {
-      console.log('updating chart from form')
-      this.dataService.processInputData(formData.links, this.dataMonth);
-      this.taxNodeExists = this._hasTaxNode(formData.links);
+      console.log('data changed', data)
     });
 
     // Listen to changes in the search control to filter the dropdown
@@ -110,6 +98,15 @@ export class InputListComponent extends BasePageComponent implements OnInit {
       this.filteredNodes = this._filterNodes(searchTerm);
       this._addDefaultNode();
     });
+  }
+
+  updateInput() {
+    if (this.linkForm.valid && !this.updateFromService) {
+      console.log('User input changed!')
+      const formData: UserDefinedLink[] = this.linkForm.value.links;
+      this.taxNodeExists = this._hasTaxNode(formData);
+      this.dataService.processInputData(formData, this.dataMonth)
+    }
   }
 
   //#region Form Initialisation
@@ -131,16 +128,16 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
     // Disable the source field if type is 'income'
     if (linkGroup.get('type')?.value === 'income' || linkGroup.get('type')?.value === 'tax') {
-      linkGroup.get('source')?.disable();
+      linkGroup.get('source')?.disable({ emitEvent: false });
     }
 
 
     // Subscribe to changes in the type field
     linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value === 'income') {
-        linkGroup.get('source')?.disable(); // Disable source if income
+        linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if income
       } else {
-        linkGroup.get('source')?.enable();  // Enable source otherwise
+        linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
       }
     });
 
@@ -160,12 +157,20 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   /** Initiliase/Populate the form with predefined data */
   populateInputFields(selectedMonthData: ProcessedOutputData): void {
-    this.linkArray.clear();
+    // const currentLinks = this.linkArray.controls.map(control => control.value);
+    // const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(selectedMonthData.rawInput);
+    // if (!isDifferent) {
+    //   return
+    // }
+    
+    console.log('populating input fields...', selectedMonthData.rawInput)
+
+    this.linkArray.clear({ emitEvent: false });
     
     const links = this.dataService.isDemo ? this.demoLinks : selectedMonthData.rawInput;
     
     // Populate form without emitting valueChanges
-    links.forEach(link => this.linkArray.push(this._createLinkGroup(link)));
+    links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));
   }
   //#endregion
 
@@ -182,27 +187,31 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   }
 
   /** Update form value to correctly reflect the value of children sum in their parent */
-  updateFormValueReactively(rawInput: UserDefinedLink[]): void {
-    // Check if the new data is different from the current values
-    const currentLinks = this.linkArray.controls.map(control => control.value);
-    const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
+  // updateFormValueReactively(rawInput: UserDefinedLink[]): void {
+  //   // Check if the new data is different from the current values
+  //   const currentLinks = this.linkArray.controls.map(control => control.value);
+  //   const isDifferent = JSON.stringify(currentLinks) !== JSON.stringify(rawInput);
   
-    if (!isDifferent) {
-      return; // Don't proceed if data hasn't changed
-    }
+  //   if (!isDifferent) {
+  //     console.log('no difference to update the form')
+  //     return; // Don't proceed if data hasn't changed
+  //   }
+    
+  //   console.log('difference detected, updating form...')
+  //   this.updateFromService = true; // Set the flag to true
   
-    this.updateFromService = true; // Set the flag to true
+  //   // Clear current form array
+  //   this.linkArray.clear({ emitEvent: false });
   
-    // Clear current form array
-    this.linkArray.clear();
-  
-    // Populate the form with the new data
-    rawInput.forEach(link => {
-      this.linkArray.push(this._createLinkGroup(link));
-    });
+  //   // // Populate the form with the new data
+  //   // rawInput.forEach(link => {
+  //   //   this.linkArray.push(this._createLinkGroup(link), { emitEvent: false });
+  //   // });
 
-    this.updateFromService = false; // Reset the flag
-  }
+  //   // this.updateFromService = false; // Reset the flag
+  //   // console.log('new raw input', rawInput)
+  //   this.dataService.processInputData(rawInput, this.dataMonth);
+  // }
   
 
 
@@ -268,7 +277,7 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
     /** If source = value, it's a cycle error, exit the function early. */
     if (source.toLowerCase() === target.toLowerCase()) {
-      linkGroup.get('source')?.setErrors({ cycle: true });
+      linkGroup.get('source')?.setErrors({ cycle: true }, { emitEvent: false });
       return;
     }
   
@@ -281,9 +290,9 @@ export class InputListComponent extends BasePageComponent implements OnInit {
     
     /** Check if a node is sourcing its decendants. If yes, return cycle error */
     if (descendants.has(source)) {
-      linkGroup.get('source')?.setErrors({ cycle: true }); // Cycle detected
+      linkGroup.get('source')?.setErrors({ cycle: true }, { emitEvent: false }); // Cycle detected
     } else {
-      linkGroup.get('source')?.setErrors(null);  // No cycle
+      linkGroup.get('source')?.setErrors(null, { emitEvent: false });  // No cycle
     }
   }
 
@@ -302,19 +311,14 @@ export class InputListComponent extends BasePageComponent implements OnInit {
 
   // Add a new input row
   addLink(): void {
-    this.linkArray.push(this._createLinkGroup());
+    this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
   }
 
   // Remove an input row
   removeLink(index: number): void {
-    this.linkArray.removeAt(index);
+    this.linkArray.removeAt(index, { emitEvent: false });
     // Update chart when input changed
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth)
-  }
-
-  clearAllLinks() {
-    this.linkArray.clear();
-    this.dataService.processInputData([], this.dataMonth)
   }
 
   // Getter to easily access the FormArray

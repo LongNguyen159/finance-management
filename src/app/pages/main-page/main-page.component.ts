@@ -56,6 +56,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.monthlyData = data
+      console.log('all months data', data)
     })
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {

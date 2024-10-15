@@ -16,7 +16,7 @@
         <!-- Target -->
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
-          <input matInput formControlName="target" placeholder="Entry name" />
+          <input matInput formControlName="target" placeholder="Entry name" (blur)="updateInput()" />
           <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
             This name is not allowed.
           </mat-error>
@@ -28,7 +28,7 @@
         
         <!-- Type (Income, Expense, Tax) -->
         <mat-form-field appearance="fill">
-          <mat-select formControlName="type" placeholder="Type">
+          <mat-select formControlName="type" placeholder="Type" (selectionChange)="updateInput()">
             <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
           </mat-select>
         </mat-form-field>
@@ -37,7 +37,7 @@
         <!-- Value -->
         <mat-form-field appearance="fill">
           <mat-label>Amount</mat-label>
-          <input matInput formControlName="value" type="number" placeholder="Value" />
+          <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
 
           <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
             Amount must be greater than or equal 0.
@@ -66,7 +66,7 @@
         <!-- Select with search -->
         <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
           <mat-label>Part of (optional)</mat-label>
-          <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel">
+          <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel" (selectionChange)="updateInput()">
             <mat-option>
               <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search entries..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
             </mat-option>

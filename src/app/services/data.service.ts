@@ -233,10 +233,32 @@ export class DataService {
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
         ];
-        const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+        // const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+
+        let updatedRawInput: UserDefinedLink[] = userDefinedLinks; // Default to original input
+
+        // Update raw input if necessary
+        if (changedExpensesDuringCalculation.length > 0) {
+            updatedRawInput = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+        }
+
+        // Step 1: Update Sankey nodes and links based on updatedRawInput
+        const updatedNodes = nodes.map(node => {
+            const updatedNode = updatedRawInput.find(link => link.target === node.name);
+            return updatedNode ? { ...node, value: updatedNode.value } : node; // Update value or leave as is
+        });
+
+        // const updatedLinks = links.map(link => {
+        //     const updatedLink = updatedRawInput.find(l => l.source === link.source && l.target === link.target);
+        //     return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
+        // });
+        const updatedLinks = links.map(link => {
+            const updatedLink = updatedRawInput.find(l => l.target === link.target);
+            return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
+        });
 
         this.monthlyData[month] = {
-            sankeyData: { nodes, links: uniqueLinks },
+            sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
@@ -245,12 +267,13 @@ export class DataService {
             pieData: pieSeriesData,
             rawInput: updatedRawInput,
             month: month
-        }
+        };
 
         // Emit the processed data
         this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
         this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         this.isDemo = false; // Reset demo flag
+
         this.saveData()
 
         //#endregion
@@ -267,7 +290,16 @@ export class DataService {
 
     /** Save user data in localStorage. Data will be retrieved on app Init. */
     private saveData() {
-        localStorage.setItem('monthlyData', JSON.stringify(this.monthlyData));
+        const nonEmptyMonthlyData = Object.keys(this.monthlyData).reduce((result, month) => {
+            const data = this.monthlyData[month];
+            // Check if the data contains meaningful entries (you can adjust conditions as needed)
+            if (data.rawInput.length > 0 || data.totalGrossIncome > 0 || data.totalExpenses > 0) {
+                result[month] = data; // Only keep non-empty months
+            }
+            return result;
+        }, {} as MonthlyData);
+    
+        localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
     }
 
     // Load data from LocalStorage
