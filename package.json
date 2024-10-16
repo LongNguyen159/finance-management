@@ -41,6 +41,7 @@
     "@angular/cli": "^18.0.3",
     "@angular/compiler-cli": "^18.0.0",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^22.7.5",
     "autoprefixer": "^10.4.20",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",

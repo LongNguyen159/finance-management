@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { InputListComponent } from './components/input-list/input-list.component';
 import { NavbarComponent } from "./components/navbar/navbar.component";
+import * as packageJson from '../../package.json';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -14,17 +15,41 @@ import { NavbarComponent } from "./components/navbar/navbar.component";
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Easy Sankey';
-  constructor(private router: Router) {
-    if (localStorage.getItem('firstTime') === null || localStorage.getItem('firstTime') === 'true') {
-      localStorage.setItem('firstTime', 'true');
-      this.navigateToWelcome()
+  appVersion = ''
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    // Fetch app version from package.json
+    this.appVersion = packageJson.version;
+
+    // Check if it's the user's first time
+    const isFirstTime = localStorage.getItem('firstTime') === null || localStorage.getItem('firstTime') === 'true';
+
+    if (isFirstTime) {
+      // Navigate to the welcome page and mark the user as not first-time
+      this.navigateToWelcome();
+    } else {
+      // For non-first-time users, check for updates
+      this.checkForUpdate();
+    }
+  }
+
+  checkForUpdate() {
+    const storedVersion = localStorage.getItem('appVersion');
+    if (!storedVersion || storedVersion !== this.appVersion) {
+      // If the stored version is missing or different, show the update page
+      this.router.navigate(['/updates']);
+      
+      // Store the new version to prevent showing the update page again
+      localStorage.setItem('appVersion', this.appVersion);
     }
   }
 
   navigateToWelcome() {
     this.router.navigate(['/welcome']);
+    // Mark the user as having seen the welcome page
     localStorage.setItem('firstTime', 'false');
   }
 }
