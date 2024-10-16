@@ -31,7 +31,6 @@ export class SankeyChartComponent implements OnChanges {
   constructor() {
     effect(() => {
       this.updateSankeyChart();
-      
     });
   }
   ngOnChanges(changes: SimpleChanges): void {
