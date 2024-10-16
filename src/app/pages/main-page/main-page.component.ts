@@ -55,10 +55,17 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
   }
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.monthlyData = data
-      this.highlightMonths = Object.keys(data)
+      const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
+        const dataEntry = data[month];
+        // Check if the data contains meaningful entries
+        if (dataEntry.rawInput.length > 0 || dataEntry.totalGrossIncome > 0 || dataEntry.totalExpenses > 0) {
+            result[month] = dataEntry; // Keep non-empty months
+        }
+          return result;
+      }, {} as MonthlyData);
       
-      console.log('all months data', data)
+      this.monthlyData = filteredMonthlyData;
+      this.highlightMonths = Object.keys(filteredMonthlyData); // Get keys of filtered data
     })
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
