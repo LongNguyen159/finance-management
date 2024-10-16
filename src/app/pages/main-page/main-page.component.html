@@ -1,6 +1,6 @@
 <div class="flex flex-col">    
     <app-navbar [showBackButton]="false" class="sticky top-0 z-50">
-        <app-month-picker (monthSelected)="onMonthChanges($event)"></app-month-picker>
+        <app-month-picker (monthSelected)="onMonthChanges($event)" [highlightedMonths]="highlightMonths"></app-month-picker>
     </app-navbar>
     <div class="p-4 pt-0">
         <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">

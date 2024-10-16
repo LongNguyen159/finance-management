@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, EventEmitter, inject, Input, OnInit, Output, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -12,6 +12,7 @@ import * as _moment from 'moment';
 import { default as _rollupMoment, Moment } from 'moment';
 import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { ColorService } from '../../services/color.service';
 
 
 const moment = _rollupMoment || _moment;
@@ -41,10 +42,27 @@ export const MY_FORMATS = {
     MonthPickerHeaderComponent, MatMenuModule
   ],
   templateUrl: './month-picker.component.html',
-  styleUrl: './month-picker.component.scss'
+  styleUrl: './month-picker.component.scss',
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MonthPickerComponent implements OnInit {
+  @Input() highlightedMonths: string[] = [];
   @Output() monthSelected = new EventEmitter<Date>()
+  colorService = inject(ColorService)
+
+
+
+  cellClass = (date: Date): string => {
+    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const baseClass = this.highlightedMonths.includes(yearMonth) ? 'highlighted' : '';
+    
+    // Add 'dark-mode' class conditionally based on dark mode signal
+    const darkModeClass = this.colorService.isDarkMode() ? 'dark-mode' : '';
+  
+    return `${baseClass} ${darkModeClass}`.trim(); // Combine both classes
+  };
+
 
   @ViewChild(MatMenuTrigger) calendarMenuTrigger!: MatMenuTrigger; // Inject MatMenuTrigger
 

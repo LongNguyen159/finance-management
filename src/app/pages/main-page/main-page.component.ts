@@ -37,6 +37,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
 
   processedOutputData: ProcessedOutputData
   monthlyData: MonthlyData = {};
+  highlightMonths: string[] = []
 
 
   totalExpenses: number = -1
@@ -55,6 +56,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.monthlyData = data
+      this.highlightMonths = Object.keys(data)
+      
       console.log('all months data', data)
     })
 
