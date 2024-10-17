@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, Renderer2 } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { InputListComponent } from './components/input-list/input-list.component';
 import { NavbarComponent } from "./components/navbar/navbar.component";
 import * as packageJson from '../../package.json';
+import { ColorService } from './services/color.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -18,7 +19,12 @@ import * as packageJson from '../../package.json';
 export class AppComponent implements OnInit {
   title = 'Easy Sankey';
   appVersion = ''
-  constructor(private router: Router) {}
+  colorService = inject(ColorService)
+  constructor(private router: Router, renderer: Renderer2) {
+    this.colorService.renderer = renderer;
+    /** Retrieve theme from service to apply */
+    this.colorService.applyStoredThemeSettings()
+  }
 
   ngOnInit(): void {
     // Fetch app version from package.json

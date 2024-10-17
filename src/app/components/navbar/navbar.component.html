@@ -43,12 +43,17 @@
         
         @if (showOpenDocs) {
             <div>
-                <a mat-button routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
+                <a mat-icon-button routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon>help_outline</mat-icon>
-                    <span>How to use?</span>
                 </a>
             </div>
         }
+
+        <div class="pr-4">
+            <button mat-icon-button (click)="dataService.openSettingsDialog()">
+                <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+            </button>
+        </div>
         
     </div>    
 </div>

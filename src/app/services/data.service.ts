@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DidYouKnowDialogComponent } from '../components/did-you-know-dialog/did-you-know-dialog.component';
 import { InputListDialogComponent } from '../components/input-list-dialog/input-list-dialog.component';
+import { SettingsDialogComponent } from '../components/settings-dialog/settings-dialog.component';
 
 export interface MonthlyData {
     [month: string]: ProcessedOutputData;
@@ -481,6 +482,10 @@ export class DataService {
     //#region Dialogs
     openDidYouKnowDialog() {
         this.dialog.open(DidYouKnowDialogComponent);
+    }
+
+    openSettingsDialog() {
+        this.dialog.open(SettingsDialogComponent)
     }
 
 

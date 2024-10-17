@@ -5,29 +5,7 @@
 @tailwind utilities;
 @import 'material-symbols';
 
-
-
 @include mat.core();
-
-h1, h2, h3, h4, h5, h6 {
-  color:rgb(38,38,38);
-}
-h1 {
-    font-size: xx-large;
-}
-h2 {
-    font-size: x-large;
-}
-h3 {
-    font-size: large;
-}
-p {
-  color: rgb(64,64,64);
-}
-html, body { height: 100%; }
-body { 
-  margin: 0;font-family: Roboto, "Helvetica Neue", sans-serif;
-}
 
 // Define a dark theme
 $dark-theme: mat.define-theme((
@@ -47,32 +25,104 @@ $light-theme: mat.define-theme((
   ),
 ));
 
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+
+  /** 
+    Transition background color changes to prevent flashing 
+    when changing themes from dark to light and vice versa 
+  */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+// Theme-specific styles
 html {
-  // Apply the light theme only when the user prefers light themes.
+  /** Light theme styling, detected by system */
   @media (prefers-color-scheme: light) {
-    // Use the `-color` mixins to only apply color styles without reapplying the same
-    // typography and density styles.
     @include mat.core-color($light-theme);
     @include mat.all-component-colors($light-theme);
     @include mat.all-component-typographies($light-theme);
     @include mat.all-component-densities($light-theme);
+    
+    body {
+      background-color: white;
+      color: rgb(38, 38, 38);
+    }
+  
+    h1, h2, h3, h4, h5, h6 {
+      color: rgb(38, 38, 38);
+      transition: color 0.3s ease;
+    }
+    
+    p {
+      color: rgb(64, 64, 64);
+      transition: color 0.3s ease;
+    }
   }
 
+
+  /** Dark theme styling, detected by system */
   @media (prefers-color-scheme: dark) {
-    // Use the `-color` mixins to only apply color styles without reapplying the same
-    // typography and density styles.
-
-    body {
-      background-color: rgb(34,34,34);
-      color-scheme: dark;
-    }
-
-    h1, h2, h3, h4, h5, h6, p, ul, li {
-      color:rgb(204,204,204);
-    }
-
     @include mat.all-component-colors($dark-theme);
     @include mat.all-component-typographies($dark-theme);
     @include mat.all-component-densities($dark-theme);
+    
+    body {
+      background-color: rgb(34, 34, 34);
+      color: rgb(204, 204, 204)
+    }
+
+    h1, h2, h3, h4, h5, h6, p {
+      color: rgb(204, 204, 204)
+    }
+  }
+}
+
+// Theme classes for manual switching
+.light-theme {
+  @include mat.core-color($light-theme);
+  @include mat.all-component-colors($light-theme);
+  @include mat.all-component-typographies($light-theme);
+  @include mat.all-component-densities($light-theme);
+  
+  body {
+    background-color: white;
+    color: rgb(38, 38, 38);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(38, 38, 38);
+    transition: color 0.3s ease;
+  }
+  
+  p {
+    color: rgb(64, 64, 64);
+    transition: color 0.3s ease;
+  }
+}
+
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+  @include mat.all-component-typographies($dark-theme);
+  @include mat.all-component-densities($dark-theme);
+  
+  body {
+    background-color: rgb(34, 34, 34);
+    color: rgb(204, 204, 204);
+  }
+
+
+  h1, h2, h3, h4, h5, h6 {
+    color: rgb(204, 204, 204);
+    transition: color 0.3s ease;
+  }
+
+  p {
+    color: rgb(204, 204, 204);
+    transition: color 0.3s ease;
   }
 }
