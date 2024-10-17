@@ -6,6 +6,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ColorService, Theme } from '../../services/color.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-settings-dialog',
@@ -18,6 +19,7 @@ import { ColorService, Theme } from '../../services/color.service';
 })
 export class SettingsDialogComponent implements OnInit{
   colorService = inject(ColorService)
+  dataService = inject(DataService)
   /** 'system', 'light' or 'dark' */
   selectedTheme: Theme = Theme.System;
   theme = Theme
