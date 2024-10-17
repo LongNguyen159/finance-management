@@ -5,3 +5,8 @@
 .light-text {
     color: rgb(38, 91, 181);
 }
+
+.app-menu.mat-mdc-menu-panel {
+    max-width: none !important;
+    width: 16rem !important;
+}

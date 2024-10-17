@@ -485,7 +485,12 @@ export class DataService {
     }
 
     openSettingsDialog() {
-        this.dialog.open(SettingsDialogComponent)
+        this.dialog.open(SettingsDialogComponent, {
+            width: '50rem',
+            maxWidth: '80vw',
+            height: '35rem',
+            maxHeight: '90vh',
+        })
     }
 
 

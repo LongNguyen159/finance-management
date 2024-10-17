@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -15,7 +15,8 @@ import { CommonModule } from '@angular/common';
     NavbarComponent, CommonModule
   ],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+  styleUrl: './navbar.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class NavbarComponent {
   @Input() showAddInput: boolean = true;

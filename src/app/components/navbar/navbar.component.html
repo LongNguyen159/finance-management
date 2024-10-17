@@ -28,7 +28,7 @@
     </div>
     
     <!-- RIGHTHAND SIDE BUTTONS -->
-    <div class="flex flex-row w-full justify-end">
+    <div class="flex flex-row w-full items-center justify-end">
 
         @if (showAddInput) {
             <div>
@@ -41,17 +41,25 @@
             </div>
         }
         
-        @if (showOpenDocs) {
-            <div>
-                <a mat-icon-button routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
-                    <mat-icon>help_outline</mat-icon>
-                </a>
-            </div>
-        }
 
-        <div class="pr-4">
-            <button mat-icon-button (click)="dataService.openSettingsDialog()">
-                <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+
+        <mat-menu #settingsMenu="matMenu" [class]="'app-menu'">
+            <button mat-menu-item (click)="dataService.openSettingsDialog()">
+              <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+              <span>Settings</span>
+            </button>
+            @if (showOpenDocs) {
+                <a mat-menu-item routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
+                    <mat-icon>help_outline</mat-icon>
+                    <span>Help</span>
+                </a>
+            }
+            
+        </mat-menu>
+          
+        <div class="pr-4 flex flex-row items-center">
+            <button mat-icon-button [matMenuTriggerFor]="settingsMenu">
+                <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon> <!-- Icon to open the menu -->
             </button>
         </div>
         
