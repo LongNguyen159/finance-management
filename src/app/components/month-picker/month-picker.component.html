@@ -14,7 +14,7 @@
     </button>
 </div>
 <div class="flex flex-row w-full justify-center">
-  <mat-menu #calendarMenu="matMenu" class="centered-menu" (closed)="calendarVisible.set(false)">
+  <mat-menu #calendarMenu="matMenu" [class]="'centered-menu'" (closed)="calendarVisible.set(false)">
     <mat-calendar class="w-80" startView="year"
         *ngIf="calendarVisible()"
         [selected]="selectedDate()"
