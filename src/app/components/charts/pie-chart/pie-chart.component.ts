@@ -1,9 +1,9 @@
 import { Component, effect, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { DataService, ProcessedOutputData } from '../../services/data.service';
-import { ColorService } from '../../services/color.service';
 import { CommonModule } from '@angular/common';
+import { DataService } from '../../../services/data.service';
+import { ColorService } from '../../../services/color.service';
 @Component({
   selector: 'app-pie-chart',
   standalone: true,

@@ -2,9 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { DidYouKnowDialogComponent } from '../components/did-you-know-dialog/did-you-know-dialog.component';
-import { InputListDialogComponent } from '../components/input-list-dialog/input-list-dialog.component';
-import { SettingsDialogComponent } from '../components/settings-dialog/settings-dialog.component';
+import { DidYouKnowDialogComponent } from '../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
+import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/settings-dialog.component';
+import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
 
 export interface MonthlyData {
     [month: string]: ProcessedOutputData;

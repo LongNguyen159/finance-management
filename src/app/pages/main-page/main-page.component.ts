@@ -1,13 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { SankeyChartComponent } from '../../components/sankey-chart/sankey-chart.component';
-import { PieChartComponent } from '../../components/pie-chart/pie-chart.component';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { InputListComponent } from '../../components/input-list/input-list.component';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { DidYouKnowDialogComponent } from '../../components/did-you-know-dialog/did-you-know-dialog.component';
+
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, MonthlyData, ProcessedOutputData } from '../../services/data.service';
@@ -17,6 +15,9 @@ import { NavbarComponent } from "../../components/navbar/navbar.component";
 import { ColorService } from '../../services/color.service';
 import { MonthPickerComponent } from "../../components/month-picker/month-picker.component";
 import { formatDateToString } from '../../utils/utils';
+import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
+import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
+import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
 @Component({
   selector: 'app-main-page',
   standalone: true,

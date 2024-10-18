@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { DemoChartComponent } from "../../components/demo-chart/demo-chart.component";
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
+import { DemoChartComponent } from '../../components/charts/demo-chart/demo-chart.component';
 
 @Component({
   selector: 'app-welcome-page',

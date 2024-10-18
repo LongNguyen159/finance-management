@@ -5,8 +5,10 @@ import {MatCardModule} from '@angular/material/card';
 import {MatRadioModule} from '@angular/material/radio';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ColorService, Theme } from '../../services/color.service';
-import { DataService } from '../../services/data.service';
+import { ColorService, Theme } from '../../../services/color.service';
+import { DataService } from '../../../services/data.service';
+
+
 
 @Component({
   selector: 'app-settings-dialog',
