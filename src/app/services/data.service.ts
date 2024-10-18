@@ -348,8 +348,23 @@ export class DataService {
     }
 
 
-    removeLocalStorageItem(key: string): void {
-        localStorage.removeItem(key);
+    removeMonthFromLocalStorage(key: string) {
+        // Get the current data from LocalStorage
+        const storedData = localStorage.getItem('monthlyData');
+    
+        if (storedData) {
+            // Parse the JSON data into an object
+            const data = JSON.parse(storedData);
+    
+            // Check if the key exists in the data
+            if (data[key]) {
+                // Delete the entry for the specified key
+                delete data[key];
+    
+                // Update LocalStorage with the modified data
+                localStorage.setItem('monthlyData', JSON.stringify(data));
+            }
+        }
     }
 
 

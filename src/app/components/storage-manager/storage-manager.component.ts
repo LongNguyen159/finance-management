@@ -6,6 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ColorService } from '../../services/color.service';
+import { UiService } from '../../services/ui.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../dialogs/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-storage-manager',
@@ -17,6 +20,8 @@ import { ColorService } from '../../services/color.service';
 export class StorageManagerComponent implements OnInit{
   dataService = inject(DataService)
   colorService = inject(ColorService)
+  uiService = inject(UiService)
+  dialog = inject(MatDialog)
   localStorageData: { [key: string]: any } = {};
   storedMonths: string[] = [];
   storedYears: string[] = [];
@@ -64,8 +69,19 @@ export class StorageManagerComponent implements OnInit{
 
 
   removeItem(key: string) {
-    this.dataService.removeLocalStorageItem(key);
-    this.refreshData();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '50vw',
+      height: '14rem',
+      data: { key }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.dataService.removeMonthFromLocalStorage(key);
+        this.uiService.showSnackBar(`"${key}" removed from local storage`);
+        this.refreshData();
+      }
+    });
   }
 
 }

@@ -39,6 +39,9 @@
               <mat-panel-title>
                 {{ month }}
               </mat-panel-title>
+              <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
+                <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
+              </button>
             </mat-expansion-panel-header>
   
             <div>
