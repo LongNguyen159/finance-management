@@ -54,7 +54,13 @@
                     <span>Help</span>
                 </a>
             }
-            
+
+            @if (showUpdates) {
+                <a mat-menu-item routerLink="/updates" class="flex flex-row justify-center items-center gap-2">
+                    <mat-icon fontSet="material-symbols-outlined">lightbulb</mat-icon>
+                    <span>View features</span>
+                </a>
+            }
         </mat-menu>
           
         <div class="pr-4 flex flex-row items-center">

@@ -34,6 +34,5 @@ export class SettingsDialogComponent implements OnInit{
   /** On selection change, call apply theme */
   applySelectedTheme(theme: Theme) {
     this.colorService.applyTheme(theme);
-    console.log('isManual theme set:', this.colorService.isManualThemeSet())
   }
 }

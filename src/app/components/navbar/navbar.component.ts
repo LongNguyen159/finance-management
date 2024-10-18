@@ -23,6 +23,7 @@ export class NavbarComponent {
   @Input() showBackButton: boolean = true;
   @Input() showOpenDocs: boolean = true;
   @Input() showLogo: boolean = true;
+  @Input() showUpdates: boolean = true;
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
