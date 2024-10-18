@@ -51,8 +51,18 @@
   
             <div>
               <ul>
-                <li *ngFor="let node of localStorageData[month].sankeyData.nodes">
-                  <p>{{ node.name }}: {{ node.value.toLocaleString() }}</p>
+                <li *ngFor="let input of localStorageData[month].rawInput">
+                  <p>
+                    {{ input.target }}: 
+                    <span [ngClass]="{
+                          'income-light': input.type === 'income' && !colorService.isDarkMode(),
+                          'income-dark': input.type === 'income' && colorService.isDarkMode(),
+                          'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
+                          'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                        }">
+                      {{ input.value.toLocaleString() }}
+                    </span>
+                  </p>
                 </li>
               </ul>
             </div>
