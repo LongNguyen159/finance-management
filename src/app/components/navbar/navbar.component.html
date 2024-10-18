@@ -55,6 +55,13 @@
                 </a>
             }
 
+            @if (showStorage) {
+                <a mat-menu-item routerLink="/storage" class="flex flex-row justify-center items-center gap-2">
+                    <mat-icon fontSet="material-symbols-outlined">database</mat-icon>
+                    <span>Storage Manager</span>
+                </a>
+            }
+
             @if (showUpdates) {
                 <a mat-menu-item routerLink="/updates" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon fontSet="material-symbols-outlined">lightbulb</mat-icon>

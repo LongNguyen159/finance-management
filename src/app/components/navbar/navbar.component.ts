@@ -25,6 +25,7 @@ export class NavbarComponent {
   @Input() showOpenDocs: boolean = true;
   @Input() showLogo: boolean = true;
   @Input() showUpdates: boolean = true;
+  @Input() showStorage: boolean = true;
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
