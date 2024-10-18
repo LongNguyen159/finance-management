@@ -40,13 +40,25 @@ export class StorageManagerComponent implements OnInit{
 
   getStoredMonths(): { [key: string]: string[] } {
     const monthsByYear: { [key: string]: string[] } = {};
+  
+    // Iterate over the months stored in localStorageData
     for (const month in this.localStorageData) {
       const year = month.split('-')[0];
+  
+      // Initialize the year key if it doesn't exist
       if (!monthsByYear[year]) {
         monthsByYear[year] = [];
       }
+  
+      // Push the month to the respective year array
       monthsByYear[year].push(month);
     }
+  
+    // Sort each year's months in reverse chronological order (newest first)
+    for (const year in monthsByYear) {
+      monthsByYear[year].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    }
+  
     return monthsByYear;
   }
 

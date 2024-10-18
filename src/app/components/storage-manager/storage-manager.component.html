@@ -1,11 +1,14 @@
 <div>
-    <mat-accordion>
-
+    <mat-accordion multi>
+      <!-- PARENT PANEL (YEARS) -->
       <mat-expansion-panel 
-        class="no-shadows round-borders" 
+        class="no-shadows round-borders"
+        [ngClass]="{
+          'panel-dark': colorService.isDarkMode(),
+          'panel-light': !colorService.isDarkMode(),
+        }"
         togglePosition="before" 
-        *ngFor="let year of storedYears; let i = index" 
->
+        *ngFor="let year of storedYears; let i = index" >
         
         <mat-expansion-panel-header class="header-light">
           <mat-panel-title class="text-xl">
@@ -16,15 +19,21 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
   
-        <mat-accordion>
+
+        <!-- CHILD PANEL (MONTHS) -->
+        <mat-accordion multi>
           <mat-expansion-panel 
             class="no-shadows round-borders"
-            togglePosition="before" 
+            togglePosition="before"
             [ngClass]="{
-              'bg-gray-light-mode': j % 2 === 0 && !colorService.isDarkMode(), 
-              'bg-gray-dark-mode': j % 2 === 0 && colorService.isDarkMode()
+              'highlight-light': (j % 2 === 0 || panel.expanded) && !colorService.isDarkMode(),
+              'highlight-dark': (j % 2 === 0 || panel.expanded) && colorService.isDarkMode(),
+              'panel-dark': j % 2 !== 0 && colorService.isDarkMode(),
+              'panel-light': j % 2 !== 0 && !colorService.isDarkMode(),
             }" 
-            *ngFor="let month of getStoredMonths()[year]; let j = index">
+            *ngFor="let month of getStoredMonths()[year]; let j = index"
+            #panel="matExpansionPanel"
+            >
             
             <mat-expansion-panel-header>
               <mat-panel-title>

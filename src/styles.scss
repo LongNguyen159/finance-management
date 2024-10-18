@@ -136,3 +136,12 @@ html {
     transition: color 0.3s ease;
   }
 }
+
+/** Apply this class to component selector when you use navbar
+  Example: <app-navbar class="navbar">...</app-navbar>
+*/
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}

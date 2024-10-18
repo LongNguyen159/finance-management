@@ -1,12 +1,14 @@
 import { Component, inject, OnInit, Renderer2 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
 import {MatRadioModule} from '@angular/material/radio';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ColorService, Theme } from '../../../services/color.service';
 import { DataService } from '../../../services/data.service';
+import { MatIconModule } from '@angular/material/icon';
+import { Router, RouterModule } from '@angular/router';
 
 
 
@@ -14,7 +16,8 @@ import { DataService } from '../../../services/data.service';
   selector: 'app-settings-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatCardModule,
-    MatRadioModule, CommonModule, FormsModule
+    MatRadioModule, CommonModule, FormsModule, MatIconModule,
+    RouterModule
   ],
   templateUrl: './settings-dialog.component.html',
   styleUrl: './settings-dialog.component.scss'
@@ -22,6 +25,8 @@ import { DataService } from '../../../services/data.service';
 export class SettingsDialogComponent implements OnInit{
   colorService = inject(ColorService)
   dataService = inject(DataService)
+  readonly router = inject(Router)
+  dialogRef = inject(MatDialogRef);
   /** 'system', 'light' or 'dark' */
   selectedTheme: Theme = Theme.System;
   theme = Theme
@@ -36,5 +41,10 @@ export class SettingsDialogComponent implements OnInit{
   /** On selection change, call apply theme */
   applySelectedTheme(theme: Theme) {
     this.colorService.applyTheme(theme);
+  }
+
+  navigateToDataManager() {
+    this.router.navigate(['/storage']);
+    this.dialogRef.close()
   }
 }
