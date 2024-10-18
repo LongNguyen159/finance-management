@@ -1,0 +1,23 @@
+.no-shadows.mat-expansion-panel {
+    box-shadow: none !important;
+}
+
+.border-light.mat-expansion-panel {
+    border-bottom: 1px solid rgb(209, 213, 219)
+}
+
+.border-dark.mat-expansion-panel {
+    border-bottom: 1px solid rgb(57, 64, 80)
+}
+.bg-gray-light-mode {
+    background-color: #f0f0f0; /* Light gray */
+}
+  
+  /* Dark mode background color for even indexed items */
+.bg-gray-dark-mode {
+    background-color: #232323; /* Darker gray for dark mode */
+}
+
+.round-borders.mat-expansion-panel {
+    border-radius: 12px !important;
+}

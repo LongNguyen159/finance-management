@@ -31,7 +31,7 @@ export class DialogsService {
     this.dialog.open(StorageDialogComponent, {
         width: '60rem',
         maxWidth: '80vw',
-        height: '35rem',
+        height: '55rem',
         maxHeight: '90vh',
     })
   }

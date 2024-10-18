@@ -1,12 +1,47 @@
 <div>
-    This will be your storage manager
-</div>
+    <mat-accordion>
 
-<div>
-    <!-- @for (item of localStorageData | keyvalue; track $index) {
-        <div>
-            <span>{{item.key}}</span>
-            <span>{{item.value}}</span>
-        </div>
-    } -->
-</div>
+      <mat-expansion-panel 
+        class="no-shadows round-borders" 
+        togglePosition="before" 
+        *ngFor="let year of storedYears; let i = index" 
+>
+        
+        <mat-expansion-panel-header class="header-light">
+          <mat-panel-title class="text-xl">
+            {{ year }}
+          </mat-panel-title>
+          <mat-panel-description>
+            Entries of {{ year }}
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+  
+        <mat-accordion>
+          <mat-expansion-panel 
+            class="no-shadows round-borders"
+            togglePosition="before" 
+            [ngClass]="{
+              'bg-gray-light-mode': j % 2 === 0 && !colorService.isDarkMode(), 
+              'bg-gray-dark-mode': j % 2 === 0 && colorService.isDarkMode()
+            }" 
+            *ngFor="let month of getStoredMonths()[year]; let j = index">
+            
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ month }}
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+  
+            <div>
+              <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+              <ul>
+                <li *ngFor="let node of localStorageData[month].sankeyData.nodes">
+                  <p>{{ node.name }}: {{ node.value.toLocaleString() }}</p>
+                </li>
+              </ul>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
