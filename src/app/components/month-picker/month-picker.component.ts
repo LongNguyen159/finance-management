@@ -13,6 +13,7 @@ import { default as _rollupMoment, Moment } from 'moment';
 import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { ColorService } from '../../services/color.service';
+import { DataService } from '../../services/data.service';
 
 
 const moment = _rollupMoment || _moment;
@@ -50,6 +51,7 @@ export class MonthPickerComponent implements OnInit {
   @Input() highlightedMonths: string[] = [];
   @Output() monthSelected = new EventEmitter<Date>()
   colorService = inject(ColorService)
+  dataService = inject(DataService)
 
 
 
@@ -72,10 +74,8 @@ export class MonthPickerComponent implements OnInit {
   customHeaderComponent = MonthPickerHeaderComponent
 
   ngOnInit(): void {
-    this.emitSelectedDate()
-  }
-
-  emitSelectedDate() {
+    /** Retrieve the selected data state from service */
+    this.selectedDate.set(this.dataService.selectedActiveDate);
     this.monthSelected.emit(this.selectedDate());
   }
 
@@ -83,33 +83,41 @@ export class MonthPickerComponent implements OnInit {
     const currentDate = this.selectedDate();
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() - 1);
-    this.selectedDate.set(newDate);
-    this.monthSelected.emit(newDate);
+    this.notifyMonthChanges(newDate);
   }
 
-  // Navigate to the next month
   nextMonth() {
     const currentDate = this.selectedDate();
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + 1);
-    this.selectedDate.set(newDate);
-    this.monthSelected.emit(newDate);
+    this.notifyMonthChanges(newDate);
   }
 
-  // Toggle calendar visibility
+  /** Toggle calendar visibility.
+   * The open/close state of calendar should be synced with open/close state of menu.
+   * Because it makes no sense when calendar is closed by menu is still open.
+   */
   toggleCalendar() {
     this.calendarVisible.set(!this.calendarVisible());
     this.calendarVisible() ? this.calendarMenuTrigger.openMenu() : this.calendarMenuTrigger.closeMenu();
   }
 
-  // Handle month selection
+  // Handle month selection on calendar view
   onMonthSelected(selectedMonth: Date) {
     // Create a new Date instance to ensure immutability
     const newDate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-    this.selectedDate.set(newDate);
-    this.calendarVisible.set(false); // Hide calendar after selection
+    this.notifyMonthChanges(newDate);
+
+    // Hide calendar & close menu after selection
+    this.calendarVisible.set(false);
     this.calendarMenuTrigger.closeMenu();
-    this.monthSelected.emit(newDate);
+  }
+
+  // Notify month changes to parent component
+  notifyMonthChanges(date: Date) {
+    this.selectedDate.set(date);
+    this.dataService.selectedActiveDate = date;
+    this.monthSelected.emit(date);
   }
 
   // Handle year selection (optional)

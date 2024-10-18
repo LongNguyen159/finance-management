@@ -59,6 +59,9 @@ export class DataService {
     isDemo: boolean = false
     isAdvancedShown: boolean = false
 
+    selectedActiveDate: Date = new Date();
+    
+
     demoLinks: UserDefinedLink[] = [
         { type: 'income', target: 'Main Salary', value: 2200 },
         { type: 'income', target: 'Side hustle', value: 800 },

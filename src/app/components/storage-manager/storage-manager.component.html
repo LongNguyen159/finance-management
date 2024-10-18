@@ -39,13 +39,15 @@
               <mat-panel-title>
                 {{ month }}
               </mat-panel-title>
+              <mat-panel-description>
+                <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+              </mat-panel-description>
               <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
                 <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
               </button>
             </mat-expansion-panel-header>
   
             <div>
-              <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
               <ul>
                 <li *ngFor="let node of localStorageData[month].sankeyData.nodes">
                   <p>{{ node.name }}: {{ node.value.toLocaleString() }}</p>
