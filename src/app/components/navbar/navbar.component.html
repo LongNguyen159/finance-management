@@ -48,6 +48,13 @@
               <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
               <span>Settings</span>
             </button>
+            
+            @if (showStorage) {
+                <a mat-menu-item routerLink="/storage" class="flex flex-row justify-center items-center gap-2">
+                    <mat-icon fontSet="material-symbols-outlined">monitoring</mat-icon>
+                    <span>Finance Manager</span>
+                </a>
+            }
             @if (showOpenDocs) {
                 <a mat-menu-item routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon>help_outline</mat-icon>
@@ -55,12 +62,6 @@
                 </a>
             }
 
-            @if (showStorage) {
-                <a mat-menu-item routerLink="/storage" class="flex flex-row justify-center items-center gap-2">
-                    <mat-icon fontSet="material-symbols-outlined">database</mat-icon>
-                    <span>Storage Manager</span>
-                </a>
-            }
 
             @if (showUpdates) {
                 <a mat-menu-item routerLink="/updates" class="flex flex-row justify-center items-center gap-2">

@@ -47,7 +47,7 @@ export class SettingsDialogComponent implements OnInit{
 
   navigateToDataManager() {
     if (this.router.url === '/storage') {
-      this.uiService.showSnackBar('Already in Storage Manager', 'Dismiss', 3000)
+      this.uiService.showSnackBar('Already in Finance Manager', 'Dismiss', 3000)
       return;
     }
     this.router.navigate(['/storage']);
