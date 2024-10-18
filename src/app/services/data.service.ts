@@ -286,6 +286,10 @@ export class DataService {
         });
     }
 
+    //#endregion
+
+
+    //#region Local Storage
     /** Save user data in localStorage. Data will be retrieved on app Init. */
     private saveData() {
         const nonEmptyMonthlyData = Object.keys(this.monthlyData).reduce((result, month) => {
@@ -306,8 +310,52 @@ export class DataService {
         return saved ? JSON.parse(saved) as MonthlyData: null;
     }
 
-    getAllMonthsData() {
-        return this.multiMonthEntries$.asObservable()
+    /** Return all local storage items */
+    getAllLocalStorageItems(): { [key: string]: any } {
+        const items: { [key: string]: any } = {};
+        
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i)!;
+          const value = localStorage.getItem(key)!;
+          
+          try {
+            // Attempt to parse the value if it's in JSON format
+            items[key] = JSON.parse(value);
+          } catch (e) {
+            // If parsing fails, treat it as a string
+            items[key] = value;
+          }
+        }
+        
+        return items;
+    }
+
+    getMonthlyDataFromLocalStorage(): { [key: string]: any } {
+        const monthlyData = localStorage.getItem('monthlyData');
+        if (!monthlyData) {
+            return {}
+        }
+        try {
+            return JSON.parse(monthlyData);
+        } catch (e) {
+            console.error('Failed to parse monthlyData', e);
+            return {};
+        }
+    }
+
+    setMonthlyData(monthlyData: { [key: string]: any }): void {
+        localStorage.setItem('monthlyData', JSON.stringify(monthlyData));
+    }
+
+
+    removeLocalStorageItem(key: string): void {
+        localStorage.removeItem(key);
+    }
+
+
+    /** Migrating logic: Remove old entry from older version of the app. */
+    removeOldUserFinancialData(): void {
+        localStorage.removeItem('userFinancialData');
     }
 
     /** Only keep data of last X years in local storage. 
@@ -333,6 +381,9 @@ export class DataService {
 
     //#endregion
 
+    getAllMonthsData() {
+        return this.multiMonthEntries$.asObservable()
+    }
 
     //#region Create Tree from Sankey
     /** Helper function to determine root node of sankey.

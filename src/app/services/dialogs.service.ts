@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DidYouKnowDialogComponent } from '../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/settings-dialog.component';
 import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
+import { StorageDialogComponent } from '../components/dialogs/storage-dialog/storage-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -18,12 +19,21 @@ export class DialogsService {
   }
 
   openSettingsDialog() {
-      this.dialog.open(SettingsDialogComponent, {
-          width: '50rem',
-          maxWidth: '80vw',
-          height: '35rem',
-          maxHeight: '90vh',
-      })
+    this.dialog.open(SettingsDialogComponent, {
+        width: '50rem',
+        maxWidth: '80vw',
+        height: '35rem',
+        maxHeight: '90vh',
+    })
+  }
+
+  openStorageDialog() {
+    this.dialog.open(StorageDialogComponent, {
+        width: '60rem',
+        maxWidth: '80vw',
+        height: '35rem',
+        maxHeight: '90vh',
+    })
   }
 
 

@@ -45,7 +45,6 @@ export class ColorService {
     const settings = localStorage.getItem('themeSettings');
     if (settings) {
       const { isDarkMode, isManualThemeSet, selectedTheme } = JSON.parse(settings);
-      console.log('settings:', settings)
       /** Set signals */
       this.isDarkMode.set(isDarkMode);
       this.isManualThemeSet.set(isManualThemeSet);
