@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { ColorService } from '../../services/color.service';
 import { CommonModule } from '@angular/common';
+import { DialogsService } from '../../services/dialogs.service';
 
 @Component({
   selector: 'app-navbar',
@@ -27,4 +28,5 @@ export class NavbarComponent {
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
+  dialogService = inject(DialogsService)
 }

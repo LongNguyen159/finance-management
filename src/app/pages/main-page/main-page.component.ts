@@ -18,6 +18,7 @@ import { formatDateToString } from '../../utils/utils';
 import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
+import { DialogsService } from '../../services/dialogs.service';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -35,7 +36,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
-
+  dialogService = inject(DialogsService)
   processedOutputData: ProcessedOutputData
   monthlyData: MonthlyData = {};
   highlightMonths: string[] = []

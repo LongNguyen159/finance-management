@@ -32,7 +32,7 @@
 
         @if (showAddInput) {
             <div>
-                <button mat-button (click)="dataService.openInputListDialog()">
+                <button mat-button (click)="dialogService.openInputListDialog()">
                     <div class="flex flex-row justify-center items-center gap-2">
                         <mat-icon>add_circle_outline</mat-icon>
                         <span>Add input</span>
@@ -44,7 +44,7 @@
 
 
         <mat-menu #settingsMenu="matMenu" [class]="'app-menu'">
-            <button mat-menu-item (click)="dataService.openSettingsDialog()">
+            <button mat-menu-item (click)="dialogService.openSettingsDialog()">
               <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
               <span>Settings</span>
             </button>
