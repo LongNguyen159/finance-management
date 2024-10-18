@@ -2,12 +2,14 @@
     <mat-accordion multi>
       <!-- PARENT PANEL (YEARS) -->
       <mat-expansion-panel 
+        #yearPanel 
         class="no-shadows round-borders"
         [ngClass]="{
           'panel-dark': colorService.isDarkMode(),
           'panel-light': !colorService.isDarkMode(),
         }"
         togglePosition="before" 
+        [expanded]="year === selectedYear"
         *ngFor="let year of storedYears; let i = index" >
         
         <mat-expansion-panel-header class="header-light">
@@ -15,7 +17,7 @@
             {{ year }}
           </mat-panel-title>
           <mat-panel-description>
-            Entries of {{ year }}
+            <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString() }}
           </mat-panel-description>
         </mat-expansion-panel-header>
   

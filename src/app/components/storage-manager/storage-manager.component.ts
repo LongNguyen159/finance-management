@@ -25,10 +25,14 @@ export class StorageManagerComponent implements OnInit{
   localStorageData: { [key: string]: any } = {};
   storedMonths: string[] = [];
   storedYears: string[] = [];
+  selectedYear: string = '';
 
   ngOnInit(): void {
     this.refreshData();
     this.storedYears = this.getStoredYears();
+
+    /** Sole purpose is to expand the panel if it matches the selected year in date picker */
+    this.selectedYear = this.dataService.selectedActiveDate.getFullYear().toString();
   }
 
   refreshData() {
@@ -65,6 +69,20 @@ export class StorageManagerComponent implements OnInit{
     }
   
     return monthsByYear;
+  }
+
+  calculateTotalSurplus(year: string): number {
+    let totalSurplus = 0;
+    const months = this.getStoredMonths()[year];
+  
+    if (months) {
+      for (const month of months) {
+        const balanceString = this.localStorageData[month].remainingBalance || '0';
+        const numericBalance = parseFloat(balanceString.replace(/[^0-9.-]+/g, '')); // Remove non-numeric characters
+        totalSurplus += isNaN(numericBalance) ? 0 : numericBalance; // Ensure fallback to 0 if parsing fails
+      }
+    }
+    return totalSurplus;
   }
 
 
