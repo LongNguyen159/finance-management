@@ -9,6 +9,7 @@ import { ColorService, Theme } from '../../../services/color.service';
 import { DataService } from '../../../services/data.service';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
+import { UiService } from '../../../services/ui.service';
 
 
 
@@ -30,6 +31,7 @@ export class SettingsDialogComponent implements OnInit{
   /** 'system', 'light' or 'dark' */
   selectedTheme: Theme = Theme.System;
   theme = Theme
+  uiService = inject(UiService)
 
   constructor(private renderer: Renderer2) {}
 
@@ -44,6 +46,11 @@ export class SettingsDialogComponent implements OnInit{
   }
 
   navigateToDataManager() {
+    if (this.router.url === '/storage') {
+      console.log('already on storage page');
+      this.uiService.showSnackBar('Already in Storage Manager', 'Dismiss', 3000)
+      return;
+    }
     this.router.navigate(['/storage']);
     this.dialogRef.close()
   }
