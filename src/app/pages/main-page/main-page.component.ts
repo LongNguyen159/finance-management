@@ -14,7 +14,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import { NavbarComponent } from "../../components/navbar/navbar.component";
 import { ColorService } from '../../services/color.service';
 import { MonthPickerComponent } from "../../components/month-picker/month-picker.component";
-import { formatDateToString } from '../../utils/utils';
+import { formatDateToString, onMonthChanges } from '../../utils/utils';
 import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
@@ -37,7 +37,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
   dataService = inject(DataService)
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
-  processedOutputData: ProcessedOutputData
+  entriesOfOneMonth: ProcessedOutputData
   monthlyData: MonthlyData = {};
   highlightMonths: string[] = []
 
@@ -71,14 +71,14 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
     })
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.processedOutputData = data
+      this.entriesOfOneMonth = data
       this.pieChartDataNetto = data.pieData
       this.totalExpenses = data.totalExpenses
       this.totalGrossIncome = data.totalGrossIncome
       this.totalNetIncome = data.totalUsableIncome
 
 
-      if (this.processedOutputData.totalTax == 0) {
+      if (this.entriesOfOneMonth.totalTax == 0) {
         this.showGrossIncomePieChart = false
 
         this.pieChartDataBrutto = this.pieChartDataNetto
@@ -87,52 +87,16 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
 
         this.pieChartDataBrutto = [
           ...this.pieChartDataNetto,
-          {name: 'Taxes', value: this.processedOutputData.totalTax}
+          {name: 'Taxes', value: this.entriesOfOneMonth.totalTax}
         ]
-        this.totalGrossIncome = this.processedOutputData.totalGrossIncome
+        this.totalGrossIncome = this.entriesOfOneMonth.totalGrossIncome
       }
     })
   }
 
 
   onMonthChanges(selectedMonth: Date) {    
-    if (Object.keys(this.monthlyData).length == 0) {
-      console.warn('month data is not ready by the time on month changes is called')
-      return
-    }
-
-    const monthString = formatDateToString(selectedMonth);
-    
-    // Check if the month exists in the MonthlyData
-    if (this.monthlyData[monthString]) {
-      // Month exists, retrieve the processed data
-      const existingData = this.monthlyData[monthString];
-      this.processedOutputData = existingData; // Update processed output data
-      console.log(`month ${monthString} exists, calling service to process input`)
-      this.dataService.processInputData(existingData.rawInput, monthString);
-      
-    } else {
-      // Month does not exist, create a new empty entry
-      this.processedOutputData = this.initializeEmptyData(monthString); // Initialize empty data
-      this.monthlyData[monthString] = this.processedOutputData; // Add to the monthlyData
-      console.log(`No data for ${monthString}. Initialized new entry.`);
-      this.dataService.processInputData([], monthString);
-    }
-  }
-
-  // Initialize empty data for a month
-  private initializeEmptyData(monthString: string): ProcessedOutputData {
-    return {
-      sankeyData: { nodes: [], links: [] }, // Adjust based on your SankeyData structure
-      totalUsableIncome: 0,
-      totalGrossIncome: 0,
-      totalTax: 0,
-      totalExpenses: 0,
-      remainingBalance: '0',
-      pieData: {},
-      rawInput: [],
-      month: monthString
-    };
+    onMonthChanges(selectedMonth, this.monthlyData, this.entriesOfOneMonth, this.dataService)
   }
 
   toggleLayout() {
