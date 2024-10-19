@@ -41,7 +41,7 @@ export class StorageManagerComponent implements OnInit{
     { value: '3-months', label: 'Last 3 months' },
     { value: '6-months', label: 'Last 6 months' },
     { value: '12-months', label: 'Last 12 months' },
-    { value: 'whole-year', label: 'Current Year' },
+    { value: 'whole-year', label: 'This Year' },
     { value: 'show-all', label: 'All time' }
   ];
 
@@ -107,7 +107,7 @@ export class StorageManagerComponent implements OnInit{
     // Handle 'show-all' case
     if (this.selectedOption === 'show-all') {
       this.filteredMonthsByYear = storedMonthsAllYears;
-      this.allFilteredMonths = Object.values(storedMonthsAllYears).flat().sort();
+      this.allFilteredMonths = Object.values(storedMonthsAllYears).flat();
       this.populateSurplusChartData(this.allFilteredMonths);
       return;
     }
@@ -116,7 +116,7 @@ export class StorageManagerComponent implements OnInit{
     if (this.selectedOption === 'whole-year') {
       // Only show months for the current year
       this.filteredMonthsByYear[currentYear] = storedMonthsAllYears[currentYear] || [];
-      this.allFilteredMonths = this.filteredMonthsByYear[currentYear].sort();
+      this.allFilteredMonths = this.filteredMonthsByYear[currentYear];
       this.populateSurplusChartData(this.allFilteredMonths);
       return; // Exit early since we're done filtering for this case
     }
@@ -148,7 +148,7 @@ export class StorageManagerComponent implements OnInit{
       if (monthsToDisplay.length > 0) {
         this.filteredMonthsByYear[year] = monthsToDisplay;
       }
-      this.populateSurplusChartData(this.allFilteredMonths.sort()); // Populate chart data based on the filtered months
+      this.populateSurplusChartData(this.allFilteredMonths); // Populate chart data based on the filtered months
     }
   }
 
@@ -159,17 +159,21 @@ export class StorageManagerComponent implements OnInit{
 
 
   populateSurplusChartData(allMonths: string[] = []) {
-    const filteredObject = Object.fromEntries(
-      Object.entries(this.localStorageData).filter(([key]) => allMonths.includes(key))
-    );
-
-    this.surplusChartData = Object.entries(filteredObject).map(([key, value]) => {
-      const month = key;
-      const surplus = parseLocaleStringToNumber(value.remainingBalance) || 0;
-      return { month, surplus }
-    })
-
-    console.log('chart data: ',this.surplusChartData);
+    const filteredData = Object.entries(this.localStorageData)
+      .filter(([month]) => allMonths.includes(month))
+      .map(([month, value]) => ({
+        month,
+        surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
+      }));
+  
+    // Sort the filtered data by month in chronological order
+    this.surplusChartData = filteredData.sort((a, b) => {
+      const dateA = new Date(a.month);
+      const dateB = new Date(b.month);
+      return dateA.getTime() - dateB.getTime();
+    });
+  
+    console.log('chart data: ', this.surplusChartData);
   }
 
   calculateTotalSurplus(year: string): number {
