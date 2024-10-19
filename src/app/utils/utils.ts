@@ -61,3 +61,10 @@ function initializeEmptyData(monthString: string): ProcessedOutputData {
       month: monthString
     };
 }
+
+
+export function convertYYYMMtoDate(inputString: string): Date {
+  const [year, month] = inputString.split('-').map(Number);
+  const date = new Date(year, month - 1);
+  return date
+}

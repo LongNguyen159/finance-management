@@ -16,6 +16,7 @@ import { ColorService } from '../../services/color.service';
 import { DataService } from '../../services/data.service';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { takeUntil } from 'rxjs';
+import { convertYYYMMtoDate } from '../../utils/utils';
 
 
 const moment = _rollupMoment || _moment;
@@ -87,8 +88,7 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
        * 
        * Each time data changes, mean somewhere in the app a new month is selected.
        */
-      const [year, month] = singleMonth.month.split('-').map(Number);
-      const date = new Date(year, month - 1);
+      const date = convertYYYMMtoDate(singleMonth.month);
 
       this.selectedDate.set(date);
     })
