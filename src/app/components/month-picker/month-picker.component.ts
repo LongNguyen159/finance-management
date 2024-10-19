@@ -14,6 +14,8 @@ import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { ColorService } from '../../services/color.service';
 import { DataService } from '../../services/data.service';
+import { BasePageComponent } from '../../base-components/base-page/base-page.component';
+import { takeUntil } from 'rxjs';
 
 
 const moment = _rollupMoment || _moment;
@@ -47,7 +49,7 @@ export const MY_FORMATS = {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MonthPickerComponent implements OnInit {
+export class MonthPickerComponent extends BasePageComponent implements OnInit {
   @Input() highlightedMonths: string[] = [];
   @Output() monthSelected = new EventEmitter<Date>()
   colorService = inject(ColorService)
@@ -77,6 +79,19 @@ export class MonthPickerComponent implements OnInit {
     /** Retrieve the selected data state from service */
     this.selectedDate.set(this.dataService.selectedActiveDate);
     this.monthSelected.emit(this.selectedDate());
+
+    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(singleMonth => {
+
+      /** Convert 'singleMonth.month' (a string with YYYY-MM format) to a date object.
+       * Then notify the component about selected date.
+       * 
+       * Each time data changes, mean somewhere in the app a new month is selected.
+       */
+      const [year, month] = singleMonth.month.split('-').map(Number);
+      const date = new Date(year, month - 1);
+
+      this.selectedDate.set(date);
+    })
   }
 
   previousMonth() {
