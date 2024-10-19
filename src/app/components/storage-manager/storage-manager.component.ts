@@ -59,6 +59,12 @@ export class StorageManagerComponent implements OnInit{
 
     /** Sole purpose is to expand the panel if it matches the selected year in date picker */
     this.selectedYear = this.dataService.selectedActiveDate.getFullYear().toString();
+
+    /** Refresh data if input changes */
+    this.dataService.getProcessedData().subscribe(singleMonthData => {
+      this.refreshData()
+      this.filterMonths()
+    })
   }
 
   refreshData() {

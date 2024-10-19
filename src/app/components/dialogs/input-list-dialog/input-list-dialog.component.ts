@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -18,7 +18,8 @@ import { MonthPickerComponent } from "../../month-picker/month-picker.component"
   imports: [MatButtonModule, MatDialogModule,
     InputListComponent, MonthPickerComponent],
   templateUrl: './input-list-dialog.component.html',
-  styleUrl: './input-list-dialog.component.scss'
+  styleUrl: './input-list-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputListDialogComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
@@ -28,8 +29,8 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
 
   ngOnInit(): void {
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.monthString = formatYearMonthToLongDate(data.month)
       this.singleMonthData = data
+      this.monthString = formatYearMonthToLongDate(data.month)
     })
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
