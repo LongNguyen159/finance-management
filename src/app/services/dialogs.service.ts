@@ -20,8 +20,8 @@ export class DialogsService {
 
   openSettingsDialog() {
     this.dialog.open(SettingsDialogComponent, {
-        width: '50rem',
-        maxWidth: '80vw',
+        width: '45rem',
+        maxWidth: '60vw',
         height: '35rem',
         maxHeight: '90vh',
     })
