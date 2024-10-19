@@ -51,19 +51,22 @@
   
             <div>
               <ul>
-                <li *ngFor="let input of localStorageData[month].rawInput">
-                  <p>
-                    {{ input.target }}: 
-                    <span [ngClass]="{
-                          'income-light': input.type === 'income' && !colorService.isDarkMode(),
-                          'income-dark': input.type === 'income' && colorService.isDarkMode(),
-                          'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
-                          'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
-                        }">
-                      {{ input.value.toLocaleString() }}
-                    </span>
-                  </p>
-                </li>
+                @for (input of localStorageData[month].rawInput; track $index) {
+                  <li>
+                    <p>
+                      {{ input.target }}: 
+                      <span [ngClass]="{
+                            'income-light': input.type === 'income' && !colorService.isDarkMode(),
+                            'income-dark': input.type === 'income' && colorService.isDarkMode(),
+                            'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
+                            'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                          }">
+                        {{ input.value.toLocaleString() }}
+                      </span>
+                    </p>
+                  </li>
+
+                }
               </ul>
             </div>
           </mat-expansion-panel>
