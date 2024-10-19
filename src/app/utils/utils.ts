@@ -9,3 +9,7 @@ export function formatYearMonthToLongDate(yearMonth: string): string {
     const date = new Date(parseInt(year), parseInt(month) - 1); // month is zero-indexed
     return date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
 }
+
+export function parseLocaleStringToNumber(localeString: string): number {
+    return parseFloat(localeString.replace(/[^0-9.-]+/g, ''))
+}

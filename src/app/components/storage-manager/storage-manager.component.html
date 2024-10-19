@@ -1,76 +1,85 @@
 <div>
-    <mat-accordion multi>
-      <!-- PARENT PANEL (YEARS) -->
-      <mat-expansion-panel 
-        #yearPanel 
-        class="no-shadows round-borders"
-        [ngClass]="{
-          'panel-dark': colorService.isDarkMode(),
-          'panel-light': !colorService.isDarkMode(),
-        }"
-        togglePosition="before" 
-        [expanded]="year === selectedYear"
-        *ngFor="let year of storedYears; let i = index" >
-        
-        <mat-expansion-panel-header class="header-light">
-          <mat-panel-title class="text-xl">
-            {{ year }}
-          </mat-panel-title>
-          <mat-panel-description>
-            <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString() }}
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-  
+  <div class="filter-dropdown">
+    <mat-form-field appearance="fill">
+      <mat-label>Select Timeframe</mat-label>
+      <mat-select [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
+        <mat-option *ngFor="let option of availableOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
 
-        <!-- CHILD PANEL (MONTHS) -->
-        <mat-accordion multi>
-          <mat-expansion-panel 
-            class="no-shadows round-borders"
-            togglePosition="before"
-            [ngClass]="{
-              'highlight-light': (j % 2 === 0 || panel.expanded) && !colorService.isDarkMode(),
-              'highlight-dark': (j % 2 === 0 || panel.expanded) && colorService.isDarkMode(),
-              'panel-dark': j % 2 !== 0 && colorService.isDarkMode(),
-              'panel-light': j % 2 !== 0 && !colorService.isDarkMode(),
-            }" 
-            *ngFor="let month of getStoredMonths()[year]; let j = index"
-            #panel="matExpansionPanel"
-            >
-            
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                {{ month }}
-              </mat-panel-title>
-              <mat-panel-description>
-                <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
-              </mat-panel-description>
-              <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
-                <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
-              </button>
-            </mat-expansion-panel-header>
-  
-            <div>
-              <ul>
-                @for (input of localStorageData[month].rawInput; track $index) {
-                  <li>
+  <mat-accordion multi>
+    <ng-container *ngFor="let year of storedYears">
+      <ng-container *ngIf="filteredMonthsByYear[year] && filteredMonthsByYear[year].length > 0">
+        <mat-expansion-panel 
+          #yearPanel 
+          class="no-shadows round-borders"
+          [ngClass]="{
+            'panel-dark': colorService.isDarkMode(),
+            'panel-light': !colorService.isDarkMode(),
+          }"
+          togglePosition="before" 
+          [expanded]="year === selectedYear">
+          
+          <mat-expansion-panel-header class="header-light">
+            <mat-panel-title class="text-xl">
+              {{ year }}
+            </mat-panel-title>
+            <mat-panel-description>
+              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString() }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+    
+          <!-- Child panel logic continues here -->
+          <mat-accordion multi>
+            <mat-expansion-panel 
+              class="no-shadows round-borders"
+              togglePosition="before"
+              [ngClass]="{
+                'highlight-light': (j % 2 === 0 || panel.expanded) && !colorService.isDarkMode(),
+                'highlight-dark': (j % 2 === 0 || panel.expanded) && colorService.isDarkMode(),
+                'panel-dark': j % 2 !== 0 && colorService.isDarkMode(),
+                'panel-light': j % 2 !== 0 && !colorService.isDarkMode(),
+              }" 
+              *ngFor="let month of filteredMonthsByYear[year]; let j = index"
+              #panel="matExpansionPanel">
+              
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{ month }}
+                </mat-panel-title>
+                <mat-panel-description>
+                  <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+                </mat-panel-description>
+                <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
+                  <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
+                </button>
+              </mat-expansion-panel-header>
+    
+              <div>
+                <ul>
+                  <li *ngFor="let input of localStorageData[month].rawInput">
                     <p>
                       {{ input.target }}: 
                       <span [ngClass]="{
-                            'income-light': input.type === 'income' && !colorService.isDarkMode(),
-                            'income-dark': input.type === 'income' && colorService.isDarkMode(),
-                            'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
-                            'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
-                          }">
+                        'income-light': input.type === 'income' && !colorService.isDarkMode(),
+                        'income-dark': input.type === 'income' && colorService.isDarkMode(),
+                        'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
+                        'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                      }">
                         {{ input.value.toLocaleString() }}
                       </span>
                     </p>
                   </li>
+                </ul>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-expansion-panel>
+      </ng-container>
+    </ng-container>
+  </mat-accordion>
+</div>
 
-                }
-              </ul>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </div>
