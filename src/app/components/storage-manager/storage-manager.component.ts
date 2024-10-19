@@ -11,12 +11,16 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { parseLocaleStringToNumber } from '../../utils/utils';
+import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
+import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatIconModule, MatExpansionModule,
-    MatSelectModule
+    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent],
+  providers: [
+    provideEcharts(),
   ],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss'

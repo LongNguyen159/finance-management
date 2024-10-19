@@ -10,6 +10,8 @@
     </mat-form-field>
   </div>
 
+  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
+
   <mat-accordion multi>
     <ng-container *ngFor="let year of storedYears">
       <ng-container *ngIf="filteredMonthsByYear[year] && filteredMonthsByYear[year].length > 0">
