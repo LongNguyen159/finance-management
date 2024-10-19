@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
@@ -23,7 +23,8 @@ import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-cha
     provideEcharts(),
   ],
   templateUrl: './storage-manager.component.html',
-  styleUrl: './storage-manager.component.scss'
+  styleUrl: './storage-manager.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class StorageManagerComponent implements OnInit{
   dataService = inject(DataService);
