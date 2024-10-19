@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, ProcessedOutputData } from '../../services/data.service';
 import { UserDefinedLink } from '../models';
@@ -48,7 +48,7 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
-export class InputListComponent extends BasePageComponent implements OnInit {
+export class InputListComponent extends BasePageComponent implements OnInit, OnDestroy {
   dataService = inject(DataService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
 
@@ -309,17 +309,23 @@ export class InputListComponent extends BasePageComponent implements OnInit {
   //#endregion
 
   // Submit form and emit the data (to parent component or a service)
-  // onSubmit(): void {
-  //   if (this.linkForm.valid) {
-  //     const formData: UserDefinedLink[] = this.linkForm.value.links;
-  //     this.dataService.processInputData(formData, this.currentMonthTest)
-  //   }
-  // }
+  onSubmit(): void {
+    if (this.linkForm.valid) {
+      const formData: UserDefinedLink[] = this.linkForm.value.links;
+      this.dataService.processInputData(formData, this.dataMonth)
+    }
+  }
 
   closeAutoComplete(index: number): void {
     const trigger = this.autocompleteTriggers.toArray()[index];
     setTimeout(() => {
       trigger.closePanel();
     }, 0);
+  }
+
+  
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.onSubmit()
   }
 }

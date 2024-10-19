@@ -6,17 +6,11 @@
       </div>
     </div>
     <div formArrayName="links">
-      <!-- <div class="flex flex-row w-full justify-end items-center">
-        <span>clear all</span>
-        <button mat-icon-button color="warn" (click)="clearAllLinks()">
-          <mat-icon fontSet="material-symbols-outlined">delete_sweep</mat-icon>
-        </button>
-      </div> -->
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         <!-- Target -->
         <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
-          <input matInput formControlName="target" placeholder="Entry name" (blur)="updateInput()" />
+          <input matInput formControlName="target" placeholder="Entry name" />
           <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
             This name is not allowed.
           </mat-error>
@@ -28,7 +22,7 @@
         
         <!-- Type (Income, Expense, Tax) -->
         <mat-form-field appearance="fill">
-          <mat-select formControlName="type" placeholder="Type" (selectionChange)="updateInput()">
+          <mat-select formControlName="type" placeholder="Type">
             <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
           </mat-select>
         </mat-form-field>
