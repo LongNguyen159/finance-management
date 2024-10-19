@@ -17,7 +17,12 @@ export function parseLocaleStringToNumber(localeString: string): number {
 }
 
 
-
+/** Process data for the requested month.
+ * @param selectedMonth The month to process. Type Date.
+ * @param allMonthsData The data for all months. Type MonthlyData.
+ * @param singleMonthEntries The data for the selected month. Type ProcessedOutputData.
+ * @param dataService Function requires dataService to process the input data.
+ */
 export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, singleMonthEntries: ProcessedOutputData , dataService: DataService) {    
     if (Object.keys(allMonthsData).length == 0) {
       console.warn('month data is not ready by the time on month changes is called')
