@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { InputListComponent } from '../../components/input-list/input-list.component';
@@ -29,9 +29,14 @@ import { DialogsService } from '../../services/dialogs.service';
     provideEcharts(),
   ],
   templateUrl: './main-page.component.html',
-  styleUrl: './main-page.component.scss'
+  styleUrl: './main-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MainPageComponent extends BasePageComponent implements OnInit{
+export class MainPageComponent extends BasePageComponent implements OnInit, OnChanges {
+  @Input() hasMonthPicker: boolean = true;
+  @Input() hasNavbar: boolean = false;
+  @Input() selectedMonth: Date = new Date();
+
   isVerticalLayout = true;
 
   dataService = inject(DataService)
@@ -92,6 +97,12 @@ export class MainPageComponent extends BasePageComponent implements OnInit{
         this.totalGrossIncome = this.entriesOfOneMonth.totalGrossIncome
       }
     })
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['selectedMonth']) {
+      this.onMonthChanges(this.selectedMonth)
+    }
   }
 
 
