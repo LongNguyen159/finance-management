@@ -5,7 +5,7 @@ import { InputListComponent } from '../../components/input-list/input-list.compo
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-
+import {MatChipsModule} from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, MonthlyData, ProcessedOutputData } from '../../services/data.service';
@@ -24,7 +24,8 @@ import { DialogsService } from '../../services/dialogs.service';
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
-    UserManualComponent, NavbarComponent, MonthPickerComponent],
+    UserManualComponent, NavbarComponent, MonthPickerComponent,
+    MatChipsModule],
   providers: [
     provideEcharts(),
   ],
