@@ -5,13 +5,13 @@
     </header>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">About Easy Sankey</h2>
+        <h2 class="text-2xl font-semibold">Why Easy Sankey?</h2>
         <p class="mt-2">Easy Sankey helps you create clear and simple financial visualisations without the need for Excel or technical skills. Just a few easy inputs, and you can see where your money goes!</p>
     </section>
 
     <section class="mb-6">
         <h2 class="text-2xl font-semibold">Getting Started</h2>
-        <p class="mt-2">To get started, click the <span class="font-semibold">"+ Add Input" button</span> in the top-right corner (Of the chart page, not this page of course!). This will open a menu where you can enter your financial information.</p>
+        <p class="mt-2">To get started, click the <span class="font-semibold">"Edit Input" button</span> in the top-right corner. This will open a menu where you can enter your financial information.</p>
     </section>
 
     <section class="mb-6">
@@ -21,13 +21,13 @@
             <li style="margin-bottom: 0.5rem;">
                 <strong>Type:</strong> Choose the type of entry:
                 <ul class="list-disc list-inside mt-1" style="margin-left: 1.5rem;">
-                    <li><strong>Income:</strong> Your earnings (no need to fill out the "Part of" field).</li>
-                    <li><strong>Expense:</strong> Your spending. Use "Part of" to specify what the expense is tied to (e.g., rent or groceries). This is optional. If not specified, the expense will be assumed to come from income.</li>
+                    <li><strong>Income:</strong> Your earnings.</li>
+                    <li><strong>Expense:</strong> Your spending.</li>
                     <li><strong>Tax:</strong> Your tax amount. You can only enter this once.</li>
                 </ul>
             </li>
             <li style="margin-bottom: 0.5rem;">
-                <strong>Name:</strong> Give your entry a name (e.g., "Rent" or "Groceries") to easily track it.
+                <strong>Name:</strong> Give your entry a name (e.g., "Rent" or "Groceries").
             </li>
             <li style="margin-bottom: 0.5rem;">
                 <strong>Amount:</strong> Enter the amount of money (e.g., "800" for rent).
@@ -35,11 +35,27 @@
             <li style="margin-bottom: 0.5rem;">
                 <strong>Part of (optional):</strong> This field lets you break down expenses.
                 <ul class="list-disc list-inside mt-1" style="margin-left: 1.5rem;">
-                    <li><strong>Example:</strong> For "Housing," you can specify that it includes "Rent" and "Utilities," both of which are part of "Housing."</li>
+                    <li><strong>Example:</strong> For "Housing," you can specify that it includes "Rent" and "Wifi," both of which are part of "Housing."</li>
                     <li><strong>Default behavior:</strong> If no "Part of" is specified for an expense, it will automatically be linked to your income.</li>
-                    <li><strong>"Default income" option:</strong> Choose this option if you want the expense to link from your assumed default income.</li>
+                    <li><strong>"Default income" option:</strong> Choose this option if you want to remove the grouping.</li>
                 </ul>
             </li>
+            <div class="rounded-2xl p-4 mt-4"
+                [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}"
+            >
+                <p class="font-bold">💡 Tips:</p>
+                <ul class="list-disc list-inside mt-2" style="margin-left: 1.5rem; line-height: 1.5;">
+                    <li class="mb-2">
+                        "Part of" can be used to group expenses together!
+                    </li>
+                    <li class="mb-6">
+                        If you are unsure what is the total value of your expenses, just define a group with initial value of 0. The app will calculate the total value of the group for you as you add more items into it.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Example:</strong> You define a group called "Housing" with initial value of 0. You add "Rent" with value of 800 and "Wifi" with value of 50, then specify them as 'Part of' "Housing". The app will automatically calculate the total value of "Housing" as 850.
+                    </li>
+                </ul>                
+            </div>
         </ul>
     </section>
 
@@ -58,7 +74,6 @@
         <p class="mt-2">This app runs locally on your device, so your data stays safe with you! No need to worry about privacy issues.
             Don’t believe me? Try turning off your internet connection and see if the app still works!
         </p>
-        <p>(Heck, I don’t even have a server)</p>
         <p>For the technical folks, this app uses LocalStorage to save your data.</p>
         <br>
         <p>
