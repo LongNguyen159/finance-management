@@ -1,5 +1,7 @@
 import { DataService, MonthlyData, ProcessedOutputData } from "../services/data.service";
 
+
+/** Format a Date object into YYYY-MM format */
 export function formatDateToString(date: Date): string {
     const year = date.getFullYear(); // Get the full year
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month and pad with leading zero
@@ -30,6 +32,8 @@ export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, 
     }
 
     const monthString = formatDateToString(selectedMonth);
+
+    console.log('processing data for month: ', monthString)
     
     // Check if the month exists in the MonthlyData
     if (allMonthsData[monthString]) {

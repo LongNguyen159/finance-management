@@ -30,7 +30,7 @@ import { DialogsService } from '../../services/dialogs.service';
   ],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class MainPageComponent extends BasePageComponent implements OnInit, OnChanges {
   @Input() hasMonthPicker: boolean = true;
@@ -77,6 +77,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.entriesOfOneMonth = data
+      console.log('main page component received processed data:', data)
       this.pieChartDataNetto = data.pieData
       this.totalExpenses = data.totalExpenses
       this.totalGrossIncome = data.totalGrossIncome
@@ -101,7 +102,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['selectedMonth']) {
-      this.onMonthChanges(this.selectedMonth)
+      // this.onMonthChanges(this.selectedMonth)
     }
   }
 
