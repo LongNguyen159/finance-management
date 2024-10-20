@@ -10,7 +10,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { parseLocaleStringToNumber } from '../../utils/utils';
+import { parseLocaleStringToNumber, sortYearsDescending } from '../../utils/utils';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
@@ -79,7 +79,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   getStoredYears(): string[] {
     const years = Object.keys(this.localStorageData).map(month => month.split('-')[0]);
-    return Array.from(new Set(years)); // Get unique years
+    const sortedYears = sortYearsDescending(Array.from(new Set(years))); 
+    return sortedYears
   }
 
   getStoredMonths(): { [key: string]: string[] } {

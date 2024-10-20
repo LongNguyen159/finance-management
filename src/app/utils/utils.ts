@@ -72,3 +72,8 @@ export function convertYYYMMtoDate(inputString: string): Date {
   const date = new Date(year, month - 1);
   return date
 }
+
+
+export function sortYearsDescending(years: string[]): string[] {
+  return years.sort((a, b) => Number(b) - Number(a));
+}
