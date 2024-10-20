@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { parseLocaleStringToNumber } from '../../utils/utils';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
+import { takeUntil } from 'rxjs';
+import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 
 @Component({
   selector: 'app-storage-manager',
@@ -25,8 +27,9 @@ import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-cha
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Default
 })
-export class StorageManagerComponent implements OnInit{
+export class StorageManagerComponent extends BasePageComponent implements OnInit{
   dataService = inject(DataService);
   colorService = inject(ColorService);
   uiService = inject(UiService);
@@ -61,9 +64,11 @@ export class StorageManagerComponent implements OnInit{
     this.selectedYear = this.dataService.selectedActiveDate.getFullYear().toString();
 
     /** Refresh data if input changes */
-    this.dataService.getProcessedData().subscribe(singleMonthData => {
-      this.refreshData()
-      this.filterMonths()
+    this.dataService.isDataSaved().pipe(takeUntil(this.componentDestroyed$)).subscribe(isSaved => {
+      if (isSaved) {
+        this.refreshData()
+        this.filterMonths()
+      }
     })
   }
 

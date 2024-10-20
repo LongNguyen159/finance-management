@@ -77,26 +77,27 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
     })
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.entriesOfOneMonth = data
-      console.log('main page component received processed data:', data)
-      this.pieChartDataNetto = data.pieData
-      this.totalExpenses = data.totalExpenses
-      this.totalGrossIncome = data.totalGrossIncome
-      this.totalNetIncome = data.totalUsableIncome
-
-
-      if (this.entriesOfOneMonth.totalTax == 0) {
-        this.showGrossIncomePieChart = false
-
-        this.pieChartDataBrutto = this.pieChartDataNetto
-      } else {
-        this.showGrossIncomePieChart = true
-
-        this.pieChartDataBrutto = [
-          ...this.pieChartDataNetto,
-          {name: 'Taxes', value: this.entriesOfOneMonth.totalTax}
-        ]
-        this.totalGrossIncome = this.entriesOfOneMonth.totalGrossIncome
+      if (data) {
+        this.entriesOfOneMonth = data
+        this.pieChartDataNetto = data.pieData
+        this.totalExpenses = data.totalExpenses
+        this.totalGrossIncome = data.totalGrossIncome
+        this.totalNetIncome = data.totalUsableIncome
+  
+  
+        if (this.entriesOfOneMonth.totalTax == 0) {
+          this.showGrossIncomePieChart = false
+  
+          this.pieChartDataBrutto = this.pieChartDataNetto
+        } else {
+          this.showGrossIncomePieChart = true
+  
+          this.pieChartDataBrutto = [
+            ...this.pieChartDataNetto,
+            {name: 'Taxes', value: this.entriesOfOneMonth.totalTax}
+          ]
+          this.totalGrossIncome = this.entriesOfOneMonth.totalGrossIncome
+        }
       }
     })
   }

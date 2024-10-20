@@ -5,7 +5,7 @@
     <div class="p-4 pt-0">
         <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">
             <div class="flex flex-row w-full justify-center">
-                <mat-chip *ngIf="entriesOfOneMonth.month == '2024-09'" style="width: fit-content !important;">
+                <mat-chip *ngIf="entriesOfOneMonth.rawInput === dataService.demoLinks" style="width: fit-content !important;">
                     Demo Data
                 </mat-chip>
             </div>

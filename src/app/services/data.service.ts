@@ -55,6 +55,7 @@ export class DataService {
     private processedSingleMonthEntries$ = new BehaviorSubject<ProcessedOutputData>(this.singleMonthEntries)
     private multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
 
+    private dataSaved$ = new BehaviorSubject<boolean>(false)
 
     isDemo: boolean = false
     isAdvancedShown: boolean = false
@@ -77,6 +78,7 @@ export class DataService {
 
     constructor() {
         //#region Retrieve data
+        this.removeOldUserFinancialData() // Remove old key from previous versions
         /** Retrieve data from LocalStorage on App start */
         const savedData = this.loadData();
         if (savedData) {
@@ -276,7 +278,7 @@ export class DataService {
 
         // Emit the processed data
         this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
-        this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
+        // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         this.isDemo = false; // Reset demo flag
 
         this.saveData()
@@ -309,6 +311,8 @@ export class DataService {
         }, {} as MonthlyData);
     
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
+        this.multiMonthEntries$.next(nonEmptyMonthlyData);
+        this.dataSaved$.next(true);
     }
 
     // Load data from LocalStorage
@@ -370,6 +374,7 @@ export class DataService {
     
                 // Update LocalStorage with the modified data
                 localStorage.setItem('monthlyData', JSON.stringify(data));
+                this.processInputData([], key); // Process empty data to update the UI
             }
         }
     }
@@ -420,10 +425,7 @@ export class DataService {
 
 
 
-    /** Get all months entries. Key as yyyy-mm format, value are corresponding entries. */
-    getAllMonthsData() {
-        return this.multiMonthEntries$.asObservable()
-    }
+
 
     //#region Create Tree from Sankey
     /** Helper function to determine root node of sankey.
@@ -574,8 +576,21 @@ export class DataService {
 
 
 
+    //#region: Getters
     /** Get single month entries */
     getProcessedData() {
         return this.processedSingleMonthEntries$.asObservable()
     }
+
+
+    /** Get all months entries. Key as yyyy-mm format, value are corresponding entries. */
+    getAllMonthsData() {
+        return this.multiMonthEntries$.asObservable()
+    }
+
+    isDataSaved() {
+        return this.dataSaved$.asObservable()
+    }
+
+    //#endregion
 }
