@@ -40,7 +40,7 @@ export class DataService {
         links: []
     }
     private remainingBalance: string = '-';
-    singleMonthEntries: ProcessedOutputData = {
+    private singleMonthEntries: ProcessedOutputData = {
         sankeyData: this.sankeyData,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -52,14 +52,17 @@ export class DataService {
         month: ''
     }
 
-    processedSingleMonthEntries$ = new BehaviorSubject<ProcessedOutputData>(this.singleMonthEntries)
-    multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
+    private processedSingleMonthEntries$ = new BehaviorSubject<ProcessedOutputData>(this.singleMonthEntries)
+    private multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
 
 
     isDemo: boolean = false
     isAdvancedShown: boolean = false
 
     selectedActiveDate: Date = new Date();
+
+    private copiedLinksKey = 'copiedLinks';
+
     
 
     demoLinks: UserDefinedLink[] = [
@@ -95,6 +98,7 @@ export class DataService {
         const now = new Date();
         return now.toISOString().slice(0, 10);
     }
+    
 
     //#region: Process Input Data
     processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false): void {
@@ -399,6 +403,24 @@ export class DataService {
 
     //#endregion
 
+
+    //#region Copy & Paste Links
+    // Store in sessionStorage
+    storeCopiedLinks(links: UserDefinedLink[]) {
+        sessionStorage.setItem(this.copiedLinksKey, JSON.stringify(links));
+    }
+
+    // Retrieve from sessionStorage
+    retrieveCopiedLinks(): UserDefinedLink[] | null {
+        const data = sessionStorage.getItem(this.copiedLinksKey);
+        return data ? JSON.parse(data) : null;
+    }
+
+    //#endregion
+
+
+
+    /** Get all months entries. Key as yyyy-mm format, value are corresponding entries. */
     getAllMonthsData() {
         return this.multiMonthEntries$.asObservable()
     }
@@ -552,7 +574,7 @@ export class DataService {
 
 
 
-
+    /** Get single month entries */
     getProcessedData() {
         return this.processedSingleMonthEntries$.asObservable()
     }

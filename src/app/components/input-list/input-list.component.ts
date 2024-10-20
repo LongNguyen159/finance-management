@@ -8,11 +8,12 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import { debounceTime, filter, take, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { UiService } from '../../services/ui.service';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -50,6 +51,7 @@ function nonEmptyValidator(): ValidatorFn {
 
 export class InputListComponent extends BasePageComponent implements OnInit, OnDestroy {
   dataService = inject(DataService)
+  uiService = inject(UiService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
 
 
@@ -120,6 +122,31 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     this.initialFormState = [...formData]; // Update the stored form state
   }
 
+
+  //#region Copy & Paste Links
+  copyLinks(): void {
+    const currentLinks = this.linkForm.value.links;
+    if (currentLinks && currentLinks.length > 0) {
+      this.dataService.storeCopiedLinks(currentLinks);
+      this.uiService.showSnackBar(`'${this.dataMonth}' copied to clipboard!`, 'Ok');
+    } else {
+      this.uiService.showSnackBar('Nothing to copy!', 'Dismiss');
+    }
+  }
+
+  // Method to paste stored data back into the form
+  pasteLinks(): void {
+    const copiedLinks = this.dataService.retrieveCopiedLinks();
+    if (copiedLinks) {
+      this.populateInputFields({ rawInput: copiedLinks } as ProcessedOutputData);
+      this.uiService.showSnackBar('Links pasted!', 'Ok');
+    } else {
+      this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
+    }
+  }
+  //#endregion
+
+
   //#region Form Initialisation
   /** Function to create form input.
    * @param link Optional parameter to populate the form with existing data
@@ -170,6 +197,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
   populateInputFields(selectedMonthData: ProcessedOutputData): void {
     console.log('populating input fields...', selectedMonthData.rawInput)
 
+    /** clear the form and repopulate it with new data. */
     this.linkArray.clear({ emitEvent: false });
     
     const links = this.dataService.isDemo ? this.demoLinks : selectedMonthData.rawInput;

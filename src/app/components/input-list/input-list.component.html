@@ -1,10 +1,16 @@
 <div [formGroup]="linkForm" class="link-form-container">
+  <div class="flex flex-row w-full items-center">
+    <div class="flex flex-row gap-2">
+      <button mat-stroked-button color="primary" (click)="copyLinks()">Copy</button>
+      <button mat-stroked-button (click)="pasteLinks()">Paste</button>
+    </div>
     <div class="flex flex-row w-full items-center justify-end gap-1">
       <div>Show advanced</div>
       <div>
         <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
       </div>
     </div>
+  </div>
     <div formArrayName="links">
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         <!-- Target -->
@@ -84,15 +90,11 @@
   
     <div class="flex flex-row gap-4 mt-4 w-full text-center justify-center">
       <div>
-        <button mat-stroked-button color="primary" (click)="addLink()">Add New Link</button>
+        <button mat-stroked-button color="primary" (click)="addLink()">
+          <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+          <span>Add Entries</span>
+        </button>
       </div>
-
-        <!-- Submit Button -->
-        <!-- <div class="submit-button">
-            <button mat-raised-button color="accent" (click)="onSubmit()" [disabled]="!linkForm.valid">
-            Submit
-            </button>
-        </div> -->
     </div>
     
   </div>
