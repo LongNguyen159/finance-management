@@ -3,10 +3,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { InputListComponent } from '../input-list/input-list.component';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { ColorService } from '../../services/color.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { DialogsService } from '../../services/dialogs.service';
 
 @Component({
@@ -30,4 +30,16 @@ export class NavbarComponent {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
+  private location = inject(Location)
+  private router = inject(Router)
+
+
+  navigateBack() {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      // If no back history, navigate to a fallback route (e.g., homepage)
+      this.router.navigate(['/']);
+    }
+  }
 }
