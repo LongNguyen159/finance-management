@@ -8,7 +8,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { ColorService } from '../../services/color.service';
 import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../dialogs/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { parseLocaleStringToNumber, sortYearsDescending } from '../../utils/utils';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
@@ -203,25 +203,21 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
   removeItem(key: string) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '50vw',
-      height: '14rem',
-      data: {
-        title: `Are you sure you want to delete ${key}?`,
-        message: `This action cannot be undone.`,
-        confirmLabel: 'Delete',
-        cancelLabel: 'Cancel',
-        confirmColor: 'warn'
-      }
-    });
+    const dialogData: ConfirmDialogData = {
+      title: `Are you sure you want to delete ${key}?`,
+      message: `This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      confirmColor: 'warn'
+    }
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
+    this.uiService.openConfirmDialog(dialogData).subscribe((confirmed: boolean | undefined) => {
+      if (confirmed) {
         this.dataService.removeMonthFromLocalStorage(key);
         this.uiService.showSnackBar(`"${key}" removed from local storage`);
         this.refreshData();
         this.filterMonths(); // Re-filter after removal
       }
-    });
+    })
   }
 }

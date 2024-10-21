@@ -26,9 +26,9 @@
             </mat-card-content>
         </mat-card>
 
-        <mat-card appearance="outlined">
+        <!-- <mat-card appearance="outlined">
             <mat-card-header class="mb-4">
-                <mat-card-title>Data Control</mat-card-title>
+                <mat-card-title>Finance Manager</mat-card-title>
             </mat-card-header>
             <mat-card-content>
                 <div class="flex flex-col justify-center items-start">
@@ -39,6 +39,22 @@
                         <span>Go to Finance Manager</span>
                         <mat-icon fontSet="material-symbols-outlined">arrow_forward</mat-icon>
                     </a>
+                </div>
+            </mat-card-content>
+        </mat-card> -->
+        <mat-card appearance="outlined">
+            <mat-card-header class="mb-4">
+                <mat-card-title>Data Control</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="flex flex-col justify-center items-start">
+                    <p class="!mb-6">
+                        Your data is saved in LocalStorage. You can clear all data (Factory Reset the app) here.
+                        All data will be lost and cannot be recovered.
+                    </p>
+                    <button mat-stroked-button color="warn" (click)="clearLocalStorage()">
+                        Clear all data
+                    </button>
                 </div>
             </mat-card-content>
         </mat-card>

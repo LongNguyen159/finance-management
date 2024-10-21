@@ -10,6 +10,7 @@ import { DataService } from '../../../services/data.service';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
+import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 
 
 
@@ -52,5 +53,20 @@ export class SettingsDialogComponent implements OnInit{
     }
     this.router.navigate(['/storage']);
     this.dialogRef.close()
+  }
+  clearLocalStorage() {
+    const dialogData: ConfirmDialogData = {
+      title: 'Are you sure you want to clear Local Storage?',
+      message: 'This will delete all your data. You will see the welcome screen next time you open the app.',
+      confirmLabel: 'Delete',
+      confirmColor: 'warn',
+      cancelLabel: 'Cancel'
+    }
+    this.uiService.openConfirmDialog(dialogData).subscribe((confirmed: boolean | undefined) => {
+      if (confirmed) {
+        localStorage.clear();
+        this.uiService.showSnackBar('Local Storage Cleared!', 'Dismiss', 3000)
+      }
+    })
   }
 }
