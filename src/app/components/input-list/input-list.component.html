@@ -28,8 +28,8 @@
         
         <!-- Type (Income, Expense, Tax) -->
         <mat-form-field appearance="fill">
-          <mat-select formControlName="type" placeholder="Type">
-            <mat-option *ngFor="let type of linkTypes" [disabled]="type === 'tax' && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
+          <mat-select formControlName="type" placeholder="Type" (selectionChange)="updateInput()">
+            <mat-option *ngFor="let type of linkTypes" [disabled]="type == entryTypes.Tax && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
           </mat-select>
         </mat-form-field>
 

@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, ProcessedOutputData } from '../../services/data.service';
-import { UserDefinedLink } from '../models';
+import { EntryType, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
@@ -61,7 +61,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
   sourceSearchControl = new FormControl(); // Search control for the dropdown
   initialFormState: UserDefinedLink[] = []; // Initial form state to compare with new data
 
-  linkTypes = ['income', 'expense', 'tax']
+  linkTypes: EntryType[] = [EntryType.Income, EntryType.Expense, EntryType.Tax]; // Types of links
+  entryTypes = EntryType; // Enum for entry types
 
   existingNodes: string[] = []; // To hold existing node names
   filteredNodes: string[] = []; // To hold filtered suggestions for auto-complete
@@ -88,6 +89,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
       this.dataMonth = data.month
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];
+      this.taxNodeExists = this._hasTaxNode(data.rawInput);
 
       /** Populate links with predefined data */
       this.populateInputFields(data)
@@ -165,14 +167,14 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     });
 
     // Disable the source field if type is 'income'
-    if (linkGroup.get('type')?.value === 'income' || linkGroup.get('type')?.value === 'tax') {
+    if (linkGroup.get('type')?.value == EntryType.Income || linkGroup.get('type')?.value == EntryType.Tax) {
       linkGroup.get('source')?.disable({ emitEvent: false });
     }
 
 
     // Subscribe to changes in the type field
     linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
-      if (value === 'income') {
+      if (value == EntryType.Income || value == EntryType.Tax) {
         linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if income
       } else {
         linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
@@ -225,7 +227,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
 
   /** Helper function to determine tax node in links */
   private _hasTaxNode(data: UserDefinedLink[]): boolean {
-    return data.some(item => item.type === 'tax')
+    return data.some(item => item.type == EntryType.Tax)
   }
 
   

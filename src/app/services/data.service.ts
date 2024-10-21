@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
+import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 export interface MonthlyData {
     [month: string]: ProcessedOutputData;
@@ -67,13 +67,13 @@ export class DataService {
     
 
     demoLinks: UserDefinedLink[] = [
-        { type: 'income', target: 'Main Salary', value: 2200 },
-        { type: 'income', target: 'Side hustle', value: 800 },
-        { type: 'tax', target: 'Taxes', value: 1100},
-        { type: 'expense', target: 'Housing', value: 800},
-        { type: 'expense', target: 'Rent', value: 500, source: 'Housing'},
-        { type: 'expense', target: 'WiFi', value: 40, source: 'Housing'},
-        { type: 'expense', target: 'Groceries', value: 300},
+        { type: EntryType.Income, target: 'Main Salary', value: 2200 },
+        { type: EntryType.Income, target: 'Side hustle', value: 800 },
+        { type: EntryType.Tax, target: 'Taxes', value: 1100},
+        { type: EntryType.Expense, target: 'Housing', value: 800},
+        { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
+        { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
+        { type: EntryType.Expense, target: 'Groceries', value: 300},
     ]
 
     constructor() {
@@ -104,13 +104,13 @@ export class DataService {
 
     //#region: Process Input Data
     processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false): void {
-        const nodesMap = new Map<string, { value: number, type: string }>(); // Map to hold unique nodes and their total values and types
+        const nodesMap = new Map<string, { value: number, type: EntryType }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
         const incomeNodes: string[] = []; // Track income nodes
         let totalIncomeValue = 0; // Variable to store total income value
         let totalTaxValue = 0; // Variable to store total tax value
         let singleIncome = false; // Flag to check if there is only one income source
-        const hasTax = userDefinedLinks.some(link => link.type === 'tax'); // Check if there is any tax link
+        const hasTax = userDefinedLinks.some(link => link.type === EntryType.Tax); // Check if there is any tax link
 
         /** Demo flag: Only set to true when the app loads for the first time to show our demo
          * graph for first time users.
@@ -129,13 +129,13 @@ export class DataService {
             }
 
             // Step 1.2: Process links to accumulate income, taxes, and expenses
-            if (link.type === 'income') {
+            if (link.type == EntryType.Income) {
                 incomeNodes.push(link.target);
                 nodesMap.get(link.target)!.value += link.value; // Add income only once
-            } else if (link.type === 'tax') {
+            } else if (link.type === EntryType.Tax) {
                 nodesMap.get(link.target)!.value += link.value;
                 totalTaxValue += link.value;
-            } else if (link.type === 'expense') {
+            } else if (link.type === EntryType.Expense) {
                 if (!link.source) {
                     // Top-level expenses (those without a source)
                     nodesMap.get(link.target)!.value += link.value;
@@ -150,7 +150,7 @@ export class DataService {
         // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
         if (incomeNodes.length > 1) {
             totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node)?.value || 0), 0);
-            nodesMap.set('Total Income', { value: totalIncomeValue, type: 'income' });
+            nodesMap.set('Total Income', { value: totalIncomeValue, type: EntryType.Income });
         } else if (incomeNodes.length === 1) {
             singleIncome = true; // Only one income source, no need for a "Total Income" node
             totalIncomeValue = nodesMap.get(incomeNodes[0])?.value || 0;
@@ -158,13 +158,13 @@ export class DataService {
 
         // Step 3: Handle Usable Income if there's a tax link, otherwise use the full income directly
         const incomeSource = singleIncome ? incomeNodes[0] : 'Total Income';
-        const taxLink = userDefinedLinks.find(link => link.type === 'tax');
+        const taxLink = userDefinedLinks.find(link => link.type == EntryType.Tax);
 
         if (hasTax && taxLink) {
             let usableIncome = totalIncomeValue;
             const taxValue = nodesMap.get(taxLink.target)?.value || 0;
             usableIncome -= taxValue; // Subtract taxes
-            nodesMap.set('Usable Income', { value: usableIncome, type: 'income' }); // Set Usable Income node
+            nodesMap.set('Usable Income', { value: usableIncome, type: EntryType.Income }); // Set Usable Income node
 
             // Step 4: Create links from Income to Usable Income and Taxes
             links.push({
@@ -188,7 +188,7 @@ export class DataService {
 
         // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
         userDefinedLinks.forEach(link => {
-            if (link.type === 'income') {
+            if (link.type == EntryType.Income) {
                 if (!singleIncome) {
                     links.push({
                         source: link.target,
@@ -196,7 +196,7 @@ export class DataService {
                         value: link.value
                     });
                 }
-            } else if (link.type === 'expense') {
+            } else if (link.type == EntryType.Expense) {
                 const sourceNode = link.source || expenseSource;
         
                 // Check if the source node exists in the nodesMap; if not, use the default expenseSource
