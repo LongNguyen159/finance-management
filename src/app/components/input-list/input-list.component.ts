@@ -105,6 +105,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     });
   }
 
+  /** Update Input, this function when triggered will send the input data to service to update the form state.
+   * Only trigger this function to reatively update the form.
+   * For example like summing the total children value to reflect on the parent node.
+   * Else, we just submit the form on component destroy.
+   */
   updateInput() {
     if (!this.linkForm.valid && this.updateFromService) return;
   
