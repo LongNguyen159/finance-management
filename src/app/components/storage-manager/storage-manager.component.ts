@@ -206,7 +206,13 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '50vw',
       height: '14rem',
-      data: { key }
+      data: {
+        title: `Are you sure you want to delete ${key}?`,
+        message: `This action cannot be undone.`,
+        confirmLabel: 'Delete',
+        cancelLabel: 'Cancel',
+        confirmColor: 'warn'
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
