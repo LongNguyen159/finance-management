@@ -17,6 +17,7 @@ import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
+import { UserDefinedLink } from '../models';
 
 @Component({
   selector: 'app-storage-manager',
@@ -169,6 +170,12 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Trigger filtering when a new option is selected from the dropdown */
   onOptionSelected() {
     this.filterMonths(); // Filter the months based on selected option
+  }
+
+  getSortedRawInputWithoutSource(month: string) {
+    return this.localStorageData[month].rawInput
+      .filter((item: UserDefinedLink) => !item.source) // Filter out items with no source
+      .sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
   }
 
 
