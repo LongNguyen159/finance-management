@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DidYouKnowDialogComponent } from '../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/settings-dialog.component';
 import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
+import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expense-dialog/insert-expense-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,16 @@ export class DialogsService {
         width: '45rem',
         maxWidth: '60vw',
         height: '35rem',
+        maxHeight: '90vh',
+    })
+  }
+
+
+  openInsertIntoDialog() {
+    this.dialog.open(InsertExpenseDialogComponent, {
+        width: '30rem',
+        maxWidth: '60vw',
+        height: '20rem',
         maxHeight: '90vh',
     })
   }

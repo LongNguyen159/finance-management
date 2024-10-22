@@ -3,7 +3,7 @@
         <app-month-picker (monthSelected)="onMonthChanges($event)" [highlightedMonths]="highlightMonths"></app-month-picker>
     </app-navbar>
     <div class="p-4 pt-0">
-        <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">
+        <div [ngClass]="isVerticalLayout ? 'flex flex-col p-4' : 'grid grid-cols-2 gap-8 p-4'">
             <div class="flex flex-row w-full justify-center">
                 <mat-chip *ngIf="entriesOfOneMonth.rawInput === dataService.demoLinks" style="width: fit-content !important;">
                     Demo Data
@@ -11,6 +11,12 @@
             </div>
             <!-- CHART SECTION -->
             <div class="flex flex-col gap-8">
+                <div class="flex flex-row w-full items-center justify-end">
+                    <button mat-button (click)="dialogService.openInsertIntoDialog()">
+                        <mat-icon>add</mat-icon>
+                        <span>Insert Into</span>
+                    </button>
+                </div>
                 <app-sankey-chart
                     [sankeyData]="entriesOfOneMonth.sankeyData"
                     [remainingBalance]="entriesOfOneMonth.remainingBalance"
