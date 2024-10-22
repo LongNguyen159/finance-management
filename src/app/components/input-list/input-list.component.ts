@@ -129,6 +129,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     this.initialFormState = [...formData]; // Update the stored form state
   }
 
+  checkTaxNodeExists() {
+    this.taxNodeExists = this._hasTaxNode(this.linkForm.value.links);
+  }
+
 
   //#region Copy & Paste Links
   copyLinks(): void {
