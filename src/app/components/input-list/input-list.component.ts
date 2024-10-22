@@ -219,7 +219,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     /** clear the form and repopulate it with new data. */
     this.linkArray.clear({ emitEvent: false });
     
-    const links = this.dataService.isDemo ? this.demoLinks : selectedMonthData.rawInput;
+    const links = this.dataService.isDemo() ? this.demoLinks : selectedMonthData.rawInput;
     
     // Populate form without emitting valueChanges
     links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));

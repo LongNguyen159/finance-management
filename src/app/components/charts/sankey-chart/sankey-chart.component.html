@@ -4,9 +4,11 @@
     </h2>
 </div>
 <div class="flex flex-row w-full p-4 justify-center">
-    <mat-chip style="width: fit-content !important;">
-        Demo Data
-    </mat-chip>
+    @if (dataService.isDemo()) {
+        <mat-chip style="width: fit-content !important;">
+            Demo Data
+        </mat-chip>
+    }
 </div>
 <div
     echarts

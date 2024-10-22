@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Signal, signal } from '@angular/core';
 import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
@@ -60,7 +60,7 @@ export class DataService {
 
     private dataSaved$ = new BehaviorSubject<boolean>(false)
 
-    isDemo: boolean = false
+    isDemo = signal(false)
     isAdvancedShown: boolean = false
 
     selectedActiveDate: Date = new Date();
@@ -70,7 +70,7 @@ export class DataService {
     
 
     demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Salary', value: 2200 },
+        { type: EntryType.Income, target: 'Salary', value: 2200, demo: true },
         { type: EntryType.Expense, target: 'Housing', value: 800},
         { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
         { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
@@ -102,7 +102,6 @@ export class DataService {
     private processDemoData(): void {
         const todaysDate = new Date();
         this.processInputData(this.demoLinks, formatDateToString(todaysDate), true);
-        localStorage.setItem('firstTime', 'false');
     }
     
     private loadExistingData(): void {
@@ -149,12 +148,12 @@ export class DataService {
         /** Demo flag: Only set to true when the app loads for the first time to show our demo
          * graph for first time users.
          */
-        if (demo) {
-            this.isDemo = true;
+        if (demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
+            this.isDemo.set(true)
         } else {
-            this.isDemo = false;
+            this.isDemo.set(false)
         }
-        console.log('is demo?', this.isDemo);
+        console.log('is demo:', this.isDemo());
 
 
         // Step 1: Initialize the nodes without adding values yet
@@ -290,10 +289,6 @@ export class DataService {
             return updatedNode ? { ...node, value: updatedNode.value } : node; // Update value or leave as is
         });
 
-        // const updatedLinks = links.map(link => {
-        //     const updatedLink = updatedRawInput.find(l => l.source === link.source && l.target === link.target);
-        //     return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
-        // });
         const updatedLinks = links.map(link => {
             const updatedLink = updatedRawInput.find(l => l.target === link.target);
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
@@ -314,9 +309,8 @@ export class DataService {
         // Emit the processed data
         this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
         // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
-        this.isDemo = false; // Reset demo flag
 
-        if (showSnackbarWhenDone && !this.isDemo) {
+        if (showSnackbarWhenDone && !this.isDemo()) {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 
