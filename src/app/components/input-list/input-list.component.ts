@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import { DataService, ProcessedOutputData } from '../../services/data.service';
+import { DataService, SingleMonthData } from '../../services/data.service';
 import { EntryType, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -157,7 +157,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
   pasteLinks(): void {
     const copiedLinks = this.dataService.retrieveCopiedLinks();
     if (copiedLinks) {
-      this.populateInputFields({ rawInput: copiedLinks } as ProcessedOutputData);
+      this.populateInputFields({ rawInput: copiedLinks } as SingleMonthData);
       this.uiService.showSnackBar('Links pasted!', 'Ok');
     } else {
       this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
@@ -213,7 +213,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
 
 
   /** Initiliase/Populate the form with predefined data */
-  populateInputFields(selectedMonthData: ProcessedOutputData): void {
+  populateInputFields(selectedMonthData: SingleMonthData): void {
     console.log('populating input fields...', selectedMonthData.rawInput)
 
     /** clear the form and repopulate it with new data. */

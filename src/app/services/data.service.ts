@@ -4,10 +4,12 @@ import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToString } from '../utils/utils';
 export interface MonthlyData {
-    [month: string]: ProcessedOutputData;
+    [month: string]: SingleMonthData;
 }
-
-export interface ProcessedOutputData {
+/** TODO:
+ * Rename this model to `SingleMonthData`
+ */
+export interface SingleMonthData {
     sankeyData: SankeyData;
     totalUsableIncome: number;
     totalGrossIncome: number;
@@ -43,7 +45,7 @@ export class DataService {
         links: []
     }
     private remainingBalance: string = '-';
-    private singleMonthEntries: ProcessedOutputData = {
+    private singleMonthEntries: SingleMonthData = {
         sankeyData: this.sankeyData,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -55,7 +57,7 @@ export class DataService {
         month: ''
     }
 
-    private processedSingleMonthEntries$ = new BehaviorSubject<ProcessedOutputData>(this.singleMonthEntries)
+    private processedSingleMonthEntries$ = new BehaviorSubject<SingleMonthData>(this.singleMonthEntries)
     private multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
 
     private dataSaved$ = new BehaviorSubject<boolean>(false)

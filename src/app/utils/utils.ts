@@ -1,4 +1,4 @@
-import { DataService, MonthlyData, ProcessedOutputData } from "../services/data.service";
+import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
 
 
 /** Format a Date object into YYYY-MM format */
@@ -25,7 +25,7 @@ export function parseLocaleStringToNumber(localeString: string): number {
  * @param singleMonthEntries The data for the selected month. Type ProcessedOutputData.
  * @param dataService Function requires dataService to process the input data.
  */
-export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, singleMonthEntries: ProcessedOutputData , dataService: DataService) {    
+export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, singleMonthEntries: SingleMonthData , dataService: DataService) {    
     if (Object.keys(allMonthsData).length == 0) {
       console.warn('month data is not ready by the time on month changes is called')
       return
@@ -52,7 +52,7 @@ export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, 
     }
 }
 
-function initializeEmptyData(monthString: string): ProcessedOutputData {
+function initializeEmptyData(monthString: string): SingleMonthData {
     return {
       sankeyData: { nodes: [], links: [] }, // Adjust based on your SankeyData structure
       totalUsableIncome: 0,

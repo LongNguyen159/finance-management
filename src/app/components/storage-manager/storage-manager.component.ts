@@ -16,6 +16,7 @@ import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-cha
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
+import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
 
 @Component({
   selector: 'app-storage-manager',
@@ -226,6 +227,13 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    * @param month: string in YYYY-MM format.
    */
   getMonthsDetails(month: string) {
+    this.dialog.open(MainPageDialogComponent, {
+      data: this.localStorageData[month],
+      width: '90vw',
+      height: '80vh',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+    })
     
   }
 }

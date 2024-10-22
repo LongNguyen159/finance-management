@@ -24,6 +24,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
   @Input() totalExpenses: number = -1
   @Input() totalIncome: number = -1
 
+  @Input() chartHeight: string = '70vh'
+
   pieOption: EChartsOption = {}
   pieMergeOption: EChartsOption = {}
   

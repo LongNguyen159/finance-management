@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
-import { DataService, ProcessedOutputData } from '../../../services/data.service';
+import { DataService, SingleMonthData } from '../../../services/data.service';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
@@ -33,7 +33,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   allOptions: string[] = []
   filteredOptions: string[] = []
-  userSingleMonthEntries: ProcessedOutputData
+  userSingleMonthEntries: SingleMonthData
 
 
   constructor() {
@@ -45,7 +45,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   }
 
   ngOnInit(): void {
-    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
       this.userSingleMonthEntries = data;
       this.allOptions = data.rawInput.map(item => item.target)
       /** Assign a shallow copy of the `allOptions` array to avoid mutations */

@@ -6,7 +6,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 
 import { takeUntil } from 'rxjs';
 import { InputListComponent } from '../../input-list/input-list.component';
-import { DataService, MonthlyData, ProcessedOutputData } from '../../../services/data.service';
+import { DataService, MonthlyData, SingleMonthData } from '../../../services/data.service';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
 import { formatYearMonthToLongDate, onMonthChanges } from '../../../utils/utils';
 import { MonthPickerComponent } from "../../month-picker/month-picker.component";
@@ -24,7 +24,7 @@ import { MonthPickerComponent } from "../../month-picker/month-picker.component"
 export class InputListDialogComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   monthString: string = ''
-  singleMonthData: ProcessedOutputData
+  singleMonthData: SingleMonthData
   allMonthsData: MonthlyData
 
   ngOnInit(): void {

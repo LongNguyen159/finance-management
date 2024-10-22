@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { UserManualComponent } from '../../components/user-manual/user-manual.component';
-import { DataService, MonthlyData, ProcessedOutputData } from '../../services/data.service';
+import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";
@@ -43,7 +43,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   dataService = inject(DataService)
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
-  entriesOfOneMonth: ProcessedOutputData
+  entriesOfOneMonth: SingleMonthData
   monthlyData: MonthlyData = {};
   highlightMonths: string[] = []
 
@@ -76,7 +76,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       this.highlightMonths = Object.keys(filteredMonthlyData); // Get keys of filtered data
     })
 
-    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
       if (data && Object.keys(data).length > 0) {
         this.entriesOfOneMonth = data
         this.pieChartDataNetto = data.pieData

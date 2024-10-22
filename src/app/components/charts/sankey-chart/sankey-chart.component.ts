@@ -23,6 +23,8 @@ export class SankeyChartComponent implements OnChanges {
   @Input() sankeyData: SankeyData
   @Input() remainingBalance: string = '-'
 
+  @Input() chartHeight: string = '70vh'
+
   dataService = inject(DataService)
   colorService = inject(ColorService)
 
