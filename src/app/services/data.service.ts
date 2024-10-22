@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
+import { UiService } from './ui.service';
 export interface MonthlyData {
     [month: string]: ProcessedOutputData;
 }
@@ -34,6 +35,7 @@ export interface ExpenseData {
   providedIn: 'root'
 })
 export class DataService {
+    private UiService = inject(UiService)
     monthlyData: MonthlyData = {};
     private sankeyData: SankeyData = {
         nodes: [],
@@ -103,7 +105,13 @@ export class DataService {
     
 
     //#region: Process Input Data
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false): void {
+        const negatives = userDefinedLinks.filter(link => link.value < 0);
+        if (negatives.length > 0) {
+            this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
+            return;
+        }
+
         const nodesMap = new Map<string, { value: number, type: EntryType }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
         const incomeNodes: string[] = []; // Track income nodes
@@ -280,6 +288,10 @@ export class DataService {
         this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
         // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         this.isDemo = false; // Reset demo flag
+
+        if (showSnackbarWhenDone && !this.isDemo) {
+            this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
+        }
 
         this.saveData()
 

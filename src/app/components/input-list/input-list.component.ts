@@ -114,6 +114,14 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     if (!this.linkForm.valid && this.updateFromService) return;
   
     const formData: UserDefinedLink[] = this.linkForm.value.links;
+
+
+    /** Do not allow negative values on form */
+    const negatives = formData.filter(link => link.value < 0);
+    if (negatives.length > 0) { 
+      this.uiService.showSnackBar('Negative values are not allowed!', 'Dismiss')
+      return;
+    }
   
     // Early exit if there are no changes compared to the initial form state
     if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
