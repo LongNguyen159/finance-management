@@ -85,7 +85,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     /** On response from service, update forms to reflect correct amount if children expenses
      * exceed their parent.
      */
-    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.dataMonth = data.month
       this.existingNodes = data.sankeyData.nodes.map(node => node.name)
       this.filteredNodes = [...this.existingNodes];

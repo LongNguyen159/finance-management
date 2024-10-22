@@ -82,7 +82,7 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
     console.log('Selected date:', this.selectedDate());
     this.monthSelected.emit(this.selectedDate());
 
-    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(singleMonth => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(singleMonth => {
 
 
       /** Convert 'singleMonth.month' (a string with YYYY-MM format) to a date object.

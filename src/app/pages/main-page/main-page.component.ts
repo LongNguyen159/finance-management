@@ -76,7 +76,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       this.highlightMonths = Object.keys(filteredMonthlyData); // Get keys of filtered data
     })
 
-    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
       if (data && Object.keys(data).length > 0) {
         this.entriesOfOneMonth = data
         this.pieChartDataNetto = data.pieData

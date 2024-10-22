@@ -28,7 +28,7 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
   allMonthsData: MonthlyData
 
   ngOnInit(): void {
-    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       if (data) {
         this.singleMonthData = data
         this.monthString = formatYearMonthToLongDate(data.month)

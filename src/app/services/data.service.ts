@@ -611,7 +611,7 @@ export class DataService {
 
     //#region: Getters
     /** Get single month entries */
-    getProcessedData() {
+    getSingleMonthData() {
         return this.processedSingleMonthEntries$.asObservable()
     }
 

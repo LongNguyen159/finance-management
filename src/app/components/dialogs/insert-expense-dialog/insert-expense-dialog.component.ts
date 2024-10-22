@@ -45,7 +45,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   }
 
   ngOnInit(): void {
-    this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: ProcessedOutputData) => {
       this.userSingleMonthEntries = data;
       this.allOptions = data.rawInput.map(item => item.target)
       /** Assign a shallow copy of the `allOptions` array to avoid mutations */

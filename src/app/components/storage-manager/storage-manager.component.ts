@@ -15,12 +15,13 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatIconModule, MatExpansionModule,
-    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent],
+    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule],
   providers: [
     provideEcharts(),
   ],
@@ -219,5 +220,12 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         this.filterMonths(); // Re-filter after removal
       }
     })
+  }
+
+  /** This function is used to get details of the corresponding month. 
+   * @param month: string in YYYY-MM format.
+   */
+  getMonthsDetails(month: string) {
+    
   }
 }
