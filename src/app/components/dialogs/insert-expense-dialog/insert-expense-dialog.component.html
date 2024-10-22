@@ -29,8 +29,7 @@
       </p>
       <ul class="leading-loose">
         <li><strong>Single Value:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20</span> or <span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">-30</span></li>
-        <li><strong>Multiple Values:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 30 -10</span> (separated by spaces)</li>
-        <li><strong>This also works:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 + 30 - 10</span></li>
+        <li><strong>Multiple Values:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 + 30 - 10</span></li>
       </ul>
       <p class="!mt-4">Letters and special characters are not allowed.</p>
     </div>
