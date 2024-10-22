@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
+import { formatDateToString } from '../utils/utils';
 export interface MonthlyData {
     [month: string]: ProcessedOutputData;
 }
@@ -69,9 +70,7 @@ export class DataService {
     
 
     demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Main Salary', value: 2200 },
-        { type: EntryType.Income, target: 'Side hustle', value: 800 },
-        { type: EntryType.Tax, target: 'Taxes', value: 1100},
+        { type: EntryType.Income, target: 'Salary', value: 2200 },
         { type: EntryType.Expense, target: 'Housing', value: 800},
         { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
         { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
@@ -79,21 +78,48 @@ export class DataService {
     ]
 
     constructor() {
-        //#region Retrieve data
-        this.removeOldUserFinancialData() // Remove old key from previous versions
-        /** Retrieve data from LocalStorage on App start */
-        const savedData = this.loadData();
-        if (savedData) {
-        this.monthlyData = savedData; // Load saved data
-        this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']); // Emit saved data
-        this.multiMonthEntries$.next(this.monthlyData) // Emit all months data
-        } else {
-        // Process demo data if no saved data found
-        this.processInputData(this.demoLinks, '2024-09', true);
-        }
-        //#endregion
+        this.initializeData()
     }
-  
+
+    private initializeData(): void {
+        this.removeOldUserFinancialData(); // Remove old key from previous versions
+    
+        // Check if it's the user's first time
+        if (this.isFirstTimeUser()) {
+            console.log('First time user. Processing demo data.');
+            this.processDemoData();
+        } else {
+            // Load existing data or prepare for user input
+            this.loadExistingData();
+        }
+    }
+    
+    private isFirstTimeUser(): boolean {
+        const firstTime = localStorage.getItem('firstTime');
+        return firstTime == null || firstTime === 'true' || firstTime == undefined;
+    }
+    
+    private processDemoData(): void {
+        const todaysDate = new Date();
+        this.processInputData(this.demoLinks, formatDateToString(todaysDate), true);
+        localStorage.setItem('firstTime', 'false');
+    }
+    
+    private loadExistingData(): void {
+        const savedData = this.loadData();
+        if (savedData && Object.keys(savedData).length > 0) {
+            console.log('Saved data found:', savedData);
+            this.monthlyData = savedData;  // Load saved data
+            // this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']);  // Emit saved data
+            this.multiMonthEntries$.next(this.monthlyData);  // Emit all months data
+        } else {
+            console.log('No saved data found.');
+            this.processInputData([], formatDateToString(new Date()));
+        }
+    }
+
+
+    
     /** TODO refactor this to utils file.
      * This function is used by charts to get the current date in the format "YYYY-MM-DD".
      * The date will be shown when user exports the chart as image.
@@ -128,6 +154,7 @@ export class DataService {
         } else {
             this.isDemo = false;
         }
+        console.log('is demo?', this.isDemo);
 
 
         // Step 1: Initialize the nodes without adding values yet

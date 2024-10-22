@@ -4,12 +4,14 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { SankeyData } from '../../models';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
+import { CommonModule } from '@angular/common';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 @Component({
   selector: 'app-sankey-chart',
   standalone: true,
-  imports: [NgxEchartsDirective],
+  imports: [NgxEchartsDirective, CommonModule, MatChipsModule],
   providers: [
     provideEcharts(),
   ],

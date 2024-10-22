@@ -7,6 +7,7 @@ import { InputListComponent } from './components/input-list/input-list.component
 import { NavbarComponent } from "./components/navbar/navbar.component";
 import * as packageJson from '../../package.json';
 import { ColorService } from './services/color.service';
+import { DataService } from './services/data.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit {
   title = 'Easy Sankey';
   appVersion = ''
   colorService = inject(ColorService)
+  dataService = inject(DataService)
   constructor(private router: Router, renderer: Renderer2) {
     this.colorService.renderer = renderer;
     /** Retrieve theme from service to apply */

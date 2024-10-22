@@ -79,18 +79,22 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
   ngOnInit(): void {
     /** Retrieve the selected data state from service */
     this.selectedDate.set(this.dataService.selectedActiveDate);
+    console.log('Selected date:', this.selectedDate());
     this.monthSelected.emit(this.selectedDate());
 
     this.dataService.getProcessedData().pipe(takeUntil(this.componentDestroyed$)).subscribe(singleMonth => {
+
 
       /** Convert 'singleMonth.month' (a string with YYYY-MM format) to a date object.
        * Then notify the component about selected date.
        * 
        * Each time data changes, mean somewhere in the app a new month is selected.
        */
-      const date = convertYYYMMtoDate(singleMonth.month);
-
-      this.selectedDate.set(date);
+      if (singleMonth && singleMonth.month) {
+        const date = convertYYYMMtoDate(singleMonth.month);
+  
+        this.selectedDate.set(date);
+      }
     })
   }
 
