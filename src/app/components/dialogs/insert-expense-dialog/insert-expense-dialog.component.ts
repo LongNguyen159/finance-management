@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { debounceTime, takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
+import { ColorService } from '../../../services/color.service';
 
 @Component({
   selector: 'app-insert-expense-dialog',
@@ -24,6 +25,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   dataService = inject(DataService)
   fb = inject(FormBuilder);
   uiService = inject(UiService)
+  colorService = inject(ColorService)
 
   form: FormGroup;
   searchControl = new FormControl()

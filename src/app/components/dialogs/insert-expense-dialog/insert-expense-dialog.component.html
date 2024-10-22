@@ -3,29 +3,37 @@
   </h2>
   <mat-dialog-content class="mat-typography">
     <form [formGroup]="form">
-        <div class="flex flex-row w-full items-center gap-4">
+        <div class="flex flex-row w-full items-center justify-center gap-4">
           <!-- Dropdown with search -->
-          <mat-form-field>
+          <mat-form-field class="w-full">
             <mat-select formControlName="insertInto" placeholder="Select an option">
               <mat-option>
                 <ngx-mat-select-search [formControl]="searchControl" placeholderLabel="Search..." noEntriesFoundLabel="No results found"></ngx-mat-select-search>
               </mat-option>
   
               <mat-option *ngFor="let option of filteredOptions" [value]="option">{{ option }}</mat-option>
-                
             </mat-select>
           </mat-form-field>
           <!-- Regular value input -->
-          <mat-form-field>
+          <mat-form-field class="w-full">
             <mat-label>Amount</mat-label>
             <input matInput formControlName="amount" placeholder="Enter value">
           </mat-form-field>
         </div>
-      
-      
-        <!-- Submit button -->
-        <!-- <button mat-raised-button color="primary" type="submit">Submit</button> -->
     </form>
+
+    <div class="mb-4">
+      <p>
+        Modify the amount of your existing entries. If your expenses, e.g., Shopping, Groceries, change frequently, you can insert them here.
+        Examples:
+      </p>
+      <ul class="leading-loose">
+        <li><strong>Single Value:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20</span> or <span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">-30</span></li>
+        <li><strong>Multiple Values:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 30 -10</span> (separated by spaces)</li>
+        <li><strong>This also works:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 + 30 - 10</span></li>
+      </ul>
+      <p class="!mt-4">Letters and special characters are not allowed.</p>
+    </div>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-stroked-button [mat-dialog-close]="false">Cancel</button>
