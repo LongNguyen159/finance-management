@@ -14,7 +14,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import { NavbarComponent } from "../../components/navbar/navbar.component";
 import { ColorService } from '../../services/color.service';
 import { MonthPickerComponent } from "../../components/month-picker/month-picker.component";
-import { formatDateToString, onMonthChanges } from '../../utils/utils';
+import { onMonthChanges } from '../../utils/utils';
 import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';

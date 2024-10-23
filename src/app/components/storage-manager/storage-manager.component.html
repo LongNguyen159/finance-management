@@ -63,24 +63,29 @@
                   Details
                 </button>
               </div>
-    
-              <div class="flex flex-row w-full justify-end">
-                <ul class="flex flex-col items-end">
-                  <li *ngFor="let input of getSortedRawInputWithoutSource(month)">
-                    <p *ngIf="!input.source">  <!-- Only display items with no source -->
-                      {{ input.target }}: 
-                      <span [ngClass]="{
-                        'income-light': input.type === 'income' && !colorService.isDarkMode(),
-                        'income-dark': input.type === 'income' && colorService.isDarkMode(),
-                        'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
-                        'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
-                      }">
-                        {{ input.value.toLocaleString() }}
-                      </span>
-                    </p>
-                  </li>
-                </ul>
-              </div>
+              <div class="flex flex-row w-full justify-between">
+                <div class="w-full self-center">
+                  <app-income-expense-ratio-chart></app-income-expense-ratio-chart>
+                </div>
+
+                <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
+                  <ul class="flex flex-col items-end">
+                    <li *ngFor="let input of getSortedRawInputWithoutSource(month)">
+                      <p *ngIf="!input.source">  <!-- Only display items with no source -->
+                        {{ input.target }}: 
+                        <span [ngClass]="{
+                          'income-light': input.type === 'income' && !colorService.isDarkMode(),
+                          'income-dark': input.type === 'income' && colorService.isDarkMode(),
+                          'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
+                          'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                        }">
+                          {{ input.value.toLocaleString() }}
+                        </span>
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              </div>    
             </mat-expansion-panel>
           </mat-accordion>
         </mat-expansion-panel>

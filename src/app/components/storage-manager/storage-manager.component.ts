@@ -18,12 +18,13 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
 import { UserDefinedLink } from '../models';
+import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatIconModule, MatExpansionModule,
-    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule],
+    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
   providers: [
     provideEcharts(),
   ],
