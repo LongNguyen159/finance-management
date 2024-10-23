@@ -21,14 +21,16 @@
     background-color: #f0f0f0 !important; /* Light gray */
 }  
 .highlight-light:hover {
-    background-color: rgb(232,231,235) !important; /* Light gray */
+    // background-color: rgb(232,231,235) !important; /* Light gray */
+    background-color: #f0f0f0 !important; /* Light gray */
 }  
   /* Dark mode background color for even indexed items */
 .highlight-dark {
     background-color: #303030 !important; /* Darker gray for dark mode */
 }
 .highlight-dark:hover {
-    background-color: rgb(62,62,62) !important; /* Darker gray for dark mode */
+    // background-color: rgb(62,62,62) !important; /* Darker gray for dark mode */
+    background-color: #303030 !important; /* Darker gray for dark mode */
 }
 
 /** Highlighted text style */
