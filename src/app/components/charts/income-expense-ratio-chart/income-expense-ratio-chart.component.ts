@@ -3,6 +3,7 @@ import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } fr
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../../../services/data.service';
+import { ColorService } from '../../../services/color.service';
 
 @Component({
   selector: 'app-income-expense-ratio-chart',
@@ -19,6 +20,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
   @Input() totalExpense: number = 0;
 
   dataService = inject(DataService)
+  colorService = inject(ColorService)
 
   constructor() {
     effect(() => {
@@ -31,6 +33,10 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
     tooltip: {
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
+      backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+      textStyle: {
+        color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+      },
       formatter: (params: any) => {
         const visibleParams = params.filter((item: any) => item.seriesName !== 'scale')
         let tooltip = ''
@@ -90,7 +96,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
           data: [this.totalIncome],
           barWidth: this.barWidth,
           itemStyle: {
-            color: 'rgb(157, 202, 127)',  // Green for income
+            color: this.colorService.isDarkMode() ? '#A0CA7E' : 'rgb(157, 202, 127)',  // Green for income
             borderRadius: [0, 100, 100, 0]
           }
         },
@@ -100,7 +106,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
           data: [this.totalExpense],
           barWidth: this.barWidth,
           itemStyle: {
-            color: 'rgb(222, 110, 106)',  // Red for expense
+            color: this.colorService.isDarkMode() ? '#E07A6A' : 'rgb(222, 110, 106)',  // Red for expense
             borderRadius: [0, 100, 100, 0]
           }
         },
@@ -119,8 +125,9 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
           data: [this.totalIncome],
           barWidth: this.barWidth,
           itemStyle: {
-            color: 'rgb(157, 202, 127)',  // Green for income
+            color: this.colorService.isDarkMode() ? '#A0CA7E' : 'rgb(157, 202, 127)',  // Green for income
             borderRadius: [0, 100, 100, 0]
+            
           }
         },
         {
@@ -129,7 +136,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
           data: [this.totalExpense],
           barWidth: this.barWidth,
           itemStyle: {
-            color: 'rgb(222, 110, 106)',  // Red for expense
+            color: this.colorService.isDarkMode() ? '#E07A6A' : 'rgb(222, 110, 106)',  // Red for expense
             borderRadius: [0, 100, 100, 0]
           }
         },
