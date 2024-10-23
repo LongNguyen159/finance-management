@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DataService } from '../../services/data.service';
+import { DataService, MonthlyData } from '../../services/data.service';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -38,7 +38,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   colorService = inject(ColorService);
   uiService = inject(UiService);
   dialog = inject(MatDialog);
-  localStorageData: { [key: string]: any } = {};
+  localStorageData: MonthlyData = {};
   storedMonths: string[] = [];
   storedYears: string[] = [];
   selectedYear: string = '';
@@ -74,6 +74,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         this.filterMonths()
       }
     })
+  }
+
+
+  /** Find largest value (total income or total expenses) of given months */
+  private findLargestValue(data: { [key: string]: any }) {
+    let maxTotalUsableIncome = 0;
+    let maxTotalExpenses = 0;
+
+    for (const month in data) {
+      const monthData = data[month];
+
+      // Find max total usable income
+      if (monthData.totalUsableIncome > maxTotalUsableIncome) {
+        maxTotalUsableIncome = monthData.totalUsableIncome;
+      }
+
+      // Find max total expenses
+      if (monthData.totalExpenses > maxTotalExpenses) {
+        maxTotalExpenses = monthData.totalExpenses;
+      }
+    }
+
+    // Return the larger of the two maximums
+    return Math.max(maxTotalUsableIncome, maxTotalExpenses);
   }
 
   refreshData() {
@@ -124,7 +148,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     if (this.selectedOption === 'show-all') {
       this.filteredMonthsByYear = storedMonthsAllYears;
       this.allFilteredMonths = Object.values(storedMonthsAllYears).flat();
-      this.populateSurplusChartData(this.allFilteredMonths);
+      this.populateChartData(this.allFilteredMonths);
       return;
     }
   
@@ -133,7 +157,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       // Only show months for the current year
       this.filteredMonthsByYear[currentYear] = storedMonthsAllYears[currentYear] || [];
       this.allFilteredMonths = this.filteredMonthsByYear[currentYear];
-      this.populateSurplusChartData(this.allFilteredMonths);
+      this.populateChartData(this.allFilteredMonths);
       return; // Exit early since we're done filtering for this case
     }
   
@@ -144,7 +168,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
     for (const year of Object.keys(storedMonthsAllYears)) {
       const months = storedMonthsAllYears[year];
-      const monthsToDisplay = [];
+      const monthsToDisplay: string[] = [];
   
       // Loop through months and check if they fall within the selected date range
       for (const month of months) {
@@ -164,8 +188,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       if (monthsToDisplay.length > 0) {
         this.filteredMonthsByYear[year] = monthsToDisplay;
       }
-      this.populateSurplusChartData(this.allFilteredMonths); // Populate chart data based on the filtered months
     }
+    this.populateChartData(this.allFilteredMonths); // Populate chart data based on the filtered months
   }
 
   /** Trigger filtering when a new option is selected from the dropdown */
@@ -180,7 +204,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
 
-  populateSurplusChartData(allMonths: string[] = []) {
+  /** After filtering, we need to re-populate the chart data */
+  populateChartData(allMonths: string[] = []) {
     const filteredData = Object.entries(this.localStorageData)
       .filter(([month]) => allMonths.includes(month))
       .map(([month, value]) => ({
@@ -195,7 +220,24 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return dateA.getTime() - dateB.getTime();
     });
   
-    console.log('chart data: ', this.surplusChartData);
+    console.log('chart data changes: ', this.surplusChartData);
+    /** Scale the chart every time filter changes */
+    this.getScaleValue()
+  }
+
+  getScaleValue() {
+    const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
+    const largestValue = this.findLargestValue(showingMonths);
+    this.dataService.incomeExpenseScaleValue.set(largestValue);
+  }
+
+  filterDataByKeys(data: MonthlyData, keys: string[]) {
+    return Object.keys(data)
+      .filter(key => keys.includes(key))
+      .reduce((acc: MonthlyData, key: string) => {
+        acc[key] = data[key];
+        return acc;
+      }, {});
   }
 
   calculateTotalSurplus(year: string): number {
@@ -242,6 +284,5 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       maxWidth: '90vw',
       maxHeight: '90vh',
     })
-    
   }
 }

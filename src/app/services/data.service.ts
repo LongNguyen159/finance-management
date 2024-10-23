@@ -65,6 +65,11 @@ export class DataService {
     isDemo = signal(false)
     isAdvancedShown: boolean = false
 
+    /** Use this to scale all income-expense bar chart to have same scale.
+     * This value will be the largest value either totalUsableIncome or totalExpenses.
+     */
+    incomeExpenseScaleValue = signal(0)
+
     selectedActiveDate: Date = new Date();
 
     private copiedLinksKey = 'copiedLinks';
