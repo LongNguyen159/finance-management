@@ -35,7 +35,7 @@ html, body {
     Transition background color changes to prevent flashing 
     when changing themes from dark to light and vice versa 
   */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.5s ease, color 0.3s ease;
 }
 
 h1 {
@@ -87,8 +87,12 @@ html {
     }
     scrollbar-color: rgb(70,70,70) rgb(34,34,34);
 
-    h1, h2, h3, h4, h5, h6, p {
+    h1, h2, h3, h4, h5, h6 {
       color: rgb(204, 204, 204)
+    }
+
+    p {
+      color: rgb(199, 199, 199)
     }
   }
 }
@@ -137,7 +141,7 @@ html {
   }
 
   p {
-    color: rgb(204, 204, 204);
+    color: rgb(199, 199, 199);
     transition: color 0.3s ease;
   }
 }
