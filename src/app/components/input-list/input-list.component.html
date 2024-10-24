@@ -65,7 +65,7 @@
         
         <!-- Select with search -->
         <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
-          <mat-label>Part of (optional)</mat-label>
+          <mat-label>Part of</mat-label>
           <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel" (selectionChange)="updateInput()">
             <mat-option>
               <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search entries..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>

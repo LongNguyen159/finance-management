@@ -87,7 +87,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
      */
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       this.dataMonth = data.month
-      this.existingNodes = data.sankeyData.nodes.map(node => node.name)
+      /** Only include expense nodes. */
+      this.existingNodes = data.rawInput.filter(item => item.type == EntryType.Expense).map(item => item.target);
       this.filteredNodes = [...this.existingNodes];
       this.taxNodeExists = this._hasTaxNode(data.rawInput);
 
@@ -111,7 +112,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
    * Else, we just submit the form on component destroy.
    */
   updateInput() {
-    if (!this.linkForm.valid && this.updateFromService) return;
+    if (!this.linkForm.valid || this.updateFromService) return;
   
     const formData: UserDefinedLink[] = this.linkForm.value.links;
 
@@ -235,8 +236,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
    * Unless user defines 'default income' node, it'll be linked to default income node.
    */
   private _addDefaultNode() {
-    if (!this.filteredNodes.includes('default')) {
-      this.filteredNodes.unshift('Default income');
+    if (!this.filteredNodes.includes('-- None --')) {
+      this.filteredNodes.unshift('-- None --');
     }
   }
 
@@ -357,10 +358,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
 
   // Submit form and emit the data (to parent component or a service)
   onSubmit(): void {
-    if (this.linkForm.valid) {
-      const formData: UserDefinedLink[] = this.linkForm.value.links;
-      this.dataService.processInputData(formData, this.dataMonth)
-    }
+    if (!this.linkForm.valid) return;
+
+    const formData: UserDefinedLink[] = this.linkForm.value.links;
+    this.dataService.processInputData(formData, this.dataMonth)
   }
 
   closeAutoComplete(index: number): void {
