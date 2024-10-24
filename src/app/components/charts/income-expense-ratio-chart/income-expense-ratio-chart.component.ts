@@ -41,6 +41,13 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
     return {
       tooltip: {
         trigger: 'axis',
+        position: function (pos, params, dom, rect, size) {
+          // tooltip will be fixed on the right if mouse hovering on the left,
+          // and on the left if hovering on the right.
+          var obj: any = {top: 60};
+          obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
+          return obj;
+        },
         axisPointer: { type: 'shadow' },
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
