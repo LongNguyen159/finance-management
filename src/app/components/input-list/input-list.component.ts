@@ -160,6 +160,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
     if (copiedLinks) {
       this.populateInputFields({ rawInput: copiedLinks } as SingleMonthData);
       this.uiService.showSnackBar('Links pasted!', 'Ok');
+      /** Process the pasted links */
+      this.dataService.processInputData(copiedLinks, this.dataMonth);
     } else {
       this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
     }
