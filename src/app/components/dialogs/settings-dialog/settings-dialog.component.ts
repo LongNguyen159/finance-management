@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, Renderer2 } from '@angular/core';
+import { Component, inject, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
@@ -22,7 +22,8 @@ import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
     RouterModule
   ],
   templateUrl: './settings-dialog.component.html',
-  styleUrl: './settings-dialog.component.scss'
+  styleUrl: './settings-dialog.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class SettingsDialogComponent implements OnInit{
   colorService = inject(ColorService)
