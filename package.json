@@ -60,10 +60,11 @@
     "files": [
       "dist/**/*",
       "main.js",
-      "public/**/*"
+      "public/**/*",
+      "resources/icons/**/*"
     ],
     "directories": {
-      "output": "release/v${npm_package_version}"
+      "output": "release/v2.0.0"
     },
     "mac": {
       "icon": "resources/icons/mac/icon.icns"
