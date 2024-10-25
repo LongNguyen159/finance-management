@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, SingleMonthData } from '../../services/data.service';
 import { EntryType, UserDefinedLink } from '../models';
@@ -49,7 +49,9 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
-export class InputListComponent extends BasePageComponent implements OnInit, OnDestroy {
+export class InputListComponent extends BasePageComponent implements OnInit, OnChanges, OnDestroy {
+  @Input() triggeredMonthByDialog: string = ''
+
   dataService = inject(DataService)
   uiService = inject(UiService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
@@ -104,6 +106,22 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnD
       this.filteredNodes = this._filterNodes(searchTerm);
       this._addDefaultNode();
     });
+  }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['triggeredMonthByDialog']) {
+      console.log('month changed by dialog:', changes)
+        /** We can see the difference in currentValue and previousValue here.
+         * If it differs, call the service to process data of previous month.
+         * CASE: User changes something, then navigates to another month.
+         *
+         * CASE: User navigates to another month without changing anything. 
+         * If it's the same, do nothing.
+         * Compare the form values before calling the service to update.
+         * 
+         */
+    }
   }
 
   /** Update Input, this function when triggered will send the input data to service to update the form state.

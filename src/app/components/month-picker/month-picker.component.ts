@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, EventEmitter, inject, Input, OnInit, Output, signal, ViewChild, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -7,42 +7,23 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import { MatMomentDateModule, provideMomentDateAdapter } from '@angular/material-moment-adapter';
-import * as _moment from 'moment';
-import { default as _rollupMoment, Moment } from 'moment';
 import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { ColorService } from '../../services/color.service';
 import { DataService } from '../../services/data.service';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { takeUntil } from 'rxjs';
-import { convertYYYMMtoDate } from '../../utils/utils';
-
-
-const moment = _rollupMoment || _moment;
-
-export const MY_FORMATS = {
-  parse: {
-    dateInput: 'MM/YYYY',
-  },
-  display: {
-    dateInput: 'MM/YYYY',
-    monthYearLabel: 'MMM YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
-  },
-};
+import { formatYYYMMtoDate } from '../../utils/utils';
 
 @Component({
   selector: 'app-month-picker',
   standalone: true,
   providers: [
-    provideMomentDateAdapter(MY_FORMATS),
     provideNativeDateAdapter()
   ],
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
     CommonModule, MatButtonModule,
-    MatDatepickerModule, MatNativeDateModule, MatMomentDateModule,
+    MatDatepickerModule, MatNativeDateModule,
     MonthPickerHeaderComponent, MatMenuModule
   ],
   templateUrl: './month-picker.component.html',
@@ -91,7 +72,7 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
        * Each time data changes, mean somewhere in the app a new month is selected.
        */
       if (singleMonth && singleMonth.month) {
-        const date = convertYYYMMtoDate(singleMonth.month);
+        const date = formatYYYMMtoDate(singleMonth.month);
   
         this.selectedDate.set(date);
       }

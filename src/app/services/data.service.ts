@@ -2,7 +2,7 @@ import { inject, Injectable, Signal, signal } from '@angular/core';
 import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
-import { formatDateToString } from '../utils/utils';
+import { formatDateToYYYYMM } from '../utils/utils';
 export interface MonthlyData {
     [month: string]: SingleMonthData;
 }
@@ -108,7 +108,7 @@ export class DataService {
     
     private processDemoData(): void {
         const todaysDate = new Date();
-        this.processInputData(this.demoLinks, formatDateToString(todaysDate), true);
+        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), true);
     }
     
     private loadExistingData(): void {
@@ -120,7 +120,7 @@ export class DataService {
             this.multiMonthEntries$.next(this.monthlyData);  // Emit all months data
         } else {
             console.log('No saved data found.');
-            this.processInputData([], formatDateToString(new Date()));
+            this.processInputData([], formatDateToYYYYMM(new Date()));
         }
     }
 

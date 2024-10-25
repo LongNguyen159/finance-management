@@ -2,12 +2,13 @@ import { DataService, MonthlyData, SingleMonthData } from "../services/data.serv
 
 
 /** Format a Date object into YYYY-MM format */
-export function formatDateToString(date: Date): string {
+export function formatDateToYYYYMM(date: Date): string {
     const year = date.getFullYear(); // Get the full year
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Get the month and pad with leading zero
     return `${year}-${month}`; // Return the formatted string
 }
 
+/** Format a YYYY-MM string into a long date format like (Oct 2024, Sep 2023) */
 export function formatYearMonthToLongDate(yearMonth: string): string {
     const [year, month] = yearMonth.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1); // month is zero-indexed
@@ -31,7 +32,7 @@ export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, 
       return
     }
 
-    const monthString = formatDateToString(selectedMonth);
+    const monthString = formatDateToYYYYMM(selectedMonth);
 
     console.log('processing data for month: ', monthString)
     
@@ -67,7 +68,7 @@ function initializeEmptyData(monthString: string): SingleMonthData {
 }
 
 
-export function convertYYYMMtoDate(inputString: string): Date {
+export function formatYYYMMtoDate(inputString: string): Date {
   const [year, month] = inputString.split('-').map(Number);
   const date = new Date(year, month - 1);
   return date

@@ -8,7 +8,7 @@ import { takeUntil } from 'rxjs';
 import { InputListComponent } from '../../input-list/input-list.component';
 import { DataService, MonthlyData, SingleMonthData } from '../../../services/data.service';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
-import { formatYearMonthToLongDate, onMonthChanges } from '../../../utils/utils';
+import { formatDateToYYYYMM, formatYearMonthToLongDate, onMonthChanges } from '../../../utils/utils';
 import { MonthPickerComponent } from "../../month-picker/month-picker.component";
 
 
@@ -27,6 +27,8 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
   singleMonthData: SingleMonthData
   allMonthsData: MonthlyData
 
+  currentMonth: string = ''
+
   ngOnInit(): void {
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       if (data) {
@@ -41,6 +43,7 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
   }
 
   onMonthChanges(selectedMonth: Date) {
+    this.currentMonth = formatDateToYYYYMM(selectedMonth)
     onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
   }
 }

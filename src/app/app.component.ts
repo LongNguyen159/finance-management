@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { InputListComponent } from './components/input-list/input-list.component';
 import { NavbarComponent } from "./components/navbar/navbar.component";
-import * as packageJson from '../../package.json';
+import {version} from '../../package.json';
 import { ColorService } from './services/color.service';
 import { DataService } from './services/data.service';
 @Component({
@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     // Fetch app version from package.json
-    this.appVersion = packageJson.version;
+    this.appVersion = version;
 
     // Check if it's the user's first time
     const isFirstTime = localStorage.getItem('firstTime') === null || localStorage.getItem('firstTime') === 'true';
