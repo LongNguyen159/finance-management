@@ -8,7 +8,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import { takeUntil } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs';
 import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -75,6 +75,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
 
   dataMonth: string = ''
 
+  /** Save the current input values every time user changes the input.
+   * Currently only assigned by valueChanges, and after user switches to new month, it assigns new value.
+   */
+  savedFormValues: UserDefinedLink[] = []
+  hasChanges: boolean = false;
 
   constructor(private fb: FormBuilder) {
     super();
@@ -98,7 +103,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
       this.populateInputFields(data)
       this._addDefaultNode();
 
-      console.log('data changed', data)
+      console.log('fetched data to InputList: ', data)
     });
 
     // Listen to changes in the search control to filter the dropdown
@@ -106,22 +111,53 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
       this.filteredNodes = this._filterNodes(searchTerm);
       this._addDefaultNode();
     });
+
+    /** Listen to changes in value. If changes, save the current form value immediately. */
+    this.linkForm.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe((formData) => {
+      console.log('user edited form values:', formData.links)
+      this.savedFormValues = formData.links.slice();
+      this.hasChanges = true;
+    })
   }
 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['triggeredMonthByDialog']) {
-      console.log('month changed by dialog:', changes)
-        /** We can see the difference in currentValue and previousValue here.
-         * If it differs, call the service to process data of previous month.
-         * CASE: User changes something, then navigates to another month.
-         *
-         * CASE: User navigates to another month without changing anything. 
-         * If it's the same, do nothing.
-         * Compare the form values before calling the service to update.
-         * 
-         */
+      // Current and previous month values
+      const previousMonth = changes['triggeredMonthByDialog'].previousValue;
+      const currentMonth = changes['triggeredMonthByDialog'].currentValue;
+  
+      console.log('current form value after input changes:', this.linkForm.value.links.slice());
+  
+      /** If changes month, process the previous month. */
+      if (currentMonth !== previousMonth && this.hasChanges) {
+        // Process the previous month values
+        this.processMonthBeforeMonthChanges(previousMonth, this.savedFormValues);
+        this.hasChanges = false;
+      }
+      // Assign the saved form values to the current form values (instead of previous month)
+      this.savedFormValues = this.linkForm.value.links.slice();
     }
+  }
+
+  /** This function is used to process the previous month (in compare to current month).
+   * Triggered when user changes the month.
+   * USE CASE: When user made some changes, and navigate to another month, we want to save changes and process it.
+   * @param previouMonthValue The previous month value
+   * @param previousFormValues The previous form values
+   */
+  processMonthBeforeMonthChanges(previouMonthValue: string | undefined, previousFormValues: UserDefinedLink[]) {
+    /** On first change the previousMomthValue can be undefined, in that case, do nothing. */
+    if (!previouMonthValue || previousFormValues.length == 0) return;
+
+
+    /** If process Input data, remember NOT to emit, because we only want to save it, if we emit,
+     * the current month will be overriden from the data of previous month.
+     */
+    this.dataService.processInputData(previousFormValues, previouMonthValue, false, true, false)
+
+    console.log('previous month:', previouMonthValue)
+    console.log('previous form values:', previousFormValues)
   }
 
   /** Update Input, this function when triggered will send the input data to service to update the form state.

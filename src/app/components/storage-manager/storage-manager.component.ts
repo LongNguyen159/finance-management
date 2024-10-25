@@ -220,7 +220,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return dateA.getTime() - dateB.getTime();
     });
   
-    console.log('chart data changes: ', this.surplusChartData);
     /** Scale the chart every time filter changes */
     this.getScaleValue()
   }

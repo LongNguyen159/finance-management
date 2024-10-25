@@ -77,7 +77,7 @@ export class DataService {
     
 
     demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Salary', value: 2200, demo: true },
+        { type: EntryType.Income, target: 'Salary demo', value: 2200, demo: true },
         { type: EntryType.Expense, target: 'Housing', value: 800},
         { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
         { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
@@ -137,7 +137,14 @@ export class DataService {
     
 
     //#region: Process Input Data
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false): void {
+
+    /** Process input data and emits a Subject of Single month entries.
+     * @param userDefinedLinks: raw input from form.
+     * @param month: month in "YYYY-MM" format.
+     * @param demo: flag to indicate if the data is demo data.
+     * @param showSnackbarWhenDone: flag to show snackbar when data is processed.
+     */
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false, emitObservable: boolean = true): void {
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
@@ -160,7 +167,6 @@ export class DataService {
         } else {
             this.isDemo.set(false)
         }
-        console.log('is demo:', this.isDemo());
 
 
         // Step 1: Initialize the nodes without adding values yet
@@ -314,8 +320,10 @@ export class DataService {
         };
 
         // Emit the processed data
-        this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
-        // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
+        if (emitObservable) {
+            this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+            // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
+        }
 
         if (showSnackbarWhenDone && !this.isDemo()) {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
