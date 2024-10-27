@@ -115,13 +115,31 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
 
     /** Listen to changes in value. If changes, save the current form value immediately. */
     this.linkForm.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe((formData) => {
-      console.log('user edited form values:', formData.links)
       this.savedFormValues = formData.links.slice();
       this.hasChanges = true;
     })
   }
 
+  private _checkDuplicateName(value: string | null, linkGroup: FormGroup): void {
+    if (!value) return;
+
+    const normalizedValue = value.toLowerCase();
+    const duplicate = this.linkArray.value.some(
+      (link: UserDefinedLink) => link.target.toLowerCase() === normalizedValue
+    );
+
+    if (duplicate) {
+      linkGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
+      this.uiService.showSnackBar('Duplicate node names are not allowed!', 'Dismiss');
+    } else {
+      linkGroup.get('target')?.setErrors(null, { emitEvent: false });
+    }
+  }
+
   ngAfterViewInit(): void {
+    /** Scroll to bottom of dialog input every time component is initialised.
+     * Do it here because the view is not yet rendered in ngOnInit.
+     */
     this.scrollToBottom();
   }
 
@@ -249,6 +267,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     if (linkGroup.get('type')?.value == EntryType.Income || linkGroup.get('type')?.value == EntryType.Tax) {
       linkGroup.get('source')?.disable({ emitEvent: false });
     }
+
+    linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe(value => {
+      this._checkDuplicateName(value, linkGroup);
+    })
 
 
     // Subscribe to changes in the type field

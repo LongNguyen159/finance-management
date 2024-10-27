@@ -21,6 +21,10 @@
           This name is not allowed.
         </mat-error>
 
+        <mat-error *ngIf="linkGroup.get('target')?.hasError('duplicatedName')">
+          Duplicated name.
+        </mat-error>
+
         <mat-error *ngIf="linkGroup.get('target')?.hasError('emptyOrWhitespace')">
           Name cannot be empty.
         </mat-error>
