@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, SingleMonthData } from '../../services/data.service';
 import { EntryType, UserDefinedLink } from '../models';
@@ -49,12 +49,13 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
-export class InputListComponent extends BasePageComponent implements OnInit, OnChanges, OnDestroy {
+export class InputListComponent extends BasePageComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @Input() triggeredMonthByDialog: string = ''
 
   dataService = inject(DataService)
   uiService = inject(UiService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
+  @ViewChild('bottomContent') bottomContent!: ElementRef;
 
 
   demoLinks: UserDefinedLink[] = this.dataService.demoLinks;
@@ -118,6 +119,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
       this.savedFormValues = formData.links.slice();
       this.hasChanges = true;
     })
+  }
+
+  ngAfterViewInit(): void {
+    this.scrollToBottom();
   }
 
 
@@ -396,6 +401,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
   // Add a new input row
   addLink(): void {
     this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
+    // scroll to bottom after adding new form field
+    this.scrollToBottom()
   }
 
   // Remove an input row
@@ -425,6 +432,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     setTimeout(() => {
       trigger.closePanel();
     }, 0);
+  }
+
+
+  scrollToBottom(): void {
+    this.bottomContent.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
   
