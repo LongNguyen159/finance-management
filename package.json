@@ -60,21 +60,22 @@
     "files": [
       "dist/**/*",
       "main.js",
-      "public/**/*",
-      "resources/icons/**/*"
+      "preload.js"
     ],
     "directories": {
       "output": "release/v2.0.0"
     },
     "mac": {
+      "target": [
+        "dmg"
+      ],
       "icon": "resources/icons/mac/icon.icns"
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ],
-      "icon": "public/icons/easy-sankey.ico"
+      "icon": "resources/icons/win/icon.ico"
     }
   }
 }
