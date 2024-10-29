@@ -120,22 +120,21 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     })
   }
 
-  private _checkDuplicateName(value: string | null, linkGroup: FormGroup): void {
+  private _checkDuplicateName(value: string | null, formGroup: FormGroup): void {
     if (!value) return;
+    
+    // Get all form values and normalize for comparison
+    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase());
+    const duplicateNames: string[] = formValues.filter((item, index) => formValues.indexOf(item) !== index);
 
-    const normalizedValue = value.toLowerCase();
-    const duplicate = this.linkArray.value.some(
-      (link: UserDefinedLink) => link.target.toLowerCase() === normalizedValue
-    );
-
-    if (duplicate) {
-      linkGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
-      this.uiService.showSnackBar('Duplicate node names are not allowed!', 'Dismiss');
+    // Display a snackbar notification if duplicates are found
+    if (duplicateNames.length > 0) {
+      formGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
+      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss');
     } else {
-      linkGroup.get('target')?.setErrors(null, { emitEvent: false });
+      formGroup.get('target')?.setErrors(null, { emitEvent: false });
     }
   }
-
   ngAfterViewInit(): void {
     /** Scroll to bottom of dialog input every time component is initialised.
      * Do it here because the view is not yet rendered in ngOnInit.
