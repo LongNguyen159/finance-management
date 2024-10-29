@@ -1,8 +1,13 @@
 <div [formGroup]="linkForm" class="link-form-container" #bottomContent id="bottom-content">
-  <div class="flex flex-row w-full items-center">
+
+  <!-- INPUT LIST ACTIONS BAR CONTAINER -->
+  <div class="grid w-full py-2 sticky z-50 top-0 material-background" style="grid-template-columns: 1fr 1fr 1fr;">
     <div class="flex flex-row gap-2">
       <button mat-stroked-button color="primary" (click)="copyLinks()">Copy</button>
       <button mat-stroked-button (click)="pasteLinks()">Paste</button>
+    </div>
+    <div class="flex flex-row w-full justify-center items-center">
+      <app-month-picker (monthSelected)="onMonthChanges($event)"></app-month-picker>
     </div>
     <div class="flex flex-row w-full items-center justify-end gap-1">
       <div>Show advanced</div>
@@ -11,6 +16,8 @@
       </div>
     </div>
   </div>
+
+  <!-- LINKS CONTAINER -->
   <div formArrayName="links">
     <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
       <!-- Target -->
@@ -92,7 +99,7 @@
     </div>
   </div>
   
-  <div class="flex flex-row gap-4 mt-4 w-full text-center justify-center sticky bottom-0 z-50">
+  <div class="flex flex-row gap-4 mt-4 w-fit text-center justify-center self-center sticky bottom-0 z-50">
     <div>
       <button mat-stroked-button color="primary" class="backdrop-blur-[200px]" (click)="addLink()">
         <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
@@ -100,6 +107,5 @@
       </button>
     </div>
   </div>
-    
 </div>
   

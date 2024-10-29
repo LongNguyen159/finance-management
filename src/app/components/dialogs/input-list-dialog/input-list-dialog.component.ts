@@ -8,7 +8,7 @@ import { takeUntil } from 'rxjs';
 import { InputListComponent } from '../../input-list/input-list.component';
 import { DataService, MonthlyData, SingleMonthData } from '../../../services/data.service';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
-import { formatDateToYYYYMM, formatYearMonthToLongDate, onMonthChanges } from '../../../utils/utils';
+import {formatYearMonthToLongDate } from '../../../utils/utils';
 import { MonthPickerComponent } from "../../month-picker/month-picker.component";
 
 
@@ -37,13 +37,13 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
       }
     })
 
-    this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
-      this.allMonthsData = allMonthsData
-    })
+    // this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
+    //   this.allMonthsData = allMonthsData
+    // })
   }
 
-  onMonthChanges(selectedMonth: Date) {
-    this.currentMonth = formatDateToYYYYMM(selectedMonth)
-    onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
-  }
+  // onMonthChanges(selectedMonth: Date) {
+  //   this.currentMonth = formatDateToYYYYMM(selectedMonth)
+  //   onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
+  // }
 }

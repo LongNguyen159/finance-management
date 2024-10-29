@@ -1,6 +1,5 @@
 <h2 mat-dialog-title class="!font-bold text-xl">
   {{ monthString }}
-  <app-month-picker (monthSelected)="onMonthChanges($event)"></app-month-picker>
 </h2>
 <mat-dialog-content class="mat-typography">
     <app-input-list [triggeredMonthByDialog]="currentMonth"></app-input-list>

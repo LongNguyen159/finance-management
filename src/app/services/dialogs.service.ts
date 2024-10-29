@@ -43,7 +43,7 @@ export class DialogsService {
   openInputListDialog() {
       const dialogRef = this.dialog.open(InputListDialogComponent, {
           width: '75rem',
-          height: '40rem',
+          height: '83vh',
           maxHeight: '90vh',
           maxWidth: '90vw',
           disableClose: false

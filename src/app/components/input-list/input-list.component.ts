@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import { DataService, SingleMonthData } from '../../services/data.service';
+import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
 import { EntryType, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,8 @@ import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
+import { MonthPickerComponent } from "../month-picker/month-picker.component";
+import { formatDateToYYYYMM, onMonthChanges } from '../../utils/utils';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -43,8 +45,7 @@ function nonEmptyValidator(): ValidatorFn {
     MatIconModule,
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
-    MatSlideToggleModule,
-  ],
+    MatSlideToggleModule, MonthPickerComponent],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
@@ -75,6 +76,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
   updateFromService = false; // Flag to control value changes
 
   dataMonth: string = ''
+  singleMonthData: SingleMonthData
+  allMonthsData: MonthlyData
 
   /** Save the current input values every time user changes the input.
    * Currently only assigned by valueChanges, and after user switches to new month, it assigns new value.
@@ -90,10 +93,16 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
   }
 
   ngOnInit(): void {
+
+    this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
+      this.allMonthsData = allMonthsData
+    })
+
     /** On response from service, update forms to reflect correct amount if children expenses
      * exceed their parent.
      */
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
+      this.singleMonthData = data;
       this.dataMonth = data.month
       /** Only include expense nodes. */
       this.existingNodes = data.rawInput.filter(item => item.type == EntryType.Expense).map(item => item.target);
@@ -120,6 +129,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     })
   }
 
+  onMonthChanges(selectedMonth: Date) {
+    this.dataMonth = formatDateToYYYYMM(selectedMonth)
+    onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
+  }
+
   private _checkDuplicateName(value: string | null, formGroup: FormGroup): void {
     if (!value) return;
     
@@ -139,7 +153,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     /** Scroll to bottom of dialog input every time component is initialised.
      * Do it here because the view is not yet rendered in ngOnInit.
      */
-    this.scrollToBottom();
+    // this.scrollToBottom();
   }
 
 
@@ -148,8 +162,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
       // Current and previous month values
       const previousMonth = changes['triggeredMonthByDialog'].previousValue;
       const currentMonth = changes['triggeredMonthByDialog'].currentValue;
-  
-      console.log('current form value after input changes:', this.linkForm.value.links.slice());
+
   
       /** If changes month, process the previous month. */
       if (currentMonth !== previousMonth && this.hasChanges) {
@@ -177,9 +190,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
      * the current month will be overriden from the data of previous month.
      */
     this.dataService.processInputData(previousFormValues, previouMonthValue, false, true, false)
-
-    console.log('previous month:', previouMonthValue)
-    console.log('previous form values:', previousFormValues)
   }
 
   /** Update Input, this function when triggered will send the input data to service to update the form state.
@@ -204,8 +214,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
       return; // No changes, don't proceed
     }
-  
-    console.log('User input changed!');
     
     this.taxNodeExists = this._hasTaxNode(formData);
     this.dataService.processInputData(formData, this.dataMonth);

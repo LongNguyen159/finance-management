@@ -19,3 +19,7 @@
       flex: 1;
     }
   }
+
+.material-background {
+  background-color: var(--mdc-dialog-container-color, var(--mat-app-surface, white));
+}
