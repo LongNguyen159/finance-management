@@ -43,39 +43,56 @@
         
 
 
-        <mat-menu #settingsMenu="matMenu" [class]="'app-menu'">
+        <!-- Main Menu: settingsMenu -->
+        <mat-menu #settingsMenu="matMenu" class="app-menu">
+    
+            <!-- Finance Manager link -->
+            <ng-container *ngIf="showStorage">
+            <a mat-menu-item routerLink="/storage" class="flex flex-row justify-center items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">monitoring</mat-icon>
+                <span>Finance Manager</span>
+            </a>
+            </ng-container>
+        
+            <!-- Settings link -->
             <button mat-menu-item (click)="dialogService.openSettingsDialog()">
-              <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
-              <span>Settings</span>
+            <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+            <span>Settings</span>
             </button>
-            
-            @if (showStorage) {
-                <a mat-menu-item routerLink="/storage" class="flex flex-row justify-center items-center gap-2">
-                    <mat-icon fontSet="material-symbols-outlined">monitoring</mat-icon>
-                    <span>Finance Manager</span>
-                </a>
-            }
-            @if (showOpenDocs) {
-                <a mat-menu-item routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
-                    <mat-icon>help_outline</mat-icon>
-                    <span>Help</span>
-                </a>
-            }
-
-
-            @if (showUpdates) {
-                <a mat-menu-item routerLink="/updates" class="flex flex-row justify-center items-center gap-2">
-                    <mat-icon fontSet="material-symbols-outlined">lightbulb</mat-icon>
-                    <span>View features</span>
-                </a>
-            }
+        
+            <!-- Help and Features trigger button for nested menu -->
+            <button mat-menu-item [matMenuTriggerFor]="helpAndFeatures">
+            <mat-icon fontSet="material-symbols-outlined">menu</mat-icon>
+            <span>More Options</span>
+            </button>
         </mat-menu>
-          
+    
+        <!-- Nested Menu: helpAndFeatures -->
+        <mat-menu #helpAndFeatures="matMenu" class="app-menu">
+    
+            <!-- Help link -->
+            <ng-container *ngIf="showOpenDocs">
+            <a mat-menu-item routerLink="/docs" class="flex flex-row justify-center items-center gap-2">
+                <mat-icon>help_outline</mat-icon>
+                <span>How to use?</span>
+            </a>
+            </ng-container>
+        
+            <!-- View Features link -->
+            <ng-container *ngIf="showUpdates">
+            <a mat-menu-item routerLink="/updates" class="flex flex-row justify-center items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">lightbulb</mat-icon>
+                <span>View Features</span>
+            </a>
+            </ng-container>
+        </mat-menu>
+  
+        <!-- Menu Trigger Button -->
         <div class="pr-4 flex flex-row items-center">
-            <button mat-icon-button class="!flex flex-row !items-center" [matMenuTriggerFor]="settingsMenu" [ariaHidden]="false" aria-label="More options">
-                <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon> <!-- Icon to open the menu -->
+            <button mat-icon-button class="!flex flex-row !items-center" [matMenuTriggerFor]="settingsMenu" aria-label="More options">
+            <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon>
             </button>
         </div>
         
-    </div>    
+    </div> 
 </div>
