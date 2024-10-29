@@ -1,18 +1,26 @@
 <div class="flex flex-col">    
-    <app-navbar [showBackButton]="false" class="sticky top-0 z-50"></app-navbar>
+    <app-navbar [showBackButton]="false" class="navbar">
+        <app-month-picker (monthSelected)="onMonthChanges($event)" [highlightedMonths]="highlightMonths"></app-month-picker>
+    </app-navbar>
     <div class="p-4 pt-0">
-        <div [ngClass]="isVerticalLayout ? 'flex flex-col gap-8 p-4' : 'grid grid-cols-2 gap-8 p-4'">
+        <div [ngClass]="isVerticalLayout ? 'flex flex-col p-4' : 'grid grid-cols-2 gap-8 p-4'">
             <!-- CHART SECTION -->
             <div class="flex flex-col gap-8">
+                <div class="flex flex-row w-full items-center justify-end">
+                    <button mat-button (click)="dialogService.openInsertIntoDialog()">
+                        <mat-icon>add</mat-icon>
+                        <span>Insert Into</span>
+                    </button>
+                </div>
                 <app-sankey-chart
-                    [sankeyData]="processedOutputData.sankeyData"
-                    [remainingBalance]="processedOutputData.remainingBalance"
+                    [sankeyData]="entriesOfOneMonth.sankeyData"
+                    [remainingBalance]="entriesOfOneMonth.remainingBalance"
                 ></app-sankey-chart>
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
                 <!-- NETTO CHART -->
                 
                 <div class="flex flex-row w-full items-center justify-end">
-                    <button mat-button (click)="dataService.openDidYouKnowDialog()" class="flex items-center">
+                    <button mat-button (click)="dialogService.openDidYouKnowDialog()" class="flex items-center">
                         <mat-icon class="mr-1">lightbulb_outline</mat-icon>
                         <span>Did You Know?</span>
                     </button>

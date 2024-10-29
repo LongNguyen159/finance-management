@@ -1,0 +1,7 @@
+<h2 mat-dialog-title class="!font-bold">Details for {{ dialogData.month }}</h2>
+<mat-dialog-content>
+    <app-main-page-single-month [chartData]="dialogData"></app-main-page-single-month>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Close</button>
+</mat-dialog-actions>

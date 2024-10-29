@@ -1,0 +1,20 @@
+<div class="flex flex-row w-full justify-center">
+    <h2 class="font-bold">
+        Income Flow and Expense Allocation
+    </h2>
+</div>
+<div class="flex flex-row w-full p-4 justify-center">
+    @if (dataService.isDemo()) {
+        <mat-chip style="width: fit-content !important;">
+            Demo Data
+        </mat-chip>
+    }
+</div>
+<div
+    echarts
+    [options]="sankeyOption"
+    [style]="'height: ' + chartHeight"
+></div>
+<h3 class="font-bold">
+    Remaining Balance: {{ remainingBalance }}
+</h3>

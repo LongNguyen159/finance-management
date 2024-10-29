@@ -14,8 +14,8 @@ function createWindow() {
     height: height,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true
     },
     frame: true,         // Show the window frame (this allows you to drag and resize the window)
     resizable: true,     // Allow resizing the window (optional)

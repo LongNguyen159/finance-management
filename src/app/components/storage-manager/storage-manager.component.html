@@ -1,0 +1,97 @@
+<div>
+  <div class="flex flex-row w-full justify-end pr-6">
+    <mat-form-field appearance="outline">
+      <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
+        <mat-option *ngFor="let option of availableOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
+
+  <mat-accordion multi>
+    <ng-container *ngFor="let year of storedYears">
+      <ng-container *ngIf="filteredMonthsByYear[year] && filteredMonthsByYear[year].length > 0">
+        <mat-expansion-panel 
+          #yearPanel 
+          class="no-shadows round-borders"
+          [ngClass]="{
+            'panel-dark': colorService.isDarkMode(),
+            'panel-light': !colorService.isDarkMode(),
+          }"
+          togglePosition="before" 
+          [expanded]="year === selectedYear">
+          
+          <mat-expansion-panel-header class="header-light">
+            <mat-panel-title class="text-xl">
+              {{ year }}
+            </mat-panel-title>
+            <mat-panel-description>
+              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString() }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+    
+          <!-- Child panel logic continues here -->
+          <mat-accordion multi>
+            <mat-expansion-panel 
+              class="no-shadows round-borders"
+              togglePosition="before"
+              [ngClass]="{
+                'highlight-light': (j % 2 === 0 || panel.expanded) && !colorService.isDarkMode(),
+                'highlight-dark': (j % 2 === 0 || panel.expanded) && colorService.isDarkMode(),
+                'panel-dark': j % 2 !== 0 && colorService.isDarkMode(),
+                'panel-light': j % 2 !== 0 && !colorService.isDarkMode(),
+              }" 
+              *ngFor="let month of filteredMonthsByYear[year]; let j = index"
+              #panel="matExpansionPanel">
+              
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{ month }}
+                </mat-panel-title>
+                <mat-panel-description class="flex flex-row gap-6">
+                  <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+                </mat-panel-description>
+                <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
+                  <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
+                </button>
+              </mat-expansion-panel-header>
+              <div class="flex flex-row pb-4">
+                <button mat-stroked-button (click)="getMonthsDetails(month)">
+                  Details
+                </button>
+              </div>
+              <div class="flex flex-row w-full justify-between">
+                <div class="w-full self-center">
+                  <app-income-expense-ratio-chart [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
+                  ></app-income-expense-ratio-chart>
+                </div>
+
+                <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
+                  <ul class="flex flex-col items-end">
+                    <li *ngFor="let input of getSortedRawInputWithoutSource(month)">
+                      <p *ngIf="!input.source">  <!-- Only display items with no source -->
+                        {{ input.target }}: 
+                        <span [ngClass]="{
+                          'income-light': input.type === 'income' && !colorService.isDarkMode(),
+                          'income-dark': input.type === 'income' && colorService.isDarkMode(),
+                          'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
+                          'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                        }">
+                          {{ input.value.toLocaleString() }}
+                        </span>
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+              </div>    
+            </mat-expansion-panel>
+          </mat-accordion>
+        </mat-expansion-panel>
+      </ng-container>
+    </ng-container>
+  </mat-accordion>
+</div>
+

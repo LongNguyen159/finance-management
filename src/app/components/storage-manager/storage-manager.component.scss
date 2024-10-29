@@ -1,0 +1,57 @@
+
+/** expansion panel override styles */
+.no-shadows.mat-expansion-panel {
+    box-shadow: none !important;
+}
+
+.round-borders.mat-expansion-panel {
+    border-radius: 12px !important;
+}
+
+.panel-light {
+    background: rgb(255,255,255); // color of light mode background so panel seems transparent
+}
+
+.panel-dark.mat-expansion-panel {
+    background: rgb(34,34,34); // color of dark mode background so panel seems transparent
+}
+
+/** Highlighted background style */
+.highlight-light {
+    background-color: #f0f0f0 !important; /* Light gray */
+}  
+.highlight-light:hover {
+    // background-color: rgb(232,231,235) !important; /* Light gray */
+    background-color: #f0f0f0 !important; /* Light gray */
+}  
+  /* Dark mode background color for even indexed items */
+.highlight-dark {
+    background-color: #353535 !important; /* Darker gray for dark mode */
+}
+.highlight-dark:hover {
+    // background-color: rgb(62,62,62) !important; /* Darker gray for dark mode */
+    background-color: #353535 !important; /* Darker gray for dark mode */
+}
+
+/** Highlighted text style */
+/* Light Mode Styles */
+.income-light {
+    color: green; /* Light mode income color */
+  }
+  
+  .expense-light, .expense-light {
+    color: rgb(217, 24, 24); /* Light mode tax and expense color */
+  }
+  
+  /* Dark Mode Styles */
+  .income-dark {
+    color: lightgreen; /* Dark mode income color */
+  }
+  
+  .expense-dark, .expense-dark {
+    color: lightcoral; /* Dark mode tax and expense color */
+  }
+
+  .mat-mdc-select-arrow-wrapper {
+    margin-right: 1rem !important;
+  }

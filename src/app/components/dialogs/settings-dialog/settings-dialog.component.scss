@@ -1,0 +1,39 @@
+.no-selector-centered-radio .mat-internal-form-field {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.no-selector-centered-radio .mdc-label {
+    display: flex;
+    padding: 0 !important;
+    height: 100%;
+    cursor: pointer;
+}
+
+.no-selector-centered-radio .mdc-radio {
+    display: none !important;
+}
+
+.bigger {
+    transform: scale(2);
+}
+
+.square-radio-label {
+    padding: 16px;
+    width: 84px;
+    border-radius: 24px;
+    height: 84px;
+    cursor: pointer;
+}
+
+.highlighted-dark {
+    background-color: #353535;
+    transition: background-color 0.2s ease-out;
+}
+
+.highlighted-light {
+    background-color: rgb(230, 230, 230);
+    transition: background-color 0.2s ease-out;
+}

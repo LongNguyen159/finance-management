@@ -1,0 +1,13 @@
+<h1 mat-dialog-title>{{ data.title }}</h1>
+<div mat-dialog-content>
+    <p>{{ data.message }}</p>
+</div>
+<mat-dialog-actions align="end">
+    @if(data.cancelLabel) {
+        <button mat-stroked-button (click)="onCancel()"> {{ data.cancelLabel }} </button>
+    }
+
+    <button mat-flat-button [color]="data.confirmColor ? data.confirmColor : 'primary' " (click)="onConfirm()">
+        {{ data.confirmLabel ? data.confirmLabel : 'Ok' }}
+    </button>
+</mat-dialog-actions>

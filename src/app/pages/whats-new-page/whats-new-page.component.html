@@ -1,0 +1,88 @@
+<div class="flex flex-col" [ngClass]="colorService.isDarkMode() ? 'dark-background' : 'light-background'">
+    <app-navbar [showUpdates]="false" [showLogo]="false" [showAddInput]="false" class="navbar">
+    </app-navbar>
+
+    <div class="p-6 flex flex-row w-full justify-center mb-10">
+        <h1 class="font-bold text-4xl">
+            What's New in Easy Sankey
+        </h1>
+    </div>
+
+    <!-- CONTENTS -->
+    <div class="page-container">
+
+        <div class="feature-card">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Multi-Month</h2>
+                <p>
+                    View your financial data over multiple months! Track trends and compare spending habits with ease.
+                </p>
+            </div>
+            <div class="image-section">
+                <img class="object-cover aspect-[4/3] w-[600px] h-full image" src="assets/images/calendar-dark.png" alt="whats-new">
+            </div>
+        </div>
+
+
+
+        <div class="feature-card">
+            <div class="image-section">
+                <img src="assets/images/darkmode-1.png" alt="whats-new" class="object-cover h-full image">
+            </div>
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Dark Mode</h2>
+                <p>
+                    Enjoy a comfortable viewing experience with Dark Mode! Easily toggle between themes to suit your environment.
+                </p>
+            </div>
+        </div>
+
+
+        
+
+        <!-- 
+        <div class="feature-card">
+            <div class="text-section">
+                <h2 class="font-bold mb-2">Copy-Paste</h2>
+                <p>
+                    Save time with Copy-Paste! Quickly duplicate monthly entries without the hassle of retyping.
+                </p>
+            </div>
+            <div class="image-section">
+                <img class="object-cover h-full image" src="assets/images/copy-paste-dark.png" alt="whats-new">
+            </div>
+        </div> -->
+
+
+        <div class="feature-card">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Insert small expenses</h2>
+                <p>
+                    Easily track small expenses! Add individual purchases to your Sankey diagram for better insights.
+                </p>
+            </div>
+            <div class="image-section">
+                <img class="object-cover h-full aspect-[4/3] w-[600px] image" src="assets/images/insert-into-dark.png" alt="whats-new">
+            </div>
+        </div>
+
+
+
+
+        <div class="feature-card">
+            <div class="image-section">
+                <img class="object-cover h-full w-[800px] image" src="assets/images/manager-dark.png" alt="whats-new">
+            </div>
+            
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Finance Manager</h2>
+                <p>
+                    Get an overview of your finances! Monitor income and expenses over time to stay in control of your budget.
+                </p>
+            </div>
+        </div>
+        <div class="h-20">
+
+        </div>
+    </div>
+</div>
