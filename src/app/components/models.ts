@@ -12,6 +12,11 @@ export enum EntryType {
   Tax = 'tax'
 }
 
+export interface DateChanges {
+  previousMonth: Date;
+  currentMonth: Date;
+}
+
 
 
 export interface SankeyNode {

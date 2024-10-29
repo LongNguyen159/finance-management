@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
-import { EntryType, UserDefinedLink } from '../models';
+import { DateChanges, EntryType, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
@@ -50,7 +50,7 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
-export class InputListComponent extends BasePageComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
+export class InputListComponent extends BasePageComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() triggeredMonthByDialog: string = ''
 
   dataService = inject(DataService)
@@ -129,26 +129,26 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     })
   }
 
-  onMonthChanges(selectedMonth: Date) {
-    this.dataMonth = formatDateToYYYYMM(selectedMonth)
-    onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
-  }
+  onMonthChanges(selectedMonth: DateChanges) {
+    const currentMonth = formatDateToYYYYMM(selectedMonth.currentMonth)
+    const prevMonth = formatDateToYYYYMM(selectedMonth.previousMonth)
 
-  private _checkDuplicateName(value: string | null, formGroup: FormGroup): void {
-    if (!value) return;
-    
-    // Get all form values and normalize for comparison
-    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase());
-    const duplicateNames: string[] = formValues.filter((item, index) => formValues.indexOf(item) !== index);
+    /** This will trigger subscription onInit of this component. No need to update global variables here as we already did it in the subscription. */
+    onMonthChanges(selectedMonth.currentMonth, this.allMonthsData, this.singleMonthData, this.dataService)
 
-    // Display a snackbar notification if duplicates are found
-    if (duplicateNames.length > 0) {
-      formGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
-      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss');
-    } else {
-      formGroup.get('target')?.setErrors(null, { emitEvent: false });
+    if (currentMonth !== prevMonth && this.hasChanges) {
+      // Process previous month values if there are changes of that month and user navigate to another month.
+      this.processMonthBeforeMonthChanges(prevMonth, this.savedFormValues)
+      
+      // Reset has changes flag after processing the month.
+      this.hasChanges = false;
     }
+    /** Assign the saved form values to the current form values (instead of previous month)
+     * We do this to make the savedFormValues up-to-date to track whether it changes.
+     */
+    this.savedFormValues = this.linkForm.value.links.slice();
   }
+
   ngAfterViewInit(): void {
     /** Scroll to bottom of dialog input every time component is initialised.
      * Do it here because the view is not yet rendered in ngOnInit.
@@ -156,24 +156,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     // this.scrollToBottom();
   }
 
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes && changes['triggeredMonthByDialog']) {
-      // Current and previous month values
-      const previousMonth = changes['triggeredMonthByDialog'].previousValue;
-      const currentMonth = changes['triggeredMonthByDialog'].currentValue;
-
-  
-      /** If changes month, process the previous month. */
-      if (currentMonth !== previousMonth && this.hasChanges) {
-        // Process the previous month values
-        this.processMonthBeforeMonthChanges(previousMonth, this.savedFormValues);
-        this.hasChanges = false;
-      }
-      // Assign the saved form values to the current form values (instead of previous month)
-      this.savedFormValues = this.linkForm.value.links.slice();
-    }
-  }
 
   /** This function is used to process the previous month (in compare to current month).
    * Triggered when user changes the month.
@@ -251,6 +233,23 @@ export class InputListComponent extends BasePageComponent implements OnInit, OnC
     }
   }
   //#endregion
+
+
+  private _checkDuplicateName(value: string | null, formGroup: FormGroup): void {
+    if (!value) return;
+    
+    // Get all form values and normalize for comparison
+    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase());
+    const duplicateNames: string[] = formValues.filter((item, index) => formValues.indexOf(item) !== index);
+
+    // Display a snackbar notification if duplicates are found
+    if (duplicateNames.length > 0) {
+      formGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
+      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss');
+    } else {
+      formGroup.get('target')?.setErrors(null, { emitEvent: false });
+    }
+  }
 
 
   //#region Form Initialisation

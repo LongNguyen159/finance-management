@@ -19,6 +19,7 @@ import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
 import { DialogsService } from '../../services/dialogs.service';
+import { DateChanges } from '../../components/models';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -109,8 +110,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   }
 
 
-  onMonthChanges(selectedMonth: Date) {    
-    onMonthChanges(selectedMonth, this.monthlyData, this.entriesOfOneMonth, this.dataService)
+  onMonthChanges(selectedMonth: DateChanges) {    
+    onMonthChanges(selectedMonth.currentMonth, this.monthlyData, this.entriesOfOneMonth, this.dataService)
   }
 
   toggleLayout() {
