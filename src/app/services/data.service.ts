@@ -92,8 +92,8 @@ export class DataService {
         this.removeOldUserFinancialData(); // Remove old key from previous versions
     
         // Check if it's the user's first time
-        if (this.isFirstTimeUser()) {
-            console.log('First time user. Processing demo data.');
+        if (this.isFirstTimeUser() || this.isOldVersion()) {
+            console.log('First time user or outdated app version. Processing demo data.');
             this.processDemoData();
         } else {
             // Load existing data or prepare for user input
@@ -104,6 +104,14 @@ export class DataService {
     private isFirstTimeUser(): boolean {
         const firstTime = localStorage.getItem('firstTime');
         return firstTime == null || firstTime === 'true' || firstTime == undefined;
+    }
+
+    private isOldVersion(): boolean {
+        const storedVersion = localStorage.getItem('appVersion');
+        if (!storedVersion) return true; // Treat as outdated if version is missing
+    
+        const [major, minor] = storedVersion.split('.').map(Number);
+        return major < 2 || (major === 2 && minor < 0);
     }
     
     private processDemoData(): void {
@@ -143,6 +151,7 @@ export class DataService {
      * @param month: month in "YYYY-MM" format.
      * @param demo: flag to indicate if the data is demo data.
      * @param showSnackbarWhenDone: flag to show snackbar when data is processed.
+     * @param emitObservable: flag to emit observable. True: Emit obseravale for subscribe to do something with the data. False: Only save processed data in local storage.
      */
     processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false, emitObservable: boolean = true): void {
         const negatives = userDefinedLinks.filter(link => link.value < 0);
