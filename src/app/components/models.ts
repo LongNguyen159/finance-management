@@ -12,6 +12,22 @@ export enum EntryType {
   Tax = 'tax'
 }
 
+
+export enum ExpenseCategory {
+  Housing = 'Housing',
+  Groceries = 'Groceries',
+  Restaurants = 'Restaurants',
+  Shopping = 'Shopping',
+  Education = 'Education',
+  Savings = 'Savings & Investments',
+  Health = 'Health & Fitness',
+  Entertainment = 'Entertainment',
+  Hobby = 'Hobbies',
+  Commute = 'Commute & Transport',
+  Utils = 'Utilities',
+  Other = 'Other'
+}
+
 export interface DateChanges {
   previousMonth: Date;
   currentMonth: Date;
