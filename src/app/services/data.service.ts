@@ -1,5 +1,5 @@
 import { inject, Injectable, Signal, signal } from '@angular/core';
-import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
+import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
@@ -63,7 +63,7 @@ export class DataService {
     private dataSaved$ = new BehaviorSubject<boolean>(false)
 
     isDemo = signal(false)
-    isAdvancedShown: boolean = false
+    isAdvancedShown: boolean = true
 
     /** Use this to scale all income-expense bar chart to have same scale.
      * This value will be the largest value either totalUsableIncome or totalExpenses.
@@ -247,6 +247,8 @@ export class DataService {
         const expenseSource = hasTax ? 'Usable Income' : incomeSource;
 
         // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
+        const allowedCategories = Object.values(ExpenseCategory);
+
         userDefinedLinks.forEach(link => {
             if (link.type == EntryType.Income) {
                 if (!singleIncome) {
@@ -256,21 +258,45 @@ export class DataService {
                         value: link.value
                     });
                 }
-            } else if (link.type == EntryType.Expense) {
-                const sourceNode = link.source || expenseSource;
-        
-                // Check if the source node exists in the nodesMap; if not, use the default expenseSource
-                const isSourceValid: boolean = nodesMap.has(sourceNode)
-                const validSource = isSourceValid ? sourceNode : expenseSource;
-                if (!isSourceValid) {
-                    link.source = '';
+            } else if (link.type === EntryType.Expense) {
+                let sourceNode = link.source || expenseSource;
+
+                // Step 2: Check if the source node exists in nodesMap or is an allowed category
+                if (!nodesMap.has(sourceNode) && allowedCategories.includes(sourceNode as ExpenseCategory)) {
+                    // Create the missing source node as a new entry with 'Expense' type
+                    nodesMap.set(sourceNode, { value: 0, type: EntryType.Expense });
+
+                    // Calculate its total value by summing all links that use it as a source
+                    const sourceValue = userDefinedLinks
+                        .filter(childLink => childLink.source === sourceNode)
+                        .reduce((sum, childLink) => sum + childLink.value, 0);
+                    
+                    // Set the source node's accumulated value
+                    nodesMap.get(sourceNode)!.value = sourceValue;
+
+                    // Add a link from the new source node to its child
+                    links.push({
+                        source: sourceNode,
+                        target: link.target,
+                        value: link.value
+                    });
+
+                    // Link newly created source node to the default income node
+                    links.push({
+                        source: incomeSource, // Link to default income (Total Income or single income node)
+                        target: sourceNode,
+                        value: sourceValue
+                    });
+                } else {
+                    // If the source is not found or is not in allowed categories, link directly to default income
+                    const validSource = nodesMap.has(sourceNode) ? sourceNode : incomeSource;
+                    
+                    links.push({
+                        source: validSource, // Use either the existing source or default income
+                        target: link.target,
+                        value: link.value
+                    });
                 }
-        
-                links.push({
-                    source: validSource, // Use either the user-defined source or the default expenseSource
-                    target: link.target,
-                    value: link.value
-                });
             }
         });
 

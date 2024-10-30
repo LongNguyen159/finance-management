@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
-import { DateChanges, EntryType, UserDefinedLink } from '../models';
+import { DateChanges, EntryType, ExpenseCategory, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
@@ -105,7 +105,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.singleMonthData = data;
       this.dataMonth = data.month
       /** Only include expense nodes. */
-      this.existingNodes = data.rawInput.filter(item => item.type == EntryType.Expense).map(item => item.target);
+      this.existingNodes = Object.values(ExpenseCategory)
+
+
       this.filteredNodes = [...this.existingNodes];
       this.taxNodeExists = this._hasTaxNode(data.rawInput);
 
