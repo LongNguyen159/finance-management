@@ -264,8 +264,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
         Validators.required,
-        nonEmptyValidator(),  // Add this validator to ensure the target is not empty or whitespace
-        restrictedNodeNamesValidator(['Default income', 'Total Income', 'Usable Income'])
+
+        /** Non empty node names */
+        nonEmptyValidator(),
+
+        /** Not allowed node names: */
+        restrictedNodeNamesValidator(['Total Income', 'Usable Income', 'Remaining Balance'])
       ]],
       value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
       source: [link ? link.source : ''] // Optional
