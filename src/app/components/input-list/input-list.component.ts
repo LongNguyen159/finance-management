@@ -291,7 +291,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // Subscribe to changes in the type field
     linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value == EntryType.Income || value == EntryType.Tax) {
-        linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if income
+        linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if type = income or tax
+        linkGroup.get('source')?.setValue('', { emitEvent: false }); // Clear source field
       } else {
         linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
       }
