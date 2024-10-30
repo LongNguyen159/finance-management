@@ -171,7 +171,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** If process Input data, remember NOT to emit, because we only want to save it, if we emit,
      * the current month will be overriden from the data of previous month.
      */
-    this.dataService.processInputData(previousFormValues, previouMonthValue, false, true, false)
+    this.dataService.processInputData(previousFormValues, previouMonthValue, { showSnackbarWhenDone: true, emitObservable: false})
   }
 
   /** Update Input, this function when triggered will send the input data to service to update the form state.

@@ -116,7 +116,7 @@ export class DataService {
     
     private processDemoData(): void {
         const todaysDate = new Date();
-        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), true);
+        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true});
     }
     
     private loadExistingData(): void {
@@ -146,14 +146,17 @@ export class DataService {
 
     //#region: Process Input Data
 
-    /** Process input data and emits a Subject of Single month entries.
-     * @param userDefinedLinks: raw input from form.
-     * @param month: month in "YYYY-MM" format.
-     * @param demo: flag to indicate if the data is demo data.
-     * @param showSnackbarWhenDone: flag to show snackbar when data is processed.
-     * @param emitObservable: flag to emit observable. True: Emit obseravale for subscribe to do something with the data. False: Only save processed data in local storage.
+    /**
+     * Processes input data and emits a Subject for single month entries.
+     * @param userDefinedLinks - The raw input data from the form.
+     * @param month - The month for which to process data, in "YYYY-MM" format.
+     * @param options - An object containing optional configuration flags:
+     *   - demo: `boolean` (default: `false`) - Indicates if the data is demo data.
+     *   - showSnackbarWhenDone: `boolean` (default: `false`) - Shows a snackbar notification when data processing is complete.
+     *   - emitObservable: `boolean` (default: `true`) - If `true`, emits an observable with the processed data for further actions.
+     *       If `false`, only saves the processed data in local storage without emitting.
      */
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false, emitObservable: boolean = true): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
@@ -171,7 +174,7 @@ export class DataService {
         /** Demo flag: Only set to true when the app loads for the first time to show our demo
          * graph for first time users.
          */
-        if (demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
+        if (options.demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
             this.isDemo.set(true)
         } else {
             this.isDemo.set(false)
@@ -329,12 +332,12 @@ export class DataService {
         };
 
         // Emit the processed data
-        if (emitObservable) {
+        if (options.emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
             // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         }
 
-        if (showSnackbarWhenDone && !this.isDemo()) {
+        if (options.showSnackbarWhenDone && !this.isDemo()) {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 

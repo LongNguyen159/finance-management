@@ -142,7 +142,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       ];
   
       // Send the updated array to the service
-      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, false, true);
+      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true});
     } else {
       this.uiService.showSnackBar('No matching entry found!', 'Error');
     }
