@@ -28,6 +28,10 @@
           This name is not allowed.
         </mat-error>
 
+        <mat-error *ngIf="linkGroup.get('target')?.hasError('cycle')">
+          This creates a cycle!
+        </mat-error>
+
         <mat-error *ngIf="linkGroup.get('target')?.hasError('duplicatedName')">
           Duplicated name.
         </mat-error>

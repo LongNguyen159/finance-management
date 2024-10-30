@@ -280,8 +280,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       linkGroup.get('source')?.disable({ emitEvent: false });
     }
 
-    linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe(value => {
-      this._checkDuplicateName(value, linkGroup);
+    linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
+      if (value) {
+        this._checkDuplicateName(value, linkGroup);
+        this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
+      }
     })
 
 
@@ -401,6 +404,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** If source = value, it's a cycle error, exit the function early. */
     if (source.toLowerCase() === target.toLowerCase()) {
       linkGroup.get('source')?.setErrors({ cycle: true }, { emitEvent: false });
+      linkGroup.get('target')?.setErrors({ cycle: true }, { emitEvent: false });
       return;
     }
   
