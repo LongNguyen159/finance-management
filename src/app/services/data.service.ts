@@ -116,7 +116,7 @@ export class DataService {
     
     private processDemoData(): void {
         const todaysDate = new Date();
-        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true});
+        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true, emitObservable: true});
     }
     
     private loadExistingData(): void {
@@ -157,6 +157,7 @@ export class DataService {
      *       If `false`, only saves the processed data in local storage without emitting.
      */
     processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
+        const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
@@ -174,7 +175,7 @@ export class DataService {
         /** Demo flag: Only set to true when the app loads for the first time to show our demo
          * graph for first time users.
          */
-        if (options.demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
+        if (demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
             this.isDemo.set(true)
         } else {
             this.isDemo.set(false)
@@ -332,12 +333,13 @@ export class DataService {
         };
 
         // Emit the processed data
-        if (options.emitObservable) {
+        if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+            console.log('Observable emitted:', this.monthlyData[month]);
             // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         }
 
-        if (options.showSnackbarWhenDone && !this.isDemo()) {
+        if (showSnackbarWhenDone && !this.isDemo()) {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 

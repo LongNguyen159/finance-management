@@ -62,13 +62,15 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
 
   private filterOptions(searchTerm: string): void {
-    if (!searchTerm) {
+    const normalisedSearchTerm = searchTerm.toLowerCase();
+    if (!normalisedSearchTerm) {
       /** Assign a shallow copy of the `allOptions` array to avoid mutations */
       this.filteredOptions = this.allOptions.slice();
     } else {
       this.filteredOptions = this.allOptions.filter(option =>
-        option.toLowerCase().includes(searchTerm)
+        option.toLowerCase().includes(normalisedSearchTerm)
       );
+      console.log('filteredOptions:', this.filteredOptions);
     }
   }
 
@@ -142,7 +144,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       ];
   
       // Send the updated array to the service
-      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true});
+      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
     } else {
       this.uiService.showSnackBar('No matching entry found!', 'Error');
     }
