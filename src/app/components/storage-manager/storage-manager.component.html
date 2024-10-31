@@ -73,7 +73,7 @@
                   <ul class="flex flex-col items-end">
                     <li *ngFor="let input of getSortedRawInputWithoutSource(month)">
                       <p *ngIf="!input.source">  <!-- Only display items with no source -->
-                        {{ input.target }}: 
+                        {{ input.name }}: 
                         <span [ngClass]="{
                           'income-light': input.type === 'income' && !colorService.isDarkMode(),
                           'income-dark': input.type === 'income' && colorService.isDarkMode(),

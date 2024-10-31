@@ -17,7 +17,7 @@ import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
-import { UserDefinedLink } from '../models';
+import { PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 
 @Component({
@@ -198,9 +198,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
   getSortedRawInputWithoutSource(month: string) {
-    return this.localStorageData[month].rawInput
-      .filter((item: UserDefinedLink) => !item.source) // Filter out items with no source
-      .sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
+    const currentMonthData = this.localStorageData[month];
+
+    // Step 1: Extract income entries from rawInput
+    const incomeEntries = currentMonthData.rawInput
+    .filter(entry => entry.type === 'income')
+    .map(entry => ({
+        type: 'income',
+        name: entry.target,
+        value: entry.value
+    }));
+
+    // Step 2: Extract entries from pieData, excluding "Remaining Balance"
+    const expenseEntries = currentMonthData.pieData
+    .filter((entry: PieData) => entry.name !== 'Remaining Balance')
+    .map((entry: PieData) => ({
+        type: 'expense',
+        name: entry.name,
+        value: entry.value
+    }));
+
+    // Step 3: Combine the two arrays
+    const result = [...incomeEntries, ...expenseEntries];
+    
+    return result.sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
   }
 
 

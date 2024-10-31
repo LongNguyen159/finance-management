@@ -50,3 +50,8 @@ export interface SankeyData {
     nodes: SankeyNode[];
     links: SankeyLink[];
 }
+
+export interface PieData {
+  name: string
+  value: number
+}
