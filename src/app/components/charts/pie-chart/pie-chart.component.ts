@@ -90,7 +90,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
           emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
           label: {
             formatter: (params: any) =>  {
-              return `${params.name}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
+              return `${removeSystemPrefix(params.name)}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
             },
             fontSize: 12,
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary
