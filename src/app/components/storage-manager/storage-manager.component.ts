@@ -10,7 +10,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { parseLocaleStringToNumber, sortYearsDescending } from '../../utils/utils';
+import { parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
@@ -197,7 +197,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.filterMonths(); // Filter the months based on selected option
   }
 
-  getSortedRawInputWithoutSource(month: string) {
+  getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
     const currentMonthData = this.localStorageData[month];
 
     // Step 1: Extract income entries from rawInput
@@ -214,13 +214,12 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     .filter((entry: PieData) => entry.name !== 'Remaining Balance')
     .map((entry: PieData) => ({
         type: 'expense',
-        name: entry.name,
+        name: removeSystemPrefix(entry.name),
         value: entry.value
     }));
 
     // Step 3: Combine the two arrays
-    const result = [...incomeEntries, ...expenseEntries];
-    
+    const result = [...incomeEntries, ...expenseEntries];    
     return result.sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
   }
 
