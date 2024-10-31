@@ -10,7 +10,7 @@
       <app-month-picker (monthSelected)="onMonthChanges($event)"></app-month-picker>
     </div>
     <div class="flex flex-row w-full items-center justify-end gap-1">
-      <div>Show advanced</div>
+      <div>Show categories</div>
       <div>
         <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
       </div>
