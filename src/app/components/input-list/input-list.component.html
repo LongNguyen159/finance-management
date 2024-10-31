@@ -85,8 +85,8 @@
           <mat-option>
             <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search categories..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
           </mat-option>
-          <mat-option *ngFor="let node of filteredNodes" [value]="node">
-            {{ node }}
+          <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
+            {{ node.label }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">

@@ -81,7 +81,7 @@ export class DataService {
 
     private copiedLinksKey = 'copiedLinks';
 
-    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', ...Object.values(ExpenseCategory)];
+    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', '-- None --' , ...Object.values(ExpenseCategory)];
 
     
 

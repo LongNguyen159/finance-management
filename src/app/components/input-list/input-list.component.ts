@@ -15,7 +15,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { formatDateToYYYYMM, onMonthChanges } from '../../utils/utils';
+import { formatDateToYYYYMM, onMonthChanges, removeSystemPrefix } from '../../utils/utils';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -68,8 +68,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   linkTypes: EntryType[] = [EntryType.Income, EntryType.Expense, EntryType.Tax]; // Types of links
   entryTypes = EntryType; // Enum for entry types
 
-  existingNodes: string[] = []; // To hold existing node names
-  filteredNodes: string[] = []; // To hold filtered suggestions for auto-complete
+  existingNodes: {label: string, value: string}[] = []; // To hold existing node names
+  filteredNodes: {label: string, value: string}[] = []; // To hold filtered suggestions for auto-complete
 
   taxNodeExists = false; // Flag to check if a tax node exists
 
@@ -105,7 +105,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.singleMonthData = data;
       this.dataMonth = data.month
       /** Only include expense nodes. */
-      this.existingNodes = Object.values(ExpenseCategory)
+      this.existingNodes = this.transformEnumToObjects(ExpenseCategory as any)
 
 
       this.filteredNodes = [...this.existingNodes];
@@ -129,6 +129,13 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.savedFormValues = formData.links.slice();
       this.hasChanges = true;
     })
+  }
+
+  private transformEnumToObjects(enumObj: ExpenseCategory): { label: string, value: string }[] {
+    return Object.values(enumObj).map(value => {
+      const label = removeSystemPrefix(value)
+      return { label, value };
+    });
   }
 
   onMonthChanges(selectedMonth: DateChanges) {
@@ -344,8 +351,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * Unless user defines 'default income' node, it'll be linked to default income node.
    */
   private _addDefaultNode() {
-    if (!this.filteredNodes.includes('-- None --')) {
-      this.filteredNodes.unshift('-- None --');
+    const defaultNode = {
+      label: '-- None --',
+      value: '-- None --'
+    }
+    if (!this.filteredNodes.includes(defaultNode)) {
+      this.filteredNodes.unshift(defaultNode);
     }
   }
 
@@ -462,12 +473,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   //#region Link Controls
   // Filter nodes based on user input
-  private _filterNodes(value: string): string[] {
+  private _filterNodes(value: string): { label: string, value: string }[] {
     const filterValue = value.toLowerCase();
-    
+  
     // Filter nodes, excluding the current node if it matches
     return this.filteredNodes = this.existingNodes
-      .filter(nodeName => nodeName.toLowerCase().includes(filterValue) && nodeName.toLowerCase() !== filterValue);
+      .filter(node => node.label.toLowerCase().includes(filterValue) && node.label.toLowerCase() !== filterValue);
   }
 
   // Add a new input row
