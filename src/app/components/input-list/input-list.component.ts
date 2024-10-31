@@ -8,7 +8,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import { debounceTime, takeUntil } from 'rxjs';
+import { debounceTime, findIndex, takeUntil } from 'rxjs';
 import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -302,6 +302,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // Listen to changes in the source field for filtering options
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
+        /** Set type automatic to expense if category choosed */
+        linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
         this._filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
       }
@@ -323,6 +325,13 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     
     // Populate form without emitting valueChanges
     links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));
+
+    // Check for cycles in the initial form state
+    this.linkArray.controls.forEach((control) => {
+      this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
+    })
+
+
     // Shallow copy to avoid mutations
     this.initialFormState = [...links];
   }
@@ -387,40 +396,64 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     return descendants;
   }
   
-  /** Check for cycle in the links.
-   * @param source Source node
-   * @param target Target node
-   * @param linkGroup FormGroup containing the source and target fields
-   * @param links Array of links
+  /**
+   * Checks for cycles in the links based on source and target.
+   * A cycle occurs when:
+   *   - source equals target, or
+   *   - source is found among the descendants of target.
    * 
-   * @if source = target, it's a cycle error
-   * @if source is sourcing its descendants, it's a cycle error
-   */
-  private checkForCycle(source: string, target: string | undefined | null, linkGroup: FormGroup, links: UserDefinedLink[]): void {
-    if (!target) {
-      return;
-    }
+   * @param source Source node
+   * @param target Target node (optional)
+   * @param linkGroup FormGroup with source and target fields (optional)
+   * @param links Array of links to search for descendants (optional)
+  */
+  private checkForCycle(source: string, target: string | null | undefined, linkGroup?: FormGroup, links?: UserDefinedLink[]): void {
+    console.log('Checking for cycle...');
+    console.log('Source:', source);
+    console.log("Target:", target);
+    console.log('Links:', links);
+    console.log('LinkGroup:', linkGroup);
 
+    this.dataService.hasDataCycle.set(false); // Reset cycle flag
+      
+    // Exit if either source or target is missing
+    if (!source || !target) return;
 
-    /** If source = value, it's a cycle error, exit the function early. */
+    // Check for direct cycle (source == target)
     if (source.toLowerCase() === target.toLowerCase()) {
-      linkGroup.get('source')?.setErrors({ cycle: true }, { emitEvent: false });
-      linkGroup.get('target')?.setErrors({ cycle: true }, { emitEvent: false });
+      this.setCycleError(true, linkGroup);
+      console.log('Cycle detected: source equals target');
       return;
     }
-  
-    // Build adjacency list from existing links
-    // const adjacencyList = this.buildAdjacencyList(links);
-  
-    // Find all descendants of the target
-    const descendants = this.findDescendants(target, links);
 
+    // Exit if no links provided for descendant check
+    if (!links) return;
+
+    // Check if source is a descendant of target
+    // const descendants = this.findDescendants(target, links);
+
+    // console.log('Descendants:', descendants);
+    // const hasCycle = descendants.has(source);
+    // if (hasCycle) {
+    //   this.setCycleError(hasCycle, linkGroup);
+    // } else {
+    //   this.setCycleError(null, linkGroup)
+    // }
+    // console.log(hasCycle ? 'Cycle detected: source is a descendant' : 'No cycle detected');
+  } 
+
+  /**
+   * Sets the cycle error state on source and target fields.
+   * @param linkGroup FormGroup containing source and target fields
+   * @param hasCycle Boolean indicating if a cycle was detected
+   */
+  private setCycleError(hasCycle: boolean | null, linkGroup?: FormGroup): void {
+    this.dataService.hasDataCycle.set(hasCycle || false);
     
-    /** Check if a node is sourcing its decendants. If yes, return cycle error */
-    if (descendants.has(source)) {
-      linkGroup.get('source')?.setErrors({ cycle: true }, { emitEvent: false }); // Cycle detected
-    } else {
-      linkGroup.get('source')?.setErrors(null, { emitEvent: false });  // No cycle
+    if (linkGroup) {
+      const cycleError = hasCycle ? { cycle: true } : null;
+      linkGroup.get('source')?.setErrors(cycleError, { emitEvent: false });
+      linkGroup.get('target')?.setErrors(cycleError, { emitEvent: false });
     }
   }
 

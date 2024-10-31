@@ -123,6 +123,8 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
 
   // Notify month changes to parent component
   notifyMonthChanges(date: Date) {
+    /** Reset data cycle flag for new month */
+    this.dataService.hasDataCycle.set(false)
     // Emit both the previous and current month
     this.monthSelected.emit({
       previousMonth: this.previousDate,

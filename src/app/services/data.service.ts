@@ -3,6 +3,7 @@ import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDef
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
+import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
 export interface MonthlyData {
     [month: string]: SingleMonthData;
 }
@@ -40,13 +41,13 @@ export interface ExpenseData {
 export class DataService {
     private UiService = inject(UiService)
     monthlyData: MonthlyData = {};
-    private sankeyData: SankeyData = {
+    private readonly sankeyDataInit: SankeyData = {
         nodes: [],
         links: []
     }
     private remainingBalance: string = '-';
     private singleMonthEntries: SingleMonthData = {
-        sankeyData: this.sankeyData,
+        sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
         totalGrossIncome: -1,
@@ -70,9 +71,17 @@ export class DataService {
      */
     incomeExpenseScaleValue = signal(0)
 
+
+    /** Data cycle flag. If true, means contains data cycle in the sankey.
+     * If this is the case, do not process the data.
+     */
+    hasDataCycle = signal(false)
+
     selectedActiveDate: Date = new Date();
 
     private copiedLinksKey = 'copiedLinks';
+
+    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', ...Object.values(ExpenseCategory)];
 
     
 
@@ -159,12 +168,51 @@ export class DataService {
      *       If `false`, only saves the processed data in local storage without emitting.
      */
     processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
+        /** Prevent overriding default value if not given.
+         * e.g. `emitObservable` defaults to true, but if not provided by caller, it will be undefined.
+         * This line below will set it to true if it's not provided.
+         */
         const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
+
+        /** Early exit if detect negative values. */
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
             return;
         }
+
+        if (userDefinedLinks.some(link => this.nonAllowedNames.includes(link.target))) {
+            const foundLinks = userDefinedLinks.filter(link => this.nonAllowedNames.includes(link.target));
+            const dialogData: ConfirmDialogData = {
+                title: 'Warning: Restricted Name Usage',
+                message: `Some names in your input are reserved for internal use and may cause unexpected behaviours. 
+                          Please rename the following entries:<br><br>
+                          ${foundLinks.map(link => `- "${link.target}"`).join('<br>')}
+                         `,
+                confirmLabel: 'OK'
+            };
+            this.UiService.openConfirmDialog(dialogData)
+        }
+
+        /** Early exit if detect data cycle */
+        if (this.hasDataCycle() || (userDefinedLinks.some(link => link.source === link.target) && userDefinedLinks.length > 1)) {
+            this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
+            console.log('Data has a cycle! Emitting default entries');
+            this.singleMonthEntries = {
+                sankeyData: this.sankeyDataInit,
+                totalUsableIncome: -1,
+                totalTax: -1,
+                totalGrossIncome: -1,
+                totalExpenses: -1,
+                remainingBalance: '-',
+                pieData: [],
+                rawInput: userDefinedLinks,
+                month: month
+            }
+            this.processedSingleMonthEntries$.next(this.singleMonthEntries);
+            return;
+        }
+
 
         const nodesMap = new Map<string, { value: number, type: EntryType }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
