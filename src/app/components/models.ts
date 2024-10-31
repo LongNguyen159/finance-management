@@ -14,18 +14,18 @@ export enum EntryType {
 
 
 export enum ExpenseCategory {
-  Housing = 'Housing',
-  Groceries = 'Groceries',
-  Restaurants = 'Restaurants',
-  Shopping = 'Shopping',
-  Education = 'Education',
-  Savings = 'Savings & Investments',
-  Health = 'Health & Fitness',
-  Entertainment = 'Entertainment',
-  Hobby = 'Hobbies',
-  Commute = 'Commute & Transport',
-  Utils = 'Utilities',
-  Other = 'Other'
+  Housing = 'Housing@category',
+  Groceries = 'Groceries@category',
+  Restaurants = 'Restaurants@category',
+  Shopping = 'Shopping@category',
+  Education = 'Education@category',
+  Savings = 'Savings & Investments@category',
+  Health = 'Health & Fitness@category',
+  Entertainment = 'Entertainment@category',
+  Hobby = 'Hobbies@category',
+  Commute = 'Commute & Transport@category',
+  Utils = 'Utilities@category',
+  Other = 'Other@category'
 }
 
 export interface DateChanges {

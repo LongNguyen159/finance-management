@@ -6,6 +6,7 @@ import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
+import { removeSystemPrefix } from '../../../utils/utils';
 
 
 @Component({
@@ -55,6 +56,16 @@ export class SankeyChartComponent implements OnChanges {
         textStyle: {
           color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
+        formatter: (params: any) => {
+          if (params.dataType === 'node') {
+            const nodeName = removeSystemPrefix(params.data.name);
+            return `${nodeName}: <strong>${params.data.value.toLocaleString()}</strong>`;
+          } else {
+            const source = params.data.source ? removeSystemPrefix(params.data.source) : '';
+            const target = params.data.target ? removeSystemPrefix(params.data.target) : '';
+            return `${source} → ${target}: <strong>${params.data.value.toLocaleString()}</strong>`;
+          }
+        }
       },
       toolbox: {
         right: 20,
@@ -88,8 +99,9 @@ export class SankeyChartComponent implements OnChanges {
               }
             },
             formatter: (params: any) => {
+              const nodeName = removeSystemPrefix(params.name); // Remove system prefix
               return [
-                `{bold|${params.name}}`, // Bold name
+                `{bold|${nodeName}}`, // Bold name
                 `{normal|${params.value.toLocaleString()}}`, // Normal value
               ].join('\n'); // Join with a newline
             }

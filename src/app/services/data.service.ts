@@ -88,6 +88,7 @@ export class DataService {
         this.initializeData()
     }
 
+    //#region: Initialize Data
     private initializeData(): void {
         this.removeOldUserFinancialData(); // Remove old key from previous versions
     
@@ -131,6 +132,7 @@ export class DataService {
             this.processInputData([], formatDateToYYYYMM(new Date()));
         }
     }
+    //#endregion
 
 
     
