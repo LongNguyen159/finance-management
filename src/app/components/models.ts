@@ -13,19 +13,21 @@ export enum EntryType {
 }
 
 
+export const SYSTEM_PREFIX = '__system/category__'
+
 export enum ExpenseCategory {
-  Housing = 'Housing@category',
-  Groceries = 'Groceries@category',
-  Restaurants = 'Restaurants@category',
-  Shopping = 'Shopping@category',
-  Education = 'Education@category',
-  Savings = 'Savings & Investments@category',
-  Health = 'Health & Fitness@category',
-  Entertainment = 'Entertainment@category',
-  Hobby = 'Hobbies@category',
-  Commute = 'Commute & Transport@category',
-  Utils = 'Utilities@category',
-  Other = 'Other@category'
+  Housing = `Housing@${SYSTEM_PREFIX}`,
+  Groceries = `Groceries@${SYSTEM_PREFIX}`,
+  Restaurants = `Restaurants@${SYSTEM_PREFIX}`,
+  Shopping = `Shopping@${SYSTEM_PREFIX}`,
+  Education = `Education@${SYSTEM_PREFIX}`,
+  Savings = `Savings & Investments@${SYSTEM_PREFIX}`,
+  Health = `Health & Fitness@${SYSTEM_PREFIX}`,
+  Entertainment = `Entertainment@${SYSTEM_PREFIX}`,
+  Hobby = `Hobbies@${SYSTEM_PREFIX}`,
+  Commute = `Commute & Transport@${SYSTEM_PREFIX}`,
+  Utils = `Utilities@${SYSTEM_PREFIX}`,
+  Other = `Other@${SYSTEM_PREFIX}`
 }
 
 export interface DateChanges {

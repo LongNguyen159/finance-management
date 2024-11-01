@@ -1,3 +1,4 @@
+import { SYSTEM_PREFIX } from "../components/models";
 import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
 
 
@@ -83,5 +84,5 @@ export function sortYearsDescending(years: string[]): string[] {
  * name collisions in our data, but we don't want to show it in the UI.
  */
 export function removeSystemPrefix(name: string): string {
-  return name.replace(/@category/g, '');
+  return name.replace(new RegExp(`@${SYSTEM_PREFIX}`, 'g'), '');
 }
