@@ -86,6 +86,9 @@
             <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search categories..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
           </mat-option>
           <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
+            @if(node.icon) {
+              <mat-icon fontSet="material-symbols-outlined">{{ node.icon }}</mat-icon>
+            }
             {{ node.label }}
           </mat-option>
         </mat-select>

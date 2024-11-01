@@ -30,6 +30,27 @@ export enum ExpenseCategory {
   Other = `Other@${SYSTEM_PREFIX}`
 }
 
+export interface ExpenseCategoryDetails {
+  label: string;
+  value: string;
+  icon?: string;
+}
+
+export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategoryDetails } = {
+  [ExpenseCategory.Housing]: { label: 'Housing', value: ExpenseCategory.Housing, icon: 'home' },
+  [ExpenseCategory.Groceries]: { label: 'Groceries', value: ExpenseCategory.Groceries, icon: 'shopping_cart' },
+  [ExpenseCategory.Restaurants]: { label: 'Restaurants', value: ExpenseCategory.Restaurants, icon: 'restaurant' },
+  [ExpenseCategory.Shopping]: { label: 'Shopping', value: ExpenseCategory.Shopping, icon: 'shopping_bag' },
+  [ExpenseCategory.Education]: { label: 'Education', value: ExpenseCategory.Education, icon: 'school' },
+  [ExpenseCategory.Savings]: { label: 'Savings & Investments', value: ExpenseCategory.Savings, icon: 'savings' },
+  [ExpenseCategory.Health]: { label: 'Health & Fitness', value: ExpenseCategory.Health, icon: 'fitness_center' },
+  [ExpenseCategory.Entertainment]: { label: 'Entertainment', value: ExpenseCategory.Entertainment, icon: 'movie' },
+  [ExpenseCategory.Hobby]: { label: 'Hobbies', value: ExpenseCategory.Hobby, icon: 'palette' },
+  [ExpenseCategory.Commute]: { label: 'Commute & Transport', value: ExpenseCategory.Commute, icon: 'commute' },
+  [ExpenseCategory.Utils]: { label: 'Utilities', value: ExpenseCategory.Utils, icon: 'build' },
+  [ExpenseCategory.Other]: { label: 'Other', value: ExpenseCategory.Other, icon: 'more_horiz' }
+};
+
 export interface DateChanges {
   previousMonth: Date;
   currentMonth: Date;

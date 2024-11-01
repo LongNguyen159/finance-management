@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
-import { DateChanges, EntryType, ExpenseCategory, UserDefinedLink } from '../models';
+import { DateChanges, EntryType, ExpenseCategory, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
@@ -68,8 +68,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   linkTypes: EntryType[] = [EntryType.Income, EntryType.Expense, EntryType.Tax]; // Types of links
   entryTypes = EntryType; // Enum for entry types
 
-  existingNodes: {label: string, value: string}[] = []; // To hold existing node names
-  filteredNodes: {label: string, value: string}[] = []; // To hold filtered suggestions for auto-complete
+  existingNodes: ExpenseCategoryDetails[] = []; // To hold existing node names
+  filteredNodes: ExpenseCategoryDetails[] = []; // To hold filtered suggestions for auto-complete
 
   taxNodeExists = false; // Flag to check if a tax node exists
 
@@ -105,7 +105,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.singleMonthData = data;
       this.dataMonth = data.month
       /** Only include expense nodes. */
-      this.existingNodes = this.transformEnumToObjects(ExpenseCategory as any)
+      this.existingNodes = Object.values(expenseCategoryDetails)
 
 
       this.filteredNodes = [...this.existingNodes];
@@ -419,12 +419,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * @param links Array of links to search for descendants (optional)
   */
   private checkForCycle(source: string, target: string | null | undefined, linkGroup?: FormGroup, links?: UserDefinedLink[]): void {
-    console.log('Checking for cycle...');
-    console.log('Source:', source);
-    console.log("Target:", target);
-    console.log('Links:', links);
-    console.log('LinkGroup:', linkGroup);
-
     this.dataService.hasDataCycle.set(false); // Reset cycle flag
       
     // Exit if either source or target is missing
