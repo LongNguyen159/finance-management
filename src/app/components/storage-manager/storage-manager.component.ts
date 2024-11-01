@@ -23,7 +23,7 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
-  imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatIconModule, MatExpansionModule,
+  imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
     MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
   providers: [
     provideEcharts(),
@@ -33,7 +33,7 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class StorageManagerComponent extends BasePageComponent implements OnInit{
+export class StorageManagerComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService);
   colorService = inject(ColorService);
   uiService = inject(UiService);

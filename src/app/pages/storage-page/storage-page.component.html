@@ -1,7 +1,43 @@
 
 <div class="flex flex-col">
     <app-navbar class="navbar" [showStorage]="false" [showLogo]="false"></app-navbar>
-    <div class="p-4">
-        <app-storage-manager></app-storage-manager>
-    </div>
+
+    <mat-tab-group>
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <!-- <mat-icon class="example-tab-icon">thumb_up</mat-icon> -->
+                Overview
+            </ng-template>
+
+            <!-- PAGE CONTENTS -->
+            <div class="p-4">
+                <app-storage-manager></app-storage-manager>
+            </div>
+        </mat-tab>
+      
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon class="mr-3" fontSet="material-symbols-outlined">payments</mat-icon>
+                Fix Costs
+            </ng-template>
+
+            <!-- PAGE CONTENTS -->
+            <div class="p-4">
+                
+            </div>
+        </mat-tab>
+      
+        <mat-tab>
+            <ng-template mat-tab-label>
+            <mat-icon class="mr-3" fontSet="material-symbols-outlined">savings</mat-icon>
+            Budgets
+            </ng-template>
+
+            <!-- PAGE CONTENTS -->
+            <div class="p-4">
+                
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+    
 </div>
