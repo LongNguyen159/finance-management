@@ -130,14 +130,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.hasChanges = true;
     })
   }
-
-  private transformEnumToObjects(enumObj: ExpenseCategory): { label: string, value: string }[] {
-    return Object.values(enumObj).map(value => {
-      const label = removeSystemPrefix(value)
-      return { label, value };
-    });
-  }
-
+  
   onMonthChanges(selectedMonth: DateChanges) {
     const currentMonth = formatDateToYYYYMM(selectedMonth.currentMonth)
     const prevMonth = formatDateToYYYYMM(selectedMonth.previousMonth)
