@@ -269,7 +269,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
         nonEmptyValidator(),
 
         /** Not allowed node names: */
-        restrictedNodeNamesValidator(['Total Income', 'Usable Income', 'Remaining Balance'])
+        restrictedNodeNamesValidator(this.dataService.nonAllowedNames)
       ]],
       value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
       source: [link ? link.source : ''] // Optional
