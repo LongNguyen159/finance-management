@@ -16,6 +16,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
 import { formatDateToYYYYMM, onMonthChanges, removeSystemPrefix } from '../../utils/utils';
+import { MatCardModule } from '@angular/material/card';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -45,7 +46,9 @@ function nonEmptyValidator(): ValidatorFn {
     MatIconModule,
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
-    MatSlideToggleModule, MonthPickerComponent],
+    MatSlideToggleModule, MonthPickerComponent,
+    MatCardModule
+  ],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
@@ -74,6 +77,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   taxNodeExists = false; // Flag to check if a tax node exists
 
   updateFromService = false; // Flag to control value changes
+
+  isFixCostsExpanded: boolean = true;
+
+  isVariableCostsExpanded: boolean = true;
 
   dataMonth: string = ''
   singleMonthData: SingleMonthData
