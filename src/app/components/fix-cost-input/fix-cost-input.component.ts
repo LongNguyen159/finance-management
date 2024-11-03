@@ -43,9 +43,10 @@ export class FixCostInputComponent extends InputListComponent {
     const existingFixCosts = localStorage.getItem('fixCosts');
 
     if (existingFixCosts) {
-      const parsedFixCosts: {links: UserDefinedLink[]} = JSON.parse(existingFixCosts);
+      const parsedFixCosts: UserDefinedLink[] = JSON.parse(existingFixCosts);
 
-      parsedFixCosts.links.forEach(link => {
+      parsedFixCosts.forEach(link => {
+        link.isFixCost = true;
         this.linkArray.push(this._createLinkGroup(link), { emitEvent: false });
       })
 
@@ -89,7 +90,7 @@ export class FixCostInputComponent extends InputListComponent {
 
 
   saveToLocalStorage() {
-    localStorage.setItem('fixCosts', JSON.stringify(this.linkForm.value));
+    localStorage.setItem('fixCosts', JSON.stringify(this.linkArray.value.map((link: UserDefinedLink) => ({ ...link, isFixCost: true }))));
   }
 
   override ngOnDestroy(): void {

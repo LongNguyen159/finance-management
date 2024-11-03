@@ -40,11 +40,85 @@
     <mat-card appearance="outlined" class="mb-4">
       @if (isFixCostsExpanded) {
         <mat-card-content>
-          <div>
-            <button mat-button>
-              <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
-              <span>Paste Fix Costs</span>
-            </button>
+          <!-- PASTE FIX COSTS BUTTON -->
+          <div class="flex flex-row">
+            <button 
+                mat-button 
+                (click)="pasteFixCosts()" 
+                [disabled]="fixedLinks.length == 0"
+              >  
+                <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
+                {{ fixedLinks.length == 0 ? 'No fix costs defined' : 'Paste Fix Costs'  }}
+              </button>
+          </div>
+          <div class="mt-2">
+            <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
+  
+              @if (linkGroup.get('isFixCost')?.value) {
+                <!-- Target -->
+                <mat-form-field appearance="fill">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="target" placeholder="Entry name" />
+                  <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
+                    This name is not allowed.
+                  </mat-error>
+          
+                  <mat-error *ngIf="linkGroup.get('target')?.hasError('cycle')">
+                    This creates a cycle!
+                  </mat-error>
+          
+                  <mat-error *ngIf="linkGroup.get('target')?.hasError('duplicatedName')">
+                    Duplicated name.
+                  </mat-error>
+          
+                  <mat-error *ngIf="linkGroup.get('target')?.hasError('emptyOrWhitespace')">
+                    Name cannot be empty.
+                  </mat-error>
+                </mat-form-field>
+                
+                <!-- Type (Income, Expense, Tax) -->
+                <mat-form-field appearance="fill">
+                  <mat-select formControlName="type" placeholder="Type" (selectionChange)="checkTaxNodeExists()">
+                    <mat-option *ngFor="let type of linkTypes" [disabled]="type == entryTypes.Tax && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+          
+                <!-- Value -->
+                <mat-form-field appearance="fill">
+                  <mat-label>Amount</mat-label>
+                  <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
+          
+                  <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
+                    Amount must be greater than or equal 0.
+                  </mat-error>
+                </mat-form-field>
+                
+                <!-- Select with search -->
+                <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
+                  <mat-label>Category</mat-label>
+                  <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel" (selectionChange)="updateInput()">
+                    <mat-option>
+                      <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search categories..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
+                    </mat-option>
+                    <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
+                      @if(node.icon) {
+                        <mat-icon fontSet="material-symbols-outlined">{{ node.icon }}</mat-icon>
+                      }
+                      {{ node.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
+                    This creates a cycle!
+                  </mat-error>
+                </mat-form-field>
+          
+  
+                <!-- Remove Button -->
+                <button mat-icon-button color="warn" (click)="removeLink(i)">
+                  <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+                </button>
+              }
+            </div>
           </div>
         </mat-card-content>
       }
@@ -67,89 +141,71 @@
       @if (isVariableCostsExpanded) {
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
-            <!-- Target -->
-            <mat-form-field appearance="fill">
-              <mat-label>Name</mat-label>
-              <input matInput formControlName="target" placeholder="Entry name" />
-              <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
-                This name is not allowed.
-              </mat-error>
-      
-              <mat-error *ngIf="linkGroup.get('target')?.hasError('cycle')">
-                This creates a cycle!
-              </mat-error>
-      
-              <mat-error *ngIf="linkGroup.get('target')?.hasError('duplicatedName')">
-                Duplicated name.
-              </mat-error>
-      
-              <mat-error *ngIf="linkGroup.get('target')?.hasError('emptyOrWhitespace')">
-                Name cannot be empty.
-              </mat-error>
-            </mat-form-field>
-            
-            <!-- Type (Income, Expense, Tax) -->
-            <mat-form-field appearance="fill">
-              <mat-select formControlName="type" placeholder="Type" (selectionChange)="checkTaxNodeExists()">
-                <mat-option *ngFor="let type of linkTypes" [disabled]="type == entryTypes.Tax && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-      
-      
-            <!-- Value -->
-            <mat-form-field appearance="fill">
-              <mat-label>Amount</mat-label>
-              <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
-      
-              <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
-                Amount must be greater than or equal 0.
-              </mat-error>
-            </mat-form-field>
-      
-            <!-- Source (Optional) -->
-            <!-- input with auto complete -->
-            <!-- <mat-form-field appearance="fill">
-              <mat-label>Part of (optional)</mat-label>
-              <input type="text"
-                matInput
-                [matAutocomplete]="auto"
-                formControlName="source"
-                placeholder="Existing entry e.g. Housing"
-                (blur)="closeAutoComplete(i)"
-              />
-              <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
-                A node cannot source itself!
-              </mat-error>
-              <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-                <mat-option *ngFor="let node of filteredNodes" [value]="node">{{ node }}</mat-option>
-              </mat-autocomplete>
-            </mat-form-field> -->
-            
-            <!-- Select with search -->
-            <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
-              <mat-label>Category</mat-label>
-              <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel" (selectionChange)="updateInput()">
-                <mat-option>
-                  <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search categories..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
-                </mat-option>
-                <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
-                  @if(node.icon) {
-                    <mat-icon fontSet="material-symbols-outlined">{{ node.icon }}</mat-icon>
-                  }
-                  {{ node.label }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
-                This creates a cycle!
-              </mat-error>
-            </mat-form-field>
-      
-      
-      
-            <!-- Remove Button -->
-            <button mat-icon-button color="warn" (click)="removeLink(i)">
-              <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
-            </button>
+
+            @if (!linkGroup.get('isFixCost')?.value) {
+              <!-- Target -->
+              <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="target" placeholder="Entry name" />
+                <mat-error *ngIf="linkGroup.get('target')?.hasError('restrictedNodeName')">
+                  This name is not allowed.
+                </mat-error>
+        
+                <mat-error *ngIf="linkGroup.get('target')?.hasError('cycle')">
+                  This creates a cycle!
+                </mat-error>
+        
+                <mat-error *ngIf="linkGroup.get('target')?.hasError('duplicatedName')">
+                  Duplicated name.
+                </mat-error>
+        
+                <mat-error *ngIf="linkGroup.get('target')?.hasError('emptyOrWhitespace')">
+                  Name cannot be empty.
+                </mat-error>
+              </mat-form-field>
+              
+              <!-- Type (Income, Expense, Tax) -->
+              <mat-form-field appearance="fill">
+                <mat-select formControlName="type" placeholder="Type" (selectionChange)="checkTaxNodeExists()">
+                  <mat-option *ngFor="let type of linkTypes" [disabled]="type == entryTypes.Tax && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+        
+              <!-- Value -->
+              <mat-form-field appearance="fill">
+                <mat-label>Amount</mat-label>
+                <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
+        
+                <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
+                  Amount must be greater than or equal 0.
+                </mat-error>
+              </mat-form-field>
+              
+              <!-- Select with search -->
+              <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="source" [disableOptionCentering]="true" panelClass="custom-select-panel" (selectionChange)="updateInput()">
+                  <mat-option>
+                    <ngx-mat-select-search [formControl]="sourceSearchControl" placeholderLabel="Search categories..." noEntriesFoundLabel="No entries found."></ngx-mat-select-search>
+                  </mat-option>
+                  <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
+                    @if(node.icon) {
+                      <mat-icon fontSet="material-symbols-outlined">{{ node.icon }}</mat-icon>
+                    }
+                    {{ node.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="linkGroup.get('source')?.hasError('cycle')">
+                  This creates a cycle!
+                </mat-error>
+              </mat-form-field>
+        
+
+              <!-- Remove Button -->
+              <button mat-icon-button color="warn" (click)="removeLink(i)">
+                <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+              </button>
+            }
           </div>
         </mat-card-content>
       }

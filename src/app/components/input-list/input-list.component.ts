@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, Input, OnChanges, OnDestroy, OnInit, QueryList, SimpleChanges, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
 import { DateChanges, EntryType, ExpenseCategory, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
@@ -8,14 +8,14 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
-import { debounceTime, findIndex, takeUntil } from 'rxjs';
-import {MatAutocomplete, MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import { debounceTime, takeUntil } from 'rxjs';
+import { MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { formatDateToYYYYMM, onMonthChanges, removeSystemPrefix } from '../../utils/utils';
+import { formatDateToYYYYMM, onMonthChanges } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
 
@@ -90,7 +90,16 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * Currently only assigned by valueChanges, and after user switches to new month, it assigns new value.
    */
   savedFormValues: UserDefinedLink[] = []
+
+  /** Flag to track changes in the form. If true, means form has changes.
+   * Use this flag to determine if we need to save the form values before switching to another month,
+   * or process the form values before doing something.
+   */
   hasChanges: boolean = false;
+
+  /** Fixed links array. This hold the fix costs stored in local storage */
+  fixedLinks: UserDefinedLink[] = []
+
 
   constructor(private fb: FormBuilder) {
     super();
@@ -100,6 +109,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
 
   ngOnInit(): void {
+    /** Retrieve fixed costs from local storage */
+    const fixedLinks = localStorage.getItem('fixCosts')
+    this.fixedLinks = fixedLinks ? JSON.parse(fixedLinks) : []
+
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
       this.allMonthsData = allMonthsData
@@ -239,12 +252,31 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     const copiedLinks = this.dataService.retrieveCopiedLinks();
     if (copiedLinks) {
       this.populateInputFields({ rawInput: copiedLinks } as SingleMonthData);
+      this.hasChanges = true;
       this.uiService.showSnackBar('Links pasted!', 'Ok');
       /** Process the pasted links */
       this.dataService.processInputData(copiedLinks, this.dataMonth);
     } else {
       this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
     }
+  }
+
+  pasteFixCosts() {
+    if (this.fixedLinks.length == 0) {
+      this.uiService.showSnackBar('No fixed costs found', 'Dismiss');
+      return;
+    }
+
+    // Avoid double-pushing fixed links by checking if they already exist in linkArray
+    const existingLinks = this.linkArray.value.map((link: UserDefinedLink) => link.target); // Assuming 'target' is unique for each link
+    this.fixedLinks = this.fixedLinks
+        .filter(link => !existingLinks.includes(link.target))
+
+
+    this.populateInputFields({ rawInput: [...this.linkArray.value, ...this.fixedLinks] } as SingleMonthData);
+    this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
+    this.hasChanges = true;
+    this.uiService.showSnackBar('Fixed costs inserted!', 'Ok');
   }
   //#endregion
 
@@ -284,7 +316,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
         restrictedNodeNamesValidator(this.dataService.nonAllowedNames)
       ]],
       value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
-      source: [link ? link.source : ''] // Optional
+      source: [link ? link.source : ''], // Optional
+      isFixCost: [link ? link.isFixCost : false]
     });
 
     // Disable the source field if type is 'income'
@@ -498,9 +531,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   // Remove an input row
   removeLink(index: number): void {
+    const link: UserDefinedLink = this.linkArray.at(index).value;
     this.linkArray.removeAt(index, { emitEvent: false });
-    // Update chart when input changed
-    this.dataService.processInputData(this.linkForm.value.links, this.dataMonth)
+    this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
   }
 
   // Getter to easily access the FormArray
