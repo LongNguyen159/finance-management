@@ -1,3 +1,8 @@
+@if(!linkForm.valid) {
+  <div class="sticky top-0 z-[100]">
+    <app-error-card></app-error-card>
+  </div>
+}
 <div [formGroup]="linkForm" class="link-form-container" #bottomContent id="bottom-content">
 
   <!-- INPUT LIST ACTIONS BAR CONTAINER -->

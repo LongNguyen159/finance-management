@@ -17,6 +17,7 @@ import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
 import { formatDateToYYYYMM, onMonthChanges, removeSystemPrefix } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
+import { ErrorCardComponent } from "../error-card/error-card.component";
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -47,8 +48,7 @@ function nonEmptyValidator(): ValidatorFn {
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
     MatSlideToggleModule, MonthPickerComponent,
-    MatCardModule
-  ],
+    MatCardModule, ErrorCardComponent],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss'
 })
@@ -126,16 +126,21 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     });
 
     // Listen to changes in the search control to filter the dropdown
-    this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
-      this.filteredNodes = this._filterNodes(searchTerm);
-      this._addDefaultNode();
-    });
-
+    this.listenCategoryChanges()
+    
     /** Listen to changes in value. If changes, save the current form value immediately. */
     this.linkForm.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe((formData) => {
       this.savedFormValues = formData.links.slice();
       this.hasChanges = true;
     })
+  }
+  
+  protected listenCategoryChanges() {
+    this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
+      this.filteredNodes = this._filterNodes(searchTerm);
+      this._addDefaultNode();
+    });
+
   }
   
   onMonthChanges(selectedMonth: DateChanges) {
@@ -266,7 +271,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * @param link Optional parameter to populate the form with existing data
    * if no `link` param is provided, an empty form with default values '' will be created.
    */
-  private _createLinkGroup(link?: UserDefinedLink): FormGroup {
+  protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
@@ -291,6 +296,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       if (value) {
         this._checkDuplicateName(value, linkGroup);
         this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
+        this.checkForNonAllowedNames(value, linkGroup)
       }
     })
 
@@ -318,6 +324,14 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       
     });
     return linkGroup;
+  }
+
+  checkForNonAllowedNames(name: string, linkGroup: FormGroup) {
+    const isNotAllowedName = this.dataService.nonAllowedNames.includes(name.trim())
+    if (isNotAllowedName) {
+      linkGroup.get('target')?.setErrors({ restrictedNodeName: true }, { emitEvent: false });
+      this.uiService.showSnackBar(`'${name}' is a reserved name and cannot be used!`, 'Dismiss');
+    }
   }
 
 
@@ -363,7 +377,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
 
   /** Helper function to determine tax node in links */
-  private _hasTaxNode(data: UserDefinedLink[]): boolean {
+  protected _hasTaxNode(data: UserDefinedLink[]): boolean {
     return data.some(item => item.type == EntryType.Tax)
   }
 

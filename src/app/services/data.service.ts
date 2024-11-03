@@ -195,7 +195,7 @@ export class DataService {
         }
 
         /** Early exit if detect data cycle */
-        if (this.hasDataCycle() || (userDefinedLinks.some(link => link.source === link.target) && userDefinedLinks.length > 1)) {
+        if (this.hasDataCycle()) {
             this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
             console.log('Data has a cycle! Emitting default entries');
             this.singleMonthEntries = {
