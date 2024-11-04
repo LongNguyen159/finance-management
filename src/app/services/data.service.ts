@@ -559,6 +559,12 @@ export class DataService {
         return data ? JSON.parse(data) : null;
     }
 
+
+    retrieveFixCostsLinks(): UserDefinedLink[] {
+        const fixedLinks = localStorage.getItem('fixCosts')
+        return fixedLinks ? JSON.parse(fixedLinks) : []  
+    }
+
     //#endregion
 
 

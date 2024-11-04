@@ -53,6 +53,20 @@ function nonEmptyValidator(): ValidatorFn {
   styleUrl: './input-list.component.scss'
 })
 
+/** 
+ * Notes for this component:
+ * - This component is used to manage the input fields for the user-defined links.
+ * 
+ * Every time form changes: value changes, a row is removed, a row is pasted, we should call `updateSavedFormValuesOnFormChanges()` to notify that the current month
+ * changes its value from initial state. This way, we can process the previous month before switching to a new month.
+ * 
+ * Switching months just repopulate the from with new data, and update the saved form values to the new form values. All within one lifecycle (Form is not destroyed or reinitialised).
+ * 
+ * 
+ * - Use `_createLinkGroup()` to create a new form group for each link; Params 'links' in the function is optional for predefined links. If no links are provided, an empty form will be created.
+ * 
+ */
+
 export class InputListComponent extends BasePageComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() triggeredMonthByDialog: string = ''
 
@@ -110,8 +124,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   ngOnInit(): void {
     /** Retrieve fixed costs from local storage */
-    const fixedLinks = localStorage.getItem('fixCosts')
-    this.fixedLinks = fixedLinks ? JSON.parse(fixedLinks) : []
+    this.fixedLinks = this.dataService.retrieveFixCostsLinks()
 
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
@@ -143,10 +156,25 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     
     /** Listen to changes in value. If changes, save the current form value immediately. */
     this.linkForm.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(300)).subscribe((formData) => {
-      this.savedFormValues = formData.links.slice();
-      this.hasChanges = true;
+      this.updateSavedFormValuesOnFormChanges()
     })
   }
+
+  /** This function is used to hold the current form values. If there are changes in the form,
+   * either by adding more links or remove links (via copy-paste also), or form values changes
+   * call this function.
+   * 
+   * Main purpose of holding the saved form values is to track whether there are changes in the form.
+   * If yes, process the form values before switching to another month. If no, do nothing.
+   * If we don't have this functionality of saving current form values, we can't track whether there are changes in the form,
+   * so every onMonthChanges, we will process the form values, which is inefficient.
+   */
+  private updateSavedFormValuesOnFormChanges() {
+    this.savedFormValues = this.linkArray.value.slice();
+    this.hasChanges = true;
+  }
+
+  
   
   protected listenCategoryChanges() {
     this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
@@ -156,6 +184,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   }
   
+  //#region Month Changes
   onMonthChanges(selectedMonth: DateChanges) {
     const currentMonth = formatDateToYYYYMM(selectedMonth.currentMonth)
     const prevMonth = formatDateToYYYYMM(selectedMonth.previousMonth)
@@ -163,6 +192,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** This will trigger subscription onInit of this component. No need to update global variables here as we already did it in the subscription. */
     onMonthChanges(selectedMonth.currentMonth, this.allMonthsData, this.singleMonthData, this.dataService)
 
+    /** Only process previous months if there are changes in the form detected by the boolen flag `hasChanges`.
+     * Else it would process every previou months on month changes.
+     */
     if (currentMonth !== prevMonth && this.hasChanges) {
       // Process previous month values if there are changes of that month and user navigate to another month.
       this.processMonthBeforeMonthChanges(prevMonth, this.savedFormValues)
@@ -200,6 +232,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
      */
     this.dataService.processInputData(previousFormValues, previouMonthValue, { showSnackbarWhenDone: true, emitObservable: false})
   }
+  //#endregion
+
+
 
   /** Update Input, this function when triggered will send the input data to service to update the form state.
    * Only trigger this function to reatively update the form.
@@ -267,16 +302,33 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       return;
     }
 
-    // Avoid double-pushing fixed links by checking if they already exist in linkArray
-    const existingLinks = this.linkArray.value.map((link: UserDefinedLink) => link.target); // Assuming 'target' is unique for each link
-    this.fixedLinks = this.fixedLinks
-        .filter(link => !existingLinks.includes(link.target))
+    const existingFixCosts: UserDefinedLink[] = this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost)
 
+    /** If there are no changes in the fix costs section and user paste it, do nothing. */
+    if (JSON.stringify(this.fixedLinks) == JSON.stringify(existingFixCosts)) {
+      this.uiService.showSnackBar('Fixed costs already inserted!', 'Dismiss');
+      return;
+    }
+    
+    /** If different, clear out the current fixed costs link and paste the link in local storage in.
+     * This wil avoid duplicate fixed costs in the form.
+     */
+    if (JSON.stringify(this.fixedLinks) !== JSON.stringify(existingFixCosts)) { 
+      // Filter out the current fixed costs from `linkArray`
+      const updatedLinks = this.linkArray.value.filter((link: UserDefinedLink) => !link.isFixCost);
+    
+      // Add fixedLinks from localStorage to the filtered linkArray
+      const newLinkArray = [...updatedLinks, ...this.fixedLinks];
+    
+      // Update the form with the new link array
+      this.populateInputFields({ rawInput: newLinkArray } as SingleMonthData);
+      /** Update saved form values. */
+      this.updateSavedFormValuesOnFormChanges()
 
-    this.populateInputFields({ rawInput: [...this.linkArray.value, ...this.fixedLinks] } as SingleMonthData);
-    this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
-    this.hasChanges = true;
-    this.uiService.showSnackBar('Fixed costs inserted!', 'Ok');
+      this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
+      this.hasChanges = true;
+      this.uiService.showSnackBar('Fixed costs inserted!', 'Ok');
+    }
   }
   //#endregion
 
@@ -533,6 +585,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   removeLink(index: number): void {
     const link: UserDefinedLink = this.linkArray.at(index).value;
     this.linkArray.removeAt(index, { emitEvent: false });
+    this.updateSavedFormValuesOnFormChanges()
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
   }
 
