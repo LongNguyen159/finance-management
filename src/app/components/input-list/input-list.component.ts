@@ -18,6 +18,7 @@ import { MonthPickerComponent } from "../month-picker/month-picker.component";
 import { formatDateToYYYYMM, onMonthChanges } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
+import { ColorService } from '../../services/color.service';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -72,6 +73,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   dataService = inject(DataService)
   uiService = inject(UiService)
+  colorService = inject(ColorService)
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
   @ViewChild('bottomContent') bottomContent!: ElementRef;
 

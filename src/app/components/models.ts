@@ -35,21 +35,95 @@ export interface ExpenseCategoryDetails {
   label: string;
   value: string;
   icon?: string;
+  colorLight?: string;  // New property for light mode color
+  colorDark?: string;   // New property for dark mode color
 }
 
 export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategoryDetails } = {
-  [ExpenseCategory.Housing]: { label: 'Housing', value: ExpenseCategory.Housing, icon: 'home' },
-  [ExpenseCategory.Groceries]: { label: 'Groceries', value: ExpenseCategory.Groceries, icon: 'shopping_cart' },
-  [ExpenseCategory.Restaurants]: { label: 'Restaurants', value: ExpenseCategory.Restaurants, icon: 'restaurant' },
-  [ExpenseCategory.Shopping]: { label: 'Shopping', value: ExpenseCategory.Shopping, icon: 'shopping_bag' },
-  [ExpenseCategory.Education]: { label: 'Education', value: ExpenseCategory.Education, icon: 'school' },
-  [ExpenseCategory.Savings]: { label: 'Savings & Investments', value: ExpenseCategory.Savings, icon: 'savings' },
-  [ExpenseCategory.Health]: { label: 'Health & Fitness', value: ExpenseCategory.Health, icon: 'fitness_center' },
-  [ExpenseCategory.Entertainment]: { label: 'Entertainment', value: ExpenseCategory.Entertainment, icon: 'movie' },
-  [ExpenseCategory.Hobby]: { label: 'Hobbies', value: ExpenseCategory.Hobby, icon: 'palette' },
-  [ExpenseCategory.Commute]: { label: 'Commute & Transport', value: ExpenseCategory.Commute, icon: 'commute' },
-  [ExpenseCategory.Utils]: { label: 'Utilities', value: ExpenseCategory.Utils, icon: 'build' },
-  [ExpenseCategory.Other]: { label: 'Other', value: ExpenseCategory.Other, icon: 'more_horiz' }
+  [ExpenseCategory.Housing]: { 
+    label: 'Housing', 
+    value: ExpenseCategory.Housing, 
+    icon: 'home', 
+    colorLight: '#1976d2', // Blue for light mode
+    colorDark: '#90caf9'   // Light Blue for dark mode
+  },
+  [ExpenseCategory.Groceries]: { 
+    label: 'Groceries', 
+    value: ExpenseCategory.Groceries, 
+    icon: 'shopping_cart', 
+    colorLight: '#4caf50', // Green for light mode
+    colorDark: '#a5d6a7'   // Light Green for dark mode
+  },
+  [ExpenseCategory.Restaurants]: { 
+    label: 'Restaurants', 
+    value: ExpenseCategory.Restaurants, 
+    icon: 'restaurant', 
+    colorLight: '#ff9800', // Orange for light mode
+    colorDark: '#ffcc80'   // Light Orange for dark mode
+  },
+  [ExpenseCategory.Shopping]: { 
+    label: 'Shopping', 
+    value: ExpenseCategory.Shopping, 
+    icon: 'shopping_bag', 
+    colorLight: '#9c27b0', // Purple for light mode
+    colorDark: '#e1bee7'   // Light Purple for dark mode
+  },
+  [ExpenseCategory.Education]: { 
+    label: 'Education', 
+    value: ExpenseCategory.Education, 
+    icon: 'school', 
+    colorLight: '#f44336', // Red for light mode
+    colorDark: '#ef5350'   // Light Red for dark mode
+  },
+  [ExpenseCategory.Savings]: { 
+    label: 'Savings & Investments', 
+    value: ExpenseCategory.Savings, 
+    icon: 'savings', 
+    colorLight: '#4caf50', // Green for light mode
+    colorDark: '#a5d6a7'   // Light Green for dark mode
+  },
+  [ExpenseCategory.Health]: { 
+    label: 'Health & Fitness', 
+    value: ExpenseCategory.Health, 
+    icon: 'fitness_center', 
+    colorLight: '#ff5722', // Deep Orange for light mode
+    colorDark: '#ffccbc'   // Light Deep Orange for dark mode
+  },
+  [ExpenseCategory.Entertainment]: { 
+    label: 'Entertainment', 
+    value: ExpenseCategory.Entertainment, 
+    icon: 'movie', 
+    colorLight: '#3f51b5', // Indigo for light mode
+    colorDark: '#c5cae9'   // Light Indigo for dark mode
+  },
+  [ExpenseCategory.Hobby]: { 
+    label: 'Hobbies', 
+    value: ExpenseCategory.Hobby, 
+    icon: 'palette', 
+    colorLight: '#673ab7', // Deep Purple for light mode
+    colorDark: '#d1c4e9'   // Light Deep Purple for dark mode
+  },
+  [ExpenseCategory.Commute]: { 
+    label: 'Commute & Transport', 
+    value: ExpenseCategory.Commute, 
+    icon: 'commute', 
+    colorLight: '#ff9800', // Orange for light mode
+    colorDark: '#ffcc80'   // Light Orange for dark mode
+  },
+  [ExpenseCategory.Utils]: { 
+    label: 'Utilities', 
+    value: ExpenseCategory.Utils, 
+    icon: 'build', 
+    colorLight: '#607d8b', // Blue Grey for light mode
+    colorDark: '#b0bec5'   // Light Blue Grey for dark mode
+  },
+  [ExpenseCategory.Other]: { 
+    label: 'Other', 
+    value: ExpenseCategory.Other, 
+    icon: 'more_horiz', 
+    colorLight: '#9e9e9e', // Grey for light mode
+    colorDark: '#e0e0e0'   // Light Grey for dark mode
+  }
 };
 
 export interface DateChanges {
