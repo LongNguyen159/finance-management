@@ -298,7 +298,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   pasteFixCosts() {
     if (this.fixedLinks.length == 0) {
-      this.uiService.showSnackBar('No fixed costs found', 'Dismiss');
+      this.uiService.showSnackBar('No fix costs found', 'Dismiss');
       return;
     }
 
@@ -306,7 +306,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
     /** If there are no changes in the fix costs section and user paste it, do nothing. */
     if (JSON.stringify(this.fixedLinks) == JSON.stringify(existingFixCosts)) {
-      this.uiService.showSnackBar('Fixed costs already inserted!', 'Dismiss');
+      this.uiService.showSnackBar('No changes', 'Dismiss');
       return;
     }
     
@@ -327,7 +327,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
       this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
       this.hasChanges = true;
-      this.uiService.showSnackBar('Fixed costs inserted!', 'Ok');
+      this.uiService.showSnackBar('Fix costs updated!', 'Ok');
     }
   }
   //#endregion
@@ -614,6 +614,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   scrollToBottom(): void {
     this.bottomContent.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  trackByFn(index: any, item: any) {
+    return item.target
   }
 
   
