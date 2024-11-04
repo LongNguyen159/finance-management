@@ -52,7 +52,7 @@
               </button>
           </div>
           <div>
-            <div *ngFor="let linkGroup of linkArray.controls; let i = index; trackBy: trackByFn" [formGroupName]="i" class="link-row">
+            <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
               @if (linkGroup.get('isFixCost')?.value) {
                 <!-- Target -->
                 <mat-form-field appearance="fill">
@@ -141,7 +141,7 @@
     <mat-card appearance="outlined" class="mb-4">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
-          <div *ngFor="let linkGroup of linkArray.controls; let i = index; trackBy: trackByFn" [formGroupName]="i" class="link-row">
+          <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
 
             @if (!linkGroup.get('isFixCost')?.value) {
               <!-- Target -->

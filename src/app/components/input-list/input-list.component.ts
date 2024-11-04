@@ -618,10 +618,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.bottomContent.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
-  trackByFn(index: any, item: any) {
-    return item.target
-  }
-
   
   override ngOnDestroy(): void {
     super.ngOnDestroy();
