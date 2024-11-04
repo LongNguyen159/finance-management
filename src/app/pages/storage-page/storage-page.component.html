@@ -4,7 +4,7 @@
     <mat-tab-group animationDuration="0">
         <mat-tab>
             <ng-template mat-tab-label>
-                <mat-icon class="mr-3" fontSet="material-symbols-outlined">dashboard</mat-icon>
+                <mat-icon class="mr-3" [ngStyle]="{'color': colorService.isDarkMode() ? '#90caf9' : '#1976d2'}" fontSet="material-symbols-outlined">dashboard</mat-icon>
                 Overview
             </ng-template>
 
@@ -16,7 +16,7 @@
       
         <mat-tab>
             <ng-template mat-tab-label>
-                <mat-icon class="mr-3" fontSet="material-symbols-outlined">savings</mat-icon>
+                <mat-icon class="mr-3" [ngStyle]="{'color': colorService.isDarkMode() ? '#a5d6a7' : '#4caf50'}" fontSet="material-symbols-outlined">savings</mat-icon>
                 Budgets
             </ng-template>
 
@@ -28,7 +28,7 @@
 
         <mat-tab>
             <ng-template mat-tab-label>
-                <mat-icon class="mr-3" fontSet="material-symbols-outlined">payments</mat-icon>
+                <mat-icon class="mr-3" [ngStyle]="{'color': colorService.isDarkMode() ? '#ffcc80' : '#ff9800'}" fontSet="material-symbols-outlined">calendar_today</mat-icon>
                 Fix Costs
             </ng-template>
 
