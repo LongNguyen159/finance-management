@@ -1,7 +1,7 @@
 
 <div class="flex flex-col">
     <app-navbar class="navbar" [showStorage]="false" [showLogo]="false"></app-navbar>
-    <mat-tab-group animationDuration="0">
+    <mat-tab-group animationDuration="0" [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
         <mat-tab>
             <ng-template mat-tab-label>
                 <mat-icon class="mr-3" [ngStyle]="{'color': colorService.isDarkMode() ? '#90caf9' : '#1976d2'}" fontSet="material-symbols-outlined">dashboard</mat-icon>
@@ -9,9 +9,11 @@
             </ng-template>
 
             <!-- PAGE CONTENTS -->
-            <div class="p-4">
-                <app-storage-manager></app-storage-manager>
-            </div>
+            @if (selectedTabIndex == 0) {
+                <div class="p-4">
+                    <app-storage-manager></app-storage-manager>
+                </div>
+            }
         </mat-tab>
       
         <mat-tab>
@@ -21,9 +23,11 @@
             </ng-template>
 
             <!-- PAGE CONTENTS -->
-            <div class="p-4">
-                
-            </div>
+            @if (selectedTabIndex == 1) {
+                <div class="p-4">
+                    
+                </div>
+            }
         </mat-tab>
 
         <mat-tab>
@@ -33,10 +37,12 @@
             </ng-template>
 
             <!-- PAGE CONTENTS -->
-            <div class="p-4">
-                <app-fix-cost-input></app-fix-cost-input>
-            </div>
+            @if (selectedTabIndex == 2) {
+                <div class="p-4">
+                    <app-fix-cost-input></app-fix-cost-input>
+                </div>
+            }
         </mat-tab>
-
+        
     </mat-tab-group>
 </div>

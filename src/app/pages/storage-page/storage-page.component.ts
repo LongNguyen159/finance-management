@@ -19,4 +19,10 @@ import { ColorService } from '../../services/color.service';
 })
 export class StoragePageComponent {
   colorService = inject(ColorService)
+
+  selectedTabIndex = 0;
+
+  onTabChange(index: number) {
+    this.selectedTabIndex = index;
+  }
 }
