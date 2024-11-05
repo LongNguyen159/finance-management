@@ -1,3 +1,4 @@
+import { SYSTEM_PREFIX } from "../components/models";
 import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
 
 
@@ -77,4 +78,11 @@ export function formatYYYMMtoDate(inputString: string): Date {
 
 export function sortYearsDescending(years: string[]): string[] {
   return years.sort((a, b) => Number(b) - Number(a));
+}
+
+/** Remove system prefixes from name. We use system prefix to avoid
+ * name collisions in our data, but we don't want to show it in the UI.
+ */
+export function removeSystemPrefix(name: string): string {
+  return name.replace(new RegExp(`@${SYSTEM_PREFIX}`, 'g'), '');
 }

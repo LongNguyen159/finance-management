@@ -10,20 +10,20 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { parseLocaleStringToNumber, sortYearsDescending } from '../../utils/utils';
+import { parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
-import { UserDefinedLink } from '../models';
+import { PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
-  imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatIconModule, MatExpansionModule,
+  imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
     MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
   providers: [
     provideEcharts(),
@@ -33,7 +33,7 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class StorageManagerComponent extends BasePageComponent implements OnInit{
+export class StorageManagerComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService);
   colorService = inject(ColorService);
   uiService = inject(UiService);
@@ -197,10 +197,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.filterMonths(); // Filter the months based on selected option
   }
 
-  getSortedRawInputWithoutSource(month: string) {
-    return this.localStorageData[month].rawInput
-      .filter((item: UserDefinedLink) => !item.source) // Filter out items with no source
-      .sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
+  getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
+    const currentMonthData = this.localStorageData[month];
+
+    // Step 1: Extract income entries from rawInput
+    const incomeEntries = currentMonthData.rawInput
+    .filter(entry => entry.type === 'income')
+    .map(entry => ({
+        type: 'income',
+        name: entry.target,
+        value: entry.value
+    }));
+
+    // Step 2: Extract entries from pieData, excluding "Remaining Balance"
+    const expenseEntries = currentMonthData.pieData
+    .filter((entry: PieData) => entry.name !== 'Remaining Balance')
+    .map((entry: PieData) => ({
+        type: 'expense',
+        name: removeSystemPrefix(entry.name),
+        value: entry.value
+    }));
+
+    // Step 3: Combine the two arrays
+    const result = [...incomeEntries, ...expenseEntries];    
+    return result.sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
   }
 
 

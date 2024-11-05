@@ -1,8 +1,9 @@
 import { inject, Injectable, Signal, signal } from '@angular/core';
-import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
+import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
+import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
 export interface MonthlyData {
     [month: string]: SingleMonthData;
 }
@@ -40,13 +41,13 @@ export interface ExpenseData {
 export class DataService {
     private UiService = inject(UiService)
     monthlyData: MonthlyData = {};
-    private sankeyData: SankeyData = {
+    private readonly sankeyDataInit: SankeyData = {
         nodes: [],
         links: []
     }
     private remainingBalance: string = '-';
     private singleMonthEntries: SingleMonthData = {
-        sankeyData: this.sankeyData,
+        sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
         totalGrossIncome: -1,
@@ -63,24 +64,32 @@ export class DataService {
     private dataSaved$ = new BehaviorSubject<boolean>(false)
 
     isDemo = signal(false)
-    isAdvancedShown: boolean = false
+    isAdvancedShown: boolean = true
 
     /** Use this to scale all income-expense bar chart to have same scale.
      * This value will be the largest value either totalUsableIncome or totalExpenses.
      */
     incomeExpenseScaleValue = signal(0)
 
+
+    /** Data cycle flag. If true, means contains data cycle in the sankey.
+     * If this is the case, do not process the data.
+     */
+    hasDataCycle = signal(false)
+
     selectedActiveDate: Date = new Date();
 
     private copiedLinksKey = 'copiedLinks';
+
+    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', '-- None --' , ...Object.values(ExpenseCategory)];
 
     
 
     demoLinks: UserDefinedLink[] = [
         { type: EntryType.Income, target: 'Salary demo', value: 2200, demo: true },
-        { type: EntryType.Expense, target: 'Housing', value: 800},
-        { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
-        { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
+        { type: EntryType.Expense, target: 'Apartment', value: 800},
+        { type: EntryType.Expense, target: 'Rent', value: 500, source: ExpenseCategory.Housing},
+        { type: EntryType.Expense, target: 'WiFi', value: 40, source: ExpenseCategory.Housing},
         { type: EntryType.Expense, target: 'Groceries', value: 300},
     ]
 
@@ -88,6 +97,7 @@ export class DataService {
         this.initializeData()
     }
 
+    //#region: Initialize Data
     private initializeData(): void {
         this.removeOldUserFinancialData(); // Remove old key from previous versions
     
@@ -116,7 +126,7 @@ export class DataService {
     
     private processDemoData(): void {
         const todaysDate = new Date();
-        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), true);
+        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true, emitObservable: true});
     }
     
     private loadExistingData(): void {
@@ -131,6 +141,7 @@ export class DataService {
             this.processInputData([], formatDateToYYYYMM(new Date()));
         }
     }
+    //#endregion
 
 
     
@@ -146,19 +157,62 @@ export class DataService {
 
     //#region: Process Input Data
 
-    /** Process input data and emits a Subject of Single month entries.
-     * @param userDefinedLinks: raw input from form.
-     * @param month: month in "YYYY-MM" format.
-     * @param demo: flag to indicate if the data is demo data.
-     * @param showSnackbarWhenDone: flag to show snackbar when data is processed.
-     * @param emitObservable: flag to emit observable. True: Emit obseravale for subscribe to do something with the data. False: Only save processed data in local storage.
+    /**
+     * Processes input data and emits a Subject for single month entries.
+     * @param userDefinedLinks - The raw input data from the form.
+     * @param month - The month for which to process data, in "YYYY-MM" format.
+     * @param options - An object containing optional configuration flags:
+     *   - demo: `boolean` (default: `false`) - Indicates if the data is demo data.
+     *   - showSnackbarWhenDone: `boolean` (default: `false`) - Shows a snackbar notification when data processing is complete.
+     *   - emitObservable: `boolean` (default: `true`) - If `true`, emits an observable with the processed data for further actions.
+     *       If `false`, only saves the processed data in local storage without emitting.
      */
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false, emitObservable: boolean = true): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
+        /** Prevent overriding default value if not given.
+         * e.g. `emitObservable` defaults to true, but if not provided by caller, it will be undefined.
+         * This line below will set it to true if it's not provided.
+         */
+        const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
+
+        /** Early exit if detect negative values. */
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
             return;
         }
+
+        if (userDefinedLinks.some(link => this.nonAllowedNames.includes(link.target))) {
+            const foundLinks = userDefinedLinks.filter(link => this.nonAllowedNames.includes(link.target));
+            const dialogData: ConfirmDialogData = {
+                title: 'Warning: Restricted Name Usage',
+                message: `Some names in your input are reserved for internal use and may cause unexpected behaviours. 
+                          Please rename the following entries:<br><br>
+                          ${foundLinks.map(link => `- "${link.target}"`).join('<br>')}
+                         `,
+                confirmLabel: 'OK'
+            };
+            this.UiService.openConfirmDialog(dialogData)
+        }
+
+        /** Early exit if detect data cycle */
+        if (this.hasDataCycle()) {
+            this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
+            console.log('Data has a cycle! Emitting default entries');
+            this.singleMonthEntries = {
+                sankeyData: this.sankeyDataInit,
+                totalUsableIncome: -1,
+                totalTax: -1,
+                totalGrossIncome: -1,
+                totalExpenses: -1,
+                remainingBalance: '-',
+                pieData: [],
+                rawInput: userDefinedLinks,
+                month: month
+            }
+            this.processedSingleMonthEntries$.next(this.singleMonthEntries);
+            return;
+        }
+
 
         const nodesMap = new Map<string, { value: number, type: EntryType }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
@@ -243,6 +297,8 @@ export class DataService {
         const expenseSource = hasTax ? 'Usable Income' : incomeSource;
 
         // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
+        const allowedCategories = Object.values(ExpenseCategory);
+
         userDefinedLinks.forEach(link => {
             if (link.type == EntryType.Income) {
                 if (!singleIncome) {
@@ -252,21 +308,45 @@ export class DataService {
                         value: link.value
                     });
                 }
-            } else if (link.type == EntryType.Expense) {
-                const sourceNode = link.source || expenseSource;
-        
-                // Check if the source node exists in the nodesMap; if not, use the default expenseSource
-                const isSourceValid: boolean = nodesMap.has(sourceNode)
-                const validSource = isSourceValid ? sourceNode : expenseSource;
-                if (!isSourceValid) {
-                    link.source = '';
+            } else if (link.type === EntryType.Expense) {
+                let sourceNode = link.source || expenseSource;
+
+                // Step 2: Check if the source node exists in nodesMap or is an allowed category
+                if (!nodesMap.has(sourceNode) && allowedCategories.includes(sourceNode as ExpenseCategory)) {
+                    // Create the missing source node as a new entry with 'Expense' type
+                    nodesMap.set(sourceNode, { value: 0, type: EntryType.Expense });
+
+                    // Calculate its total value by summing all links that use it as a source
+                    const sourceValue = userDefinedLinks
+                        .filter(childLink => childLink.source === sourceNode)
+                        .reduce((sum, childLink) => sum + childLink.value, 0);
+                    
+                    // Set the source node's accumulated value
+                    nodesMap.get(sourceNode)!.value = sourceValue;
+
+                    // Add a link from the new source node to its child
+                    links.push({
+                        source: sourceNode,
+                        target: link.target,
+                        value: link.value
+                    });
+
+                    // Link newly created source node to the default income node
+                    links.push({
+                        source: incomeSource, // Link to default income (Total Income or single income node)
+                        target: sourceNode,
+                        value: sourceValue
+                    });
+                } else {
+                    // If the source is not found or is not in allowed categories, link directly to default income
+                    const validSource = nodesMap.has(sourceNode) ? sourceNode : incomeSource;
+                    
+                    links.push({
+                        source: validSource, // Use either the existing source or default income
+                        target: link.target,
+                        value: link.value
+                    });
                 }
-        
-                links.push({
-                    source: validSource, // Use either the user-defined source or the default expenseSource
-                    target: link.target,
-                    value: link.value
-                });
             }
         });
 
@@ -331,6 +411,7 @@ export class DataService {
         // Emit the processed data
         if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+            console.log('Observable emitted:', this.monthlyData[month]);
             // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         }
 
@@ -476,6 +557,12 @@ export class DataService {
     retrieveCopiedLinks(): UserDefinedLink[] | null {
         const data = sessionStorage.getItem(this.copiedLinksKey);
         return data ? JSON.parse(data) : null;
+    }
+
+
+    retrieveFixCostsLinks(): UserDefinedLink[] {
+        const fixedLinks = localStorage.getItem('fixCosts')
+        return fixedLinks ? JSON.parse(fixedLinks) : []  
     }
 
     //#endregion
