@@ -62,7 +62,9 @@
             </mat-option>
             <mat-option *ngFor="let node of filteredNodes" [value]="node.value">
               @if(node.icon) {
-                <mat-icon fontSet="material-symbols-outlined">{{ node.icon }}</mat-icon>
+                <mat-icon fontSet="material-symbols-outlined"
+                  [ngStyle]="{'color': colorService.isDarkMode() ? node.colorDark : node.colorLight}"
+                >{{ node.icon }}</mat-icon>
               }
               {{ node.label }}
             </mat-option>
