@@ -404,11 +404,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       if (value) {
         /** Set type automatic to expense if category choosed */
         linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
-        this._filterNodes(value);
+        // this._filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
       }
-      
-      
     });
     return linkGroup;
   }

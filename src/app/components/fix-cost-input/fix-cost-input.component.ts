@@ -37,6 +37,7 @@ export class FixCostInputComponent extends InputListComponent {
   override ngOnInit() {
     this.existingNodes = Object.values(expenseCategoryDetails);
     this.filteredNodes = [...this.existingNodes];
+    this.initialFormState = [...this.linkArray.value]; // Store the initial form state
     this.listenCategoryChanges()
 
 
@@ -63,7 +64,7 @@ export class FixCostInputComponent extends InputListComponent {
 
   
   override updateInput() {
-    if (!this.linkForm.valid || this.updateFromService) return;
+    if (!this.linkForm.valid) return;
   
     const formData: UserDefinedLink[] = this.linkForm.value.links;
 
@@ -73,8 +74,16 @@ export class FixCostInputComponent extends InputListComponent {
       this.uiService.showSnackBar('Negative values are not allowed!', 'Dismiss')
       return;
     }
+
+    if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
+      return; // No changes, don't proceed
+    }
     
     this.taxNodeExists = this._hasTaxNode(formData);
+    this.saveToLocalStorage()
+
+    // After processing, update the initial form state to the new one
+    this.initialFormState = [...formData]; // Update the stored form state
   }
 
   override addLink(): void {
@@ -94,5 +103,13 @@ export class FixCostInputComponent extends InputListComponent {
   }
 
   override ngOnDestroy(): void {
+
+    if (JSON.stringify(this.linkArray.value) === JSON.stringify(this.initialFormState)) {
+      return; // No changes, don't proceed
+    }
+
+    if (this.linkForm.valid) {
+      this.saveToLocalStorage()
+    }
   }
 }
