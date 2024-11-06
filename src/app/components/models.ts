@@ -68,27 +68,6 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
     colorLight: '#9c27b0', // Purple for light mode
     colorDark: '#e1bee7'   // Light Purple for dark mode
   },
-  [ExpenseCategory.Education]: { 
-    label: 'Education', 
-    value: ExpenseCategory.Education, 
-    icon: 'school', 
-    colorLight: '#f44336', // Red for light mode
-    colorDark: '#ef5350'   // Light Red for dark mode
-  },
-  [ExpenseCategory.Savings]: { 
-    label: 'Savings & Investments', 
-    value: ExpenseCategory.Savings, 
-    icon: 'savings', 
-    colorLight: '#4caf50', // Green for light mode
-    colorDark: '#a5d6a7'   // Light Green for dark mode
-  },
-  [ExpenseCategory.Health]: { 
-    label: 'Health & Fitness', 
-    value: ExpenseCategory.Health, 
-    icon: 'fitness_center', 
-    colorLight: '#ff5722', // Deep Orange for light mode
-    colorDark: '#ffccbc'   // Light Deep Orange for dark mode
-  },
   [ExpenseCategory.Entertainment]: { 
     label: 'Entertainment', 
     value: ExpenseCategory.Entertainment, 
@@ -110,6 +89,28 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
     colorLight: '#ff9800', // Orange for light mode
     colorDark: '#ffcc80'   // Light Orange for dark mode
   },
+  [ExpenseCategory.Education]: { 
+    label: 'Education', 
+    value: ExpenseCategory.Education, 
+    icon: 'school', 
+    colorLight: '#f44336', // Red for light mode
+    colorDark: '#ef5350'   // Light Red for dark mode
+  },
+  [ExpenseCategory.Health]: { 
+    label: 'Health & Fitness', 
+    value: ExpenseCategory.Health, 
+    icon: 'fitness_center', 
+    colorLight: '#ff5722', // Deep Orange for light mode
+    colorDark: '#ffccbc'   // Light Deep Orange for dark mode
+  },
+  [ExpenseCategory.Savings]: { 
+    label: 'Savings & Investments', 
+    value: ExpenseCategory.Savings, 
+    icon: 'savings', 
+    colorLight: '#4caf50', // Green for light mode
+    colorDark: '#a5d6a7'   // Light Green for dark mode
+  },
+  
   [ExpenseCategory.Utils]: { 
     label: 'Utilities', 
     value: ExpenseCategory.Utils, 
