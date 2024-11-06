@@ -31,7 +31,16 @@
                     </h2>
                 </div>
 
+
+                @if (budgets.length == 0) {
+                    <div class="flex flex-col w-full justify-center items-center gap-2">
+                      <p>No budgets set yet!</p>
+                      <button mat-stroked-button color="primary" (click)="navigateToBudgetList()">Create One Now</button>
+                    </div>
+                  }
+
                 <div class="flex flex-row w-full items-center justify-end">
+                    <!-- ENABLE TOGGLE GAUGE CHART IF RADAR CHART EXISTS -->
                     @if (indicators.length > 2) {
                         <div class="flex flex-row w-full items-center justify-end gap-1">
                             <div class="text-sm">Show Gauge Chart</div>
@@ -42,6 +51,7 @@
                     }
                 </div>
 
+                <!-- SHOW RADAR CHART IF THERE ARE MORE THAN 2 BUDGETS CATEGORIES -->
                 @if (indicators.length > 2) {
                     <section>
                         <app-budget-radar-chart
@@ -52,6 +62,7 @@
                     </section>
                 }
 
+                <!-- GAUGE CHART IS OPTIONAL, CAN BE TOGGLED -->
                 @if (showGaugeChart) {
                     <section>
                         <div class="gauge-chart-container">

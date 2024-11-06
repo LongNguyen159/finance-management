@@ -19,7 +19,9 @@ export class BudgetService {
   }
 
   saveBudgets(budgets: Budget[]) {
-    this.budget.set(budgets);
-    localStorage.setItem(this.storageKey, JSON.stringify(budgets));
+    // Filter out budgets with no value or value <= 0
+    const validBudgets = budgets.filter((budget: Budget) => budget.value && budget.value > 0);
+    this.budget.set(validBudgets) 
+    localStorage.setItem(this.storageKey, JSON.stringify(validBudgets));
   }
 }

@@ -25,6 +25,7 @@ import { BudgetGaugeChartComponent } from "../../components/charts/budget-gauge-
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -51,6 +52,9 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
   budgetService = inject(BudgetService)
+
+  router = inject(Router)
+
   entriesOfOneMonth: SingleMonthData
   monthlyData: MonthlyData = {};
   highlightMonths: string[] = []
@@ -93,11 +97,10 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
     super();
     effect(() => {
       this.budgets = this.budgetService.budget()
-      console.log('budget updated', this.budgets)
     })
   }
   ngOnInit(): void {
-
+    console.log('budgets', this.budgets)
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
         const dataEntry = data[month];
@@ -168,6 +171,12 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   getActualSpendingValue(category: string): number {
     const spending = this.spending.find(s => s.category === category);
     return spending ? spending.value : 0;
+  }
+
+  navigateToBudgetList() {
+    this.router.navigate(['/storage'], {
+      queryParams: { tab: 1 }
+    });
   }
 
 
