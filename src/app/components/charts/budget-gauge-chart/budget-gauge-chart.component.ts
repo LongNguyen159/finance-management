@@ -50,7 +50,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
     if (this.spendingPercentage <= 50) {
       return this.colorService.isDarkMode() ? 'rgb(157, 202, 127)' : 'rgb(157, 202, 127)'; // Green
     } else if (this.spendingPercentage <= 75) {
-      return '#f5da5f'; // Yellow
+      return this.colorService.isDarkMode() ? '#f5da5f' : 'rgb(242,201,107)'; // Yellow
     } else if (this.spendingPercentage <= 100) {
       return '#ffa550'; // Orange
     } else {
