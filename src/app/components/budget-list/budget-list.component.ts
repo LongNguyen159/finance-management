@@ -28,17 +28,26 @@ export class BudgetListComponent implements OnInit{
 
   budgets: Budget[] = [];
 
+  hoveredCategory: string | null = null;
+
   constructor(private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.budgets = this.budgetService.getBudgets()
   }
 
+  onMouseEnter(category: string) {
+    this.hoveredCategory = category;
+  }
+
+  onMouseLeave() {
+    this.hoveredCategory = null;
+  }
+
 
   onBudgetClick(category: string) {
     const _category = category as ExpenseCategory;
     const categoryDetails = this.expenseCategoryDetails.find(cat => cat.value === category);
-    console.log('Budget clicked', category);
 
     const currentBudget = this.getCurrentBudget(_category);
 
