@@ -103,6 +103,7 @@ export class FixCostInputComponent extends InputListComponent {
 
 
   saveToLocalStorage() {
+    if (!this.linkForm.valid) return;
     localStorage.setItem('fixCosts', JSON.stringify(this.linkArray.value.map((link: UserDefinedLink) => ({ ...link, isFixCost: true }))));
   }
 
