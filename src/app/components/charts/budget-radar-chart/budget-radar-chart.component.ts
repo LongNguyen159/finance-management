@@ -22,7 +22,7 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
 
 
   options: EChartsOption
-  SCALE_FACTOR = 1.2
+  SCALE_FACTOR = 1.25
 
   constructor() {
     effect(() => {
