@@ -43,6 +43,8 @@ export class BudgetListComponent implements OnInit{
     const currentBudget = this.getCurrentBudget(_category);
 
     const dialogRef = this.dialog.open(BudgetDialogComponent, {
+      width: '500px',
+      height: '300px',
       data: { categoryLabel: categoryDetails?.label || '', value: currentBudget }
     });
 

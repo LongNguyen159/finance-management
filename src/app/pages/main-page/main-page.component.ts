@@ -24,6 +24,7 @@ import { BudgetRadarChartComponent } from "../../components/charts/budget-radar-
 import { BudgetGaugeChartComponent } from "../../components/charts/budget-gauge-chart/budget-gauge-chart.component";
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
+import { BudgetService } from '../../services/budget.service';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -49,6 +50,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   dataService = inject(DataService)
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
+  budgetService = inject(BudgetService)
   entriesOfOneMonth: SingleMonthData
   monthlyData: MonthlyData = {};
   highlightMonths: string[] = []
@@ -67,16 +69,16 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   categories: ExpenseCategoryDetails[] = Object.values(expenseCategoryDetails)
 
   budgets: Budget[] = [
-    { category: ExpenseCategory.Housing, value: 1200 },
-    { category: ExpenseCategory.Shopping, value: 200 },
-    { category: ExpenseCategory.Groceries, value: 180 },
-    { category: ExpenseCategory.Restaurants, value: 150 },
-    { category: ExpenseCategory.Education, value: 300 },
-    { category: ExpenseCategory.Savings, value: 400 },
-    { category: ExpenseCategory.Health, value: 40 },
-    { category: ExpenseCategory.Entertainment, value: 220 },
-    { category: ExpenseCategory.Hobby, value: 180 },
-    { category: ExpenseCategory.Commute, value: 100 },
+    // { category: ExpenseCategory.Housing, value: 1200 },
+    // { category: ExpenseCategory.Shopping, value: 200 },
+    // { category: ExpenseCategory.Groceries, value: 180 },
+    // { category: ExpenseCategory.Restaurants, value: 150 },
+    // { category: ExpenseCategory.Education, value: 300 },
+    // { category: ExpenseCategory.Savings, value: 400 },
+    // { category: ExpenseCategory.Health, value: 40 },
+    // { category: ExpenseCategory.Entertainment, value: 220 },
+    // { category: ExpenseCategory.Hobby, value: 180 },
+    // { category: ExpenseCategory.Commute, value: 100 },
     // { category: ExpenseCategory.Utils, value: 0 },
     // { category: ExpenseCategory.Other, value: 0 }
   ]
@@ -91,7 +93,9 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
     super();
   }
   ngOnInit(): void {
-  
+    this.budgets = this.budgetService.getBudgets()
+
+
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
         const dataEntry = data[month];
