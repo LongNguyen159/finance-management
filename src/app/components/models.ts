@@ -26,7 +26,7 @@ export enum ExpenseCategory {
   Health = `Health & Fitness@${SYSTEM_PREFIX}`,
   Entertainment = `Entertainment@${SYSTEM_PREFIX}`,
   Hobby = `Hobbies@${SYSTEM_PREFIX}`,
-  Commute = `Commute & Transport@${SYSTEM_PREFIX}`,
+  Commute = `Transportation@${SYSTEM_PREFIX}`,
   Utils = `Utilities@${SYSTEM_PREFIX}`,
   Other = `Other@${SYSTEM_PREFIX}`
 }
@@ -104,7 +104,7 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
     colorDark: '#d1c4e9'   // Light Deep Purple for dark mode
   },
   [ExpenseCategory.Commute]: { 
-    label: 'Commute & Transport', 
+    label: 'Transportation', 
     value: ExpenseCategory.Commute, 
     icon: 'commute', 
     colorLight: '#ff9800', // Orange for light mode
@@ -125,6 +125,11 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
     colorDark: '#e0e0e0'   // Light Grey for dark mode
   }
 };
+
+export interface Budget {
+  category: ExpenseCategory;
+  value: number;
+}
 
 export interface DateChanges {
   previousMonth: Date;

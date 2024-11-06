@@ -19,14 +19,16 @@ import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
 import { DialogsService } from '../../services/dialogs.service';
-import { DateChanges } from '../../components/models';
+import { Budget, DateChanges, ExpenseCategory, ExpenseCategoryDetails, expenseCategoryDetails, SYSTEM_PREFIX } from '../../components/models';
+import { BudgetRadarChartComponent } from "../../components/charts/budget-radar-chart/budget-radar-chart.component";
+import { BudgetGaugeChartComponent } from "../../components/charts/budget-gauge-chart/budget-gauge-chart.component";
 @Component({
   selector: 'app-main-page',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
     UserManualComponent, NavbarComponent, MonthPickerComponent,
-    MatChipsModule],
+    MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent],
   providers: [
     provideEcharts(),
   ],
@@ -54,15 +56,38 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   totalNetIncome: number = -1
   showGrossIncomePieChart: boolean = false /** Only shown when tax is given and > 0 */
 
-  pieChartDataBrutto: any[] = []
-  pieChartDataNetto: any[] = []
+  pieChartDataBrutto: {name: string, value: number}[] = []
+  pieChartDataNetto: {name: string, value: number}[] = []
 
   isDarkmode: boolean = false
+
+  categories: ExpenseCategoryDetails[] = Object.values(expenseCategoryDetails)
+
+  budgets: Budget[] = [
+    { category: ExpenseCategory.Housing, value: 1200 },
+    { category: ExpenseCategory.Shopping, value: 200 },
+    { category: ExpenseCategory.Groceries, value: 180 },
+    { category: ExpenseCategory.Restaurants, value: 150 },
+    { category: ExpenseCategory.Education, value: 300 },
+    { category: ExpenseCategory.Savings, value: 400 },
+    { category: ExpenseCategory.Health, value: 40 },
+    { category: ExpenseCategory.Entertainment, value: 220 },
+    { category: ExpenseCategory.Hobby, value: 180 },
+    { category: ExpenseCategory.Commute, value: 100 },
+    // { category: ExpenseCategory.Utils, value: 0 },
+    // { category: ExpenseCategory.Other, value: 0 }
+  ]
+  
+  
+  spending: Budget[] = []
+
+  indicators: ExpenseCategoryDetails[] = []
   
   constructor() {
     super();
   }
   ngOnInit(): void {
+  
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
         const dataEntry = data[month];
@@ -84,7 +109,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
         this.totalExpenses = data.totalExpenses
         this.totalGrossIncome = data.totalGrossIncome
         this.totalNetIncome = data.totalUsableIncome
-  
+
+        this.getBudgetData()
   
         if (this.entriesOfOneMonth.totalTax == 0) {
           this.showGrossIncomePieChart = false
@@ -102,6 +128,36 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       }
     })
   }
+
+
+  getBudgetData() {
+    const categoriesValues = this.pieChartDataNetto.filter(item => item.name.includes(SYSTEM_PREFIX)).map(item => ({
+      category: item.name as ExpenseCategory,
+      value: item.value
+    }))
+    this.spending = categoriesValues
+
+    /** Find overlap between spending and budget. Only show what appears in both arrays and not null or 0. */
+    this.indicators = categoriesValues
+      .filter(a => a.value > 0 && this.budgets.some(b => b.category === a.category && b.value > 0))
+      .map(a => {
+        return expenseCategoryDetails[a.category];
+      });
+  }
+
+
+
+  getBudgetValue(category: string): number {
+    const budget = this.budgets.find(b => b.category === category);
+    return budget ? budget.value : 0;
+  }
+
+  getActualSpendingValue(category: string): number {
+    const spending = this.spending.find(s => s.category === category);
+    return spending ? spending.value : 0;
+  }
+
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['selectedMonth']) {

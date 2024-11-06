@@ -6,35 +6,82 @@
         <div [ngClass]="isVerticalLayout ? 'flex flex-col p-4' : 'grid grid-cols-2 gap-8 p-4'">
             <!-- CHART SECTION -->
             <div class="flex flex-col gap-8">
-                <div class="flex flex-row w-full items-center justify-end">
-                    <button mat-button (click)="dialogService.openInsertIntoDialog()">
-                        <mat-icon>add</mat-icon>
-                        <span>Insert Into</span>
-                    </button>
-                </div>
-                <app-sankey-chart
-                    [sankeyData]="entriesOfOneMonth.sankeyData"
-                    [remainingBalance]="entriesOfOneMonth.remainingBalance"
-                ></app-sankey-chart>
+                <!-- SANKEY CHART -->
+                <section>
+                    <div class="flex flex-row w-full items-center justify-end">
+                        <button mat-button (click)="dialogService.openInsertIntoDialog()">
+                            <mat-icon>add</mat-icon>
+                            <span>Insert Into</span>
+                        </button>
+                    </div>
+                    <app-sankey-chart
+                        [sankeyData]="entriesOfOneMonth.sankeyData"
+                        [remainingBalance]="entriesOfOneMonth.remainingBalance"
+                    ></app-sankey-chart>
+                </section>
+
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-                <!-- NETTO CHART -->
-                
-                <div class="flex flex-row w-full items-center justify-end">
-                    <button mat-button (click)="dialogService.openDidYouKnowDialog()" class="flex items-center">
-                        <mat-icon class="mr-1">lightbulb_outline</mat-icon>
-                        <span>Did You Know?</span>
-                    </button>
+
+
+
+                <!-- BUDGET VS ACTUAL SPENDING -->
+                <div class="flex flex-row w-full justify-center mb-4">
+                    <h2 class="font-bold">
+                        Budget vs Actual Spending
+                    </h2>
                 </div>
-                <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
-                    [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
-                ></app-pie-chart>
-                @if (showGrossIncomePieChart) {
-                    <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-                    <!-- BRUTTO CHART -->
-                    <app-pie-chart [pieChartData]="pieChartDataBrutto" [chartTitle]="'Total Income Distribution'" [chartDescription]="'(The whole pie represents your total gross income)'"
-                        [totalIncome]="totalGrossIncome"
+
+
+                <section>
+                    @if (indicators.length > 2) {
+                        <app-budget-radar-chart
+                            [budget]="budgets"
+                            [actualSpending]="spending"
+                        ></app-budget-radar-chart>
+                    }
+                </section>
+
+                <section>
+                    <div class="gauge-chart-container">
+                        <ng-container *ngFor="let item of indicators;">
+                            <app-budget-gauge-chart 
+                                [title]="item.label"
+                                [budget]="getBudgetValue(item.value)"
+                                [actualSpending]="getActualSpendingValue(item.value)"
+                                [color]="colorService.isDarkMode() ? (item.colorDark || 'rgb(92, 144, 247)') : (item.colorLight || 'rgb(90, 111, 192)')">
+                            </app-budget-gauge-chart>
+                        </ng-container>
+                    </div>
+                </section>
+
+
+                <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+
+                <!-- NETTO CHART -->
+                <section>
+                    <div class="flex flex-row w-full items-center justify-end">
+                        <button mat-button (click)="dialogService.openDidYouKnowDialog()" class="flex items-center">
+                            <mat-icon class="mr-1">lightbulb_outline</mat-icon>
+                            <span>Did You Know?</span>
+                        </button>
+                    </div>
+                    <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
+                        [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
                     ></app-pie-chart>
+                </section>
+
+                <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+                @if (showGrossIncomePieChart) {
+                    <section>
+                        <!-- BRUTTO CHART -->
+                        <app-pie-chart [pieChartData]="pieChartDataBrutto" [chartTitle]="'Total Income Distribution'" [chartDescription]="'(The whole pie represents your total gross income)'"
+                            [totalIncome]="totalGrossIncome"
+                        ></app-pie-chart>
+                    </section>
                 }
+
             </div>
         </div>
     </div>    
