@@ -89,7 +89,9 @@ export class FixCostInputComponent extends InputListComponent {
   override addLink(): void {
     this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
     // scroll to bottom after adding new form field
-    this.scrollToBottom()
+    setTimeout(() => {
+      this.scrollToBottom()
+    }, 200)
   }
 
   override removeLink(index: number): void {

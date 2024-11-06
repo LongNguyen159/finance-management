@@ -579,7 +579,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   addLink(): void {
     this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
     // scroll to bottom after adding new form field
-    this.scrollToBottom()
+    setTimeout(() => {
+      this.scrollToBottom()
+    }, 200)
   }
 
   // Remove an input row

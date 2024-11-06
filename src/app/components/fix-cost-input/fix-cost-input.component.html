@@ -1,12 +1,14 @@
 @if(!linkForm.valid) {
-    <div>
-        <app-error-card></app-error-card>
+    <div class="flex flex-row w-full justify-end">
+      <div class="fixed top-20 z-50">
+          <app-error-card></app-error-card>
+      </div>
     </div>
 }
 
 <div [formGroup]="linkForm" class="link-form-container" #bottomContent id="bottom-content">
     <!-- LINKS CONTAINER -->
-    <div formArrayName="links">
+    <div formArrayName="links" class="mb-14">
     
       <!-- VARIABLE COSTS SECTION -->
       <div class="flex flex-row items-center w-full mb-2">
@@ -82,8 +84,9 @@
         </button>
       </div>
     </div>
-    
-    <div class="flex flex-row gap-4 mt-4 w-fit text-center justify-center self-center sticky bottom-0 z-50">
+
+    <!-- ADD BUTTON -->
+    <div class="flex flex-row gap-4 mt-4 w-fit text-center justify-center self-center fixed bottom-5 z-50">
       <div>
         <button mat-stroked-button color="primary" class="backdrop-blur-[200px]" (click)="addLink()">
           <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
