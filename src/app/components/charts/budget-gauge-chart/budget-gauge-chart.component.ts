@@ -63,13 +63,6 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
       {
         value: this.computeBudgetPercentage(),
         name: this.title,
-        title: {
-          offsetCenter: ['0%', '-30%'],
-        },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '30%']
-        }
       },
     ];
 
@@ -96,7 +89,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
           },
           axisLine: {
             lineStyle: {
-              // width: 40
+              width: 20,
               color: this.colorService.isDarkMode() ? [[1, 'rgb(70,70,70)']] : [[1, 'rgb(240,240,240)']]
             }
           },
@@ -113,21 +106,26 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
             distance: 50
           },
           data: gaugeData,
+
+          
           title: {
             fontSize: 20,
+            offsetCenter: ['0%', '-30%'],
             fontWeight: 'bold',
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
           },
+
+
           detail: {
-            width: 50,
-            height: 14,
+            // width: 50,
+            // height: 14,
             fontSize: 14,
             color: this.getColorBasedOnPercentage(),
-            // borderColor: 'inherit',
-            borderRadius: 20,
-            borderWidth: 1,
-            formatter: '{value}%'
-          }
+            // borderWidth: 1,
+            formatter: `${this.actualSpending} / ${this.budget}\n{value}%`,
+            valueAnimation: true,
+            offsetCenter: ['0%', '30%']
+          },
         }
       ]
     };

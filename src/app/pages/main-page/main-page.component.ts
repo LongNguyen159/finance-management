@@ -148,7 +148,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
         return expenseCategoryDetails[a.category];
       });
 
-    this.showGaugeChart = this.indicators.length <= 3
+    this.showGaugeChart = this.indicators.length <= 2
   }
 
 
