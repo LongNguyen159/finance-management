@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Set Budget for {{ data.categoryLabel }}</h2>
+<mat-dialog-content>
+    <mat-form-field appearance="fill">
+        <mat-label>Enter amount</mat-label>
+        <input matInput [(ngModel)]="budgetValue" type="number" (input)="validateInput()" />
+        <mat-error *ngIf="budgetValue < 0">Budget cannot be negative</mat-error>
+    </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-button (click)="save()" [disabled]="budgetValue < 0">Save</button>
+</mat-dialog-actions>
