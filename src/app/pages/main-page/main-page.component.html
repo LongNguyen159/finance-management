@@ -25,34 +25,47 @@
 
 
                 <!-- BUDGET VS ACTUAL SPENDING -->
-                <div class="flex flex-row w-full justify-center mb-4">
+                <div class="flex flex-row w-full justify-center">
                     <h2 class="font-bold">
                         Budget vs Actual Spending
                     </h2>
                 </div>
 
-
-                <section>
+                <div class="flex flex-row w-full items-center justify-end">
                     @if (indicators.length > 2) {
+                        <div class="flex flex-row w-full items-center justify-end gap-1">
+                            <div class="text-sm">Show Gauge Chart</div>
+                            <div>
+                                <mat-slide-toggle [(ngModel)]="showGaugeChart" color="primary" labelPosition="before"></mat-slide-toggle>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (indicators.length > 2) {
+                    <section>
                         <app-budget-radar-chart
                             [budget]="budgets"
                             [actualSpending]="spending"
                         ></app-budget-radar-chart>
-                    }
-                </section>
+                        
+                    </section>
+                }
 
-                <section>
-                    <div class="gauge-chart-container">
-                        <ng-container *ngFor="let item of indicators;">
-                            <app-budget-gauge-chart 
-                                [title]="item.label"
-                                [budget]="getBudgetValue(item.value)"
-                                [actualSpending]="getActualSpendingValue(item.value)"
-                                [color]="colorService.isDarkMode() ? (item.colorDark || 'rgb(92, 144, 247)') : (item.colorLight || 'rgb(90, 111, 192)')">
-                            </app-budget-gauge-chart>
-                        </ng-container>
-                    </div>
-                </section>
+                @if (showGaugeChart) {
+                    <section>
+                        <div class="gauge-chart-container">
+                            <ng-container *ngFor="let item of indicators;">
+                                <app-budget-gauge-chart 
+                                    [title]="item.label"
+                                    [budget]="getBudgetValue(item.value)"
+                                    [actualSpending]="getActualSpendingValue(item.value)"
+                                    [color]="colorService.isDarkMode() ? (item.colorDark || 'rgb(92, 144, 247)') : (item.colorLight || 'rgb(90, 111, 192)')">
+                                </app-budget-gauge-chart>
+                            </ng-container>
+                        </div>
+                    </section>
+                }
 
 
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>

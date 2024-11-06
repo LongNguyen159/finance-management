@@ -22,13 +22,16 @@ import { DialogsService } from '../../services/dialogs.service';
 import { Budget, DateChanges, ExpenseCategory, ExpenseCategoryDetails, expenseCategoryDetails, SYSTEM_PREFIX } from '../../components/models';
 import { BudgetRadarChartComponent } from "../../components/charts/budget-radar-chart/budget-radar-chart.component";
 import { BudgetGaugeChartComponent } from "../../components/charts/budget-gauge-chart/budget-gauge-chart.component";
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-main-page',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
     UserManualComponent, NavbarComponent, MonthPickerComponent,
-    MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent],
+    MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
+  MatSlideToggleModule, FormsModule],
   providers: [
     provideEcharts(),
   ],
@@ -82,6 +85,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   spending: Budget[] = []
 
   indicators: ExpenseCategoryDetails[] = []
+  showGaugeChart: boolean = false
   
   constructor() {
     super();
@@ -143,6 +147,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       .map(a => {
         return expenseCategoryDetails[a.category];
       });
+
+    this.showGaugeChart = this.indicators.length <= 3
   }
 
 
