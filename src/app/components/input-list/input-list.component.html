@@ -40,22 +40,34 @@
           ({{ fixCosts.length }})
         </span>
       </p>
+
+      <!-- PASTE FIX COSTS BUTTON -->
+      <div class="flex flex-row">
+        <button 
+            mat-button 
+            (click)="pasteFixCosts()"
+            [disabled]="fixedLinks.length == 0"
+            class="ml-2"
+          >  
+            <!-- IF FIX COST ALREADY EXISTS, SHOW UPDATE INSTEAD OF PASTING -->
+            @if (fixCosts.length > 0) {
+              <div class="flex flex-row items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">update</mat-icon>
+                <span>Update Fix costs</span>
+              </div>
+            } @else {
+              <div class="flex flex-row items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
+                <span>{{ fixedLinks.length == 0 ? 'No Fix costs defined' : 'Paste Fix Costs'  }}</span>
+              </div>
+            }
+          </button>
+      </div>
     </div>
 
     <mat-card appearance="outlined" class="mb-4">
       @if (isFixCostsExpanded) {
         <mat-card-content>
-          <!-- PASTE FIX COSTS BUTTON -->
-          <div class="flex flex-row">
-            <button 
-                mat-button 
-                (click)="pasteFixCosts()" 
-                [disabled]="fixedLinks.length == 0"
-              >  
-                <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
-                {{ fixedLinks.length == 0 ? 'No fix costs defined' : 'Paste Fix Costs'  }}
-              </button>
-          </div>
           <div>
             <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
               @if (linkGroup.get('isFixCost')?.value) {

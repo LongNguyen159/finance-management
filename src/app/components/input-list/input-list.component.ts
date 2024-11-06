@@ -312,6 +312,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.uiService.showSnackBar('No changes', 'Dismiss');
       return;
     }
+
+    this.isFixCostsExpanded = true;
     
     /** If different, clear out the current fixed costs link and paste the link in local storage in.
      * This wil avoid duplicate fixed costs in the form.
