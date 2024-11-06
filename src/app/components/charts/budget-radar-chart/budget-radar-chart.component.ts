@@ -80,7 +80,25 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
       },
       radar: {
         indicator: indicators,
+        shape: 'circle',
         scale: true,
+        axisLine: {
+          lineStyle: {
+            color: this.colorService.isDarkMode() ? 'rgba(204, 204, 204, 0.7)' : 'rgba(144, 144, 144, 1)',
+          }
+        },
+        splitLine: {
+          lineStyle: {
+            color: [
+              'rgba(144, 144, 144, 0.1)',
+              'rgba(144, 144, 144, 0.2)',
+              'rgba(144, 144, 144, 0.4)',
+              'rgba(144, 144, 144, 0.6)',
+              'rgba(144, 144, 144, 0.8)',
+              'rgba(144, 144, 144, 1)'
+            ].reverse()
+          }
+        },
       },
       series: [
         {
