@@ -7,13 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { FixCostInputComponent } from "../../components/fix-cost-input/fix-cost-input.component";
 import { CommonModule } from '@angular/common';
 import { ColorService } from '../../services/color.service';
+import { BudgetListComponent } from "../../components/budget-list/budget-list.component";
 
 @Component({
   selector: 'app-storage-page',
   standalone: true,
   imports: [StorageManagerComponent, NavbarComponent, MatTabsModule, MatButtonModule, MatIconModule, FixCostInputComponent,
-    CommonModule
-  ],
+    CommonModule, BudgetListComponent],
   templateUrl: './storage-page.component.html',
   styleUrl: './storage-page.component.scss'
 })

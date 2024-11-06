@@ -1,0 +1,23 @@
+<div class="card-container">
+  <mat-card class="cursor-pointer budget-card" *ngFor="let category of expenseCategoryDetails | keyvalue" 
+            (click)="onBudgetClick(category.key)"
+            [ngClass]="{'dark-mode': colorService.isDarkMode(), 'light-mode': !colorService.isDarkMode()}">
+    <mat-card-header class="mb-4 flex flex-row w-full justify-center">
+      <div class="flex flex-col gap-2 items-center">
+          <mat-icon fontSet="material-symbols-outlined" class="flex flex-row w-full justify-center large-icon" 
+                    [ngStyle]="{'color': colorService.isDarkMode() ? category.value.colorDark : category.value.colorLight}">
+            {{ category.value.icon }}
+          </mat-icon>
+          <mat-card-title class="!font-bold flex flex-row w-full justify-center">{{ category.value.label }}</mat-card-title>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="flex flex-row w-full justify-center">
+          <div [ngStyle]="{'border-color': colorService.isDarkMode() ? '#404040' : '#d4d4d4' }" 
+               class="flex flex-row justify-center items-center rounded-full px-4 py-2 cursor-pointer budget-indicator">
+              Budget: 500
+          </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
