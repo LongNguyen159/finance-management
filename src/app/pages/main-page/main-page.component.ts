@@ -108,6 +108,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
       if (data && Object.keys(data).length > 0) {
+        this.showGaugeChart = false // Reset gauge chart flag
         this.entriesOfOneMonth = data
         this.pieChartDataNetto = data.pieData
         this.totalExpenses = data.totalExpenses
