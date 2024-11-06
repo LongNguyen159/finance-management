@@ -20,7 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class BudgetListComponent {
   colorService = inject(ColorService)
-  expenseCategoryDetails = expenseCategoryDetails;
+  expenseCategoryDetails = Object.values(expenseCategoryDetails);
 
   onBudgetClick(category: string) {
     console.log('Budget clicked', category);
