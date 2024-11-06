@@ -24,9 +24,43 @@ export class ColorService {
 
   lightTextPrimary = 'rgb(38,38,38)';
   lightTextSecondary = 'rgb(64,64,64)';
-  lightTextTertiary = 'rgb(108,114,127)';
 
   lightBackgroundPrimary = 'rgb(255,255,255)';
+
+
+
+  //#region Chart Colors
+  chartColorPaletteLight: string[] =  [
+    '#5470c6',
+    '#91cc75',
+    '#fac858',
+    '#ee6666',
+    '#73c0de',
+    '#3ba272',
+    '#fc8452',
+    '#9a60b4',
+    '#ea7ccc'
+  ]
+
+  chartColorPaletteDark: string[] = [
+    '#4992ff',
+    '#9EE49E',
+    '#fddd60',
+    '#ff6e76',
+    '#58d9f9',
+    '#05c091',
+    '#ff8a45',
+    '#8d48e3',
+    '#dd79ff'
+  ]
+
+  greenDarkMode = '#9EE49E'
+  greenLightMode = '#9DCA7F'
+
+  redDarkMode = '#f87171'
+  redLightMode = '#DE6E6A'
+
+  //#endregion
 
   constructor(@Inject(DOCUMENT) private document: Document) {
     this.listenForColorSchemeChanges();

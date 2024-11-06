@@ -109,15 +109,15 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
               value: actualValues,
               name: 'Actual Spending',
               itemStyle: {
-                color: this.colorService.isDarkMode() ? '#f87171' : '#ef4444'
+                color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode,
               },
               lineStyle: {
                 width: 2,
-                color: this.colorService.isDarkMode() ? '#f87171' : '#ef4444',
+                color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode,
                 cap: 'round'
               },
               areaStyle: {
-                color: this.colorService.isDarkMode() ? '#f87171' : '#ef4444',
+                color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode,
                 opacity: 0.7
               },
             },
@@ -127,14 +127,14 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
               name: 'Budget',
 
               itemStyle: {
-                color: this.colorService.isDarkMode() ? '#4ade80' : '#22c55e',
+                color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode,
               },
               lineStyle: {
                 width: 2,
-                color: this.colorService.isDarkMode() ? '#4ade80' : '#22c55e',
+                color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode,
               },
               areaStyle: {
-                color: this.colorService.isDarkMode() ? '#4ade80' : '#22c55e',
+                color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode,
                 opacity: 0.5
               },
             },

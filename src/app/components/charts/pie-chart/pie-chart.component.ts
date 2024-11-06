@@ -29,6 +29,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
 
   pieOption: EChartsOption = {}
   pieMergeOption: EChartsOption = {}
+
+
   
   @ViewChild(NgxEchartsDirective, { static: false }) chartDirective?: NgxEchartsDirective;
 
@@ -51,6 +53,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
 
   updateChart() {
     this.pieOption = {
+
+      color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         trigger: 'item',
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
