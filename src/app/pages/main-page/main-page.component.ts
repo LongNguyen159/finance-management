@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { InputListComponent } from '../../components/input-list/input-list.component';
@@ -91,10 +91,12 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   
   constructor() {
     super();
+    effect(() => {
+      this.budgets = this.budgetService.budget()
+      console.log('budget updated', this.budgets)
+    })
   }
   ngOnInit(): void {
-    this.budgets = this.budgetService.getBudgets()
-
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {

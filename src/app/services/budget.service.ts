@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Budget } from '../components/models';
 
 @Injectable({
@@ -6,6 +6,8 @@ import { Budget } from '../components/models';
 })
 export class BudgetService {
   private readonly storageKey = 'budgets';
+
+  budget = signal<Budget[]>(this.getBudgets());
 
   
 
@@ -17,6 +19,7 @@ export class BudgetService {
   }
 
   saveBudgets(budgets: Budget[]) {
+    this.budget.set(budgets);
     localStorage.setItem(this.storageKey, JSON.stringify(budgets));
   }
 }
