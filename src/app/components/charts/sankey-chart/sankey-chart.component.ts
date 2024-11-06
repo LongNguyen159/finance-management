@@ -6,13 +6,14 @@ import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
-import { removeSystemPrefix } from '../../../utils/utils';
+import { parseLocaleStringToNumber, removeSystemPrefix } from '../../../utils/utils';
+import { MatButtonModule } from '@angular/material/button';
 
 
 @Component({
   selector: 'app-sankey-chart',
   standalone: true,
-  imports: [NgxEchartsDirective, CommonModule, MatChipsModule],
+  imports: [NgxEchartsDirective, CommonModule, MatChipsModule, MatButtonModule],
   providers: [
     provideEcharts(),
   ],
@@ -42,6 +43,15 @@ export class SankeyChartComponent implements OnChanges {
     if (changes && changes['sankeyData']) {
       this.updateSankeyChart()
     }
+  }
+
+  isPositiveBalance(): boolean {
+    const balanceNumber = parseLocaleStringToNumber(this.remainingBalance);
+    return balanceNumber >= 0;
+  }
+
+  getBalanceClass(): string {
+    return this.isPositiveBalance() ? 'positive-balance' : 'negative-balance';
   }
 
 
