@@ -94,7 +94,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   updateFromService = false; // Flag to control value changes
 
-  isFixCostsExpanded: boolean = true;
+  isFixCostsExpanded: boolean = false;
 
   isVariableCostsExpanded: boolean = true;
 
@@ -592,6 +592,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   // Getter to easily access the FormArray
   get linkArray(): FormArray {
     return this.linkForm.get('links') as FormArray;
+  }
+
+  get fixCosts(): UserDefinedLink[] {
+    return this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost);
   }
 
   //#endregion
