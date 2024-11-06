@@ -1,4 +1,4 @@
-@if(!linkForm.valid) {
+@if(!linkForm.valid && linkForm.touched) {
   <div class="sticky top-0 z-[100]">
     <app-error-card></app-error-card>
   </div>

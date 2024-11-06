@@ -577,6 +577,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   // Add a new input row
   addLink(): void {
+    /** Mark as untouch to prevent form being marked as invalid on adding link without doing anything yet */
+    this.linkForm.markAsUntouched()
     this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
     // scroll to bottom after adding new form field
     setTimeout(() => {

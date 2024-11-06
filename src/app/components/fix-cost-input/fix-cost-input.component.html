@@ -1,4 +1,4 @@
-@if(!linkForm.valid) {
+@if(!linkForm.valid && linkForm.touched) {
     <div class="flex flex-row w-full justify-end">
       <div class="fixed top-20 z-50">
           <app-error-card></app-error-card>
