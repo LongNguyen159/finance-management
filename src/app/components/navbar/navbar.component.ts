@@ -27,6 +27,8 @@ export class NavbarComponent {
   @Input() showUpdates: boolean = true;
   @Input() showStorage: boolean = true;
 
+  @Input() backLink: string = '';
+
   dataService = inject(DataService)
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
@@ -35,6 +37,11 @@ export class NavbarComponent {
 
 
   navigateBack() {
+    if (this.backLink) {
+      this.router.navigate([this.backLink]);
+      return
+    }
+    
     if (window.history.length > 1) {
       this.location.back();
     } else {
