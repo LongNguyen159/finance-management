@@ -15,10 +15,11 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { formatDateToYYYYMM, onMonthChanges } from '../../utils/utils';
+import { formatDateToYYYYMM } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
 import { ColorService } from '../../services/color.service';
+import { onMonthChanges } from '../../utils/data-utils';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
