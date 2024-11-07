@@ -133,6 +133,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** Retrieve fixed costs from local storage */
     this.fixedLinks = this.dataService.retrieveFixCostsLinks()
 
+    if (this.dataService.isDemo()) {
+      this.isFixCostsExpanded = true
+    }
+
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
       this.allMonthsData = allMonthsData

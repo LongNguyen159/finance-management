@@ -1,6 +1,8 @@
 @if(!linkForm.valid && linkForm.touched) {
-  <div class="sticky top-0 z-[100]">
-    <app-error-card></app-error-card>
+  <div class="flex flex-row w-full justify-center">
+    <div class="fixed top-6 z-[100]">
+      <app-error-card></app-error-card>
+    </div>
   </div>
 }
 <div [formGroup]="linkForm" class="link-form-container" #bottomContent id="bottom-content">
@@ -45,8 +47,8 @@
       <div class="flex flex-row w-full gap-2 justify-end">
         <div>
           <button mat-button (click)="navigateToFixCosts()">
-            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
-            Edit
+            <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+            Edit Fix Costs
           </button>
         </div>
         <button 
@@ -59,7 +61,7 @@
             @if (fixCosts.length > 0) {
               <div class="flex flex-row items-center gap-2">
                 <mat-icon fontSet="material-symbols-outlined">update</mat-icon>
-                <span>Update Fix costs</span>
+                <span>Update Fix Costs</span>
               </div>
             } @else {
               <div class="flex flex-row items-center gap-2">
