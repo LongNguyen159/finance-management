@@ -386,16 +386,24 @@ export class DataService {
 
 
         //#region: Handle Return params
-        // Step 5: Convert nodesMap to an array of nodes (including child nodes)
+
+        // Step 5: Get Links and Nodes
+
+        // Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
 
-        // Step 6: Remove duplicate links
+        // Remove duplicate links
         const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
  
 
-       // Step 7: Calculate return params
+       // Step 6: Calculate return params
+
        /** Pie data will be generated based on Tree Structure generated from Sankey.
         * Not from Sankey links.
+        * 
+        * Pie data will be the top level expenses only, meaning the first level in tree structure.
+        * We do this because how else would we know which items are top level or which are children of which?
+        * So we transform Sankey data (source - target - value) into a tree structure (name - value - children).
         * 
         * => If you want to modify pie chart data, modify tree structure.
         */
@@ -404,20 +412,24 @@ export class DataService {
         const { totalExpenses, topLevelexpenses: pieData, changedExpensesDuringCalculation: changedExpensesDuringCalculation } = this._getExpensesData(uniqueLinks, hasTax, incomeNodes.length);
         const remainingBalance: number = (totalIncomeValue - totalExpenses - totalTaxValue)
 
+        // Push remaining balance number to Pie Data to show how much is left proportionally.
         pieSeriesData = [
             ...pieData,
             { name: 'Remaining Balance', value: remainingBalance },
         ];
-        // const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+
 
         let updatedRawInput: UserDefinedLink[] = userDefinedLinks; // Default to original input
 
-        // Update raw input if necessary
+        /** Update raw input if there are changes in expenses during calculation.
+         * The value of some parent will be added up to correctly reflect total value of children.
+         * Raw Input should be updated to correctly populate the form with new values.
+         */
         if (changedExpensesDuringCalculation.length > 0) {
             updatedRawInput = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
         }
 
-        // Step 1: Update Sankey nodes and links based on updatedRawInput
+        // Update Sankey nodes and links based on updatedRawInput
         const updatedNodes = nodes.map(node => {
             const updatedNode = updatedRawInput.find(link => link.target === node.name);
             return updatedNode ? { ...node, value: updatedNode.value } : node; // Update value or leave as is
@@ -428,6 +440,8 @@ export class DataService {
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
         });
 
+
+        // Final Object to be emitted
         this.monthlyData[month] = {
             sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
@@ -456,6 +470,12 @@ export class DataService {
         //#endregion
     }
 
+    /** Update Raw input to correctly reflect the parent value as sum of their children values.
+     * @paream oldInput - The original input data.
+     * @param changedExpenses - The array of changed expenses during calculation.
+     * 
+     * @returns The updated input data with parent values updated to reflect the sum of their children.
+     */
     private _updateUserInput(oldInput: UserDefinedLink[], changedExpenses: TreeNode[]): UserDefinedLink[] {
         return oldInput.map(link => {
             // Check if the current link's target matches any of the changed expenses
@@ -480,18 +500,29 @@ export class DataService {
             return result;
         }, {} as MonthlyData);
     
+        /** Save all months data in Local Storage.
+         * Optimise:
+         * Only write into Local Storage the processed data?
+         * Currently we are writing all months in on every save.
+         * 
+         */
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
+
+        // Emit all months data
         this.multiMonthEntries$.next(nonEmptyMonthlyData);
         this.dataSaved$.next(true);
     }
 
-    // Load data from LocalStorage
+    /** Retrieve existing entries from Local Storage */
     loadData(): MonthlyData | null {
         const saved = localStorage.getItem('monthlyData');
         return saved ? JSON.parse(saved) as MonthlyData: null;
     }
 
-    /** Return all local storage items */
+    /** Return all local storage items
+     * 
+     * UNUSED: This function is not used in the current implementation. But reserved for future use.
+     */
     getAllLocalStorageItems(): { [key: string]: any } {
         const items: { [key: string]: any } = {};
         
@@ -511,6 +542,9 @@ export class DataService {
         return items;
     }
 
+    /** Get monthly data object from Local Storage.
+     * @returns All months data. Key as yyyy-mm format, value are corresponding entries.
+     */
     getMonthlyDataFromLocalStorage(): { [key: string]: any } {
         const monthlyData = localStorage.getItem('monthlyData');
         if (!monthlyData) {
@@ -529,6 +563,9 @@ export class DataService {
     }
 
 
+    /** Remove a specific month entries from Local Storage. Used by Finance Manager,
+     * to delete all entries of a month.
+     */
     removeMonthFromLocalStorage(key: string) {
         // Get the current data from LocalStorage
         const storedData = localStorage.getItem('monthlyData');
@@ -570,12 +607,6 @@ export class DataService {
           }
         });
     }
-
-    private clearData() {
-        localStorage.removeItem('userFinancialData');
-        console.log('User data cleared from LocalStorage');
-    }
-
     //#endregion
 
 
@@ -704,10 +735,13 @@ export class DataService {
         // Step 2: Build the tree from the root node
         let treeFromRootNode: TreeNode = this._buildTree(links, rootNodeName);
 
-        /** Tree might be modified here. So if you want to use the tree structure, use it after these lines. */
+        /** Tree might be modified during calculations. So if you want to use the tree structure, write code after these lines. */
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
         
+        /** Tree is in recursive stucture, but we only care about Top-level expense for pie data.
+         * So only iterate through children of root node to get top level expenses.
+         */
         const pieData = treeFromRootNode.children.map(child => {
             return {
                 name: child.name,
@@ -715,8 +749,6 @@ export class DataService {
             }
         })
 
-    
-        // Step 3: Calculate total expenses from the root
         return {
             totalExpenses: totalExpenses,
             topLevelexpenses: pieData,
@@ -724,7 +756,13 @@ export class DataService {
         }
     }
 
-    /** Recursively transverse the tree to find the modified nodes. Returns an array of changed nodes. */
+    /** Recursively transverse the tree to find the modified nodes.
+     * @param node - The current node to check for changes. Or the starting node.
+     * It will receursively check all children of the node.
+     * @param changedNodes - The array to store the changed nodes. Default to empty array, will be used in recursion to push in changed nodes.
+     * 
+     * @returns An array of changed nodes.
+     */
     private _getChangedNodes(node: TreeNode, changedNodes: TreeNode[] = []): TreeNode[] {    
         // Check if the node has been modified
         if (node.isValueChangedDuringCalc) {
