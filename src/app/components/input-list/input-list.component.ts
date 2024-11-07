@@ -20,6 +20,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
 import { ColorService } from '../../services/color.service';
 import { onMonthChanges } from '../../utils/data-utils';
+import { Router } from '@angular/router';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -75,6 +76,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   dataService = inject(DataService)
   uiService = inject(UiService)
   colorService = inject(ColorService)
+
+  router = inject(Router)
+
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
   @ViewChild('bottomContent') bottomContent!: ElementRef;
 
@@ -625,6 +629,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   scrollToBottom(): void {
     this.bottomContent.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  navigateToFixCosts() {
+    this.router.navigate(['/storage'], {
+      queryParams: { tab: 2 }
+    });
   }
 
   

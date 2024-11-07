@@ -34,7 +34,7 @@
           <mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon>
         }
       </button>
-      <p class="font-bold text-2xl !m-0 flex flex-row items-center">
+      <p class="font-bold text-2xl !m-0 flex flex-row w-full items-center">
         <span>Fix Costs</span>&nbsp;
         <span>
           ({{ fixCosts.length }})
@@ -42,9 +42,15 @@
       </p>
 
       <!-- PASTE FIX COSTS BUTTON -->
-      <div class="flex flex-row">
+      <div class="flex flex-row w-full gap-2 justify-end">
+        <div>
+          <button mat-button (click)="navigateToFixCosts()">
+            <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+            Edit
+          </button>
+        </div>
         <button 
-            mat-button 
+            mat-stroked-button 
             (click)="pasteFixCosts()"
             [disabled]="fixedLinks.length == 0"
             class="ml-2"
