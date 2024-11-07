@@ -57,6 +57,8 @@ export class AppComponent implements OnInit {
 
   navigateToWelcome() {
     this.router.navigate(['/welcome']);
+    /** Set app version on welcome to prevent showing updates on next time. */
+    localStorage.setItem('appVersion', this.appVersion);
     // Mark the user as having seen the welcome page
     localStorage.setItem('firstTime', 'false');
   }
