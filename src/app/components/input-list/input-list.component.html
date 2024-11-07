@@ -36,7 +36,7 @@
           <mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon>
         }
       </button>
-      <p class="font-bold text-2xl !m-0 flex flex-row w-full items-center">
+      <p class="font-bold text-2xl !m-0 flex flex-row w-full items-center cursor-pointer" (click)="isFixCostsExpanded = !isFixCostsExpanded">
         <span>Fix Costs</span>&nbsp;
         <span>
           ({{ fixCosts.length }})
@@ -160,7 +160,7 @@
           <mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon>
         }
       </button>
-      <p class="font-bold text-2xl !m-0">Variable Costs</p>
+      <p class="font-bold text-2xl !m-0 cursor-pointer" (click)="isVariableCostsExpanded = !isVariableCostsExpanded">Variable Costs</p>
     </div>
 
     <mat-card appearance="outlined" class="mb-4">
