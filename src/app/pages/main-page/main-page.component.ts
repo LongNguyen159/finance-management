@@ -72,20 +72,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
   categories: ExpenseCategoryDetails[] = Object.values(expenseCategoryDetails)
 
-  budgets: Budget[] = [
-    // { category: ExpenseCategory.Housing, value: 1200 },
-    // { category: ExpenseCategory.Shopping, value: 200 },
-    // { category: ExpenseCategory.Groceries, value: 180 },
-    // { category: ExpenseCategory.Restaurants, value: 150 },
-    // { category: ExpenseCategory.Education, value: 300 },
-    // { category: ExpenseCategory.Savings, value: 400 },
-    // { category: ExpenseCategory.Health, value: 40 },
-    // { category: ExpenseCategory.Entertainment, value: 220 },
-    // { category: ExpenseCategory.Hobby, value: 180 },
-    // { category: ExpenseCategory.Commute, value: 100 },
-    // { category: ExpenseCategory.Utils, value: 0 },
-    // { category: ExpenseCategory.Other, value: 0 }
-  ]
+  budgets: Budget[] = []
   
   
   spending: Budget[] = []
@@ -100,6 +87,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
     })
   }
   ngOnInit(): void {
+    this.budgets = this.budgetService.getBudgets()
     console.log('budgets', this.budgets)
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {

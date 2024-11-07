@@ -41,7 +41,12 @@ export class FixCostInputComponent extends InputListComponent {
     this.listenCategoryChanges()
 
 
-    const existingFixCosts = localStorage.getItem('fixCosts');
+    let existingFixCosts = localStorage.getItem('fixCosts') 
+
+    if (this.dataService.isDemo()) {
+      existingFixCosts = JSON.stringify(this.dataService.demoLinks.filter(item => item.isFixCost));
+    }
+
 
     if (existingFixCosts) {
       const parsedFixCosts: UserDefinedLink[] = JSON.parse(existingFixCosts);
