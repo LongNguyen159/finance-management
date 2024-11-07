@@ -67,7 +67,7 @@ export class BudgetListComponent implements OnInit{
 
   getBudgetValue(category: string): string {
     const budgetValue = this.budgets.find(budget => budget.category === category)?.value;
-    return budgetValue ? budgetValue.toLocaleString('en-US') : 'Set a Budget';
+    return budgetValue ? budgetValue.toLocaleString('en-US') : ' _';
   }
   
 

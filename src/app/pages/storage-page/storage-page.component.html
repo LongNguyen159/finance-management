@@ -1,6 +1,6 @@
 
 <div class="flex flex-col">
-    <app-navbar class="navbar" [backLink]="'/'" [showStorage]="false" [showLogo]="false"></app-navbar>
+    <app-navbar class="navbar" [backLink]="'/'" [showStorage]="false" [showLogo]="false" [scrollToTop]="selectedTabIndex == 1"></app-navbar>
     <mat-tab-group animationDuration="0" [(selectedIndex)]="selectedTabIndex" (selectedIndexChange)="onTabChange($event)">
         <mat-tab>
             <ng-template mat-tab-label>
