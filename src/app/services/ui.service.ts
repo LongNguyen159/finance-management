@@ -6,6 +6,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../components/dialogs
 @Injectable({
   providedIn: 'root'
 })
+
+/** Service that handles showing UI components like snackbar, confirm dialog, etc. to notify or prompt user. */
 export class UiService {
 
   private _snackBar = inject(MatSnackBar);

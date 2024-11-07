@@ -4,12 +4,12 @@ import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
 import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
+
+/** Interface for multi month data. */
 export interface MonthlyData {
     [month: string]: SingleMonthData;
 }
-/** TODO:
- * Rename this model to `SingleMonthData`
- */
+/** Interface for single month data. */
 export interface SingleMonthData {
     sankeyData: SankeyData;
     totalUsableIncome: number;
@@ -22,7 +22,7 @@ export interface SingleMonthData {
     month: string
 }
 
-export interface TreeNode {
+interface TreeNode {
     name: string;
     value: number;
     isValueChangedDuringCalc: boolean
@@ -38,15 +38,27 @@ export interface ExpenseData {
 @Injectable({
   providedIn: 'root'
 })
+
+/** This service main purpose is to hanlde the processing of Input Data (converting raw input data into Sankey Data with source - target - value).
+ * 
+ * 
+ * This is the central processing part of the app. It also handles saving data into Local Storage and emit observables for the subscribers.
+ */
 export class DataService {
     private UiService = inject(UiService)
+
+    //#region Chart Data
     monthlyData: MonthlyData = {};
     private readonly sankeyDataInit: SankeyData = {
         nodes: [],
         links: []
     }
     private remainingBalance: string = '-';
-    private singleMonthEntries: SingleMonthData = {
+
+    /** Emit this object if data has a cycle. Only keep raw input and month for user to correct it.
+     * Every other value will be unset to prevent further processing.
+     */
+    private defaultEmptySingleMonthEntries: SingleMonthData = {
         sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -58,16 +70,35 @@ export class DataService {
         month: ''
     }
 
-    private processedSingleMonthEntries$ = new BehaviorSubject<SingleMonthData>(this.singleMonthEntries)
+    demoLinks: UserDefinedLink[] = [
+        { type: EntryType.Income, target: 'Salary demo', value: 2200, demo: true },
+        { type: EntryType.Expense, target: 'Apartment', value: 800},
+        { type: EntryType.Expense, target: 'Rent', value: 500, source: ExpenseCategory.Housing},
+        { type: EntryType.Expense, target: 'WiFi', value: 40, source: ExpenseCategory.Housing},
+        { type: EntryType.Expense, target: 'Groceries', value: 300},
+    ]
+
+    
+    /** Behaviour subjects to emit the values. */
+    private processedSingleMonthEntries$ = new BehaviorSubject<SingleMonthData>(this.defaultEmptySingleMonthEntries)
     private multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
-
     private dataSaved$ = new BehaviorSubject<boolean>(false)
+    //#endregion
 
+
+
+    
+    //#region States
+    /** Signal to check if the app is in demo mode. */
     isDemo = signal(false)
+
+    /** Flag to show/hide advanced options in the form. This being here for state saving only.
+     * Meaning components can modify this value. Turning into Signal might also be a good idea.
+     */
     isAdvancedShown: boolean = true
 
     /** Use this to scale all income-expense bar chart to have same scale.
-     * This value will be the largest value either totalUsableIncome or totalExpenses.
+     * This value will be the largest value of either totalUsableIncome or totalExpenses.
      */
     incomeExpenseScaleValue = signal(0)
 
@@ -78,26 +109,18 @@ export class DataService {
     hasDataCycle = signal(false)
 
     selectedActiveDate: Date = new Date();
+    //#endregion
 
-    private copiedLinksKey = 'copiedLinks';
-
+    /** Immutable states */
+    private readonly copiedLinksKey = 'copiedLinks';
     readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', '-- None --' , ...Object.values(ExpenseCategory)];
 
-    
-
-    demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Salary demo', value: 2200, demo: true },
-        { type: EntryType.Expense, target: 'Apartment', value: 800},
-        { type: EntryType.Expense, target: 'Rent', value: 500, source: ExpenseCategory.Housing},
-        { type: EntryType.Expense, target: 'WiFi', value: 40, source: ExpenseCategory.Housing},
-        { type: EntryType.Expense, target: 'Groceries', value: 300},
-    ]
 
     constructor() {
         this.initializeData()
     }
 
-    //#region: Initialize Data
+    //#region: Initialise Data
     private initializeData(): void {
         this.removeOldUserFinancialData(); // Remove old key from previous versions
     
@@ -198,7 +221,7 @@ export class DataService {
         if (this.hasDataCycle()) {
             this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
             console.log('Data has a cycle! Emitting default entries');
-            this.singleMonthEntries = {
+            this.defaultEmptySingleMonthEntries = {
                 sankeyData: this.sankeyDataInit,
                 totalUsableIncome: -1,
                 totalTax: -1,
@@ -209,7 +232,7 @@ export class DataService {
                 rawInput: userDefinedLinks,
                 month: month
             }
-            this.processedSingleMonthEntries$.next(this.singleMonthEntries);
+            this.processedSingleMonthEntries$.next(this.defaultEmptySingleMonthEntries);
             return;
         }
 
@@ -222,8 +245,8 @@ export class DataService {
         let singleIncome = false; // Flag to check if there is only one income source
         const hasTax = userDefinedLinks.some(link => link.type === EntryType.Tax); // Check if there is any tax link
 
-        /** Demo flag: Only set to true when the app loads for the first time to show our demo
-         * graph for first time users.
+        /** Demo flag: Only set to true when the app loads for the first time
+         * to show our demo graph for first time users.
          */
         if (demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
             this.isDemo.set(true)
@@ -259,10 +282,15 @@ export class DataService {
         //#region: Handle Income & Taxes
         // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
         if (incomeNodes.length > 1) {
+            // Sum up every item in incomeNodes to get total income value
             totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node)?.value || 0), 0);
             nodesMap.set('Total Income', { value: totalIncomeValue, type: EntryType.Income });
+
         } else if (incomeNodes.length === 1) {
             singleIncome = true; // Only one income source, no need for a "Total Income" node
+
+
+            // Total income value will be the value of incomeNodes[0], because there's only one anyway.
             totalIncomeValue = nodesMap.get(incomeNodes[0])?.value || 0;
         }
 
@@ -270,6 +298,9 @@ export class DataService {
         const incomeSource = singleIncome ? incomeNodes[0] : 'Total Income';
         const taxLink = userDefinedLinks.find(link => link.type == EntryType.Tax);
 
+
+
+        /** If has tax, create 'Usasble Income' node and use it as source for all expenses. */
         if (hasTax && taxLink) {
             let usableIncome = totalIncomeValue;
             const taxValue = nodesMap.get(taxLink.target)?.value || 0;
@@ -293,10 +324,11 @@ export class DataService {
 
 
         //#region: Handle Expenses
-        // Default root node for the sankey chart
-        const expenseSource = hasTax ? 'Usable Income' : incomeSource;
+        
+        /** This will be the default root node for Sankey Chart. The source for all expenses to flow from. */
+        const sourceForExpenses = hasTax ? 'Usable Income' : incomeSource;
 
-        // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
+        // Step 4: Create links for expenses, using default expense source.
         const allowedCategories = Object.values(ExpenseCategory);
 
         userDefinedLinks.forEach(link => {
@@ -309,9 +341,9 @@ export class DataService {
                     });
                 }
             } else if (link.type === EntryType.Expense) {
-                let sourceNode = link.source || expenseSource;
+                let sourceNode = link.source || sourceForExpenses;
 
-                // Step 2: Check if the source node exists in nodesMap or is an allowed category
+                // Check if the source node exists in nodesMap or is an allowed category
                 if (!nodesMap.has(sourceNode) && allowedCategories.includes(sourceNode as ExpenseCategory)) {
                     // Create the missing source node as a new entry with 'Expense' type
                     nodesMap.set(sourceNode, { value: 0, type: EntryType.Expense });
@@ -333,16 +365,16 @@ export class DataService {
 
                     // Link newly created source node to the default income node
                     links.push({
-                        source: incomeSource, // Link to default income (Total Income or single income node)
+                        source: sourceForExpenses, // Link to default income (Total Income or single income node)
                         target: sourceNode,
                         value: sourceValue
                     });
                 } else {
                     // If the source is not found or is not in allowed categories, link directly to default income
-                    const validSource = nodesMap.has(sourceNode) ? sourceNode : incomeSource;
+                    const validSource = nodesMap.has(sourceNode) ? sourceNode : sourceForExpenses;
                     
                     links.push({
-                        source: validSource, // Use either the existing source or default income
+                        source: validSource,
                         target: link.target,
                         value: link.value
                     });
