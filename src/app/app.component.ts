@@ -3,16 +3,13 @@ import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { InputListComponent } from './components/input-list/input-list.component';
-import { NavbarComponent } from "./components/navbar/navbar.component";
 import {version} from '../../package.json';
 import { ColorService } from './services/color.service';
 import { DataService } from './services/data.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MatMenuModule, MatIconModule, MatButtonModule, InputListComponent, RouterModule, NavbarComponent,
-    NavbarComponent
+  imports: [RouterOutlet, MatMenuModule, MatIconModule, MatButtonModule, RouterModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -35,7 +32,7 @@ export class AppComponent implements OnInit {
     // Check if it's the user's first time
     const isFirstTime = localStorage.getItem('firstTime') === null || localStorage.getItem('firstTime') === 'true';
 
-    if (isFirstTime) {
+    if (isFirstTime || this.dataService.isOldVersion()) {
       // Navigate to the welcome page and mark the user as not first-time
       this.navigateToWelcome();
     } else {

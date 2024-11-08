@@ -137,12 +137,12 @@ export class DataService {
         }
     }
     
-    private isFirstTimeUser(): boolean {
+    isFirstTimeUser(): boolean {
         const firstTime = localStorage.getItem('firstTime');
         return firstTime == null || firstTime === 'true' || firstTime == undefined;
     }
 
-    private isOldVersion(): boolean {
+    isOldVersion(): boolean {
         const storedVersion = localStorage.getItem('appVersion');
         if (!storedVersion) return true; // Treat as outdated if version is missing
     
