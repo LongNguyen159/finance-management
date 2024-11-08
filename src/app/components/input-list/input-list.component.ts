@@ -652,9 +652,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
 
   navigateToFixCosts() {
+    this.dataService.setNavigateFixCostState(true)
     this.router.navigate(['/storage'], {
       queryParams: { tab: 2 }
     });
+    this.dataService.setNavigateFixCostState(false)
   }
 
   

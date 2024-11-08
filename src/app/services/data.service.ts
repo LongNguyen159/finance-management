@@ -1,4 +1,4 @@
-import { inject, Injectable, Signal, signal } from '@angular/core';
+import { inject, Injectable, signal, EventEmitter } from '@angular/core';
 import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
@@ -110,6 +110,8 @@ export class DataService {
      * If this is the case, do not process the data.
      */
     hasDataCycle = signal(false)
+
+    private navigateToFixCost = new EventEmitter<boolean>(false)
 
     selectedActiveDate: Date = new Date();
     //#endregion
@@ -791,7 +793,13 @@ export class DataService {
     //#endregion
     
 
+    setNavigateFixCostState(value: boolean) {
+        this.navigateToFixCost.emit(value)
+    }
 
+    getNavigateFixCostState() {
+        return this.navigateToFixCost.asObservable()
+    }
 
     //#region: Getters
     /** Get single month entries */
