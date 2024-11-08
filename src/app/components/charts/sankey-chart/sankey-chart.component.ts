@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { parseLocaleStringToNumber, removeSystemPrefix } from '../../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
+import { DialogsService } from '../../../services/dialogs.service';
 
 
 @Component({
@@ -29,6 +30,7 @@ export class SankeyChartComponent implements OnChanges {
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
+  dialogService = inject(DialogsService)
 
   sankeyOption: EChartsOption = {}
   mergeOption: EChartsOption = {}

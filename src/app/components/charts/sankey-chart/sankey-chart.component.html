@@ -10,6 +10,15 @@
         </mat-chip>
     }
 </div>
+@if(!sankeyData || sankeyData.nodes.length === 0) {
+    <div class="flex flex-col items-center gap-2">
+        <p>No entries defined...</p>
+        <button mat-stroked-button (click)="dialogService.openInputListDialog()">
+            Create Entry
+        </button>
+    </div>
+}
+
 <div
     echarts
     [options]="sankeyOption"
