@@ -26,7 +26,7 @@
 
   <!-- LINKS CONTAINER -->
   <div formArrayName="links">
-
+    <mat-divider class="!mb-4" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     <!-- FIX COSTS SECTION -->
     <div class="flex flex-row items-center w-full mb-2">
       <button mat-icon-button class="mr-2" (click)="isFixCostsExpanded = !isFixCostsExpanded">
@@ -73,7 +73,8 @@
       </div>
     </div>
 
-    <mat-card appearance="outlined" class="mb-4" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
+
+    <mat-card class="mb-4" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isFixCostsExpanded) {
         <mat-card-content>
           <div>
@@ -150,6 +151,7 @@
       }
     </mat-card>
 
+    <mat-divider class="!mb-4" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
     <!-- VARIABLE COSTS SECTION -->
     <div class="flex flex-row items-center w-full mb-2">
@@ -163,7 +165,7 @@
       <p class="font-bold text-2xl !m-0 cursor-pointer" (click)="isVariableCostsExpanded = !isVariableCostsExpanded">Variable Costs</p>
     </div>
 
-    <mat-card appearance="outlined" class="mb-4" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
+    <mat-card class="mb-4" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">

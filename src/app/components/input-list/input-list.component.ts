@@ -22,6 +22,7 @@ import { ColorService } from '../../services/color.service';
 import { onMonthChanges } from '../../utils/data-utils';
 import { Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { MatDividerModule } from '@angular/material/divider';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -52,7 +53,7 @@ function nonEmptyValidator(): ValidatorFn {
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
     MatSlideToggleModule, MonthPickerComponent,
-    MatCardModule, ErrorCardComponent],
+    MatCardModule, ErrorCardComponent, MatDividerModule],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss',
 
