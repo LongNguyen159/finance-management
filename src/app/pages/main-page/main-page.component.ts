@@ -26,17 +26,15 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
+import { GraphicTextComponent } from "../../components/charts/graphic-text/graphic-text.component";
 @Component({
   selector: 'app-main-page',
   standalone: true,
-  imports: [SankeyChartComponent, PieChartComponent, NgxEchartsDirective, InputListComponent,
-    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, DidYouKnowDialogComponent, MatDividerModule,
-    UserManualComponent, NavbarComponent, MonthPickerComponent,
+  imports: [SankeyChartComponent, PieChartComponent,
+    MatButtonModule, CommonModule, MatIconModule, MatMenuModule, MatDividerModule,
+    NavbarComponent, MonthPickerComponent,
     MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
-  MatSlideToggleModule, FormsModule],
-  providers: [
-    provideEcharts(),
-  ],
+    MatSlideToggleModule, FormsModule],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
