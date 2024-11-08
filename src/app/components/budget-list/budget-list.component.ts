@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { BudgetService } from '../../services/budget.service';
 import { BudgetDialogComponent } from '../dialogs/budget-dialog/budget-dialog.component';
+import { UiService } from '../../services/ui.service';
+import { removeSystemPrefix } from '../../utils/utils';
 
 @Component({
   selector: 'app-budget-list',
@@ -24,6 +26,7 @@ import { BudgetDialogComponent } from '../dialogs/budget-dialog/budget-dialog.co
 export class BudgetListComponent implements OnInit{
   colorService = inject(ColorService)
   budgetService = inject(BudgetService)
+  uiService = inject(UiService)
   expenseCategoryDetails = Object.values(expenseCategoryDetails);
 
   budgets: Budget[] = [];
@@ -60,7 +63,6 @@ export class BudgetListComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       if (result !== undefined) {
         this.updateBudget(_category, result);
-        console.log('current budgets:', this.budgets)
       }
     });
   }
@@ -87,5 +89,10 @@ export class BudgetListComponent implements OnInit{
     }
 
     this.budgetService.saveBudgets(this.budgets);
+    if (value === 0 || value == null) {
+      this.uiService.showSnackBar(`Removed budget for ${removeSystemPrefix(category)}`, 'OK', 3000);
+    } else {
+      this.uiService.showSnackBar(`Budget for ${removeSystemPrefix(category)} set!`, 'OK', 3000);
+    }
   }
 }
