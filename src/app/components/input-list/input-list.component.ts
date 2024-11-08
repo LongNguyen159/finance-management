@@ -66,7 +66,7 @@ function nonEmptyValidator(): ValidatorFn {
         height: '0px', opacity: 0, transform: 'scale(0.95)'
       })),
       transition('expanded <=> collapsed', [
-        animate('300ms ease-in-out')
+        animate('300ms ease')
       ]),
     ]),
   ]
