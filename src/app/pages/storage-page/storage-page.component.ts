@@ -33,7 +33,6 @@ export class StoragePageComponent implements OnInit, AfterViewInit {
       const tab = params['tab'];
       if (tab !== undefined) {
         this.selectedTabIndex = +tab;  // Convert the query parameter to a number
-        console.log('Tab: ' + this.selectedTabIndex);
       }
     });
 

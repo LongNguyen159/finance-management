@@ -55,8 +55,6 @@ export class FixCostInputComponent extends InputListComponent {
         link.isFixCost = true;
         this.linkArray.push(this._createLinkGroup(link), { emitEvent: false });
       })
-
-      console.log('exising fix costs', parsedFixCosts)
     }
 
     this.linkForm.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(250)).subscribe(() => {

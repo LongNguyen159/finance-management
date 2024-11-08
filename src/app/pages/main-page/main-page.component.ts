@@ -86,7 +86,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   }
   ngOnInit(): void {
     this.budgets = this.budgetService.getBudgets()
-    console.log('budgets', this.budgets)
+    
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
         const dataEntry = data[month];

@@ -70,47 +70,8 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       this.filteredOptions = this.allOptions.filter(option =>
         option.toLowerCase().includes(normalisedSearchTerm)
       );
-      console.log('filteredOptions:', this.filteredOptions);
     }
   }
-
-
-
-  /** Working version, but mutating the original `rawInput` array. */
-  // submitForm() {
-  //   if (!this.form.valid) {
-  //     return;
-  //   }
-  
-  //   console.log(this.form.value);
-  //   const amount = this.form.value.amount;
-  //   const totalAmount = this.processStringAmountToNumber(amount);
-  
-  //   if (totalAmount === null) {
-  //     this.uiService.showSnackBar('Invalid input!', 'OK');
-  //     return;
-  //   }
-  
-  //   console.log('Total amount:', totalAmount);
-  //   console.log('Current raw input', this.userSingleMonthEntries.rawInput);
-  
-  //   // Find the matching entry based on the "target"
-  //   const matchingEntry = this.userSingleMonthEntries.rawInput.find(item => item.target === this.form.value.insertInto);
-  
-  //   if (matchingEntry) {
-  //     // Update the value of the matching entry by adding the totalAmount
-  //     matchingEntry.value += totalAmount; // Add totalAmount to the existing value
-  
-  //     console.log('Updated entry:', matchingEntry);
-  //     console.log('Updated raw input:', this.userSingleMonthEntries.rawInput);
-  //     this.dataService.processInputData(this.userSingleMonthEntries.rawInput, this.userSingleMonthEntries.month);
-  
-  //     this.uiService.showSnackBar('Input inserted successfully!', 'OK');
-  //   } else {
-  //     this.uiService.showSnackBar('No matching entry found!', 'Error');
-  //   }
-  // }
-
 
   /** Submit form, refactored version, not modifying original `rawInput` array. */
   submitForm() {

@@ -178,8 +178,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       /** Populate links with predefined data */
       this.populateInputFields(data)
       this._addDefaultNode();
-
-      console.log('fetched data to InputList: ', data)
     });
 
     // Listen to changes in the search control to filter the dropdown
