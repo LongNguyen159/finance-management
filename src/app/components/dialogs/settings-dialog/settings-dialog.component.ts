@@ -45,6 +45,7 @@ export class SettingsDialogComponent implements OnInit{
   /** On selection change, call apply theme */
   applySelectedTheme(theme: Theme) {
     this.colorService.applyTheme(theme);
+    this.selectedTheme = theme;
   }
 
   navigateToDataManager() {
