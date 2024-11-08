@@ -34,6 +34,12 @@
                             Edit Budgets
                         </button>
                     }
+
+                    @if (indicators.length == 0 && budgets.length !== 0) {
+                        <p class="mt-4">
+                            Budget Charts will appear here once you enter your actual spending on the set budgets.
+                        </p>
+                    }
                 </div>
                 
 
