@@ -19,7 +19,12 @@
       <div class="flex flex-row items-center w-full mb-4">
         <p class="font-bold text-2xl !m-0">Fix Costs</p>
       </div>
-  
+      <div class="mb-4">
+        <p>
+          Fix costs are costs that occur regularly and are not influenced by your actions. They are fixed and
+          predictable. Examples are rent, insurance, or subscriptions.
+        </p>
+      </div>
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         <!-- Target -->
         <mat-form-field appearance="fill">
