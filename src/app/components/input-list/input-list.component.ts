@@ -134,6 +134,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    */
   hasChanges: boolean = false;
 
+  hasDuplicates: boolean = false;
+  duplicatedNames: string[] = []
+  errorMessage: string = 'Duplicated names are not allowed! Please check your input.'
+
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
 
@@ -342,13 +346,13 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** If different, clear out the current fixed costs link and paste the link in local storage in.
      * This wil avoid duplicate fixed costs in the form.
      */
-    if (JSON.stringify(this.fixedLinks) !== JSON.stringify(existingFixCosts)) { 
+    if (JSON.stringify(this.fixedLinks) !== JSON.stringify(existingFixCosts)) {
       // Filter out the current fixed costs from `linkArray`
       const updatedLinks = this.linkArray.value.filter((link: UserDefinedLink) => !link.isFixCost);
     
       // Add fixedLinks from localStorage to the filtered linkArray
       const newLinkArray = [...updatedLinks, ...this.fixedLinks];
-    
+      this.hasDuplicates = this._checkDuplicateName()
       // Update the form with the new link array
       this.populateInputFields({ rawInput: newLinkArray } as SingleMonthData);
       /** Update saved form values. */
@@ -362,19 +366,35 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   //#endregion
 
 
-  private _checkDuplicateName(value: string | null, formGroup: FormGroup): void {
-    if (!value) return;
+  private _checkDuplicateName(formGroup?: FormGroup): boolean {
+    console.log('checking duplicates...')
     
     // Get all form values and normalize for comparison
-    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase());
-    const duplicateNames: string[] = formValues.filter((item, index) => formValues.indexOf(item) !== index);
+    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase().trim());
+    
+    // Track duplicates
+    const seen = new Set<string>();
+    const duplicateNames = formValues.filter((item) => {
+      const normalizedItem = item.toLowerCase().trim();
+      if (seen.has(normalizedItem)) {
+        return true;
+      }
+      seen.add(normalizedItem);
+      return false;
+    });
 
-    // Display a snackbar notification if duplicates are found
+    this.duplicatedNames = [...duplicateNames];
+
+    /** FormGroup is used to set error on form. */
     if (duplicateNames.length > 0) {
-      formGroup.get('target')?.setErrors({ duplicatedName: true }, { emitEvent: false });
-      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss');
+      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 10000);
+      this.hasDuplicates = true;
+      this.errorMessage = `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`;
+      return true
     } else {
-      formGroup.get('target')?.setErrors(null, { emitEvent: false });
+      this.hasDuplicates = false;
+      this.errorMessage ='';
+      return false
     }
   }
 
@@ -408,7 +428,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
     linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
       if (value) {
-        this._checkDuplicateName(value, linkGroup);
+        this._checkDuplicateName(linkGroup);
         this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
         this.checkForNonAllowedNames(value, linkGroup)
       }
@@ -464,6 +484,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
     })
 
+    this.hasDuplicates = this._checkDuplicateName()
 
     // Shallow copy to avoid mutations
     this.initialFormState = [...links];

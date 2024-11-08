@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -21,5 +21,5 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   ]
 })
 export class ErrorCardComponent {
-
+  @Input() errorMessage: string = 'New changes won’t be saved until all issues are resolved.'
 }

@@ -1,7 +1,12 @@
-@if(!linkForm.valid && linkForm.touched) {
+@if((!linkForm.valid && linkForm.touched) || hasDuplicates) {
   <div class="flex flex-row w-full justify-center">
     <div class="fixed top-6 z-[100]">
-      <app-error-card></app-error-card>
+      @if(!hasDuplicates) {
+        <app-error-card></app-error-card>
+      } @else {
+        <app-error-card [errorMessage]="errorMessage">
+          </app-error-card>
+      }
     </div>
   </div>
 }
