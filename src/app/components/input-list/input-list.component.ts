@@ -15,7 +15,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { formatDateToYYYYMM } from '../../utils/utils';
+import { formatDateToYYYYMM, processStringAmountToNumber } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
 import { ColorService } from '../../services/color.service';
@@ -270,7 +270,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * For example like summing the total children value to reflect on the parent node.
    * Else, we just submit the form on component destroy.
    */
-  updateInput() {
+  updateInput(value?: string, linkGroup?: AbstractControl) {
     if (!this.linkForm.valid || this.updateFromService) return;
   
     const formData: UserDefinedLink[] = this.linkForm.value.links;
@@ -287,12 +287,26 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
       return; // No changes, don't proceed
     }
-    
-    this.taxNodeExists = this._hasTaxNode(formData);
-    this.dataService.processInputData(formData, this.dataMonth);
+
+
+    /** Update the value on blur, get the sum string and calculate it.
+     * After calculating, update the input value with the sum.
+     */
+    const sum = processStringAmountToNumber(value ?? '0')
+
+
+    linkGroup?.setValue({ ...linkGroup.value, value: sum, source: linkGroup.value.source ?? '' });
+
+
+    const updatedFormData = formData.map(item => 
+      item.target === linkGroup?.value.target ? { ...linkGroup.value } : item
+    );
+
+    this.taxNodeExists = this._hasTaxNode(updatedFormData);
+    this.dataService.processInputData(updatedFormData, this.dataMonth);
   
     // After processing, update the initial form state to the new one
-    this.initialFormState = [...formData]; // Update the stored form state
+    this.initialFormState = [...updatedFormData]; // Update the stored form state
   }
 
   checkTaxNodeExists() {

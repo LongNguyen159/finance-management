@@ -207,7 +207,7 @@
               <!-- Value -->
               <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
-                <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
+                <input #valueInput matInput formControlName="value" type="text" placeholder="Value" (blur)="updateInput(valueInput.value, linkGroup)" />
         
                 <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
                   Amount must be greater than or equal 0.

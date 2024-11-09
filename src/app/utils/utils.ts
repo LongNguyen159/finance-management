@@ -39,3 +39,32 @@ export function sortYearsDescending(years: string[]): string[] {
 export function removeSystemPrefix(name: string): string {
   return name.replace(new RegExp(`@${SYSTEM_PREFIX}`, 'g'), '');
 }
+
+
+/** Process string input like '110 + 50' to '160'
+* @param amount The string input to process
+* @returns The total amount as a number or null if the input is invalid
+*/
+export function processStringAmountToNumber(amount: string): number | null {
+  // Replace commas with dots for German input
+  const normalizedAmount = amount.replace(/,/g, '.');
+
+  // Remove unnecessary spaces around numbers, "+", and "-" signs
+  const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
+
+  // Convert isolated spaces between numbers into '+' for implicit addition
+  const implicitAddition = cleanedAmount.replace(/(\d)\s+(\d)/g, '$1+$2');
+
+  // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
+  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(implicitAddition.replace(/\s/g, ''))) {
+    return null; // Invalid input
+  }
+
+  try {
+    // Use eval to compute the total since it's a valid math expression
+    const total = eval(implicitAddition);
+    return total;
+  } catch (error) {
+    return null; // In case of any error during evaluation
+  }
+}

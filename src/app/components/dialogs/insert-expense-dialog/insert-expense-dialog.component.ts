@@ -11,6 +11,7 @@ import { debounceTime, takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
 import { ColorService } from '../../../services/color.service';
+import { processStringAmountToNumber } from '../../../utils/utils';
 
 @Component({
   selector: 'app-insert-expense-dialog',
@@ -80,7 +81,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
     }
   
     const amount = this.form.value.amount;
-    const totalAmount = this.processStringAmountToNumber(amount);
+    const totalAmount = processStringAmountToNumber(amount);
   
     if (totalAmount === null) {
       this.uiService.showSnackBar('Invalid input!', 'OK');
@@ -111,28 +112,4 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
     }
   }
 
-  /** Process string input like '110 + 50' to '160'
-   * @param amount The string input to process
-   * @returns The total amount as a number or null if the input is invalid
-   */
-  processStringAmountToNumber(amount: string): number | null {
-    // Replace commas with dots for German input
-    const normalizedAmount = amount.replace(/,/g, '.');
-
-    // Remove unnecessary spaces around numbers, "+", and "-" signs
-    const cleanedAmount = normalizedAmount.replace(/\s+/g, '');
-
-    // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
-    if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(cleanedAmount)) {
-      return null; // Invalid input
-    }
-
-    try {
-      // Use eval to compute the total since it's a valid math expression
-      const total = eval(cleanedAmount);
-      return total;
-    } catch (error) {
-      return null; // In case of any error during evaluation
-    }
-  }
 }
