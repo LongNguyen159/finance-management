@@ -272,19 +272,20 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    */
   updateInput(value?: string, linkGroup?: AbstractControl) {
     if (!this.linkForm.valid || this.updateFromService) return;
-  
-    const formData: UserDefinedLink[] = this.linkForm.value.links;
+    
+    // Used to early exit the function. If function is valid, use 'updatedFormData' below to access the form data.
+    const formDataOld: UserDefinedLink[] = this.linkForm.value.links;
 
 
     /** Do not allow negative values on form */
-    const negatives = formData.filter(link => link.value < 0);
+    const negatives = formDataOld.filter(link => link.value < 0);
     if (negatives.length > 0) { 
       this.uiService.showSnackBar('Negative values are not allowed!', 'Dismiss')
       return;
     }
   
     // Early exit if there are no changes compared to the initial form state
-    if (JSON.stringify(formData) === JSON.stringify(this.initialFormState)) {
+    if (JSON.stringify(formDataOld) === JSON.stringify(this.initialFormState)) {
       return; // No changes, don't proceed
     }
 
@@ -292,15 +293,36 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** Update the value on blur, get the sum string and calculate it.
      * After calculating, update the input value with the sum.
      */
-    const sum = processStringAmountToNumber(value ?? '0')
+    const sum: number | null = processStringAmountToNumber(value ?? '0')
+
+    if (sum == null || !sum) {
+      this.uiService.showSnackBar('Invalid value!', 'Dismiss')
+      linkGroup?.get('value')?.setErrors({ invalidValue: true }, { emitEvent: false });
+      return;
+    }
 
 
     linkGroup?.setValue({ ...linkGroup.value, value: sum, source: linkGroup.value.source ?? '' });
 
-
-    const updatedFormData = formData.map(item => 
+    /** Update form data after setting summed value. */
+    const updatedFormData = formDataOld.map(item => 
       item.target === linkGroup?.value.target ? { ...linkGroup.value } : item
     );
+
+
+    const valueFields = updatedFormData.map(item => item.value);
+    /** check if values are valid. If they are not number, they are not valid.
+     * Although they are originally type strings input, after summing up values, 
+     * they should be parsed into numbers. If not, means they contain invalid characters.
+     */
+    if (valueFields.some(value => typeof value !== 'number' || isNaN(value))) {
+      console.error('Error: One or more values are not valid numbers');
+      this.linkForm.setErrors({ invalidValues: true });
+      return;
+      // Optionally, show an error to the user or handle it appropriately here
+    } else {
+      console.log('All values are valid numbers');
+    }
 
     this.taxNodeExists = this._hasTaxNode(updatedFormData);
     this.dataService.processInputData(updatedFormData, this.dataMonth);
@@ -308,6 +330,17 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // After processing, update the initial form state to the new one
     this.initialFormState = [...updatedFormData]; // Update the stored form state
   }
+
+  // restrictInput(event: KeyboardEvent) {
+  //   const allowedKeys = /^[0-9.,+\-\s]$/;
+  //   const specialKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  
+  //   // Allow if the key is in the allowed list or if any modifier key is active
+  //   if (!allowedKeys.test(event.key) && !specialKeys.includes(event.key) && 
+  //       !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
+  //     event.preventDefault(); // Block the key press if it’s not allowed
+  //   }
+  // }
 
   checkTaxNodeExists() {
     this.taxNodeExists = this._hasTaxNode(this.linkForm.value.links);

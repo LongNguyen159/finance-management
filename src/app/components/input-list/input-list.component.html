@@ -212,6 +212,13 @@
                 <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
                   Amount must be greater than or equal 0.
                 </mat-error>
+
+
+                <mat-error *ngIf="linkGroup.get('value')?.hasError('invalidValue')">
+                  Invalid value!
+                </mat-error>
+
+                
               </mat-form-field>
               
               <!-- Select with search -->
