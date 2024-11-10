@@ -1,4 +1,4 @@
-import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, effect, inject, input, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { SankeyData } from '../../models';
@@ -23,10 +23,14 @@ import { DialogsService } from '../../../services/dialogs.service';
 })
 export class SankeyChartComponent implements OnChanges {
 
+  /** Chart data input */
   @Input() sankeyData: SankeyData
   @Input() remainingBalance: string = '-'
 
+  /** Chart Configs input */
   @Input() chartHeight: string = '75vh'
+  @Input() orientation: 'horizontal' | 'vertical' = 'horizontal'
+
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
@@ -45,6 +49,10 @@ export class SankeyChartComponent implements OnChanges {
     if (changes && changes['sankeyData']) {
       this.updateSankeyChart()
     }
+
+    if (changes && changes['orientation']) {
+      this.updateSankeyChart()
+    }
   }
 
   isPositiveBalance(): boolean {
@@ -61,6 +69,7 @@ export class SankeyChartComponent implements OnChanges {
     const isDarkMode = this.colorService.isDarkMode(); // Call the signal
 
     this.sankeyOption = {
+      animation: this.orientation === 'horizontal' ? true : false,
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
@@ -95,7 +104,9 @@ export class SankeyChartComponent implements OnChanges {
           data: this.sankeyData.nodes,
           links: this.sankeyData.links,
           emphasis: { focus: 'adjacency' },
+          orient: this.orientation,
           label: {
+            position: this.orientation === 'horizontal' ? 'right' : 'top',
             fontSize: 12,
             color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
             // Use rich text for formatting
@@ -117,6 +128,9 @@ export class SankeyChartComponent implements OnChanges {
                 `{normal|${params.value.toLocaleString('en-US')}}`, // Normal value
               ].join('\n'); // Join with a newline
             }
+          },
+          labelLayout: {
+            hideOverlap: true,
           },
           nodeGap: 28,
           lineStyle: { color: 'gradient', curveness: 0.5 }

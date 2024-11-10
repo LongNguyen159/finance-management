@@ -8,15 +8,22 @@
             <div class="flex flex-col gap-8">
                 <!-- SANKEY CHART -->
                 <section>
-                    <div class="flex flex-row w-full items-center justify-end">
-                        <button mat-button (click)="dialogService.openInsertIntoDialog()">
+                    <div class="flex flex-row w-full items-center justify-end gap-2">
+                        <!-- <button mat-button (click)="dialogService.openInsertIntoDialog()">
                             <mat-icon>add</mat-icon>
                             <span>Insert Into</span>
-                        </button>
+                        </button> -->
+                        <div class="flex flex-row items-center gap-1">
+                            <div class="text-sm">Vertial View</div>
+                            <div>
+                                <mat-slide-toggle [(ngModel)]="isSankeyVertical" color="primary" labelPosition="before"></mat-slide-toggle>
+                            </div>
+                        </div>
                     </div>
                     <app-sankey-chart
                         [sankeyData]="entriesOfOneMonth.sankeyData"
                         [remainingBalance]="entriesOfOneMonth.remainingBalance"
+                        [orientation]="isSankeyVertical ? 'vertical' : 'horizontal'"
                     ></app-sankey-chart>
                 </section>
 

@@ -358,7 +358,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   //#region Copy & Paste Links
   copyLinks(): void {
-    const currentLinks = this.linkForm.value.links;
+    const currentLinks: UserDefinedLink[] = this.linkForm.value.links;
     if (currentLinks && currentLinks.length > 0) {
       this.dataService.storeCopiedLinks(currentLinks);
       this.uiService.showSnackBar(`'${this.dataMonth}' copied to clipboard!`, 'Ok');
