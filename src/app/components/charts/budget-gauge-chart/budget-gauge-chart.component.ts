@@ -59,12 +59,24 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
   }
 
   updateChart() {
+    let formattedTitle = this.title;
+    let fontSize = 20;
+
+    if (this.title.includes('&')) {
+      const [firstPart, secondPart] = this.title.split('&').map(part => part.trim());
+      formattedTitle = `${firstPart} &\n${secondPart}`;
+      fontSize = 16;  // Adjust font size for multi-line title
+    }
+
+
     const gaugeData = [
       {
         value: this.computeBudgetPercentage(),
-        name: this.title,
+        name: formattedTitle,
       },
     ];
+
+    
 
     
     this.chartOptions = {

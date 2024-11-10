@@ -18,7 +18,7 @@ export const SYSTEM_PREFIX = '__system/category__'
 
 export enum ExpenseCategory {
   Housing = `Housing@${SYSTEM_PREFIX}`,
-  Groceries = `Groceries@${SYSTEM_PREFIX}`,
+  Groceries = `Groceries & Essentials@${SYSTEM_PREFIX}`,
   Restaurants = `Restaurants@${SYSTEM_PREFIX}`,
   Shopping = `Shopping@${SYSTEM_PREFIX}`,
   Education = `Education@${SYSTEM_PREFIX}`,
@@ -48,7 +48,7 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
     colorDark: '#90caf9'   // Light Blue for dark mode
   },
   [ExpenseCategory.Groceries]: { 
-    label: 'Groceries', 
+    label: 'Groceries & Essentials', 
     value: ExpenseCategory.Groceries, 
     icon: 'shopping_cart', 
     colorLight: '#4caf50', // Green for light mode
