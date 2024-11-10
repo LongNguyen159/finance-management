@@ -142,6 +142,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   hasInValidRows: boolean = false;
 
+  isSearchDisplayed: boolean = false;
+
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
 

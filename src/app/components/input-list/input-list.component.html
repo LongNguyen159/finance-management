@@ -9,24 +9,38 @@
 
   <!-- INPUT LIST ACTIONS BAR CONTAINER -->
   <div class="grid w-full py-2 sticky z-50 top-0 material-background" style="grid-template-columns: 1fr 1fr 1fr;">
-    <div class="flex flex-row gap-2">
-      <div class="flex flex-row w-full justify-center my-4">
-        <mat-form-field appearance="outline">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="filterQuery" [ngModelOptions]="{standalone: true}">
-        </mat-form-field>
-      </div>
+
+    <div class="flex flex-row items-center gap-2">
+
+      <!-- COPY PASTE BUTTONS -->
       <button mat-stroked-button color="primary" [disabled]="dataService.hasDataCycle()" (click)="copyLinks()">Copy</button>
       <button mat-stroked-button (click)="pasteLinks()">Paste</button>
     </div>
+
+    <!-- MONTH PICKER -->
     <div class="flex flex-row w-full justify-center items-center">
       <app-month-picker (monthSelected)="onMonthChanges($event)"></app-month-picker>
     </div>
-    <div class="flex flex-row w-full items-center justify-end gap-1">
-      <div>Show categories</div>
+
+    <!-- ACTIONS BUTTONS -->
+    <div class="flex flex-row justify-end items-center w-full">
+      <button mat-icon-button (click)="isSearchDisplayed = !isSearchDisplayed">
+        <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
+      </button>
+    </div>
+
+    <div class="flex flex-row w-[25%] items-center justify-end gap-1 absolute right-11">
+      @if (isSearchDisplayed) {
+        <div class="flex flex-row w-full justify-center"> 
+          <mat-form-field appearance="outline" floatLabel="always">
+            <input matInput [(ngModel)]="filterQuery" [ngModelOptions]="{standalone: true}" placeholder="Search">
+          </mat-form-field>
+        </div>
+      }
+      <!-- <div>Show categories</div>
       <div>
         <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
-      </div>
+      </div> -->
     </div>
   </div>
 
