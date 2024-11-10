@@ -138,6 +138,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   duplicatedNames: string[] = []
   errorMessage: string = 'Duplicated names are not allowed! Please check your input.'
 
+  hasInValidRows: boolean = false;
+
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
 
@@ -264,13 +266,13 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   //#endregion
 
 
-
+  //#region Reactive update input
   /** Update Input, this function when triggered will send the input data to service to update the form state.
    * Only trigger this function to reatively update the form.
    * For example like summing the total children value to reflect on the parent node.
    * Else, we just submit the form on component destroy.
    */
-  updateInput(value?: string, linkGroup?: AbstractControl) {
+  updateInput(linkGroup?: AbstractControl) {
     if (!this.linkForm.valid || this.updateFromService) return;
     
     // Used to early exit the function. If function is valid, use 'updatedFormData' below to access the form data.
@@ -292,12 +294,18 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
     /** Update the value on blur, get the sum string and calculate it.
      * After calculating, update the input value with the sum.
+     * 
+     * 
+     * CASE: linkGroup is not defined, because it's from other input fields (not value field),
+     * the sum will be default to 0. But that is not a problem, because then the value will 
+     * be repopulated by the service anyway.
      */
-    const sum: number | null = processStringAmountToNumber(value ?? '0')
+    const sum: number | null = processStringAmountToNumber(linkGroup?.value.value || '0')
 
-    if (sum == null || !sum) {
+    if (sum == null) {
       this.uiService.showSnackBar('Invalid value!', 'Dismiss')
       linkGroup?.get('value')?.setErrors({ invalidValue: true }, { emitEvent: false });
+      this.errorMessage = 'One or more values are not valid numbers.'
       return;
     }
 
@@ -345,6 +353,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   checkTaxNodeExists() {
     this.taxNodeExists = this._hasTaxNode(this.linkForm.value.links);
   }
+  //#endregion
 
 
   //#region Copy & Paste Links
@@ -411,6 +420,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   //#endregion
 
 
+  //#region Check Duplicate Name
   private _checkDuplicateName(formGroup?: FormGroup): boolean {
     console.log('checking duplicates...')
     
@@ -442,6 +452,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       return false
     }
   }
+  //#endregion
 
 
   //#region Form Initialisation
@@ -530,6 +541,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     })
 
     this.hasDuplicates = this._checkDuplicateName()
+    this.checkForInvalidRows()
 
     // Shallow copy to avoid mutations
     this.initialFormState = [...links];
@@ -680,11 +692,28 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   // Remove an input row
   removeLink(index: number): void {
-    const link: UserDefinedLink = this.linkArray.at(index).value;
+    /** find the invalid input, only process the valid inputs. */
+    const link: UserDefinedLink = this.linkArray.at(index).value;    
     this.linkArray.removeAt(index, { emitEvent: false });
     this.updateSavedFormValuesOnFormChanges()
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
   }
+  //#region Check invalid row
+  checkForInvalidRows(): boolean {
+    console.log('checking for invalid rows...')
+    let hasInvalidRows = false;
+    this.hasInValidRows = false;
+    this.linkArray.controls.forEach((control, index) => {
+      if (!control.valid) {
+        this.uiService.showSnackBar(`Invalid input`, 'Dismiss');
+        hasInvalidRows = true;
+        this.hasInValidRows = true;
+        console.log('Invalid input at row ', index + 1);
+      }
+    });
+    return hasInvalidRows;
+  }
+  //#endregion
 
   // Getter to easily access the FormArray
   get linkArray(): FormArray {

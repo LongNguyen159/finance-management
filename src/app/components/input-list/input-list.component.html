@@ -1,12 +1,7 @@
-@if((!linkForm.valid && linkForm.touched) || hasDuplicates) {
+@if((!linkForm.valid && linkForm.touched) || hasDuplicates || hasInValidRows) {
   <div class="flex flex-row w-full justify-center">
     <div class="fixed top-6 z-[100]">
-      @if(!hasDuplicates) {
-        <app-error-card></app-error-card>
-      } @else {
-        <app-error-card [errorMessage]="errorMessage">
-          </app-error-card>
-      }
+      <app-error-card [errorMessage]="errorMessage"></app-error-card>
     </div>
   </div>
 }
@@ -207,7 +202,7 @@
               <!-- Value -->
               <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
-                <input #valueInput matInput formControlName="value" type="text" placeholder="Value" (blur)="updateInput(valueInput.value, linkGroup)" />
+                <input matInput formControlName="value" type="text" placeholder="Value" (blur)="updateInput(linkGroup)" />
         
                 <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
                   Amount must be greater than or equal 0.

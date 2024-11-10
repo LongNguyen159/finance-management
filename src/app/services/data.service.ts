@@ -203,7 +203,20 @@ export class DataService {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
             return;
         }
+        
+        /** Check for non valid values field. */
+        if ((userDefinedLinks && userDefinedLinks.length > 0) && userDefinedLinks.some(link => typeof link.value !== 'number' || isNaN(link.value))) {
+            console.error('Error: One or more values are not valid numbers');
+            this.UiService.showSnackBar('One or more values are not valid numbers', 'Dismiss', 5000);
+            return;
+        }
+        
+        if (this.checkDuplicateNames(userDefinedLinks)) {
+            this.UiService.showSnackBar('Duplicate names are not allowed', 'Dismiss', 5000);
+            return;
+        }
 
+        /** Check for restricted name usage */
         if (userDefinedLinks.some(link => this.nonAllowedNames.includes(link.target))) {
             const foundLinks = userDefinedLinks.filter(link => this.nonAllowedNames.includes(link.target));
             const dialogData: ConfirmDialogData = {
@@ -468,6 +481,26 @@ export class DataService {
         this.saveData()
 
         //#endregion
+    }
+
+    checkDuplicateNames(links: UserDefinedLink[]): boolean {    
+        const values: string[] = links.map(link => link.target);
+        // Track duplicates
+        const seen = new Set<string>();
+        const duplicateNames = values.filter((item) => {
+        const normalizedItem = item.toLowerCase().trim();
+        if (seen.has(normalizedItem)) {
+            return true;
+        }
+        seen.add(normalizedItem);
+        return false;
+        });
+
+        if (duplicateNames.length > 0) {
+        return true
+        } else {
+        return false
+        }
     }
 
     /** Update Raw input to correctly reflect the parent value as sum of their children values.

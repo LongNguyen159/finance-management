@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { trigger, state, style, transition, animate } from '@angular/animations';
@@ -20,6 +20,19 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     ])
   ]
 })
-export class ErrorCardComponent {
-  @Input() errorMessage: string = 'New changes won’t be saved until all issues are resolved.'
+export class ErrorCardComponent implements OnChanges {
+  defaultErrorMessage: string = 'New changes won’t be saved until all issues are resolved.'
+
+  @Input() errorMessage: string = this.defaultErrorMessage
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['errorMessage'] && changes['errorMessage'].currentValue) {
+      this.errorMessage = changes['errorMessage'].currentValue
+    }
+
+    if (!this.errorMessage) {
+      this.errorMessage = this.defaultErrorMessage
+    }
+  }
 }
