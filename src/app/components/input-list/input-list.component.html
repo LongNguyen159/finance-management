@@ -10,6 +10,12 @@
   <!-- INPUT LIST ACTIONS BAR CONTAINER -->
   <div class="grid w-full py-2 sticky z-50 top-0 material-background" style="grid-template-columns: 1fr 1fr 1fr;">
     <div class="flex flex-row gap-2">
+      <div class="flex flex-row w-full justify-center my-4">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="filterQuery" [ngModelOptions]="{standalone: true}">
+        </mat-form-field>
+      </div>
       <button mat-stroked-button color="primary" [disabled]="dataService.hasDataCycle()" (click)="copyLinks()">Copy</button>
       <button mat-stroked-button (click)="pasteLinks()">Paste</button>
     </div>
@@ -168,7 +174,7 @@
     <mat-card class="mb-4" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
-          <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
+          <div *ngFor="let linkGroup of filteredLinks; let i = index" [formGroupName]="i" class="link-row">
 
             @if (!linkGroup.get('isFixCost')?.value) {
               <!-- Target -->

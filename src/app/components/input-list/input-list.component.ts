@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
-import { DateChanges, EntryType, ExpenseCategory, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { DateChanges, EntryType, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -53,7 +53,8 @@ function nonEmptyValidator(): ValidatorFn {
     MatAutocompleteModule,
     NgxMatSelectSearchModule,
     MatSlideToggleModule, MonthPickerComponent,
-    MatCardModule, ErrorCardComponent, MatDividerModule],
+    MatCardModule, ErrorCardComponent, MatDividerModule,
+  FormsModule],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss',
 
@@ -115,13 +116,13 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   updateFromService = false; // Flag to control value changes
 
+  /** Expand or collapse the fix costs/variable cost section in template. */
   isFixCostsExpanded: boolean = false;
-
   isVariableCostsExpanded: boolean = true;
 
-  dataMonth: string = ''
-  singleMonthData: SingleMonthData
-  allMonthsData: MonthlyData
+  dataMonth: string = '' // Month to process, in YYYY-MM format
+  singleMonthData: SingleMonthData // Data for the current month
+  allMonthsData: MonthlyData // Data for all months
 
   /** Save the current input values every time user changes the input.
    * Currently only assigned by valueChanges, and after user switches to new month, it assigns new value.
@@ -133,7 +134,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * or process the form values before doing something.
    */
   hasChanges: boolean = false;
-
+  
+  /** Flag to check for duplicate names. True if detected duplicates */
   hasDuplicates: boolean = false;
   duplicatedNames: string[] = []
   errorMessage: string = 'Duplicated names are not allowed! Please check your input.'
@@ -142,6 +144,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
+
+
+
+  /** Search value for filtering the input fields. */
+  filterQuery: string = '';
 
 
   constructor(private fb: FormBuilder) {
@@ -715,6 +722,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
   //#endregion
 
+
+  //#region Getters
   // Getter to easily access the FormArray
   get linkArray(): FormArray {
     return this.linkForm.get('links') as FormArray;
@@ -724,6 +733,17 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     return this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost);
   }
 
+  /** For the search function */
+  get filteredLinks() {
+    if (!this.filterQuery) {
+      return this.linkArray.controls;
+    }
+    return this.linkArray.controls.filter(control => {
+      const target = control.get('target')?.value?.toLowerCase() || '';
+      const searchTerm = this.filterQuery.toLowerCase();
+      return target.includes(searchTerm);
+    });
+  }
   //#endregion
 
   // Submit form and emit the data (to parent component or a service)
