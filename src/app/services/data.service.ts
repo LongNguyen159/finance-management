@@ -461,7 +461,7 @@ export class DataService {
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
-            remainingBalance: remainingBalance.toLocaleString(),
+            remainingBalance: remainingBalance.toLocaleString('en-US'),
             pieData: pieSeriesData,
             rawInput: updatedRawInput,
             month: month

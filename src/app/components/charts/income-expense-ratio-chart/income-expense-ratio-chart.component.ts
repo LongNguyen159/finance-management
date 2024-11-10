@@ -84,7 +84,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         </div>
         &nbsp;
         <div style="flex: 1; text-align: right;">
-          <strong>${item.value.toLocaleString()}</strong>
+          <strong>${item.value.toLocaleString('en-US')}</strong>
         </div>
       </div>`).join('');
   }

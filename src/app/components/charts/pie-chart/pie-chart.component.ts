@@ -63,7 +63,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         },
         formatter: (params: any) => {
           // Use toLocaleString to format the value
-          const value = params.data.value.toLocaleString(); // Format the value
+          const value = params.data.value.toLocaleString('en-US'); // Format the value
           return `${removeSystemPrefix(params.name)}: <b>${value} (${params.percent}%)</b>`; // Bold the params.name
         }
       },
@@ -94,7 +94,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
           emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
           label: {
             formatter: (params: any) =>  {
-              return `${removeSystemPrefix(params.name)}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
+              return `${removeSystemPrefix(params.name)}: ${params.value.toLocaleString('en-US')} (${params.percent.toLocaleString('en-US')}%)`;
             },
             fontSize: 12,
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary

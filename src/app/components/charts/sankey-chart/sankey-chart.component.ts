@@ -71,11 +71,11 @@ export class SankeyChartComponent implements OnChanges {
         formatter: (params: any) => {
           if (params.dataType === 'node') {
             const nodeName = removeSystemPrefix(params.data.name);
-            return `${nodeName}: <strong>${params.data.value.toLocaleString()}</strong>`;
+            return `${nodeName}: <strong>${params.data.value.toLocaleString('en-US')}</strong>`;
           } else {
             const source = params.data.source ? removeSystemPrefix(params.data.source) : '';
             const target = params.data.target ? removeSystemPrefix(params.data.target) : '';
-            return `${source} → ${target}: <strong>${params.data.value.toLocaleString()}</strong>`;
+            return `${source} → ${target}: <strong>${params.data.value.toLocaleString('en-US')}</strong>`;
           }
         }
       },
@@ -114,7 +114,7 @@ export class SankeyChartComponent implements OnChanges {
               const nodeName = removeSystemPrefix(params.name); // Remove system prefix
               return [
                 `{bold|${nodeName}}`, // Bold name
-                `{normal|${params.value.toLocaleString()}}`, // Normal value
+                `{normal|${params.value.toLocaleString('en-US')}}`, // Normal value
               ].join('\n'); // Join with a newline
             }
           },

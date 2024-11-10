@@ -30,7 +30,7 @@
               {{ year }}
             </mat-panel-title>
             <mat-panel-description>
-              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString() }}
+              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString('en-US') }}
             </mat-panel-description>
           </mat-expansion-panel-header>
     
@@ -82,7 +82,7 @@
                             'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
                             'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
                           }">
-                            {{ input.value.toLocaleString() }}
+                            {{ input.value.toLocaleString('en-US') }}
                           </span>
                         </p>
                       </li>
