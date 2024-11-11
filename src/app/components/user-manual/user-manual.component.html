@@ -13,6 +13,7 @@
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     </div>
 
+    <!-- SECTION: GETTING STARTED -->
     <section class="mb-6">
         <h2 class="text-2xl font-bold">Getting Started</h2>
         <p class="mt-2">On the main page, click the <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Edit Input</span> in the top-right corner. This will open a menu where you can enter your financial information.</p>
@@ -25,6 +26,7 @@
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     </div>
 
+    <!-- SECTION: INPUT FIELDS EXPLAINED -->
     <section class="mb-6">
         <h2 class="text-2xl font-bold">Input Fields Explained</h2>
         <p class="mt-2">Here’s a quick overview to help you fill in the input fields:</p>
@@ -48,12 +50,27 @@
                 <strong>Category (optional):</strong> Assign a category to your entry. This can be useful for reportings and budget setting for each category.
             </li>
         </ul>
+
+        <div class="rounded-2xl p-4 mt-4"
+                [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}"
+            >
+                <p class="text-xl font-bold">💡 Did You Know?</p>
+                <img [src]="colorService.isDarkMode() ? 'assets/images/inline-calc-dark.png' : 'assets/images/inline-calc-light.png'" alt="Overview Tabs" class="w-[50%] image">
+                <p class="mt-2">
+                    You can use inline math operators in the <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Amount</span> field.
+                </p>
+                <p class="mt-4 font-bold">Better yet? For positive values, you just need to separate the numbers using space. They will be understood as "+".</p>
+                <p class="mt-2">For example, entering "100 50" will be understood as "100 + 50 = 150".</p>
+                <br>
+                <p>Easy Sankey will automatically calculate your input.</p>
+            </div>
     </section>
 
     <div class="my-8">
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     </div>
 
+    <!-- SECTION: FIXED COSTS & BUDGET MANAGEMENT -->
     <section class="mb-6">
         <h2 class="text-2xl font-bold">Fixed Costs & Budget Management</h2>
         <p class="mt-2 font-bold">In <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Finance Manager</span> you’ll find the following three tabs:</p>
@@ -80,6 +97,7 @@
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     </div>
 
+    <!-- SECTION: NOTES FROM ME -->
     <section class="mb-6">
         <h2 class="text-2xl font-bold">Notes from Developer</h2>
         <p class="mt-2">This app runs locally on your device, so your data stays safe with you! No need to worry about privacy issues.
