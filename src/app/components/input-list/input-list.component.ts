@@ -242,6 +242,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       // Reset has changes flag after processing the month.
       this.hasChanges = false;
     }
+
+    if (currentMonth !== prevMonth) {
+      this.filterQuery = ''
+    }
     /** Assign the saved form values to the current form values (instead of previous month)
      * We do this to make the savedFormValues up-to-date to track whether it changes.
      */
