@@ -1,5 +1,6 @@
 import { SYSTEM_PREFIX } from "../components/models";
-import { evaluate } from 'mathjs';
+import { evaluate } from 'mathjs/number';
+
 
 /** Format a Date object into YYYY-MM format */
 export function formatDateToYYYYMM(date: Date): string {
