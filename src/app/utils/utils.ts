@@ -1,5 +1,5 @@
 import { SYSTEM_PREFIX } from "../components/models";
-
+import { evaluate } from 'mathjs';
 
 /** Format a Date object into YYYY-MM format */
 export function formatDateToYYYYMM(date: Date): string {
@@ -49,21 +49,24 @@ export function processStringAmountToNumber(amount: string): number | null {
   // Replace commas with dots for German input
   const normalizedAmount = amount.replace(/,/g, '.');
 
-  // Remove unnecessary spaces around numbers, "+", and "-" signs
+  // Remove unnecessary spaces around numbers, "+" and "-" signs
   const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
 
   // Convert isolated spaces between numbers into '+' for implicit addition
   const implicitAddition = cleanedAmount.replace(/(\d)\s+(\d)/g, '$1+$2');
 
+  // Remove leading zeros in each number segment to avoid octal interpretation
+  const withoutLeadingZeros = implicitAddition.replace(/\b0+(\d)/g, '$1');
+
   // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
-  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(implicitAddition.replace(/\s/g, ''))) {
+  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(withoutLeadingZeros.replace(/\s/g, ''))) {
     return null; // Invalid input
   }
 
   try {
-    // Use eval to compute the total since it's a valid math expression
-    const total = eval(implicitAddition);
-    return total;
+    // Use mathjs's evaluate function to compute the total
+    const total = evaluate(withoutLeadingZeros);
+    return typeof total === 'number' ? total : null;
   } catch (error) {
     return null; // In case of any error during evaluation
   }

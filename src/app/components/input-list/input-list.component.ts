@@ -310,6 +310,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
      * be repopulated by the service anyway.
      */
     const sum: number | null = processStringAmountToNumber(linkGroup?.value.value || '0')
+    console.log('Sum:', sum)
 
     if (sum == null) {
       this.uiService.showSnackBar('Invalid value!', 'Dismiss')
