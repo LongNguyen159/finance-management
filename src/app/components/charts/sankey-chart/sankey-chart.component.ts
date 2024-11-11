@@ -69,7 +69,7 @@ export class SankeyChartComponent implements OnChanges {
     const isDarkMode = this.colorService.isDarkMode(); // Call the signal
 
     this.sankeyOption = {
-      animation: this.orientation === 'horizontal' ? true : false,
+      animation: true,
       tooltip: {
         trigger: 'item',
         triggerOn: 'mousemove',
