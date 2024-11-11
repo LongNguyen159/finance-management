@@ -93,7 +93,7 @@
     </div>
 
 
-    <mat-card class="mb-4" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
+    <mat-card class="mb-4 material-background" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isFixCostsExpanded) {
         <mat-card-content>
           <div>
@@ -184,7 +184,7 @@
       <p class="font-bold text-2xl !m-0 cursor-pointer" (click)="isVariableCostsExpanded = !isVariableCostsExpanded">Variable Costs</p>
     </div>
 
-    <mat-card class="mb-4" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
+    <mat-card class="mb-4 material-background" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
           <div *ngFor="let linkGroup of filteredLinks; let i = index" [formGroupName]="i" class="link-row">
