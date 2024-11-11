@@ -4,15 +4,24 @@
         <p class="mt-2 text-lg">Easily Visualise Your Financial Data</p>
     </header>
 
+
     <section class="mb-6">
         <h2 class="text-2xl font-semibold">Why Easy Sankey?</h2>
         <p class="mt-2">Easy Sankey helps you create clear and simple financial visualisations without the need for Excel or technical skills. Just a few easy inputs, and you can see where your money goes!</p>
     </section>
 
+    <div class="my-8">
+        <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    </div>
+
     <section class="mb-6">
         <h2 class="text-2xl font-semibold">Getting Started</h2>
         <p class="mt-2">On the main page, click the <span class="font-semibold">"Edit Input" button</span> in the top-right corner. This will open a menu where you can enter your financial information.</p>
     </section>
+
+    <div class="my-8">
+        <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    </div>
 
     <section class="mb-6">
         <h2 class="text-2xl font-semibold">Input Fields Explained</h2>
@@ -27,20 +36,16 @@
                 </ul>
             </li>
             <li style="margin-bottom: 0.5rem;">
-                <strong>Name:</strong> Give your entry a name (e.g., "Rent" or "Groceries").
+                <strong>Name:</strong> Give your entry a name (e.g., "Rent" or "Pet food").
             </li>
             <li style="margin-bottom: 0.5rem;">
                 <strong>Amount:</strong> Enter the amount of money (e.g., "800" for rent).
             </li>
             <li style="margin-bottom: 0.5rem;">
-                <strong>Part of (optional):</strong> This field lets you break down expenses.
-                <ul class="list-disc list-inside mt-1" style="margin-left: 1.5rem;">
-                    <li><strong>Example:</strong> For "Housing," you can specify that it includes "Rent" and "Wifi," both of which are part of "Housing."</li>
-                    <li><strong>Default behavior:</strong> If no "Part of" is specified for an expense, it will automatically be linked to your income.</li>
-                    <li><strong>"Default income" option:</strong> Choose this option if you want to remove the grouping.</li>
-                </ul>
+                <strong>Category (optional):</strong> Assign a category to your entry. This can be useful for reportings and budget setting for each category.
             </li>
-            <div class="rounded-2xl p-4 mt-4"
+
+            <!-- <div class="rounded-2xl p-4 mt-4"
                 [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}"
             >
                 <p class="font-bold">💡 Tips:</p>
@@ -55,18 +60,28 @@
                         <strong>Example:</strong> You define a group called "Housing" with initial value of 0. You add "Rent" with value of 800 and "Wifi" with value of 50, then specify them as 'Part of' "Housing". The app will automatically calculate the total value of "Housing" as 850.
                     </li>
                 </ul>                
-            </div>
+            </div> -->
         </ul>
     </section>
 
+    <div class="my-8">
+        <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    </div>
+
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">What Happens Next?</h2>
-        <p class="mt-2">As you add entries:</p>
+        <h2 class="text-2xl font-semibold">Fix Costs & Budget</h2>
+        <img src="assets/images/user-manual/fix-costs.png" alt="Fix Costs" class="w-full rounded-lg shadow-lg mt-4">
+        <!-- <p class="mt-2">As you add entries:</p>
         <ul class="list-disc list-inside mt-2">
             <li>If you enter more than one income, Easy Sankey will calculate your total income.</li>
             <li>If you enter a tax amount, the app will show your "usable income" after taxes are deducted.</li>
-        </ul>
+        </ul> -->
     </section>
+
+
+    <div class="my-8">
+        <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    </div>
 
     <section class="mb-6">
         <h2 class="text-2xl font-semibold">Notes from Developer</h2>
