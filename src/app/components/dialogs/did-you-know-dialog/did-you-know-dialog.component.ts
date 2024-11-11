@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { MatDialogModule} from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
-import { InputListComponent } from '../../input-list/input-list.component';
 import { ColorService } from '../../../services/color.service';
 
 @Component({

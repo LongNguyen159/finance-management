@@ -11,7 +11,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
 import { parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
-import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -25,9 +24,6 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
     MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
-  providers: [
-    provideEcharts(),
-  ],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,

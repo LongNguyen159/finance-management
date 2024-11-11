@@ -25,7 +25,7 @@ import { DateChanges } from '../models';
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
     CommonModule, MatButtonModule,
     MatDatepickerModule, MatNativeDateModule,
-    MonthPickerHeaderComponent, MatMenuModule
+    MatMenuModule
   ],
   templateUrl: './month-picker.component.html',
   styleUrl: './month-picker.component.scss',

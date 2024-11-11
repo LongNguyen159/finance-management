@@ -2,7 +2,6 @@ import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { InputListComponent } from '../input-list/input-list.component';
 import { Router, RouterModule } from '@angular/router';
 import { DataService } from '../../services/data.service';
 import { ColorService } from '../../services/color.service';
@@ -13,8 +12,8 @@ import { UiService } from '../../services/ui.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [MatMenuModule, MatIconModule, MatButtonModule, InputListComponent, RouterModule, NavbarComponent,
-    NavbarComponent, CommonModule
+  imports: [MatMenuModule, MatIconModule, MatButtonModule, RouterModule,
+    CommonModule
   ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',

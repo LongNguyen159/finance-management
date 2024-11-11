@@ -1,13 +1,10 @@
 import { ChangeDetectionStrategy, Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { InputListComponent } from '../../components/input-list/input-list.component';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { UserManualComponent } from '../../components/user-manual/user-manual.component';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -15,7 +12,6 @@ import { NavbarComponent } from "../../components/navbar/navbar.component";
 import { ColorService } from '../../services/color.service';
 import { MonthPickerComponent } from "../../components/month-picker/month-picker.component";
 import { onMonthChanges } from '../../utils/data-utils';
-import { DidYouKnowDialogComponent } from '../../components/dialogs/did-you-know-dialog/did-you-know-dialog.component';
 import { PieChartComponent } from '../../components/charts/pie-chart/pie-chart.component';
 import { SankeyChartComponent } from '../../components/charts/sankey-chart/sankey-chart.component';
 import { DialogsService } from '../../services/dialogs.service';
@@ -26,7 +22,6 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
-import { GraphicTextComponent } from "../../components/charts/graphic-text/graphic-text.component";
 @Component({
   selector: 'app-main-page',
   standalone: true,

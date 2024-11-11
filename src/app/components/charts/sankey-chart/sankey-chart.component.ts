@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { SankeyData } from '../../models';

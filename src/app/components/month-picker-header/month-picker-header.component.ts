@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
-import { MatButton, MatButtonModule } from '@angular/material/button';
-import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { DateAdapter } from '@angular/material/core';
 import { MatCalendar } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject } from 'rxjs';
-import { startWith, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-month-picker-header',
