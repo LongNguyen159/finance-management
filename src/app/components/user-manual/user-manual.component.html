@@ -4,9 +4,8 @@
         <p class="mt-2 text-lg">Easily Visualise Your Financial Data</p>
     </header>
 
-
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Why Easy Sankey?</h2>
+        <h2 class="text-2xl font-bold">Why Easy Sankey?</h2>
         <p class="mt-2">Easy Sankey helps you create clear and simple financial visualisations without the need for Excel or technical skills. Just a few easy inputs, and you can see where your money goes!</p>
     </section>
 
@@ -15,8 +14,11 @@
     </div>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Getting Started</h2>
-        <p class="mt-2">On the main page, click the <span class="font-semibold">"Edit Input" button</span> in the top-right corner. This will open a menu where you can enter your financial information.</p>
+        <h2 class="text-2xl font-bold">Getting Started</h2>
+        <p class="mt-2">On the main page, click the <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Edit Input</span> in the top-right corner. This will open a menu where you can enter your financial information.</p>
+        <div class="flex flex-row w-full justify-center">
+            <img [src]="colorService.isDarkMode() ? 'assets/images/edit-input-dark.png' : 'assets/images/edit-input-light.png'" alt="Edit input button" class="image">
+        </div>
     </section>
 
     <div class="my-8">
@@ -24,8 +26,9 @@
     </div>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Input Fields Explained</h2>
+        <h2 class="text-2xl font-bold">Input Fields Explained</h2>
         <p class="mt-2">Here’s a quick overview to help you fill in the input fields:</p>
+        <img [src]="colorService.isDarkMode() ? 'assets/images/inputs-dark.png' : 'assets/images/inputs-light.png'" alt="Input fields button" class="image">
         <ul class="list-disc list-inside mt-2">
             <li style="margin-bottom: 0.5rem;">
                 <strong>Type:</strong> Choose the type of entry:
@@ -44,23 +47,6 @@
             <li style="margin-bottom: 0.5rem;">
                 <strong>Category (optional):</strong> Assign a category to your entry. This can be useful for reportings and budget setting for each category.
             </li>
-
-            <!-- <div class="rounded-2xl p-4 mt-4"
-                [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}"
-            >
-                <p class="font-bold">💡 Tips:</p>
-                <ul class="list-disc list-inside mt-2" style="margin-left: 1.5rem; line-height: 1.5;">
-                    <li class="mb-2">
-                        "Part of" can be used to group expenses together!
-                    </li>
-                    <li class="mb-6">
-                        If you are unsure what is the total value of your expenses, just define a group with initial value of 0. The app will calculate the total value of the group for you as you add more items into it.
-                    </li>
-                    <li class="mb-2">
-                        <strong>Example:</strong> You define a group called "Housing" with initial value of 0. You add "Rent" with value of 800 and "Wifi" with value of 50, then specify them as 'Part of' "Housing". The app will automatically calculate the total value of "Housing" as 850.
-                    </li>
-                </ul>                
-            </div> -->
         </ul>
     </section>
 
@@ -69,22 +55,33 @@
     </div>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Fix Costs & Budget</h2>
-        <img src="assets/images/user-manual/fix-costs.png" alt="Fix Costs" class="w-full rounded-lg shadow-lg mt-4">
-        <!-- <p class="mt-2">As you add entries:</p>
-        <ul class="list-disc list-inside mt-2">
-            <li>If you enter more than one income, Easy Sankey will calculate your total income.</li>
-            <li>If you enter a tax amount, the app will show your "usable income" after taxes are deducted.</li>
-        </ul> -->
-    </section>
+        <h2 class="text-2xl font-bold">Fixed Costs & Budget Management</h2>
+        <p class="mt-2 font-bold">In <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Finance Manager</span> you’ll find the following three tabs:</p>
+        <img [src]="colorService.isDarkMode() ? 'assets/images/manager-tabs-dark.png' : 'assets/images/manager-tabs-light.png'" alt="Overview Tabs" class="w-full image">
+        
+        <h3 class="text-xl font-bold mt-6">Adding Fix Costs</h3>
+        <p class="mt-2">In the <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Fixed Costs</span> tab, you can set your recurring monthly expenses, which are costs that typically remain stable.</p>
+        <br>
+        <p>Once you've defined your fixed costs, open the input dialog where you'll see the "Paste Fixed Costs" button. Clicking this will automatically add your defined fixed costs to your monthly entries.</p>
+        <div class="w-full flex flex-row justify-center">
+            <img [src]="colorService.isDarkMode() ? 'assets/images/edit-fix-costs-dark.png' : 'assets/images/edit-fix-costs-light.png'" alt="Edit Fix Costs" class="w-[75%] image">
+        </div>
+        <p>If you change your fix costs definition in Finance Manager.</p>
 
+        <h3 class="text-xl font-bold mt-6">Budget Management</h3>
+        <p class="mt-2">In the <span class="text-highlight" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}">Budget</span> tab, you can set your monthly budget. This will help you keep track of your spending and see how much you have left to spend.</p>
+        <div class="grid-display">
+            <img [src]="colorService.isDarkMode() ? 'assets/images/budgets-dark.png' : 'assets/images/budgets-light.png'" alt="Budgets" class="w-full image py-6 stretch-height" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'">
+            <img [src]="colorService.isDarkMode() ? 'assets/images/budget-dark.png' : 'assets/images/budget-light.png'" alt="Budgets" class="w-full image stretch-height" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'">
+        </div>
+    </section>
 
     <div class="my-8">
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
     </div>
 
     <section class="mb-6">
-        <h2 class="text-2xl font-semibold">Notes from Developer</h2>
+        <h2 class="text-2xl font-bold">Notes from Developer</h2>
         <p class="mt-2">This app runs locally on your device, so your data stays safe with you! No need to worry about privacy issues.
             Don’t believe me? Try turning off your internet connection and see if the app still works!
         </p>

@@ -1,0 +1,31 @@
+.image {
+    border-radius: 16px;
+    margin-top: 16px;
+    margin-bottom: 12px;
+}
+.text-highlight {
+    border-radius: 8px;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-weight: 500;
+}
+.grid-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.stretch-height {
+    height: 100%;
+    object-fit: cover; /* Optional: ensures the image covers the entire height without distortion */
+}
+
+.image-border {
+    border: 1px solid #5c5c5c;
+}
+
+.image-border-light {
+    border: 1px solid #d1d1d1;
+}
