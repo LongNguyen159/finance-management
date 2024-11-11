@@ -24,7 +24,7 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
-    MatSelectModule, NgxEchartsDirective, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
+    MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
   providers: [
     provideEcharts(),
   ],
@@ -211,7 +211,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     // Step 2: Extract entries from pieData, excluding "Remaining Balance"
     const expenseEntries = currentMonthData.pieData
-    .filter((entry: PieData) => entry.name !== 'Remaining Balance')
+    .filter((entry: PieData) => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
     .map((entry: PieData) => ({
         type: 'expense',
         name: removeSystemPrefix(entry.name),

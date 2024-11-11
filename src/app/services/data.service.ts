@@ -47,6 +47,8 @@ export interface ExpenseData {
 export class DataService {
     private UiService = inject(UiService)
 
+    readonly REMAINING_BALANCE_LABEL = 'Surplus'
+
     //#region Chart Data
     monthlyData: MonthlyData = {};
     private readonly sankeyDataInit: SankeyData = {
@@ -113,7 +115,7 @@ export class DataService {
 
     /** Immutable states */
     private readonly copiedLinksKey = 'copiedLinks';
-    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', 'Remaining Balance', '-- None --' , ...Object.values(ExpenseCategory)];
+    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', this.REMAINING_BALANCE_LABEL, '-- None --' , ...Object.values(ExpenseCategory)];
 
 
     constructor() {
@@ -428,7 +430,7 @@ export class DataService {
         // Push remaining balance number to Pie Data to show how much is left proportionally.
         pieSeriesData = [
             ...pieData,
-            { name: 'Remaining Balance', value: remainingBalance },
+            { name: this.REMAINING_BALANCE_LABEL, value: remainingBalance },
         ];
 
 
