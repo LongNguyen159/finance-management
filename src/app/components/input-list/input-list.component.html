@@ -92,7 +92,7 @@
         <mat-card-content>
           <div>
             <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
-              @if (linkGroup.get('isFixCost')?.value && matchingQueries.includes(linkGroup.get('target')?.value)) {
+              @if (linkGroup.get('isFixCost')?.value && filteredLinkIds.includes(linkGroup.get('id')?.value)) {
                 <!-- Target -->
                 <mat-form-field appearance="fill">
                   <mat-label>Name</mat-label>
@@ -184,7 +184,7 @@
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
 
-            @if (!linkGroup.get('isFixCost')?.value && matchingQueries.includes(linkGroup.get('target')?.value)) {
+            @if (!linkGroup.get('isFixCost')?.value && filteredLinkIds.includes(linkGroup.get('id')?.value)) {
               <!-- Target -->
               <mat-form-field appearance="fill">
                 <mat-label>Name</mat-label>

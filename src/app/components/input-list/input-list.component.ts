@@ -149,7 +149,19 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   /** Search value for filtering the input fields. */
   filterQuery: string = '';
-  matchingQueries: string[] = [];
+
+  /** We use this array to store the filtered entries. It contains link's IDs (UUID).
+   * If we filter directly linkArray.controls, it would not work because the form is tracked by index.
+   * 
+   * So when we filter out and repopulate the form, it'll be duplicated because index is not unique.
+   * 
+   * We will only show the entires within this array in the template, so make sure to populate this array correctly:
+   * - When adding new links, push the new link's ID into this array.
+   * - When removing links, remove the link's ID from this array.
+   * 
+   * - When filtering, we will filter this array.
+   */
+  filteredLinkIds: string[] = [];
 
 
   constructor(private fb: FormBuilder) {
@@ -242,9 +254,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.hasChanges = false;
     }
 
-    if (currentMonth !== prevMonth) {
-      this.filterQuery = ''
-    }
     /** Assign the saved form values to the current form values (instead of previous month)
      * We do this to make the savedFormValues up-to-date to track whether it changes.
      */
@@ -475,6 +484,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    */
   protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
+      id: [link ? link.id : crypto.randomUUID(), Validators.required], // Generate a unique UUID (Universal Unique Identifier) for each link.
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
         Validators.required,
@@ -489,6 +499,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       source: [link ? link.source : ''], // Optional
       isFixCost: [link ? link.isFixCost : false]
     });
+
+    /** Add into IDs array when a new link is created. */
+    this.filteredLinkIds.push(linkGroup.get('id')?.value || '');
 
     // Disable the source field if type is 'income'
     if (linkGroup.get('type')?.value == EntryType.Income || linkGroup.get('type')?.value == EntryType.Tax) {
@@ -553,7 +566,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
     })
 
-    this.matchingQueries = links.map(item => item.target);
+    /** Apply the filter upon form reinitialised/repopulated with new data. */
+    this.filterLinks(this.filterQuery)
 
     this.hasDuplicates = this._checkDuplicateName()
     this.checkForInvalidRows()
@@ -708,7 +722,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   // Remove an input row
   removeLink(index: number): void {
     /** find the invalid input, only process the valid inputs. */
-    const link: UserDefinedLink = this.linkArray.at(index).value;    
+    const link: UserDefinedLink = this.linkArray.at(index).value;
+    this.filteredLinkIds = this.filteredLinkIds.filter(id => id !== link.id);
     this.linkArray.removeAt(index, { emitEvent: false });
     this.updateSavedFormValuesOnFormChanges()
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
@@ -744,15 +759,18 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   /** For the search function */
   filterLinks(query: string): void {
     if (!query) {
-      this.matchingQueries = this.linkArray.controls.map(item => item.get('target')?.value || '');
+      this.filterQuery = ''; // Reset filter query.
+      this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
+      console.log('Matching queries:', this.filteredLinkIds);
     }
 
-
-    this.matchingQueries = this.linkArray.controls.filter(control => {
+    this.filterQuery = query; // Update filter query
+    console.log('Matching queries:', this.filteredLinkIds);
+    this.filteredLinkIds = this.linkArray.controls.filter(control => {
       const target = control.get('target')?.value?.toLowerCase() || '';
       const searchTerm = query.toLowerCase();
       return target.includes(searchTerm);
-    }).map(item => item.get('target')?.value || '');
+    }).map(item => item.get('id')?.value || ''); // Update filtered links to be matching entries IDs.
   }
   //#endregion
 

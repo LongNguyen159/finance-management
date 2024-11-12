@@ -73,9 +73,9 @@ export class DataService {
     }
 
     demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Salary demo', value: 1000, demo: true},
-        { type: EntryType.Expense, target: 'Groceries', value: 300, source: ExpenseCategory.Groceries},
-        { type: EntryType.Expense, target: 'Pet food', value: 100, source: ExpenseCategory.Groceries},
+        { id: 'demo_1' , type: EntryType.Income, target: 'Salary demo', value: 1000, demo: true},
+        { id: 'demo_2', type: EntryType.Expense, target: 'Groceries', value: 300, source: ExpenseCategory.Groceries},
+        { id: 'demo_3',type: EntryType.Expense, target: 'Pet food', value: 100, source: ExpenseCategory.Groceries},
     ]
 
     

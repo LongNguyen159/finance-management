@@ -1,4 +1,5 @@
 export interface UserDefinedLink {
+    id: string;       // Unique identifier
     type: EntryType;  // Type of the entry
     target: string;   // The name of the current node
     value: number;    // Amount associated with the link
