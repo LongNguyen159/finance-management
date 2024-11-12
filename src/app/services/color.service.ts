@@ -72,8 +72,8 @@ export class ColorService {
   }
 
 
-  /** Retrive stored theme settings from LocalStorage to apply on app init.
-   * If no settigs are found, apply system's theme.
+  /** Retrieve stored theme settings from LocalStorage to apply on app init.
+   * If no settings are found, apply system's theme.
    */
   applyStoredThemeSettings(): void {
     const settings = localStorage.getItem('themeSettings');

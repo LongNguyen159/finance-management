@@ -243,8 +243,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     /** This will trigger subscription onInit of this component. No need to update global variables here as we already did it in the subscription. */
     onMonthChanges(selectedMonth.currentMonth, this.allMonthsData, this.singleMonthData, this.dataService)
 
-    /** Only process previous months if there are changes in the form detected by the boolen flag `hasChanges`.
-     * Else it would process every previou months on month changes.
+    /** Only process previous months if there are changes in the form detected by the boolean flag `hasChanges`.
+     * Else it would process every previous months on month changes.
      */
     if (currentMonth !== prevMonth && this.hasChanges) {
       // Process previous month values if there are changes of that month and user navigate to another month.
@@ -271,25 +271,25 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   /** This function is used to process the previous month (in compare to current month).
    * Triggered when user changes the month.
    * USE CASE: When user made some changes, and navigate to another month, we want to save changes and process it.
-   * @param previouMonthValue The previous month value
+   * @param previousMonthValue The previous month value
    * @param previousFormValues The previous form values
    */
-  processMonthBeforeMonthChanges(previouMonthValue: string | undefined, previousFormValues: UserDefinedLink[]) {
-    /** On first change the previousMomthValue can be undefined, in that case, do nothing. */
-    if (!previouMonthValue || previousFormValues.length == 0) return;
+  processMonthBeforeMonthChanges(previousMonthValue: string | undefined, previousFormValues: UserDefinedLink[]) {
+    /** On first change the previousMonthValue can be undefined, in that case, do nothing. */
+    if (!previousMonthValue || previousFormValues.length == 0) return;
 
 
     /** If process Input data, remember NOT to emit, because we only want to save it, if we emit,
-     * the current month will be overriden from the data of previous month.
+     * the current month will be overridden from the data of previous month.
      */
-    this.dataService.processInputData(previousFormValues, previouMonthValue, { showSnackbarWhenDone: true, emitObservable: false})
+    this.dataService.processInputData(previousFormValues, previousMonthValue, { showSnackbarWhenDone: true, emitObservable: false})
   }
   //#endregion
 
 
   //#region Reactive update input
   /** Update Input, this function when triggered will send the input data to service to update the form state.
-   * Only trigger this function to reatively update the form.
+   * Only trigger this function to reactively update the form.
    * For example like summing the total children value to reflect on the parent node.
    * Else, we just submit the form on component destroy.
    */
@@ -542,7 +542,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // Listen to changes in the source field for filtering options
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
-        /** Set type automatic to expense if category choosed */
+        /** Set type automatic to expense if category choosen */
         linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
         // this._filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
@@ -560,7 +560,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
 
 
-  /** Initiliase/Populate the form with predefined data */
+  /** Initialise/Populate the form with predefined data */
   populateInputFields(selectedMonthData: SingleMonthData): void {
     console.log('populating input fields...', selectedMonthData.rawInput)
 

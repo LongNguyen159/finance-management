@@ -12,7 +12,8 @@
     "test": "ng test",
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
-    "deploy": "ng build && electron-builder --mac --win"
+    "deploy": "ng build && electron-builder --mac --win",
+    "spellcheck": "cspell \"src/**/*.{ts,html,css}\""
   },
   "private": true,
   "dependencies": {
@@ -39,9 +40,11 @@
     "@angular-devkit/build-angular": "^18.2.11",
     "@angular/cli": "^18.2.11",
     "@angular/compiler-cli": "^18.2.11",
+    "@cspell/dict-en-gb": "^4.1.51",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^22.7.5",
     "autoprefixer": "^10.4.20",
+    "cspell": "^8.16.0",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
     "electron-updater": "^6.3.9",

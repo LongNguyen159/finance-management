@@ -39,7 +39,7 @@ export interface ExpenseData {
   providedIn: 'root'
 })
 
-/** This service main purpose is to hanlde the processing of Input Data (converting raw input data into Sankey Data with source - target - value).
+/** This service main purpose is to handle the processing of Input Data (converting raw input data into Sankey Data with source - target - value).
  * 
  * 
  * This is the central processing part of the app. It also handles saving data into Local Storage and emit observables for the subscribers.
@@ -315,7 +315,7 @@ export class DataService {
 
 
 
-        /** If has tax, create 'Usasble Income' node and use it as source for all expenses. */
+        /** If has tax, create 'Usable Income' node and use it as source for all expenses. */
         if (hasTax && taxLink) {
             let usableIncome = totalIncomeValue;
             const taxValue = nodesMap.get(taxLink.target)?.value || 0;
@@ -506,7 +506,7 @@ export class DataService {
     }
 
     /** Update Raw input to correctly reflect the parent value as sum of their children values.
-     * @paream oldInput - The original input data.
+     * @param oldInput - The original input data.
      * @param changedExpenses - The array of changed expenses during calculation.
      * 
      * @returns The updated input data with parent values updated to reflect the sum of their children.
@@ -774,7 +774,7 @@ export class DataService {
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
         
-        /** Tree is in recursive stucture, but we only care about Top-level expense for pie data.
+        /** Tree is in recursive structure, but we only care about Top-level expense for pie data.
          * So only iterate through children of root node to get top level expenses.
          */
         const pieData = treeFromRootNode.children.map(child => {
@@ -793,7 +793,7 @@ export class DataService {
 
     /** Recursively transverse the tree to find the modified nodes.
      * @param node - The current node to check for changes. Or the starting node.
-     * It will receursively check all children of the node.
+     * It will recursively check all children of the node.
      * @param changedNodes - The array to store the changed nodes. Default to empty array, will be used in recursion to push in changed nodes.
      * 
      * @returns An array of changed nodes.
