@@ -393,11 +393,17 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   pasteLinks(): void {
     const copiedLinks = this.dataService.retrieveCopiedLinks();
     if (copiedLinks) {
-      this.populateInputFields({ rawInput: copiedLinks } as SingleMonthData);
+      // Generate new UUIDs for each copied link
+      const newLinks = copiedLinks.map(link => ({
+        ...link,
+        id: crypto.randomUUID()
+      }));
+  
+      this.populateInputFields({ rawInput: newLinks } as SingleMonthData);
       this.hasChanges = true;
       this.uiService.showSnackBar('Links pasted!', 'Ok');
       /** Process the pasted links */
-      this.dataService.processInputData(copiedLinks, this.dataMonth);
+      this.dataService.processInputData(newLinks, this.dataMonth);
     } else {
       this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
     }
@@ -408,32 +414,37 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.uiService.showSnackBar('No fix costs found', 'Dismiss');
       return;
     }
-
-    const existingFixCosts: UserDefinedLink[] = this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost)
-
+  
+    const existingFixCosts: UserDefinedLink[] = this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost);
+  
     /** If there are no changes in the fix costs section and user paste it, do nothing. */
     if (JSON.stringify(this.fixedLinks) == JSON.stringify(existingFixCosts)) {
       this.uiService.showSnackBar('No changes', 'Dismiss');
       return;
     }
-
+  
     this.isFixCostsExpanded = true;
-    
+  
     /** If different, clear out the current fixed costs link and paste the link in local storage in.
-     * This wil avoid duplicate fixed costs in the form.
+     * This will avoid duplicate fixed costs in the form.
      */
     if (JSON.stringify(this.fixedLinks) !== JSON.stringify(existingFixCosts)) {
       // Filter out the current fixed costs from `linkArray`
       const updatedLinks = this.linkArray.value.filter((link: UserDefinedLink) => !link.isFixCost);
-    
-      // Add fixedLinks from localStorage to the filtered linkArray
-      const newLinkArray = [...updatedLinks, ...this.fixedLinks];
-      this.hasDuplicates = this._checkDuplicateName()
+  
+      // Add fixedLinks from localStorage to the filtered linkArray with new UUIDs
+      const newFixedLinks = this.fixedLinks.map(link => ({
+        ...link,
+        id: crypto.randomUUID()
+      }));
+  
+      const newLinkArray = [...updatedLinks, ...newFixedLinks];
+      this.hasDuplicates = this._checkDuplicateName();
       // Update the form with the new link array
       this.populateInputFields({ rawInput: newLinkArray } as SingleMonthData);
       /** Update saved form values. */
-      this.updateSavedFormValuesOnFormChanges()
-
+      this.updateSavedFormValuesOnFormChanges();
+  
       this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
       this.hasChanges = true;
       this.uiService.showSnackBar('Fix costs updated!', 'Ok');
@@ -484,7 +495,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    */
   protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
-      id: [link ? link.id : crypto.randomUUID(), Validators.required], // Generate a unique UUID (Universal Unique Identifier) for each link.
+      id: [link && link.id ? link.id : crypto.randomUUID(), Validators.required], // Generate a unique UUID if link.id is missing.
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
         Validators.required,
