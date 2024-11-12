@@ -772,11 +772,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     if (!query) {
       this.filterQuery = ''; // Reset filter query.
       this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
-      console.log('Matching queries:', this.filteredLinkIds);
     }
 
     this.filterQuery = query; // Update filter query
-    console.log('Matching queries:', this.filteredLinkIds);
     this.filteredLinkIds = this.linkArray.controls.filter(control => {
       const target = control.get('target')?.value?.toLowerCase() || '';
       const searchTerm = query.toLowerCase();
