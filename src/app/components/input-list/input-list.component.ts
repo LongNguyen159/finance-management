@@ -542,7 +542,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // Listen to changes in the source field for filtering options
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
-        /** Set type automatic to expense if category choosen */
+        /** Set type automatic to expense if category chosen */
         linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
         // this._filterNodes(value);
         this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);

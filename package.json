@@ -13,7 +13,8 @@
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
     "deploy": "ng build && electron-builder --mac --win",
-    "spellcheck": "cspell \"src/**/*.{ts,html,css}\""
+    "spell-check": "cspell \"src/**/*.ts\" \"src/**/*.html\"",
+    "circular-check": "npx madge --circular --extensions ts ./"
   },
   "private": true,
   "dependencies": {
