@@ -1,9 +1,10 @@
-import { Component, effect, inject, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
+import { removeSystemPrefix } from '../../../utils/utils';
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
@@ -28,6 +29,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
 
   pieOption: EChartsOption = {}
   pieMergeOption: EChartsOption = {}
+
+
   
   @ViewChild(NgxEchartsDirective, { static: false }) chartDirective?: NgxEchartsDirective;
 
@@ -50,6 +53,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
 
   updateChart() {
     this.pieOption = {
+
+      color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         trigger: 'item',
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
@@ -58,8 +63,8 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         },
         formatter: (params: any) => {
           // Use toLocaleString to format the value
-          const value = params.data.value.toLocaleString(); // Format the value
-          return `${params.name}: <b>${value} (${params.percent}%)</b>`; // Bold the params.name
+          const value = params.data.value.toLocaleString('en-US'); // Format the value
+          return `${removeSystemPrefix(params.name)}: <b>${value} (${params.percent}%)</b>`; // Bold the params.name
         }
       },
       legend: {
@@ -67,6 +72,9 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         left: 'left',
         textStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
+        formatter: (name: string) => {
+          return removeSystemPrefix(name);
         }
       },
       toolbox: {
@@ -86,7 +94,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
           emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
           label: {
             formatter: (params: any) =>  {
-              return `${params.name}: ${params.value.toLocaleString()} (${params.percent.toLocaleString()}%)`;
+              return `${removeSystemPrefix(params.name)}: ${params.value.toLocaleString('en-US')} (${params.percent.toLocaleString('en-US')}%)`;
             },
             fontSize: 12,
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary

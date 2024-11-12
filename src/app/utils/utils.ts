@@ -1,4 +1,5 @@
-import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
+import { SYSTEM_PREFIX } from "../components/models";
+import { evaluate } from 'mathjs/number';
 
 
 /** Format a Date object into YYYY-MM format */
@@ -20,52 +21,6 @@ export function parseLocaleStringToNumber(localeString: string): number {
 }
 
 
-/** Process data for the requested month.
- * @param selectedMonth The month to process. Type Date.
- * @param allMonthsData The data for all months. Type MonthlyData.
- * @param singleMonthEntries The data for the selected month. Type ProcessedOutputData.
- * @param dataService Function requires dataService to process the input data.
- */
-export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, singleMonthEntries: SingleMonthData , dataService: DataService) {    
-    if (Object.keys(allMonthsData).length == 0) {
-      console.warn('month data is not ready by the time on month changes is called')
-      return
-    }
-
-    const monthString = formatDateToYYYYMM(selectedMonth);
-
-    console.log('processing data for month: ', monthString)
-    
-    // Check if the month exists in the MonthlyData
-    if (allMonthsData[monthString]) {
-      // Month exists, retrieve the processed data
-      const existingData = allMonthsData[monthString];
-      singleMonthEntries = existingData; // Update processed output data
-      console.log(`month ${monthString} exists, calling service to process input`)
-      dataService.processInputData(existingData.rawInput, monthString);
-      
-    } else {
-      // Month does not exist, create a new empty entry
-      singleMonthEntries = initializeEmptyData(monthString); // Initialize empty data
-      allMonthsData[monthString] = singleMonthEntries; // Add to the monthlyData
-      console.log(`No data for ${monthString}. Initialized new entry.`);
-      dataService.processInputData([], monthString);
-    }
-}
-
-function initializeEmptyData(monthString: string): SingleMonthData {
-    return {
-      sankeyData: { nodes: [], links: [] }, // Adjust based on your SankeyData structure
-      totalUsableIncome: 0,
-      totalGrossIncome: 0,
-      totalTax: 0,
-      totalExpenses: 0,
-      remainingBalance: '0',
-      pieData: {},
-      rawInput: [],
-      month: monthString
-    };
-}
 
 
 export function formatYYYMMtoDate(inputString: string): Date {
@@ -77,4 +32,43 @@ export function formatYYYMMtoDate(inputString: string): Date {
 
 export function sortYearsDescending(years: string[]): string[] {
   return years.sort((a, b) => Number(b) - Number(a));
+}
+
+/** Remove system prefixes from name. We use system prefix to avoid
+ * name collisions in our data, but we don't want to show it in the UI.
+ */
+export function removeSystemPrefix(name: string): string {
+  return name.replace(new RegExp(`@${SYSTEM_PREFIX}`, 'g'), '');
+}
+
+
+/** Process string input like '110 + 50' to '160'
+* @param amount The string input to process
+* @returns The total amount as a number or null if the input is invalid
+*/
+export function processStringAmountToNumber(amount: string): number | null {
+  // Replace commas with dots for German input
+  const normalizedAmount = amount.replace(/,/g, '.');
+
+  // Remove unnecessary spaces around numbers, "+" and "-" signs
+  const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
+
+  // Convert isolated spaces between numbers into '+' for implicit addition
+  const implicitAddition = cleanedAmount.replace(/(\d)\s+(\d)/g, '$1+$2');
+
+  // Remove leading zeros in each number segment to avoid octal interpretation
+  const withoutLeadingZeros = implicitAddition.replace(/\b0+(\d)/g, '$1');
+
+  // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
+  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(withoutLeadingZeros.replace(/\s/g, ''))) {
+    return null; // Invalid input
+  }
+
+  try {
+    // Use mathjs's evaluate function to compute the total
+    const total = evaluate(withoutLeadingZeros);
+    return typeof total === 'number' ? total : null;
+  } catch (error) {
+    return null; // In case of any error during evaluation
+  }
 }

@@ -1,0 +1,29 @@
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 16px;
+}
+
+.budget-card {
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+}
+
+// .budget-card.dark-mode:hover {
+//     border-color: #90caf9; /* Light Blue for dark mode */
+// }
+
+// .budget-card.light-mode:hover {
+//     border-color: #1976d2; /* Blue for light mode */
+// }
+
+.budget-indicator {
+    border: 2px solid;
+    font-weight: bold;
+}
+
+.large-icon {
+    font-size: 48px;
+    width: fit-content;
+    height: fit-content;
+}

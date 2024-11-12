@@ -10,11 +10,23 @@
         </mat-chip>
     }
 </div>
+@if(!sankeyData || sankeyData.nodes.length === 0) {
+    <div class="flex flex-col items-center gap-2">
+        <p>No entries defined...</p>
+        <button mat-stroked-button (click)="dialogService.openInputListDialog()">
+            Create Entry
+        </button>
+    </div>
+}
+
 <div
     echarts
     [options]="sankeyOption"
     [style]="'height: ' + chartHeight"
 ></div>
-<h3 class="font-bold">
-    Remaining Balance: {{ remainingBalance }}
+<h3 class="font-bold flex flex-row items-center gap-2">
+    <span>Surplus: </span>
+    <span [ngClass]="getBalanceClass()" class="flex flex-row items-center rounded-full text-neutral-950 text-base px-5 py-[5px]">
+        {{ remainingBalance }}
+    </span>
 </h3>

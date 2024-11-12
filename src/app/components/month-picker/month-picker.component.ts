@@ -25,7 +25,7 @@ import { DateChanges } from '../models';
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatIconModule,
     CommonModule, MatButtonModule,
     MatDatepickerModule, MatNativeDateModule,
-    MonthPickerHeaderComponent, MatMenuModule
+    MatMenuModule
   ],
   templateUrl: './month-picker.component.html',
   styleUrl: './month-picker.component.scss',
@@ -123,6 +123,8 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
 
   // Notify month changes to parent component
   notifyMonthChanges(date: Date) {
+    /** Reset data cycle flag for new month */
+    this.dataService.hasDataCycle.set(false)
     // Emit both the previous and current month
     this.monthSelected.emit({
       previousMonth: this.previousDate,

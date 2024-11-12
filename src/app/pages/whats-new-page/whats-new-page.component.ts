@@ -2,15 +2,21 @@ import { Component, inject } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ColorService } from '../../services/color.service';
 import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { RouterModule } from '@angular/router';
+import { UiService } from '../../services/ui.service';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-whats-new-page',
   standalone: true,
-  imports: [NavbarComponent, CommonModule],
+  imports: [NavbarComponent, CommonModule, MatButtonModule,
+    RouterModule, MatCardModule
+  ],
   templateUrl: './whats-new-page.component.html',
   styleUrl: './whats-new-page.component.scss'
 })
 export class WhatsNewPageComponent {
   colorService = inject(ColorService)
-
+  uiService = inject(UiService)
 }

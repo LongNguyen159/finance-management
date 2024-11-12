@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 
 
@@ -9,25 +9,31 @@ import { InputListComponent } from '../../input-list/input-list.component';
 import { DataService, MonthlyData, SingleMonthData } from '../../../services/data.service';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
 import {formatYearMonthToLongDate } from '../../../utils/utils';
-import { MonthPickerComponent } from "../../month-picker/month-picker.component";
+import { NavigationStart, Router } from '@angular/router';
+import { UiService } from '../../../services/ui.service';
 
 
 @Component({
   selector: 'app-input-list-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule,
-    InputListComponent, MonthPickerComponent],
+    InputListComponent],
   templateUrl: './input-list-dialog.component.html',
   styleUrl: './input-list-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputListDialogComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
+  router = inject(Router)
+  dialogRef = inject(MatDialogRef)
+  uiService = inject(UiService)
+
   monthString: string = ''
   singleMonthData: SingleMonthData
   allMonthsData: MonthlyData
 
   currentMonth: string = ''
+
 
   ngOnInit(): void {
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
@@ -37,13 +43,18 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
       }
     })
 
-    // this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
-    //   this.allMonthsData = allMonthsData
-    // })
-  }
+    this.router.events.pipe(takeUntil(this.componentDestroyed$)).subscribe(event => {
+      if (event instanceof NavigationStart) {
+        this.dialogRef.close();
+      }
+    });
 
-  // onMonthChanges(selectedMonth: Date) {
-  //   this.currentMonth = formatDateToYYYYMM(selectedMonth)
-  //   onMonthChanges(selectedMonth, this.allMonthsData, this.singleMonthData, this.dataService)
-  // }
+
+    this.dataService.getNavigateFixCostState().pipe(takeUntil(this.componentDestroyed$)).subscribe((navigating: boolean) => {
+        if (navigating && this.router.url == '/storage?tab=2') {
+          this.dialogRef.close();
+          this.uiService.showSnackBar('Already in Fix Costs Page')
+        }
+    })
+  }
 }

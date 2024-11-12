@@ -1,0 +1,18 @@
+.link-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+  
+mat-form-field {
+  flex: 1;
+}
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.material-background {
+  background-color: var(--mdc-dialog-container-color, var(--mat-app-surface, white));
+}

@@ -5,12 +5,12 @@
     </h2>
     @if (totalExpenses !== -1) {
         <p class="text-base font-medium">
-            Total expenses: {{ totalExpenses.toLocaleString() }} of {{ totalIncome.toLocaleString() }} 
+            Total expenses: {{ totalExpenses.toLocaleString('en-US') }} of {{ totalIncome.toLocaleString('en-US') }} 
             (<span class="font-semibold">{{ ((totalExpenses / totalIncome) * 100).toFixed(2) }}%</span>)
         </p>
     } @else {
         <p class="text-base font-medium">
-            Total income: {{ totalIncome.toLocaleString() }}
+            Total income: {{ totalIncome.toLocaleString('en-US') }}
         </p>
     }
     

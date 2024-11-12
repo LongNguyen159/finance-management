@@ -11,6 +11,7 @@ import { debounceTime, takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
 import { ColorService } from '../../../services/color.service';
+import { processStringAmountToNumber } from '../../../utils/utils';
 
 @Component({
   selector: 'app-insert-expense-dialog',
@@ -62,53 +63,16 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
 
   private filterOptions(searchTerm: string): void {
-    if (!searchTerm) {
+    const normalisedSearchTerm = searchTerm.toLowerCase();
+    if (!normalisedSearchTerm) {
       /** Assign a shallow copy of the `allOptions` array to avoid mutations */
       this.filteredOptions = this.allOptions.slice();
     } else {
       this.filteredOptions = this.allOptions.filter(option =>
-        option.toLowerCase().includes(searchTerm)
+        option.toLowerCase().includes(normalisedSearchTerm)
       );
     }
   }
-
-
-
-  /** Working version, but mutating the original `rawInput` array. */
-  // submitForm() {
-  //   if (!this.form.valid) {
-  //     return;
-  //   }
-  
-  //   console.log(this.form.value);
-  //   const amount = this.form.value.amount;
-  //   const totalAmount = this.processStringAmountToNumber(amount);
-  
-  //   if (totalAmount === null) {
-  //     this.uiService.showSnackBar('Invalid input!', 'OK');
-  //     return;
-  //   }
-  
-  //   console.log('Total amount:', totalAmount);
-  //   console.log('Current raw input', this.userSingleMonthEntries.rawInput);
-  
-  //   // Find the matching entry based on the "target"
-  //   const matchingEntry = this.userSingleMonthEntries.rawInput.find(item => item.target === this.form.value.insertInto);
-  
-  //   if (matchingEntry) {
-  //     // Update the value of the matching entry by adding the totalAmount
-  //     matchingEntry.value += totalAmount; // Add totalAmount to the existing value
-  
-  //     console.log('Updated entry:', matchingEntry);
-  //     console.log('Updated raw input:', this.userSingleMonthEntries.rawInput);
-  //     this.dataService.processInputData(this.userSingleMonthEntries.rawInput, this.userSingleMonthEntries.month);
-  
-  //     this.uiService.showSnackBar('Input inserted successfully!', 'OK');
-  //   } else {
-  //     this.uiService.showSnackBar('No matching entry found!', 'Error');
-  //   }
-  // }
-
 
   /** Submit form, refactored version, not modifying original `rawInput` array. */
   submitForm() {
@@ -117,7 +81,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
     }
   
     const amount = this.form.value.amount;
-    const totalAmount = this.processStringAmountToNumber(amount);
+    const totalAmount = processStringAmountToNumber(amount);
   
     if (totalAmount === null) {
       this.uiService.showSnackBar('Invalid input!', 'OK');
@@ -142,34 +106,10 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       ];
   
       // Send the updated array to the service
-      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, false, true);
+      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
     } else {
       this.uiService.showSnackBar('No matching entry found!', 'Error');
     }
   }
 
-  /** Process string input like '110 + 50' to '160'
-   * @param amount The string input to process
-   * @returns The total amount as a number or null if the input is invalid
-   */
-  processStringAmountToNumber(amount: string): number | null {
-    // Replace commas with dots for German input
-    const normalizedAmount = amount.replace(/,/g, '.');
-
-    // Remove unnecessary spaces around numbers, "+", and "-" signs
-    const cleanedAmount = normalizedAmount.replace(/\s+/g, '');
-
-    // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
-    if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(cleanedAmount)) {
-      return null; // Invalid input
-    }
-
-    try {
-      // Use eval to compute the total since it's a valid math expression
-      const total = eval(cleanedAmount);
-      return total;
-    } catch (error) {
-      return null; // In case of any error during evaluation
-    }
-  }
 }

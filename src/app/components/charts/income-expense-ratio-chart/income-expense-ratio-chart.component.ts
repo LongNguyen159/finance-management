@@ -84,7 +84,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         </div>
         &nbsp;
         <div style="flex: 1; text-align: right;">
-          <strong>${item.value.toLocaleString()}</strong>
+          <strong>${item.value.toLocaleString('en-US')}</strong>
         </div>
       </div>`).join('');
   }
@@ -104,7 +104,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         data: [this.totalIncome],
         barWidth: this.barWidth,
         itemStyle: {
-          color: this.colorService.isDarkMode() ? '#A0CA7E' : 'rgb(157, 202, 127)', // Green for income
+          color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
           borderRadius: [0, 100, 100, 0],
         },
       },
@@ -114,7 +114,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         data: [this.totalExpense],
         barWidth: this.barWidth,
         itemStyle: {
-          color: this.colorService.isDarkMode() ? '#E07A6A' : 'rgb(222, 110, 106)', // Red for expense
+          color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
           borderRadius: [0, 100, 100, 0],
         },
       },

@@ -1,14 +1,15 @@
-import { inject, Injectable, Signal, signal } from '@angular/core';
-import { EntryType, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
+import { inject, Injectable, signal, EventEmitter } from '@angular/core';
+import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
+import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
+
+/** Interface for multi month data. */
 export interface MonthlyData {
     [month: string]: SingleMonthData;
 }
-/** TODO:
- * Rename this model to `SingleMonthData`
- */
+/** Interface for single month data. */
 export interface SingleMonthData {
     sankeyData: SankeyData;
     totalUsableIncome: number;
@@ -21,7 +22,7 @@ export interface SingleMonthData {
     month: string
 }
 
-export interface TreeNode {
+interface TreeNode {
     name: string;
     value: number;
     isValueChangedDuringCalc: boolean
@@ -37,16 +38,30 @@ export interface ExpenseData {
 @Injectable({
   providedIn: 'root'
 })
+
+/** This service main purpose is to handle the processing of Input Data (converting raw input data into Sankey Data with source - target - value).
+ * 
+ * 
+ * This is the central processing part of the app. It also handles saving data into Local Storage and emit observables for the subscribers.
+ */
 export class DataService {
     private UiService = inject(UiService)
+
+    readonly REMAINING_BALANCE_LABEL = 'Surplus'
+
+    //#region Chart Data
     monthlyData: MonthlyData = {};
-    private sankeyData: SankeyData = {
+    private readonly sankeyDataInit: SankeyData = {
         nodes: [],
         links: []
     }
     private remainingBalance: string = '-';
-    private singleMonthEntries: SingleMonthData = {
-        sankeyData: this.sankeyData,
+
+    /** Emit this object if data has a cycle. Only keep raw input and month for user to correct it.
+     * Every other value will be unset to prevent further processing.
+     */
+    private defaultEmptySingleMonthEntries: SingleMonthData = {
+        sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
         totalGrossIncome: -1,
@@ -57,37 +72,57 @@ export class DataService {
         month: ''
     }
 
-    private processedSingleMonthEntries$ = new BehaviorSubject<SingleMonthData>(this.singleMonthEntries)
+    demoLinks: UserDefinedLink[] = [
+        { id: 'demo_1' , type: EntryType.Income, target: 'Salary demo', value: 1000, demo: true},
+        { id: 'demo_2', type: EntryType.Expense, target: 'Groceries', value: 300, source: ExpenseCategory.Groceries},
+        { id: 'demo_3',type: EntryType.Expense, target: 'Pet food', value: 100, source: ExpenseCategory.Groceries},
+    ]
+
+    
+    /** Behaviour subjects to emit the values. */
+    private processedSingleMonthEntries$ = new BehaviorSubject<SingleMonthData>(this.defaultEmptySingleMonthEntries)
     private multiMonthEntries$ = new BehaviorSubject<MonthlyData>(this.monthlyData)
-
     private dataSaved$ = new BehaviorSubject<boolean>(false)
+    //#endregion
 
+
+
+    
+    //#region States
+    /** Signal to check if the app is in demo mode. */
     isDemo = signal(false)
-    isAdvancedShown: boolean = false
+
+    /** Flag to show/hide advanced options in the form. This being here for state saving only.
+     * Meaning components can modify this value. Turning into Signal might also be a good idea.
+     */
+    isAdvancedShown: boolean = true
 
     /** Use this to scale all income-expense bar chart to have same scale.
-     * This value will be the largest value either totalUsableIncome or totalExpenses.
+     * This value will be the largest value of either totalUsableIncome or totalExpenses.
      */
     incomeExpenseScaleValue = signal(0)
 
+
+    /** Data cycle flag. If true, means contains data cycle in the sankey.
+     * If this is the case, do not process the data.
+     */
+    hasDataCycle = signal(false)
+
+    private navigateToFixCost = new EventEmitter<boolean>(false)
+
     selectedActiveDate: Date = new Date();
+    //#endregion
 
-    private copiedLinksKey = 'copiedLinks';
+    /** Immutable states */
+    private readonly copiedLinksKey = 'copiedLinks';
+    readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', this.REMAINING_BALANCE_LABEL, '-- None --' , ...Object.values(ExpenseCategory)];
 
-    
-
-    demoLinks: UserDefinedLink[] = [
-        { type: EntryType.Income, target: 'Salary demo', value: 2200, demo: true },
-        { type: EntryType.Expense, target: 'Housing', value: 800},
-        { type: EntryType.Expense, target: 'Rent', value: 500, source: 'Housing'},
-        { type: EntryType.Expense, target: 'WiFi', value: 40, source: 'Housing'},
-        { type: EntryType.Expense, target: 'Groceries', value: 300},
-    ]
 
     constructor() {
         this.initializeData()
     }
 
+    //#region: Initialise Data
     private initializeData(): void {
         this.removeOldUserFinancialData(); // Remove old key from previous versions
     
@@ -101,12 +136,12 @@ export class DataService {
         }
     }
     
-    private isFirstTimeUser(): boolean {
+    isFirstTimeUser(): boolean {
         const firstTime = localStorage.getItem('firstTime');
         return firstTime == null || firstTime === 'true' || firstTime == undefined;
     }
 
-    private isOldVersion(): boolean {
+    isOldVersion(): boolean {
         const storedVersion = localStorage.getItem('appVersion');
         if (!storedVersion) return true; // Treat as outdated if version is missing
     
@@ -116,7 +151,7 @@ export class DataService {
     
     private processDemoData(): void {
         const todaysDate = new Date();
-        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), true);
+        this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true, emitObservable: true});
     }
     
     private loadExistingData(): void {
@@ -131,6 +166,7 @@ export class DataService {
             this.processInputData([], formatDateToYYYYMM(new Date()));
         }
     }
+    //#endregion
 
 
     
@@ -146,19 +182,75 @@ export class DataService {
 
     //#region: Process Input Data
 
-    /** Process input data and emits a Subject of Single month entries.
-     * @param userDefinedLinks: raw input from form.
-     * @param month: month in "YYYY-MM" format.
-     * @param demo: flag to indicate if the data is demo data.
-     * @param showSnackbarWhenDone: flag to show snackbar when data is processed.
-     * @param emitObservable: flag to emit observable. True: Emit obseravale for subscribe to do something with the data. False: Only save processed data in local storage.
+    /**
+     * Processes input data and emits a Subject for single month entries.
+     * @param userDefinedLinks - The raw input data from the form.
+     * @param month - The month for which to process data, in "YYYY-MM" format.
+     * @param options - An object containing optional configuration flags:
+     *   - demo: `boolean` (default: `false`) - Indicates if the data is demo data.
+     *   - showSnackbarWhenDone: `boolean` (default: `false`) - Shows a snackbar notification when data processing is complete.
+     *   - emitObservable: `boolean` (default: `true`) - If `true`, emits an observable with the processed data for further actions.
+     *       If `false`, only saves the processed data in local storage without emitting.
      */
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, demo: boolean = false, showSnackbarWhenDone: boolean = false, emitObservable: boolean = true): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
+        /** Prevent overriding default value if not given.
+         * e.g. `emitObservable` defaults to true, but if not provided by caller, it will be undefined.
+         * This line below will set it to true if it's not provided.
+         */
+        const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
+
+        /** Early exit if detect negative values. */
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
             this.UiService.showSnackBar('Negative values are not allowed', 'Dismiss', 5000);
             return;
         }
+        
+        /** Check for non valid values field. */
+        if ((userDefinedLinks && userDefinedLinks.length > 0) && userDefinedLinks.some(link => typeof link.value !== 'number' || isNaN(link.value))) {
+            console.error('Error: One or more values are not valid numbers');
+            this.UiService.showSnackBar('One or more values are not valid numbers', 'Dismiss', 5000);
+            return;
+        }
+        
+        if (this.checkDuplicateNames(userDefinedLinks)) {
+            this.UiService.showSnackBar('Duplicate names are not allowed', 'Dismiss', 5000);
+            return;
+        }
+
+        /** Check for restricted name usage */
+        if (userDefinedLinks.some(link => this.nonAllowedNames.includes(link.target))) {
+            const foundLinks = userDefinedLinks.filter(link => this.nonAllowedNames.includes(link.target));
+            const dialogData: ConfirmDialogData = {
+                title: 'Warning: Restricted Name Usage',
+                message: `Some names in your input are reserved for internal use and may cause unexpected behaviours. 
+                          Please rename the following entries:<br><br>
+                          ${foundLinks.map(link => `- "${link.target}"`).join('<br>')}
+                         `,
+                confirmLabel: 'OK'
+            };
+            this.UiService.openConfirmDialog(dialogData)
+        }
+
+        /** Early exit if detect data cycle */
+        if (this.hasDataCycle()) {
+            this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
+            console.log('Data has a cycle! Emitting default entries');
+            this.defaultEmptySingleMonthEntries = {
+                sankeyData: this.sankeyDataInit,
+                totalUsableIncome: -1,
+                totalTax: -1,
+                totalGrossIncome: -1,
+                totalExpenses: -1,
+                remainingBalance: '-',
+                pieData: [],
+                rawInput: userDefinedLinks,
+                month: month
+            }
+            this.processedSingleMonthEntries$.next(this.defaultEmptySingleMonthEntries);
+            return;
+        }
+
 
         const nodesMap = new Map<string, { value: number, type: EntryType }>(); // Map to hold unique nodes and their total values and types
         const links: SankeyLink[] = []; // Array to hold links between nodes
@@ -168,8 +260,8 @@ export class DataService {
         let singleIncome = false; // Flag to check if there is only one income source
         const hasTax = userDefinedLinks.some(link => link.type === EntryType.Tax); // Check if there is any tax link
 
-        /** Demo flag: Only set to true when the app loads for the first time to show our demo
-         * graph for first time users.
+        /** Demo flag: Only set to true when the app loads for the first time
+         * to show our demo graph for first time users.
          */
         if (demo || JSON.stringify(userDefinedLinks) == JSON.stringify(this.demoLinks) || userDefinedLinks.some(link => link.demo)) {
             this.isDemo.set(true)
@@ -205,10 +297,15 @@ export class DataService {
         //#region: Handle Income & Taxes
         // Step 2: Aggregate income into "Total Income" node if multiple income sources exist
         if (incomeNodes.length > 1) {
+            // Sum up every item in incomeNodes to get total income value
             totalIncomeValue = incomeNodes.reduce((sum, node) => sum + (nodesMap.get(node)?.value || 0), 0);
             nodesMap.set('Total Income', { value: totalIncomeValue, type: EntryType.Income });
+
         } else if (incomeNodes.length === 1) {
             singleIncome = true; // Only one income source, no need for a "Total Income" node
+
+
+            // Total income value will be the value of incomeNodes[0], because there's only one anyway.
             totalIncomeValue = nodesMap.get(incomeNodes[0])?.value || 0;
         }
 
@@ -216,6 +313,9 @@ export class DataService {
         const incomeSource = singleIncome ? incomeNodes[0] : 'Total Income';
         const taxLink = userDefinedLinks.find(link => link.type == EntryType.Tax);
 
+
+
+        /** If has tax, create 'Usable Income' node and use it as source for all expenses. */
         if (hasTax && taxLink) {
             let usableIncome = totalIncomeValue;
             const taxValue = nodesMap.get(taxLink.target)?.value || 0;
@@ -239,10 +339,13 @@ export class DataService {
 
 
         //#region: Handle Expenses
-        // Default root node for the sankey chart
-        const expenseSource = hasTax ? 'Usable Income' : incomeSource;
+        
+        /** This will be the default root node for Sankey Chart. The source for all expenses to flow from. */
+        const sourceForExpenses = hasTax ? 'Usable Income' : incomeSource;
 
-        // Step 4: Create links for individual incomes and expenses (no need to modify nodesMap again)
+        // Step 4: Create links for expenses, using default expense source.
+        const allowedCategories = Object.values(ExpenseCategory);
+
         userDefinedLinks.forEach(link => {
             if (link.type == EntryType.Income) {
                 if (!singleIncome) {
@@ -252,21 +355,45 @@ export class DataService {
                         value: link.value
                     });
                 }
-            } else if (link.type == EntryType.Expense) {
-                const sourceNode = link.source || expenseSource;
-        
-                // Check if the source node exists in the nodesMap; if not, use the default expenseSource
-                const isSourceValid: boolean = nodesMap.has(sourceNode)
-                const validSource = isSourceValid ? sourceNode : expenseSource;
-                if (!isSourceValid) {
-                    link.source = '';
+            } else if (link.type === EntryType.Expense) {
+                let sourceNode = link.source || sourceForExpenses;
+
+                // Check if the source node exists in nodesMap or is an allowed category
+                if (!nodesMap.has(sourceNode) && allowedCategories.includes(sourceNode as ExpenseCategory)) {
+                    // Create the missing source node as a new entry with 'Expense' type
+                    nodesMap.set(sourceNode, { value: 0, type: EntryType.Expense });
+
+                    // Calculate its total value by summing all links that use it as a source
+                    const sourceValue = userDefinedLinks
+                        .filter(childLink => childLink.source === sourceNode)
+                        .reduce((sum, childLink) => sum + childLink.value, 0);
+                    
+                    // Set the source node's accumulated value
+                    nodesMap.get(sourceNode)!.value = sourceValue;
+
+                    // Add a link from the new source node to its child
+                    links.push({
+                        source: sourceNode,
+                        target: link.target,
+                        value: link.value
+                    });
+
+                    // Link newly created source node to the default income node
+                    links.push({
+                        source: sourceForExpenses, // Link to default income (Total Income or single income node)
+                        target: sourceNode,
+                        value: sourceValue
+                    });
+                } else {
+                    // If the source is not found or is not in allowed categories, link directly to default income
+                    const validSource = nodesMap.has(sourceNode) ? sourceNode : sourceForExpenses;
+                    
+                    links.push({
+                        source: validSource,
+                        target: link.target,
+                        value: link.value
+                    });
                 }
-        
-                links.push({
-                    source: validSource, // Use either the user-defined source or the default expenseSource
-                    target: link.target,
-                    value: link.value
-                });
             }
         });
 
@@ -274,16 +401,24 @@ export class DataService {
 
 
         //#region: Handle Return params
-        // Step 5: Convert nodesMap to an array of nodes (including child nodes)
+
+        // Step 5: Get Links and Nodes
+
+        // Convert nodesMap to an array of nodes (including child nodes)
         const nodes: SankeyNode[] = Array.from(nodesMap.entries()).map(([name, { value }]) => ({ name, value: value }));
 
-        // Step 6: Remove duplicate links
+        // Remove duplicate links
         const uniqueLinks: SankeyLink[] = Array.from(new Set(links.map(link => JSON.stringify(link)))).map(link => JSON.parse(link) as SankeyLink);
  
 
-       // Step 7: Calculate return params
+       // Step 6: Calculate return params
+
        /** Pie data will be generated based on Tree Structure generated from Sankey.
         * Not from Sankey links.
+        * 
+        * Pie data will be the top level expenses only, meaning the first level in tree structure.
+        * We do this because how else would we know which items are top level or which are children of which?
+        * So we transform Sankey data (source - target - value) into a tree structure (name - value - children).
         * 
         * => If you want to modify pie chart data, modify tree structure.
         */
@@ -292,20 +427,24 @@ export class DataService {
         const { totalExpenses, topLevelexpenses: pieData, changedExpensesDuringCalculation: changedExpensesDuringCalculation } = this._getExpensesData(uniqueLinks, hasTax, incomeNodes.length);
         const remainingBalance: number = (totalIncomeValue - totalExpenses - totalTaxValue)
 
+        // Push remaining balance number to Pie Data to show how much is left proportionally.
         pieSeriesData = [
             ...pieData,
-            { name: 'Remaining Balance', value: remainingBalance },
+            { name: this.REMAINING_BALANCE_LABEL, value: remainingBalance },
         ];
-        // const updatedRawInput: UserDefinedLink[] = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
+
 
         let updatedRawInput: UserDefinedLink[] = userDefinedLinks; // Default to original input
 
-        // Update raw input if necessary
+        /** Update raw input if there are changes in expenses during calculation.
+         * The value of some parent will be added up to correctly reflect total value of children.
+         * Raw Input should be updated to correctly populate the form with new values.
+         */
         if (changedExpensesDuringCalculation.length > 0) {
             updatedRawInput = this._updateUserInput(userDefinedLinks, changedExpensesDuringCalculation);
         }
 
-        // Step 1: Update Sankey nodes and links based on updatedRawInput
+        // Update Sankey nodes and links based on updatedRawInput
         const updatedNodes = nodes.map(node => {
             const updatedNode = updatedRawInput.find(link => link.target === node.name);
             return updatedNode ? { ...node, value: updatedNode.value } : node; // Update value or leave as is
@@ -316,13 +455,15 @@ export class DataService {
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
         });
 
+
+        // Final Object to be emitted
         this.monthlyData[month] = {
             sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
             totalTax: totalTaxValue,
             totalExpenses: totalExpenses,
-            remainingBalance: remainingBalance.toLocaleString(),
+            remainingBalance: remainingBalance.toLocaleString('en-US'),
             pieData: pieSeriesData,
             rawInput: updatedRawInput,
             month: month
@@ -331,6 +472,7 @@ export class DataService {
         // Emit the processed data
         if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+            console.log('Observable emitted:', this.monthlyData[month]);
             // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         }
 
@@ -343,6 +485,32 @@ export class DataService {
         //#endregion
     }
 
+    checkDuplicateNames(links: UserDefinedLink[]): boolean {    
+        const values: string[] = links.map(link => link.target);
+        // Track duplicates
+        const seen = new Set<string>();
+        const duplicateNames = values.filter((item) => {
+        const normalizedItem = item.toLowerCase().trim();
+        if (seen.has(normalizedItem)) {
+            return true;
+        }
+        seen.add(normalizedItem);
+        return false;
+        });
+
+        if (duplicateNames.length > 0) {
+        return true
+        } else {
+        return false
+        }
+    }
+
+    /** Update Raw input to correctly reflect the parent value as sum of their children values.
+     * @param oldInput - The original input data.
+     * @param changedExpenses - The array of changed expenses during calculation.
+     * 
+     * @returns The updated input data with parent values updated to reflect the sum of their children.
+     */
     private _updateUserInput(oldInput: UserDefinedLink[], changedExpenses: TreeNode[]): UserDefinedLink[] {
         return oldInput.map(link => {
             // Check if the current link's target matches any of the changed expenses
@@ -367,18 +535,29 @@ export class DataService {
             return result;
         }, {} as MonthlyData);
     
+        /** Save all months data in Local Storage.
+         * Optimise:
+         * Only write into Local Storage the processed data?
+         * Currently we are writing all months in on every save.
+         * 
+         */
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
+
+        // Emit all months data
         this.multiMonthEntries$.next(nonEmptyMonthlyData);
         this.dataSaved$.next(true);
     }
 
-    // Load data from LocalStorage
+    /** Retrieve existing entries from Local Storage */
     loadData(): MonthlyData | null {
         const saved = localStorage.getItem('monthlyData');
         return saved ? JSON.parse(saved) as MonthlyData: null;
     }
 
-    /** Return all local storage items */
+    /** Return all local storage items
+     * 
+     * UNUSED: This function is not used in the current implementation. But reserved for future use.
+     */
     getAllLocalStorageItems(): { [key: string]: any } {
         const items: { [key: string]: any } = {};
         
@@ -398,6 +577,9 @@ export class DataService {
         return items;
     }
 
+    /** Get monthly data object from Local Storage.
+     * @returns All months data. Key as yyyy-mm format, value are corresponding entries.
+     */
     getMonthlyDataFromLocalStorage(): { [key: string]: any } {
         const monthlyData = localStorage.getItem('monthlyData');
         if (!monthlyData) {
@@ -416,6 +598,9 @@ export class DataService {
     }
 
 
+    /** Remove a specific month entries from Local Storage. Used by Finance Manager,
+     * to delete all entries of a month.
+     */
     removeMonthFromLocalStorage(key: string) {
         // Get the current data from LocalStorage
         const storedData = localStorage.getItem('monthlyData');
@@ -457,12 +642,6 @@ export class DataService {
           }
         });
     }
-
-    private clearData() {
-        localStorage.removeItem('userFinancialData');
-        console.log('User data cleared from LocalStorage');
-    }
-
     //#endregion
 
 
@@ -476,6 +655,12 @@ export class DataService {
     retrieveCopiedLinks(): UserDefinedLink[] | null {
         const data = sessionStorage.getItem(this.copiedLinksKey);
         return data ? JSON.parse(data) : null;
+    }
+
+
+    retrieveFixCostsLinks(): UserDefinedLink[] {
+        const fixedLinks = localStorage.getItem('fixCosts')
+        return fixedLinks ? JSON.parse(fixedLinks) : []  
     }
 
     //#endregion
@@ -585,10 +770,13 @@ export class DataService {
         // Step 2: Build the tree from the root node
         let treeFromRootNode: TreeNode = this._buildTree(links, rootNodeName);
 
-        /** Tree might be modified here. So if you want to use the tree structure, use it after these lines. */
+        /** Tree might be modified during calculations. So if you want to use the tree structure, write code after these lines. */
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
         
+        /** Tree is in recursive structure, but we only care about Top-level expense for pie data.
+         * So only iterate through children of root node to get top level expenses.
+         */
         const pieData = treeFromRootNode.children.map(child => {
             return {
                 name: child.name,
@@ -596,8 +784,6 @@ export class DataService {
             }
         })
 
-    
-        // Step 3: Calculate total expenses from the root
         return {
             totalExpenses: totalExpenses,
             topLevelexpenses: pieData,
@@ -605,7 +791,13 @@ export class DataService {
         }
     }
 
-    /** Recursively transverse the tree to find the modified nodes. Returns an array of changed nodes. */
+    /** Recursively transverse the tree to find the modified nodes.
+     * @param node - The current node to check for changes. Or the starting node.
+     * It will recursively check all children of the node.
+     * @param changedNodes - The array to store the changed nodes. Default to empty array, will be used in recursion to push in changed nodes.
+     * 
+     * @returns An array of changed nodes.
+     */
     private _getChangedNodes(node: TreeNode, changedNodes: TreeNode[] = []): TreeNode[] {    
         // Check if the node has been modified
         if (node.isValueChangedDuringCalc) {
@@ -631,7 +823,13 @@ export class DataService {
     //#endregion
     
 
+    setNavigateFixCostState(value: boolean) {
+        this.navigateToFixCost.emit(value)
+    }
 
+    getNavigateFixCostState() {
+        return this.navigateToFixCost.asObservable()
+    }
 
     //#region: Getters
     /** Get single month entries */

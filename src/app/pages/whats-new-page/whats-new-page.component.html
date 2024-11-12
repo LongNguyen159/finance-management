@@ -19,7 +19,7 @@
                 </p>
             </div>
             <div class="image-section">
-                <img class="object-cover aspect-[4/3] w-[600px] h-full image" src="assets/images/calendar-dark.png" alt="whats-new">
+                <img class="object-cover aspect-[4/3] w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/calendar-dark.png' : 'assets/images/calendar-light.png'" alt="whats-new">
             </div>
         </div>
 
@@ -38,51 +38,70 @@
         </div>
 
 
+        <div class="feature-card grid-display">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Inline Calculator</h2>
+                <p>
+                    Perform quick calculations on the fly with the Inline Calculator! Add, subtract, multiply, and divide without leaving the input field. Easy Sankey does the math for you!
+                </p>
+            </div>
+            <div class="image-section">
+                <img class="object-cover h-full w-[600px] image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/inline-calc-dark.png' : 'assets/images/inline-calc-light.png'" alt="whats-new">
+            </div>
+        </div>
+
+
+        <div class="feature-card grid-display">
+            <div class="image-section">
+                <img class="object-cover h-full w-[600px] image image-border p-3" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/budget-dark.png' : 'assets/images/budget-light.png'" alt="whats-new">
+            </div>
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Budgets vs Actual Spending</h2>
+                <p>
+                    Set spending limits in the 'Budgets' section of the 'Finance Manager' and track your progress with real-time radar and gauge charts. Compare budgeted vs. actual spending to stay on track!
+                </p>
+            </div>
+        </div>
         
 
-        <!-- 
-        <div class="feature-card">
+
+
+
+        <div class="feature-card grid-display">
             <div class="text-section">
-                <h2 class="font-bold mb-2">Copy-Paste</h2>
+                <h2 class="font-bold mb-4 text-3xl">Finance Manager - All in One Place.</h2>
                 <p>
-                    Save time with Copy-Paste! Quickly duplicate monthly entries without the hassle of retyping.
+                    Stay on top of your finances with the 'Finance Manager'. Monitor your income and expenses, set budgets for each category, and define fixed costs for recurring expenses—all in one place.
                 </p>
-            </div>
-            <div class="image-section">
-                <img class="object-cover h-full image" src="assets/images/copy-paste-dark.png" alt="whats-new">
-            </div>
-        </div> -->
-
-
-        <div class="feature-card">
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">Insert small expenses</h2>
-                <p>
-                    Easily track small expenses! Add individual purchases to your Sankey diagram for better insights.
-                </p>
-            </div>
-            <div class="image-section">
-                <img class="object-cover h-full aspect-[4/3] w-[600px] image" src="assets/images/insert-into-dark.png" alt="whats-new">
-            </div>
-        </div>
-
-
-
-
-        <div class="feature-card">
-            <div class="image-section">
-                <img class="object-cover h-full w-[800px] image" src="assets/images/manager-dark.png" alt="whats-new">
             </div>
             
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">Finance Manager</h2>
-                <p>
-                    Get an overview of your finances! Monitor income and expenses over time to stay in control of your budget.
-                </p>
+            <div class="image-section">
+                <img class="object-cover h-full w-[800px] image p-3 pt-4"
+                    [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'"
+                    [src]="colorService.isDarkMode() ? 'assets/images/manager-dark.png' : 'assets/images/manager-light.png'"
+                    alt="Finance Manager">
             </div>
+            
+        </div>
+
+        <div >
+            <mat-card class="flex flex-col items-center gap-2 w-full px-40 py-20 !rounded-[28px] max-w-[1240px]">
+                <mat-card-header class="mb-6">
+                    <mat-card-title>
+                        <h2 class="font-bold mb-4 text-3xl">Experience Easy Sankey Now!</h2>
+                    </mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <button mat-flat-button routerLink="/" (click)="uiService.scrollToTop()">
+                        Get Started
+                    </button>
+                </mat-card-content>
+            </mat-card>
+            
+
         </div>
         <div class="h-20">
-
         </div>
     </div>
 </div>

@@ -5,13 +5,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
-import { StorageManagerComponent } from "../../storage-manager/storage-manager.component";
-
 @Component({
   selector: 'app-storage-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatCardModule,
-    MatRadioModule, CommonModule, FormsModule, StorageManagerComponent],
+    MatRadioModule, CommonModule, FormsModule],
   templateUrl: './storage-dialog.component.html',
   styleUrl: './storage-dialog.component.scss'
 })

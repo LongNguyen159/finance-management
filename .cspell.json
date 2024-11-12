@@ -1,0 +1,21 @@
+{
+    "version": "0.1",
+    "language": "en",
+    "files": ["src/**/*.html", "src/**/*.ts"],
+    "dictionaries": ["en_GB"],
+    "dictionaryDefinitions": [
+      {
+        "name": "en_GB",
+        "path": "node_modules/@cspell/dict-en-gb/en_GB.trie.gz",
+        "addWords": true
+      }
+    ],
+    "ignorePaths": ["node_modules", "dist"],
+    "overrides": [
+      {
+        "filename": "**/*.html",
+        "language": "en",
+        "allowCompoundWords": true
+      }
+    ]
+}
