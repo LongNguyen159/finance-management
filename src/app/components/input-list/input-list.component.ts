@@ -147,10 +147,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
 
-
-
   /** Search value for filtering the input fields. */
   filterQuery: string = '';
+  matchingQueries: string[] = [];
 
 
   constructor(private fb: FormBuilder) {
@@ -554,6 +553,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
     })
 
+    this.matchingQueries = links.map(item => item.target);
+
     this.hasDuplicates = this._checkDuplicateName()
     this.checkForInvalidRows()
 
@@ -739,17 +740,19 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   get fixCosts(): UserDefinedLink[] {
     return this.linkArray.value.filter((link: UserDefinedLink) => link.isFixCost);
   }
-
+  
   /** For the search function */
-  get filteredLinks() {
-    if (!this.filterQuery) {
-      return this.linkArray.controls;
+  filterLinks(query: string): void {
+    if (!query) {
+      this.matchingQueries = this.linkArray.controls.map(item => item.get('target')?.value || '');
     }
-    return this.linkArray.controls.filter(control => {
+
+
+    this.matchingQueries = this.linkArray.controls.filter(control => {
       const target = control.get('target')?.value?.toLowerCase() || '';
-      const searchTerm = this.filterQuery.toLowerCase();
+      const searchTerm = query.toLowerCase();
       return target.includes(searchTerm);
-    });
+    }).map(item => item.get('target')?.value || '');
   }
   //#endregion
 

@@ -23,16 +23,10 @@
     </div>
 
     <!-- ACTIONS BUTTONS -->
-    <!-- <div class="flex flex-row justify-end items-center w-full">
-      <button mat-icon-button (click)="isSearchDisplayed = !isSearchDisplayed">
-        <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
-      </button>
-    </div> -->
-
     <div class="flex flex-row w-[25%] items-center justify-end gap-1 absolute right-0">
       <div class="flex flex-row w-full justify-center"> 
         <mat-form-field appearance="outline" floatLabel="always">
-          <input matInput [(ngModel)]="filterQuery" [ngModelOptions]="{standalone: true}" placeholder="Search">
+          <input #inputValue matInput (input)="filterLinks(inputValue.value)" placeholder="Search">
           <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
         </mat-form-field>
       </div>
@@ -92,13 +86,13 @@
       </div>
     </div>
 
-
+    <!-- FIX COST ARRAY -->
     <mat-card class="mb-4 material-background" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isFixCostsExpanded) {
         <mat-card-content>
           <div>
             <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
-              @if (linkGroup.get('isFixCost')?.value) {
+              @if (linkGroup.get('isFixCost')?.value && matchingQueries.includes(linkGroup.get('target')?.value)) {
                 <!-- Target -->
                 <mat-form-field appearance="fill">
                   <mat-label>Name</mat-label>
@@ -184,12 +178,13 @@
       <p class="font-bold text-2xl !m-0 cursor-pointer" (click)="isVariableCostsExpanded = !isVariableCostsExpanded">Variable Costs</p>
     </div>
 
+    <!-- VARIABLE COSTS ARRAY -->
     <mat-card class="mb-4 material-background" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
-          <div *ngFor="let linkGroup of filteredLinks; let i = index" [formGroupName]="i" class="link-row">
+          <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
 
-            @if (!linkGroup.get('isFixCost')?.value) {
+            @if (!linkGroup.get('isFixCost')?.value && matchingQueries.includes(linkGroup.get('target')?.value)) {
               <!-- Target -->
               <mat-form-field appearance="fill">
                 <mat-label>Name</mat-label>
