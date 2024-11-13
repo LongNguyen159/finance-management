@@ -11,13 +11,20 @@ import { BasePageComponent } from '../../../base-components/base-page/base-page.
 import {formatYearMonthToLongDate } from '../../../utils/utils';
 import { NavigationStart, Router } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
+import { CommonModule, DatePipe } from '@angular/common';
+import { ColorService } from '../../../services/color.service';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @Component({
   selector: 'app-input-list-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule,
-    InputListComponent],
+    InputListComponent,
+    DatePipe,
+    CommonModule,
+    MatIconModule
+  ],
   templateUrl: './input-list-dialog.component.html',
   styleUrl: './input-list-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,6 +34,7 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
   router = inject(Router)
   dialogRef = inject(MatDialogRef)
   uiService = inject(UiService)
+  colorService = inject(ColorService)
 
   monthString: string = ''
   singleMonthData: SingleMonthData

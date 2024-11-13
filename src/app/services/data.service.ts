@@ -11,6 +11,7 @@ export interface MonthlyData {
 }
 /** Interface for single month data. */
 export interface SingleMonthData {
+    lastUpdated: Date
     sankeyData: SankeyData;
     totalUsableIncome: number;
     totalGrossIncome: number;
@@ -61,6 +62,7 @@ export class DataService {
      * Every other value will be unset to prevent further processing.
      */
     private defaultEmptySingleMonthEntries: SingleMonthData = {
+        lastUpdated: new Date(),
         sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -239,6 +241,7 @@ export class DataService {
             this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
             console.log('Data has a cycle! Emitting default entries');
             this.defaultEmptySingleMonthEntries = {
+                lastUpdated: new Date(),
                 sankeyData: this.sankeyDataInit,
                 totalUsableIncome: -1,
                 totalTax: -1,
@@ -457,9 +460,17 @@ export class DataService {
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
         });
 
+        const savedSingleMonthData = this.loadSingleMonth(month);
+        console.log('Saved Single Month Data:', savedSingleMonthData);
+        console.log('Processing input data:', userDefinedLinks);
+        console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
+        const isDifferent = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+
+
 
         // Final Object to be emitted
         this.monthlyData[month] = {
+            lastUpdated: isDifferent ? new Date() : savedSingleMonthData?.lastUpdated || new Date(),
             sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
@@ -482,18 +493,14 @@ export class DataService {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 
-        const savedSingleMonthData = this.loadSingleMonth(month);
-        console.log('Saved Single Month Data:', savedSingleMonthData?.rawInput);
-        console.log('Processing input data:', userDefinedLinks);
-        console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
-        const isDifferent = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+        
         if (isDifferent) {
             this.saveData()
         }
         //#endregion
     }
 
-    checkDuplicateNames(links: UserDefinedLink[]): boolean {    
+    checkDuplicateNames(links: UserDefinedLink[]): boolean {
         const values: string[] = links.map(link => link.target);
         // Track duplicates
         const seen = new Set<string>();

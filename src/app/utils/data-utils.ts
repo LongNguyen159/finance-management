@@ -36,6 +36,7 @@ export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, 
 
 function initializeEmptyData(monthString: string): SingleMonthData {
     return {
+      lastUpdated: new Date(),
       sankeyData: { nodes: [], links: [] }, // Adjust based on your SankeyData structure
       totalUsableIncome: 0,
       totalGrossIncome: 0,

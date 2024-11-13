@@ -1,8 +1,20 @@
-<h2 mat-dialog-title class="!font-bold text-xl">
-  {{ monthString }}
-</h2>
-<mat-dialog-content class="mat-typography">
-    <app-input-list [triggeredMonthByDialog]="currentMonth"></app-input-list>
+<div>
+  <h2 mat-dialog-title class="!font-bold text-xl">
+    {{ monthString }}
+  </h2>
+  @if (singleMonthData && singleMonthData.lastUpdated) {
+    <div class="text-sm w-full flex flex-row items-center px-6 gap-1" [ngClass]="colorService.isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
+      <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+      <span>
+        Last Updated: {{ singleMonthData.lastUpdated | date: 'medium' }}
+      </span>
+    </div>
+  }
+</div>
+
+
+<mat-dialog-content class="mat-typography !pt-0">
+  <app-input-list [triggeredMonthByDialog]="currentMonth"></app-input-list>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-flat-button [mat-dialog-close]="true" cdkFocusInitial>Save & Close</button>
