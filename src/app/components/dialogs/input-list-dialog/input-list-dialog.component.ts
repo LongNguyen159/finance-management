@@ -14,6 +14,8 @@ import { UiService } from '../../../services/ui.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ColorService } from '../../../services/color.service';
 import { MatIconModule } from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+
 
 
 @Component({
@@ -23,7 +25,8 @@ import { MatIconModule } from '@angular/material/icon';
     InputListComponent,
     DatePipe,
     CommonModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './input-list-dialog.component.html',
   styleUrl: './input-list-dialog.component.scss',
