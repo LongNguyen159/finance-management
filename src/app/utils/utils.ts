@@ -71,7 +71,7 @@ export function processStringAmountToNumber(amount: string | number): number | n
   try {
     // Use mathjs's evaluate function to compute the total
     const total = evaluate(withoutLeadingZeros);
-    return typeof total === 'number' ? total : null;
+    return typeof total === 'number' ? Math.round(total * 100) / 100 : null;
   } catch (error) {
     return null; // In case of any error during evaluation
   }
