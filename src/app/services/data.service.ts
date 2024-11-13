@@ -11,7 +11,7 @@ export interface MonthlyData {
 }
 /** Interface for single month data. */
 export interface SingleMonthData {
-    lastUpdated: Date
+    lastUpdated: Date | string
     sankeyData: SankeyData;
     totalUsableIncome: number;
     totalGrossIncome: number;
@@ -62,7 +62,7 @@ export class DataService {
      * Every other value will be unset to prevent further processing.
      */
     private defaultEmptySingleMonthEntries: SingleMonthData = {
-        lastUpdated: new Date(),
+        lastUpdated: '-',
         sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -241,7 +241,7 @@ export class DataService {
             this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
             console.log('Data has a cycle! Emitting default entries');
             this.defaultEmptySingleMonthEntries = {
-                lastUpdated: new Date(),
+                lastUpdated: '-',
                 sankeyData: this.sankeyDataInit,
                 totalUsableIncome: -1,
                 totalTax: -1,
@@ -464,13 +464,15 @@ export class DataService {
         console.log('Saved Single Month Data:', savedSingleMonthData);
         console.log('Processing input data:', userDefinedLinks);
         console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
-        const isDifferent = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+        const isDifferent: boolean = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+        const isEmpty: boolean = userDefinedLinks.length === 0;
+        console.log('is empty:', isEmpty);
 
 
 
         // Final Object to be emitted
         this.monthlyData[month] = {
-            lastUpdated: isDifferent ? new Date() : savedSingleMonthData?.lastUpdated || new Date(),
+            lastUpdated: (isDifferent && !isEmpty) ? new Date() : savedSingleMonthData?.lastUpdated || '-',
             sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
