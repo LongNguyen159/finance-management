@@ -484,7 +484,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
     this.taxNodeExists = this._hasTaxNode(updatedFormData);
     
-    if (!this.linkForm.valid || this.updateFromService) return;
+    if (!this.linkForm.valid || this.updateFromService) return; // Exit function here, don't process input if not valid.
 
     this.dataService.processInputData(updatedFormData, this.dataMonth);
   
@@ -701,11 +701,20 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       return false;
     });
 
+    const emptyNames = formValues.filter(name => name.trim() === '');
+
     this.duplicatedNames = [...duplicateNames];
+
+    // Handle empty names
+    if (emptyNames.length > 0) {
+      this.hasDuplicates = true;
+      this.errorMessage = `Empty names are not allowed.`;
+      return true;
+    }
 
     /** FormGroup is used to set error on form. */
     if (duplicateNames.length > 0) {
-      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 10000);
+      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 5000);
       this.hasDuplicates = true;
       this.errorMessage = `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`;
       return true
