@@ -199,6 +199,8 @@ export class DataService {
          */
         const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
 
+
+
         /** Early exit if detect negative values. */
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
@@ -480,8 +482,14 @@ export class DataService {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 
-        this.saveData()
-
+        const savedSingleMonthData = this.loadSingleMonth(month);
+        console.log('Saved Single Month Data:', savedSingleMonthData?.rawInput);
+        console.log('Processing input data:', userDefinedLinks);
+        console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
+        const isDifferent = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+        if (isDifferent) {
+            this.saveData()
+        }
         //#endregion
     }
 
@@ -542,6 +550,7 @@ export class DataService {
          * 
          */
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
+        console.log('Data saved:', nonEmptyMonthlyData);
 
         // Emit all months data
         this.multiMonthEntries$.next(nonEmptyMonthlyData);
@@ -552,6 +561,15 @@ export class DataService {
     loadData(): MonthlyData | null {
         const saved = localStorage.getItem('monthlyData');
         return saved ? JSON.parse(saved) as MonthlyData: null;
+    }
+
+    loadSingleMonth(month: string): SingleMonthData | null {
+        const saved = localStorage.getItem('monthlyData');
+        if (saved) {
+            const data = JSON.parse(saved) as MonthlyData;
+            return data[month] || null;
+        }
+        return null;
     }
 
     /** Return all local storage items
