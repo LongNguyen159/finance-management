@@ -6,7 +6,7 @@
     <div class="text-sm w-full flex flex-row items-center px-6 gap-1" [ngClass]="colorService.isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
       <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
       <span matTooltip="Last edited" [matTooltipPosition]="'below'" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}" class="text-highlight">
-        {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY, HH:MM:ss' }}
+        {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY, HH:mm:ss' }}
       </span>
     </div>
   }
