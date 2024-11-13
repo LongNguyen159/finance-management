@@ -25,6 +25,16 @@
           predictable. Examples are rent, insurance, or subscriptions.
         </p>
       </div>
+      @if (linkArray.controls.length == 0) {
+        <div class="flex flex-col w-full items-center justify-center gap-2 middle-screen">
+          <span class="font-bold">
+            No Fix Costs defined yet. Add some by clicking 'Add Entries' below.
+          </span>
+          <mat-icon fontSet="material-symbols-outlined" class="big-icon">
+            arrow_downward
+          </mat-icon>
+        </div>
+      }
       <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
         <!-- Target -->
         <mat-form-field appearance="fill">
