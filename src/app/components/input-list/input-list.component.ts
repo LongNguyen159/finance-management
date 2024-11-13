@@ -23,6 +23,7 @@ import { onMonthChanges } from '../../utils/data-utils';
 import { Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MatDividerModule } from '@angular/material/divider';
+import { v4 as uuidv4 } from 'uuid';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -235,7 +236,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    */
   protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
     const linkGroup = this.fb.group({
-      id: [link && link.id ? link.id : crypto.randomUUID(), Validators.required], // Generate a unique UUID if link.id is missing.
+      id: [link && link.id ? link.id : uuidv4(), Validators.required], // Generate a unique UUID if link.id is missing.
       type: [link ? link.type : '', Validators.required],
       target: [link ? link.target : '', [
         Validators.required,

@@ -89,15 +89,6 @@ export class FixCostInputComponent extends InputListComponent {
     this.initialFormState = [...formData]; // Update the stored form state
   }
 
-  override addLink(): void {
-    /** Mark as untouch to prevent form being marked as invalid on adding link without doing anything yet */
-    this.linkForm.markAsUntouched()
-    this.linkArray.push(this._createLinkGroup(), { emitEvent: false });
-    // scroll to bottom after adding new form field
-    setTimeout(() => {
-      this.scrollToBottom()
-    }, 200)
-  }
 
   override removeLink(index: number): void {
     this.linkArray.removeAt(index, { emitEvent: false });
