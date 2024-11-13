@@ -528,7 +528,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       // Generate new UUIDs for each copied link
       const newLinks = copiedLinks.map(link => ({
         ...link,
-        id: crypto.randomUUID()
+        id: uuidv4()
       }));
   
       this.populateInputFields({ rawInput: newLinks } as SingleMonthData);
@@ -567,7 +567,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       // Add fixedLinks from localStorage to the filtered linkArray with new UUIDs
       const newFixedLinks = this.fixedLinks.map(link => ({
         ...link,
-        id: crypto.randomUUID()
+        id: uuidv4()
       }));
   
       const newLinkArray = [...updatedLinks, ...newFixedLinks];
