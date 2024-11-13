@@ -46,9 +46,13 @@ export function removeSystemPrefix(name: string): string {
 * @param amount The string input to process
 * @returns The total amount as a number or null if the input is invalid
 */
-export function processStringAmountToNumber(amount: string): number | null {
+export function processStringAmountToNumber(amount: string | number): number | null {
+  if (typeof amount === 'number') {
+    return amount; // If the amount is already a number, return it directly
+  }
+  
   // Replace commas with dots for German input
-  const normalizedAmount = amount.replace(/,/g, '.');
+  const normalizedAmount =  amount.replace(/,/g, '.');
 
   // Remove unnecessary spaces around numbers, "+" and "-" signs
   const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
