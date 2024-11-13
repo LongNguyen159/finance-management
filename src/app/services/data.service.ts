@@ -11,6 +11,7 @@ export interface MonthlyData {
 }
 /** Interface for single month data. */
 export interface SingleMonthData {
+    lastUpdated: Date | string
     sankeyData: SankeyData;
     totalUsableIncome: number;
     totalGrossIncome: number;
@@ -61,6 +62,7 @@ export class DataService {
      * Every other value will be unset to prevent further processing.
      */
     private defaultEmptySingleMonthEntries: SingleMonthData = {
+        lastUpdated: '-',
         sankeyData: this.sankeyDataInit,
         totalUsableIncome: -1,
         totalTax: -1,
@@ -199,6 +201,8 @@ export class DataService {
          */
         const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
 
+
+
         /** Early exit if detect negative values. */
         const negatives = userDefinedLinks.filter(link => link.value < 0);
         if (negatives.length > 0) {
@@ -237,6 +241,7 @@ export class DataService {
             this.UiService.showSnackBar('Data has a cycle! Check your input.', 'Dismiss', 5000);
             console.log('Data has a cycle! Emitting default entries');
             this.defaultEmptySingleMonthEntries = {
+                lastUpdated: '-',
                 sankeyData: this.sankeyDataInit,
                 totalUsableIncome: -1,
                 totalTax: -1,
@@ -455,9 +460,19 @@ export class DataService {
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
         });
 
+        const savedSingleMonthData = this.loadSingleMonth(month);
+        console.log('Saved Single Month Data:', savedSingleMonthData);
+        console.log('Processing input data:', userDefinedLinks);
+        console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
+        const isDifferent: boolean = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
+        const isEmpty: boolean = userDefinedLinks.length === 0;
+        console.log('is empty:', isEmpty);
+
+
 
         // Final Object to be emitted
         this.monthlyData[month] = {
+            lastUpdated: (isDifferent && !isEmpty) ? new Date() : savedSingleMonthData?.lastUpdated || '-',
             sankeyData: { nodes: updatedNodes, links: updatedLinks },
             totalUsableIncome: totalIncomeValue - totalTaxValue,
             totalGrossIncome: totalIncomeValue,
@@ -480,12 +495,14 @@ export class DataService {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 
-        this.saveData()
-
+        
+        if (isDifferent) {
+            this.saveData()
+        }
         //#endregion
     }
 
-    checkDuplicateNames(links: UserDefinedLink[]): boolean {    
+    checkDuplicateNames(links: UserDefinedLink[]): boolean {
         const values: string[] = links.map(link => link.target);
         // Track duplicates
         const seen = new Set<string>();
@@ -542,6 +559,7 @@ export class DataService {
          * 
          */
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
+        console.log('Data saved:', nonEmptyMonthlyData);
 
         // Emit all months data
         this.multiMonthEntries$.next(nonEmptyMonthlyData);
@@ -552,6 +570,15 @@ export class DataService {
     loadData(): MonthlyData | null {
         const saved = localStorage.getItem('monthlyData');
         return saved ? JSON.parse(saved) as MonthlyData: null;
+    }
+
+    loadSingleMonth(month: string): SingleMonthData | null {
+        const saved = localStorage.getItem('monthlyData');
+        if (saved) {
+            const data = JSON.parse(saved) as MonthlyData;
+            return data[month] || null;
+        }
+        return null;
     }
 
     /** Return all local storage items

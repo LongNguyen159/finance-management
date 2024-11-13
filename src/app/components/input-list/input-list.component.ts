@@ -23,6 +23,7 @@ import { onMonthChanges } from '../../utils/data-utils';
 import { Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MatDividerModule } from '@angular/material/divider';
+import { v4 as uuidv4 } from 'uuid';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -223,10 +224,135 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   private updateSavedFormValuesOnFormChanges() {
     this.savedFormValues = this.linkArray.value.slice();
     this.hasChanges = true;
+    this._checkDuplicateName()
   }
 
-  
-  
+
+
+  //#region Form Initialisation
+  /** Function to create form input.
+   * @param link Optional parameter to populate the form with existing data
+   * if no `link` param is provided, an empty form with default values '' will be created.
+   */
+  protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
+    const linkGroup = this.fb.group({
+      id: [link && link.id ? link.id : uuidv4(), Validators.required], // Generate a unique UUID if link.id is missing.
+      type: [link ? link.type : '', Validators.required],
+      target: [link ? link.target : '', [
+        Validators.required,
+
+        /** Non empty node names */
+        nonEmptyValidator(),
+
+        /** Not allowed node names: */
+        restrictedNodeNamesValidator(this.dataService.nonAllowedNames)
+      ]],
+      value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
+      source: [link ? link.source : ''], // Optional
+      isFixCost: [link ? link.isFixCost : false]
+    });
+
+    /** Add into IDs array when a new link is created. */
+    this.filteredLinkIds.push(linkGroup.get('id')?.value || '');
+
+    // Disable the source field if type is 'income'
+    if (linkGroup.get('type')?.value == EntryType.Income || linkGroup.get('type')?.value == EntryType.Tax) {
+      linkGroup.get('source')?.disable({ emitEvent: false });
+    }
+
+    linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
+      if (value) {
+        this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
+        this.checkForNonAllowedNames(value, linkGroup)
+      }
+    })
+
+
+    // Subscribe to changes in the type field
+    linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
+      if (value == EntryType.Income || value == EntryType.Tax) {
+        linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if type = income or tax
+        linkGroup.get('source')?.setValue('', { emitEvent: false }); // Clear source field
+      } else {
+        linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
+      }
+    });
+
+
+    // Listen to changes in the source field for filtering options
+    linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
+      if (value) {
+        /** Set type automatic to expense if category chosen */
+        linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
+        // this._filterNodes(value);
+        this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
+      }
+    });
+    return linkGroup;
+  }
+
+  checkForNonAllowedNames(name: string, linkGroup: FormGroup) {
+    const isNotAllowedName = this.dataService.nonAllowedNames.includes(name.trim())
+    if (isNotAllowedName) {
+      linkGroup.get('target')?.setErrors({ restrictedNodeName: true }, { emitEvent: false });
+      this.uiService.showSnackBar(`'${name}' is a reserved name and cannot be used!`, 'Dismiss');
+    }
+  }
+
+
+  /** Initialise/Populate the form with predefined data */
+  populateInputFields(selectedMonthData: SingleMonthData): void {
+    console.log('populating input fields...', selectedMonthData.rawInput)
+
+    /** clear the form and repopulate it with new data. */
+    this.linkArray.clear({ emitEvent: false });
+    
+    const links = this.dataService.isDemo() ? this.demoLinks : selectedMonthData.rawInput;
+    
+    // Populate form without emitting valueChanges
+    links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));
+
+    // Check for cycles in the initial form state
+    this.linkArray.controls.forEach((control) => {
+      this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
+    })
+
+    /** Apply the filter upon form reinitialised/repopulated with new data. */
+    this.filterLinks(this.filterQuery)
+
+    this.hasDuplicates = this._checkDuplicateName()
+    this.checkForInvalidRows()
+
+    // Shallow copy to avoid mutations
+    this.initialFormState = [...links];
+  }
+
+
+  /** This is used to 'remove' the source from the field. It will be linked to default income node.
+   * In our service, we already have a logic that handles if source node is not found, link to default income node.
+   * We don't have 'default income' node, so it's understood that it'll be linked to default income node.
+   * Unless user defines 'default income' node, it'll be linked to default income node.
+   */
+  private _addDefaultNode() {
+    const defaultNode = {
+      label: '-- None --',
+      value: '-- None --'
+    }
+    if (!this.filteredNodes.includes(defaultNode)) {
+      this.filteredNodes.unshift(defaultNode);
+    }
+  }
+
+
+
+  /** Helper function to determine tax node in links */
+  protected _hasTaxNode(data: UserDefinedLink[]): boolean {
+    return data.some(item => item.type == EntryType.Tax)
+  }
+
+  //#endregion
+
+
   protected listenCategoryChanges() {
     this.sourceSearchControl.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe((searchTerm) => {
       this.filteredNodes = this._filterNodes(searchTerm);
@@ -292,9 +418,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
    * Only trigger this function to reactively update the form.
    * For example like summing the total children value to reflect on the parent node.
    * Else, we just submit the form on component destroy.
+   * 
+   * 
+   * INLINE CALCULATOR feature is implemented here. This function will be triggered when user blur input field.
    */
   updateInput(linkGroup?: AbstractControl) {
-    if (!this.linkForm.valid || this.updateFromService) return;
+    
     
     // Used to early exit the function. If function is valid, use 'updatedFormData' below to access the form data.
     const formDataOld: UserDefinedLink[] = this.linkForm.value.links;
@@ -355,6 +484,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     }
 
     this.taxNodeExists = this._hasTaxNode(updatedFormData);
+    
+    if (!this.linkForm.valid || this.updateFromService) return; // Exit function here, don't process input if not valid.
+
     this.dataService.processInputData(updatedFormData, this.dataMonth);
   
     // After processing, update the initial form state to the new one
@@ -396,7 +528,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       // Generate new UUIDs for each copied link
       const newLinks = copiedLinks.map(link => ({
         ...link,
-        id: crypto.randomUUID()
+        id: uuidv4()
       }));
   
       this.populateInputFields({ rawInput: newLinks } as SingleMonthData);
@@ -435,7 +567,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       // Add fixedLinks from localStorage to the filtered linkArray with new UUIDs
       const newFixedLinks = this.fixedLinks.map(link => ({
         ...link,
-        id: crypto.randomUUID()
+        id: uuidv4()
       }));
   
       const newLinkArray = [...updatedLinks, ...newFixedLinks];
@@ -453,166 +585,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   //#endregion
 
 
-  //#region Check Duplicate Name
-  private _checkDuplicateName(formGroup?: FormGroup): boolean {
-    console.log('checking duplicates...')
-    
-    // Get all form values and normalize for comparison
-    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase().trim());
-    
-    // Track duplicates
-    const seen = new Set<string>();
-    const duplicateNames = formValues.filter((item) => {
-      const normalizedItem = item.toLowerCase().trim();
-      if (seen.has(normalizedItem)) {
-        return true;
-      }
-      seen.add(normalizedItem);
-      return false;
-    });
-
-    this.duplicatedNames = [...duplicateNames];
-
-    /** FormGroup is used to set error on form. */
-    if (duplicateNames.length > 0) {
-      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 10000);
-      this.hasDuplicates = true;
-      this.errorMessage = `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`;
-      return true
-    } else {
-      this.hasDuplicates = false;
-      this.errorMessage ='';
-      return false
-    }
-  }
-  //#endregion
 
 
-  //#region Form Initialisation
-  /** Function to create form input.
-   * @param link Optional parameter to populate the form with existing data
-   * if no `link` param is provided, an empty form with default values '' will be created.
-   */
-  protected _createLinkGroup(link?: UserDefinedLink): FormGroup {
-    const linkGroup = this.fb.group({
-      id: [link && link.id ? link.id : crypto.randomUUID(), Validators.required], // Generate a unique UUID if link.id is missing.
-      type: [link ? link.type : '', Validators.required],
-      target: [link ? link.target : '', [
-        Validators.required,
-
-        /** Non empty node names */
-        nonEmptyValidator(),
-
-        /** Not allowed node names: */
-        restrictedNodeNamesValidator(this.dataService.nonAllowedNames)
-      ]],
-      value: [link ? link.value : 0, [Validators.required, Validators.min(0)]],
-      source: [link ? link.source : ''], // Optional
-      isFixCost: [link ? link.isFixCost : false]
-    });
-
-    /** Add into IDs array when a new link is created. */
-    this.filteredLinkIds.push(linkGroup.get('id')?.value || '');
-
-    // Disable the source field if type is 'income'
-    if (linkGroup.get('type')?.value == EntryType.Income || linkGroup.get('type')?.value == EntryType.Tax) {
-      linkGroup.get('source')?.disable({ emitEvent: false });
-    }
-
-    linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
-      if (value) {
-        this._checkDuplicateName(linkGroup);
-        this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
-        this.checkForNonAllowedNames(value, linkGroup)
-      }
-    })
-
-
-    // Subscribe to changes in the type field
-    linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
-      if (value == EntryType.Income || value == EntryType.Tax) {
-        linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if type = income or tax
-        linkGroup.get('source')?.setValue('', { emitEvent: false }); // Clear source field
-      } else {
-        linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
-      }
-    });
-
-
-    // Listen to changes in the source field for filtering options
-    linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
-      if (value) {
-        /** Set type automatic to expense if category chosen */
-        linkGroup.get('type')?.setValue(EntryType.Expense, { emitEvent: false });
-        // this._filterNodes(value);
-        this.checkForCycle(value, linkGroup.get('target')?.value, linkGroup, this.linkArray.value);
-      }
-    });
-    return linkGroup;
-  }
-
-  checkForNonAllowedNames(name: string, linkGroup: FormGroup) {
-    const isNotAllowedName = this.dataService.nonAllowedNames.includes(name.trim())
-    if (isNotAllowedName) {
-      linkGroup.get('target')?.setErrors({ restrictedNodeName: true }, { emitEvent: false });
-      this.uiService.showSnackBar(`'${name}' is a reserved name and cannot be used!`, 'Dismiss');
-    }
-  }
-
-
-  /** Initialise/Populate the form with predefined data */
-  populateInputFields(selectedMonthData: SingleMonthData): void {
-    console.log('populating input fields...', selectedMonthData.rawInput)
-
-    /** clear the form and repopulate it with new data. */
-    this.linkArray.clear({ emitEvent: false });
-    
-    const links = this.dataService.isDemo() ? this.demoLinks : selectedMonthData.rawInput;
-    
-    // Populate form without emitting valueChanges
-    links.forEach(link => this.linkArray.push(this._createLinkGroup(link), { emitEvent: false }));
-
-    // Check for cycles in the initial form state
-    this.linkArray.controls.forEach((control) => {
-      this.checkForCycle(control.get('source')?.value, control.get('target')?.value, control as FormGroup);
-    })
-
-    /** Apply the filter upon form reinitialised/repopulated with new data. */
-    this.filterLinks(this.filterQuery)
-
-    this.hasDuplicates = this._checkDuplicateName()
-    this.checkForInvalidRows()
-
-    // Shallow copy to avoid mutations
-    this.initialFormState = [...links];
-  }
-  //#endregion
-
-
-  /** This is used to 'remove' the source from the field. It will be linked to default income node.
-   * In our service, we already have a logic that handles if source node is not found, link to default income node.
-   * We don't have 'default income' node, so it's understood that it'll be linked to default income node.
-   * Unless user defines 'default income' node, it'll be linked to default income node.
-   */
-  private _addDefaultNode() {
-    const defaultNode = {
-      label: '-- None --',
-      value: '-- None --'
-    }
-    if (!this.filteredNodes.includes(defaultNode)) {
-      this.filteredNodes.unshift(defaultNode);
-    }
-  }
-
-
-
-  /** Helper function to determine tax node in links */
-  protected _hasTaxNode(data: UserDefinedLink[]): boolean {
-    return data.some(item => item.type == EntryType.Tax)
-  }
-
-  
-
+  /********** Error Handling **********/
   //#region Cycle Detection
   private buildAdjacencyList(links: UserDefinedLink[]): Map<string, string[]> {
     const adjacencyList = new Map<string, string[]>();
@@ -709,7 +684,68 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   //#endregion
 
 
+  //#region Check Duplicates
+  private _checkDuplicateName(formGroup?: FormGroup): boolean {
+    console.log('checking duplicates...')
+    
+    // Get all form values and normalize for comparison
+    const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase().trim());
+    
+    // Track duplicates
+    const seen = new Set<string>();
+    const duplicateNames = formValues.filter((item) => {
+      const normalizedItem = item.toLowerCase().trim();
+      if (seen.has(normalizedItem)) {
+        return true;
+      }
+      seen.add(normalizedItem);
+      return false;
+    });
+
+    const emptyNames = formValues.filter(name => name.trim() === '');
+
+    this.duplicatedNames = [...duplicateNames];
+
+    // Handle empty names
+    if (emptyNames.length > 0) {
+      this.hasDuplicates = true;
+      this.errorMessage = `Empty names are not allowed.`;
+      return true;
+    }
+
+    /** FormGroup is used to set error on form. */
+    if (duplicateNames.length > 0) {
+      this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 5000);
+      this.hasDuplicates = true;
+      this.errorMessage = `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`;
+      return true
+    } else {
+      this.hasDuplicates = false;
+      this.errorMessage ='';
+      return false
+    }
+  }
+  //#endregion
+
+  checkForInvalidRows(): boolean {
+    console.log('checking for invalid rows...')
+    let hasInvalidRows = false;
+    this.hasInValidRows = false;
+    this.linkArray.controls.forEach((control, index) => {
+      if (!control.valid) {
+        this.uiService.showSnackBar(`Invalid input`, 'Dismiss');
+        hasInvalidRows = true;
+        this.hasInValidRows = true;
+        console.log('Invalid input at row ', index + 1);
+      }
+    });
+    return hasInvalidRows;
+  }
+
   //#region Link Controls
+
+  /********** Filter/Add/Remove Links **********/
+
   // Filter nodes based on user input
   private _filterNodes(value: string): { label: string, value: string }[] {
     const filterValue = value.toLowerCase();
@@ -739,21 +775,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.updateSavedFormValuesOnFormChanges()
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
   }
-  //#region Check invalid row
-  checkForInvalidRows(): boolean {
-    console.log('checking for invalid rows...')
-    let hasInvalidRows = false;
-    this.hasInValidRows = false;
-    this.linkArray.controls.forEach((control, index) => {
-      if (!control.valid) {
-        this.uiService.showSnackBar(`Invalid input`, 'Dismiss');
-        hasInvalidRows = true;
-        this.hasInValidRows = true;
-        console.log('Invalid input at row ', index + 1);
-      }
-    });
-    return hasInvalidRows;
-  }
+  
   //#endregion
 
 
