@@ -35,7 +35,7 @@ jobs:
         #   CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}  # Optional: for code signing
         #   CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         run: |
-          npm run deploy-win -- --x64  # Runs the Electron Builder script to build .exe file
+          npm run deploy-win -- --x64 --publish never
           
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
