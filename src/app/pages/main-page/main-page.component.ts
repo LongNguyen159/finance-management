@@ -141,7 +141,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
     if (this.indicators.length <= 2) {
       this.showGaugeChart = true
     }
-    console.log('show gauge chart', this.showGaugeChart)
   }
 
 

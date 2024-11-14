@@ -461,12 +461,9 @@ export class DataService {
         });
 
         const savedSingleMonthData = this.loadSingleMonth(month);
-        console.log('Saved Single Month Data:', savedSingleMonthData);
-        console.log('Processing input data:', userDefinedLinks);
         console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
         const isDifferent: boolean = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
         const isEmpty: boolean = userDefinedLinks.length === 0;
-        console.log('is empty:', isEmpty);
 
 
 
@@ -487,8 +484,6 @@ export class DataService {
         // Emit the processed data
         if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
-            console.log('Observable emitted:', this.monthlyData[month]);
-            // this.multiMonthEntries$.next(this.monthlyData) // emit multi month data
         }
 
         if (showSnackbarWhenDone && !this.isDemo()) {
