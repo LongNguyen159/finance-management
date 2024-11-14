@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, globalShortcut } = require('electron');
 const { screen } = require('electron');
 
 const path = require('path');
@@ -12,6 +12,8 @@ function createWindow() {
   win = new BrowserWindow({
     width: width,
     height: height,
+    minWidth: 450,
+    minHeight: 300,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -33,8 +35,19 @@ function createWindow() {
   });
 }
 
-app.on('ready', createWindow);
 
+app.on('ready', () => {
+  createWindow();
+
+  // Register shortcuts to prevent reloading
+  globalShortcut.register('CommandOrControl+R', () => {
+    // Do nothing to prevent reload
+  });
+
+  globalShortcut.register('F5', () => {
+    // Do nothing to prevent reload
+  });
+});
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();

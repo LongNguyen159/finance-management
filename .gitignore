@@ -6,6 +6,7 @@
 /out-tsc
 /bazel-out
 /release
+/releases/**/*
 
 # Node
 /node_modules

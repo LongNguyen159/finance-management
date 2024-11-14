@@ -1,0 +1,44 @@
+name: Build Windows Electron App
+
+# Triggers the workflow on pushes to the main branch or when a pull request is opened
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest  # Use a Windows runner
+    strategy:
+      matrix:
+        node-version: [16.x]  # Electron requires Node 16.x for best compatibility
+        architecture: [x64]  # Target Windows 64-bit
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'  # Caches npm dependencies
+
+      - name: Install Dependencies
+        run: npm install
+
+      # - name: Build Angular App
+      #   run: npm run build  # Builds the Angular app and places output in dist folder
+
+      - name: Package Electron App for Windows
+        # env:
+        #   CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}  # Optional: for code signing
+        #   CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          npm run deploy-win -- --x64  # Runs the Electron Builder script to build .exe file
+          
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: EasySankey-Windows
+          path: releases/v2.0.0/win/x64/*.exe  # Adjust this path if necessary to match the output
