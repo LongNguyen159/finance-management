@@ -34,15 +34,19 @@ jobs:
       - name: Package Electron App
         run: |
           if [ "${{ matrix.architecture }}" == "x64" ]; then
-            npm run deploy-win -- --x64 --publish never  # Build for Windows
-          else
-            npm run deploy-mac -- --arm64 --publish never  # Build for macOS ARM
+            npm run deploy-win -- --x64 --publish never
+          elif [ "${{ matrix.architecture }}" == "arm64" ]; then
+            npm run deploy-mac -- --arm64 --publish never
           fi
+
+      - name: List build output directory
+        run: |
+          ls -R releases/v2.0.0
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: EasySankey-Build
           path: |
-            releases/v2.0.0/win32/x64/*.exe  # Windows .exe
-            releases/v2.0.0/darwin/arm64/*.dmg  # macOS ARM .dmg
+            releases/v2.0.0/win32/x64/*.exe  
+            releases/v2.0.0/darwin/arm64/*.dmg
