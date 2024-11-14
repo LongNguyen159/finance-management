@@ -3,9 +3,9 @@ name: Build Windows Electron App
 # Triggers the workflow on pushes to the main branch or when a pull request is opened
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build-windows:
