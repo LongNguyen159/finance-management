@@ -58,7 +58,7 @@ export function processStringAmountToNumber(amount: string | number): number | n
   const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
 
   // Convert isolated spaces between numbers into '+' for implicit addition
-  const implicitAddition = cleanedAmount.replace(/(\d)\s+(\d)/g, '$1+$2');
+  const implicitAddition = cleanedAmount.replace(/(\d)\s+(?=\d)/g, '$1+');
 
 
   // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
