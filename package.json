@@ -86,6 +86,7 @@
         "nsis"
       ],
       "icon": "resources/icons/win/icon.ico"
-    }
+    },
+    "publish": "never"
   }
 }

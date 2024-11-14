@@ -25,7 +25,7 @@ jobs:
           cache: 'npm'  # Caches npm dependencies
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       # - name: Build Angular App
       #   run: npm run build  # Builds the Angular app and places output in dist folder
