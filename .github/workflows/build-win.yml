@@ -1,4 +1,4 @@
-name: Build Windows Electron App
+name: Build Electron App
 
 # Triggers the workflow on pushes to the main branch or when a pull request is opened
 on:
@@ -8,12 +8,13 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build-windows:
-    runs-on: windows-latest  # Use a Windows runner
+  build:
     strategy:
       matrix:
-        node-version: [20.x]  # Electron requires Node 16.x for best compatibility
-        architecture: [x64]  # Target Windows 64-bit
+        node-version: [20.x]  # Ensure compatibility with Electron
+        architecture: [x64, arm64]  # Target Windows x64 and macOS ARM
+    runs-on: ${{ matrix.architecture == 'x64' && 'windows-latest' || 'macos-latest' }}  # Use macOS runner for arm64, Windows for x64
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -27,18 +28,26 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # - name: Build Angular App
-      #   run: npm run build  # Builds the Angular app and places output in dist folder
+      - name: Build Angular App
+        run: npm run build  # Builds the Angular app and places output in dist folder
 
-      - name: Package Electron App for Windows
-        # env:
-        #   CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}  # Optional: for code signing
-        #   CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+      - name: Package Electron App
         run: |
-          npm run deploy-win -- --x64 --publish never
-          
+          if [ "${{ matrix.architecture }}" == "x64" ]; then
+            npm run deploy-win -- --x64 --publish never
+          elif [ "${{ matrix.architecture }}" == "arm64" ]; then
+            npm run deploy-mac -- --arm64 --publish never
+          fi
+        shell: bash  # Explicitly use bash shell for this step
+
+      # - name: List build output directory
+      #   run: |
+      #     ls -R releases/v2.0.0
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: EasySankey-Windows
-          path: releases/v2.0.0/win/x64/*.exe  # Adjust this path if necessary to match the output
+          name: EasySankey-Build
+          path: |
+            releases/v2.0.0/win32/x64/*.exe  
+            releases/v2.0.0/darwin/arm64/*.dmg

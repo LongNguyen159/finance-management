@@ -17,8 +17,8 @@
     "circular-check": "npx madge --circular --extensions ts ./",
 
 
-    "deploy-mac": "ng build && electron-builder --mac",
-    "deploy-win": "ng build && electron-builder --win"
+    "deploy-mac": "electron-builder --mac",
+    "deploy-win": "electron-builder --win"
   },
   "private": true,
   "dependencies": {
