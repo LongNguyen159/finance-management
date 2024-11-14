@@ -41,4 +41,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: EasySankey-Windows
-          path: releases/v2.0.0/win/x64/*.exe  # Adjust this path if necessary to match the output
+          path: releases/v2.0.0/win32/x64/*.exe
