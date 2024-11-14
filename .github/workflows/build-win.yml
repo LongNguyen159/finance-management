@@ -38,10 +38,11 @@ jobs:
           elif [ "${{ matrix.architecture }}" == "arm64" ]; then
             npm run deploy-mac -- --arm64 --publish never
           fi
+        shell: bash  # Explicitly use bash shell for this step
 
-      - name: List build output directory
-        run: |
-          ls -R releases/v2.0.0
+      # - name: List build output directory
+      #   run: |
+      #     ls -R releases/v2.0.0
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
