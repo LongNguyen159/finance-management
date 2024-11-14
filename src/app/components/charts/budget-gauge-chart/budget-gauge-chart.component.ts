@@ -121,7 +121,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
 
           
           title: {
-            fontSize: 20,
+            fontSize: 22,
             offsetCenter: ['0%', '-30%'],
             fontWeight: 'bold',
             color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
@@ -131,10 +131,26 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
           detail: {
             // width: 50,
             // height: 14,
-            fontSize: 14,
+            fontSize: 16,
             color: this.getColorBasedOnPercentage(),
             // borderWidth: 1,
-            formatter: `${this.actualSpending} / ${this.budget}\n{value}%`,
+            formatter: () => {
+              const actualSpending = Math.round(this.actualSpending * 100) / 100;
+              const budget = this.budget;
+              const difference = Math.abs(budget - actualSpending);
+              const differenceFormatted = difference.toFixed(2);
+            
+              let comparisonMessage = '';
+              if (actualSpending < budget) {
+                comparisonMessage = `${differenceFormatted} left`;
+              } else if (actualSpending > budget) {
+                comparisonMessage = `${differenceFormatted} overspent`;
+              } else {
+                comparisonMessage = 'On budget';
+              }
+            
+              return `(${this.computeBudgetPercentage()}%)\n${actualSpending} / ${budget}\n${comparisonMessage}`;
+            },
             valueAnimation: true,
             offsetCenter: ['0%', '30%']
           },

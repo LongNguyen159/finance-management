@@ -12,9 +12,13 @@
     "test": "ng test",
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
-    "deploy": "ng build && electron-builder --mac --win",
+    
     "spell-check": "cspell \"src/**/*.ts\" \"src/**/*.html\"",
-    "circular-check": "npx madge --circular --extensions ts ./"
+    "circular-check": "npx madge --circular --extensions ts ./",
+
+
+    "deploy-mac": "ng build && electron-builder --mac",
+    "deploy-win": "ng build && electron-builder --win"
   },
   "private": true,
   "dependencies": {
@@ -69,7 +73,7 @@
       "preload.js"
     ],
     "directories": {
-      "output": "release/v2.0.0"
+      "output": "releases/v2.0.0/${platform}/${arch}"
     },
     "mac": {
       "target": [

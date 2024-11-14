@@ -50,7 +50,6 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       if (data) {
         this.singleMonthData = data
-        console.log('single month data: ', data)
         this.monthString = formatYearMonthToLongDate(data.month)
       }
     })
