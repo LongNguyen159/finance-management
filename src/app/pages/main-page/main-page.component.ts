@@ -71,7 +71,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   spending: Budget[] = []
 
   indicators: ExpenseCategoryDetails[] = []
-  showGaugeChart: boolean = false
+  showGaugeChart: boolean = true
   isSankeyVertical: boolean = false
   
   constructor() {
@@ -99,7 +99,6 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
       if (data && Object.keys(data).length > 0) {
-        this.showGaugeChart = false // Reset gauge chart flag
         this.entriesOfOneMonth = data
         this.pieChartDataNetto = data.pieData
         this.totalExpenses = data.totalExpenses
@@ -139,8 +138,10 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       .map(a => {
         return expenseCategoryDetails[a.category];
       });
-
-    this.showGaugeChart = this.indicators.length <= 2
+    if (this.indicators.length <= 2) {
+      this.showGaugeChart = true
+    }
+    console.log('show gauge chart', this.showGaugeChart)
   }
 
 
