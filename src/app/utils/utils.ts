@@ -60,18 +60,16 @@ export function processStringAmountToNumber(amount: string | number): number | n
   // Convert isolated spaces between numbers into '+' for implicit addition
   const implicitAddition = cleanedAmount.replace(/(\d)\s+(\d)/g, '$1+$2');
 
-  // Remove leading zeros in each number segment to avoid octal interpretation
-  const withoutLeadingZeros = implicitAddition.replace(/\b0+(\d)/g, '$1');
 
   // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
-  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(withoutLeadingZeros.replace(/\s/g, ''))) {
+  if (!/^[-+]?(\d+(\.\d+)?)([-+]\d+(\.\d+)?)*$/.test(implicitAddition.replace(/\s/g, ''))) {
     return null; // Invalid input
   }
 
   try {
     // Use mathjs's evaluate function to compute the total
-    const total = evaluate(withoutLeadingZeros);
-    return typeof total === 'number' ? Math.round(total * 100) / 100 : null;
+    const total = evaluate(implicitAddition);
+    return typeof total === 'number' ? Math.round(total * 100 ) / 100 : null;
   } catch (error) {
     return null; // In case of any error during evaluation
   }
