@@ -1,5 +1,6 @@
 const { app, BrowserWindow, globalShortcut } = require('electron');
 const { screen } = require('electron');
+const { autoUpdater } = require('electron-updater');
 
 const path = require('path');
 
@@ -35,6 +36,31 @@ function createWindow() {
   });
 }
 
+// Auto-update logic
+function setupAutoUpdater() {
+  autoUpdater.autoDownload = true;
+
+  // Check for updates
+  autoUpdater.checkForUpdatesAndNotify();
+
+  // Notify the renderer process when an update is available
+  autoUpdater.on('update-available', (info) => {
+    win.webContents.send('update_available', info);
+  });
+
+  // Notify the renderer process when an update is downloaded
+  autoUpdater.on('update-downloaded', (info) => {
+    win.webContents.send('update_downloaded', info);
+  });
+
+  // Handle errors
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-Updater Error:', err);
+  });
+}
+
+
+
 
 app.on('ready', () => {
   createWindow();
@@ -47,6 +73,8 @@ app.on('ready', () => {
   globalShortcut.register('F5', () => {
     // Do nothing to prevent reload
   });
+
+  setupAutoUpdater();
 });
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

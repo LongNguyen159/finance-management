@@ -9,5 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Listen for messages from the main process
   receiveFromMain: (channel, callback) => {
     ipcRenderer.on(channel, (event, ...args) => callback(...args));
-  }
+  },
+  onUpdateAvailable: (callback) => ipcRenderer.on('update_available', callback),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('update_downloaded', callback),
 });

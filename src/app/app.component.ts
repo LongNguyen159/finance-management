@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import {version} from '../../package.json';
 import { ColorService } from './services/color.service';
 import { DataService } from './services/data.service';
+declare const electron: any;
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -26,6 +28,18 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    electron.onUpdateAvailable(() => {
+      alert('Update available! Downloading now...');
+    });
+
+    electron.onUpdateDownloaded(() => {
+      const restart = confirm('Update downloaded. Restart now?');
+      if (restart) {
+        electron.ipcRenderer.send('restart_app');
+      }
+    });
+
+
     // Fetch app version from package.json
     this.appVersion = version;
 
