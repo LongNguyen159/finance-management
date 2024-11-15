@@ -12,11 +12,8 @@
     "test": "ng test",
     "electron": "electron .",
     "electron-build": "ng build --prod && electron .",
-    
     "spell-check": "cspell \"src/**/*.ts\" \"src/**/*.html\"",
     "circular-check": "npx madge --circular --extensions ts ./",
-
-
     "deploy-mac": "electron-builder --mac",
     "deploy-win": "electron-builder --win"
   },
@@ -33,6 +30,7 @@
     "@angular/platform-browser-dynamic": "^18.2.11",
     "@angular/router": "^18.2.11",
     "echarts": "^5.5.1",
+    "electron-updater": "^6.3.9",
     "material-symbols": "^0.24.0",
     "mathjs": "^13.2.1",
     "ngx-echarts": "^18.0.0",
@@ -53,7 +51,6 @@
     "cspell": "^8.16.0",
     "electron": "^32.1.2",
     "electron-builder": "^25.1.7",
-    "electron-updater": "^6.3.9",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
