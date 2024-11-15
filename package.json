@@ -68,7 +68,8 @@
     "publish": {
       "provider": "github",
       "owner": "LongNguyen159",
-      "repo": "finance-management"
+      "repo": "finance-management",
+      "private": true
     },
     "files": [
       "dist/**/*",

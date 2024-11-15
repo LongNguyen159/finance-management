@@ -1,6 +1,8 @@
 const { app, BrowserWindow, globalShortcut } = require('electron');
 const { screen, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
+// Import the app version from package.json
+const { version } = require('./package.json');
 
 const path = require('path');
 
@@ -19,7 +21,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false, // disable devTools for production
+      devTools: true, // disable devTools for production
     },
     frame: true,         // Show the window frame (this allows you to drag and resize the window)
     resizable: true,     // Allow resizing the window (optional)
@@ -39,9 +41,16 @@ function createWindow() {
 // Auto-update logic
 function setupAutoUpdater() {
   autoUpdater.autoDownload = true;
+  
+  // Determine the feed URL based on the operating system
+  const platform = process.platform === 'darwin' ? 'latest-mac.yml' : 'latest.yml';
+  const feedURL = `https://github.com/LongNguyen159/finance-management/releases/download/v${version}/${platform}`;
+  
+  autoUpdater.setFeedURL({ url: feedURL });
 
   // Check for updates
   autoUpdater.checkForUpdatesAndNotify();
+
 
   // Notify the renderer process when an update is available
   autoUpdater.on('update-available', (info) => {
@@ -77,6 +86,7 @@ function setupAutoUpdater() {
 
 app.on('ready', () => {
   createWindow();
+  setupAutoUpdater();
 
   // Register shortcuts to prevent reloading
   globalShortcut.register('CommandOrControl+R', () => {
@@ -87,7 +97,6 @@ app.on('ready', () => {
     // Do nothing to prevent reload
   });
 
-  setupAutoUpdater();
 });
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
