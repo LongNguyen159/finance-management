@@ -1,6 +1,5 @@
 name: Build Electron App
 
-# Triggers the workflow on pushes to the main branch or when a pull request is opened
 on:
   push:
     branches: [ main, develop ]
@@ -13,23 +12,25 @@ jobs:
       matrix:
         node-version: [20.x]  # Ensure compatibility with Electron
         architecture: [x64, arm64]  # Target Windows x64 and macOS ARM
-    runs-on: ${{ matrix.architecture == 'x64' && 'windows-latest' || 'macos-latest' }}  # Use macOS runner for arm64, Windows for x64
+    runs-on: ${{ matrix.architecture == 'x64' && 'windows-latest' || 'macos-latest' }}
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          node-version: '20'
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'  # Caches npm dependencies
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
 
       - name: Build Angular App
-        run: npm run build  # Builds the Angular app and places output in dist folder
+        run: npm run build
 
       - name: Package Electron App
         run: |
@@ -38,11 +39,7 @@ jobs:
           elif [ "${{ matrix.architecture }}" == "arm64" ]; then
             npm run deploy-mac -- --arm64 --publish never
           fi
-        shell: bash  # Explicitly use bash shell for this step
-
-      # - name: List build output directory
-      #   run: |
-      #     ls -R releases/v2.0.0
+        shell: bash
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
