@@ -10,7 +10,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { formatBigNumber, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -19,13 +19,18 @@ import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-d
 import { PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
     MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent,
-    MatCardModule],
+    MatCardModule,
+    MatSlideToggleModule,
+    MatTooltipModule
+  ],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -41,6 +46,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   storedYears: string[] = [];
   selectedYear: string = '';
   selectedOption: string = '3-months'; // Default selection for the dropdown
+
+
+  isFormatBigNumbers: boolean = false;
 
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
@@ -257,7 +265,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       }, {});
   }
 
-  calculateTotalSurplusOfYear(year: string): number {
+  calculateTotalSurplusOfYear(year: string): string {
     let totalSurplus = 0;
     const months = this.filteredMonthsByYear[year]; // Use filtered months
 
@@ -268,22 +276,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
     }
-    return totalSurplus;
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus) : totalSurplus.toLocaleString('en-US');
   }
 
   /** For Calculating all time balance based on selected time frame. */
-  calculateTotalSurplusAllTimeFiltered(): number {
+  calculateTotalSurplusAllTimeFiltered(): string {
     let totalSurplus = 0;
 
     for (const year in this.filteredMonthsByYear) {
-        totalSurplus += this.calculateTotalSurplusOfYear(year);
+        const months = this.filteredMonthsByYear[year];
+
+        if (months) {
+            for (const month of months) {
+                const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+                const numericBalance: number = parseLocaleStringToNumber(balanceString);
+                totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
+            }
+        }
     }
 
-    return totalSurplus;
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus) : totalSurplus.toLocaleString('en-US');
   }
 
   /** Calculating all time balance literally, independent from time frame. */
-  calculateTotalSurplusAllTime(): number {
+  calculateTotalSurplusAllTime(): string {
     let totalSurplus = 0;
 
     for (const month in this.localStorageData) {
@@ -292,7 +308,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
     }
 
-    return totalSurplus;
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus) : totalSurplus.toLocaleString('en-US');
+  }
+
+
+  /** Get remaining balance formatted to big numbers */
+  getFormattedRemainingBalance(month: string): string {
+    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const numericBalance: number = parseLocaleStringToNumber(balanceString);
+    return this.isFormatBigNumbers ? formatBigNumber(numericBalance) : balanceString;
   }
 
   removeItem(key: string) {
@@ -314,7 +338,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     })
   }
 
-  /** This function is used to get details of the corresponding month. 
+  formatBigNumbersTemplate(num: number): string {
+    return formatBigNumber(num);
+  }
+
+  /** This function is used to get details of the corresponding month. It opens the main page dialog.
    * @param month: string in YYYY-MM format.
    */
   getMonthsDetails(month: string) {

@@ -2,6 +2,7 @@ import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } fr
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { ColorService } from '../../../services/color.service';
+import { formatBigNumber } from '../../../utils/utils';
 
 @Component({
   selector: 'app-budget-gauge-chart',
@@ -138,7 +139,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
               const actualSpending = Math.round(this.actualSpending * 100) / 100;
               const budget = this.budget;
               const difference = Math.abs(budget - actualSpending);
-              const differenceFormatted = difference.toFixed(2);
+              const differenceFormatted = formatBigNumber(difference);
             
               let comparisonMessage = '';
               if (actualSpending < budget) {
@@ -149,7 +150,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
                 comparisonMessage = 'On budget';
               }
             
-              return `(${this.computeBudgetPercentage()}%)\n${actualSpending} / ${budget}\n${comparisonMessage}`;
+              return `(${this.computeBudgetPercentage()}%)\n${formatBigNumber(actualSpending)} / ${formatBigNumber(budget)}\n${comparisonMessage}`;
             },
             valueAnimation: true,
             offsetCenter: ['0%', '30%']

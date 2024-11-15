@@ -15,11 +15,18 @@
   <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
   <!-- ALL TIME BALANCE -->
-  <div class="flex flex-row w-full justify-end px-6 pb-2">
+  <div class="flex flex-row w-full justify-between px-6 pb-2">
+    <div class="flex flex-row gap-2 items-center">
+      <mat-slide-toggle color="primary" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
+      <span>Format Numbers</span>
+      <button mat-icon-button matTooltip="Shorten big numbers with 'K', 'M', 'B'">
+        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+      </button>
+    </div>
     <mat-card appearance="outlined" class="px-4">
       <mat-card-content>
         <p class="text-xl font-bold">
-          Balance: {{ calculateTotalSurplusAllTimeFiltered().toLocaleString('en-US') }}
+          Balance: {{ calculateTotalSurplusAllTimeFiltered() }}
         </p>
       </mat-card-content>
     </mat-card>
@@ -44,7 +51,7 @@
               {{ year }}
             </mat-panel-title>
             <mat-panel-description>
-              <strong>Total Surplus: </strong>&nbsp;{{ calculateTotalSurplusOfYear(year).toLocaleString('en-US') }}
+              <strong>Total Surplus: </strong>&nbsp;{{ calculateTotalSurplusOfYear(year) }}
             </mat-panel-description>
           </mat-expansion-panel-header>
     
@@ -67,7 +74,7 @@
                   {{ month }}
                 </mat-panel-title>
                 <mat-panel-description class="flex flex-row gap-6">
-                  <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+                  <p><strong>Surplus:</strong> {{ getFormattedRemainingBalance(month) }}</p>
                 </mat-panel-description>
                 <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
                   <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
@@ -96,7 +103,7 @@
                             'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
                             'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
                           }">
-                            {{ input.value.toLocaleString('en-US') }}
+                            {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value.toLocaleString('en-US') }}
                           </span>
                         </p>
                       </li>

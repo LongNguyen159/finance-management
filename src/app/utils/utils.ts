@@ -74,3 +74,23 @@ export function processStringAmountToNumber(amount: string | number): number | n
     return null; // In case of any error during evaluation
   }
 }
+
+/**
+ * Format a number with suffixes for thousands, millions, and billions.
+ * @param num The number to format
+ * @returns The formatted string
+ */
+export function formatBigNumber(num: number): string {
+  const sign = num < 0 ? '-' : '';
+  const absNum = Math.abs(num);
+
+  if (absNum >= 1_000_000_000) {
+      return sign + (absNum / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+  } else if (absNum >= 1_000_000) {
+      return sign + (absNum / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+  } else if (absNum >= 10_000) {
+      return sign + (absNum / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+  } else {
+      return sign + absNum.toLocaleString('en-US');
+  }
+}
