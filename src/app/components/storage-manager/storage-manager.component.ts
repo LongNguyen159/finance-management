@@ -18,12 +18,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
 import { PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
-    MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
+    MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent,
+    MatCardModule],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -255,7 +257,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       }, {});
   }
 
-  calculateTotalSurplus(year: string): number {
+  calculateTotalSurplusOfYear(year: string): number {
     let totalSurplus = 0;
     const months = this.filteredMonthsByYear[year]; // Use filtered months
 
@@ -266,6 +268,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
     }
+    return totalSurplus;
+  }
+
+  /** For Calculating all time balance based on selected time frame. */
+  calculateTotalSurplusAllTimeFiltered(): number {
+    let totalSurplus = 0;
+
+    for (const year in this.filteredMonthsByYear) {
+        totalSurplus += this.calculateTotalSurplusOfYear(year);
+    }
+
+    return totalSurplus;
+  }
+
+  /** Calculating all time balance literally, independent from time frame. */
+  calculateTotalSurplusAllTime(): number {
+    let totalSurplus = 0;
+
+    for (const month in this.localStorageData) {
+        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+        const numericBalance: number = parseLocaleStringToNumber(balanceString);
+        totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
+    }
+
     return totalSurplus;
   }
 

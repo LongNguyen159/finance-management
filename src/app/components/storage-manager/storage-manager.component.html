@@ -1,16 +1,30 @@
 <div class="pt-4">
-  <!-- TIMEFRAME FILTER OPTIONS -->
-  <div class="flex flex-row w-full justify-end pr-6">
-    <mat-form-field appearance="outline">
-      <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
-        <mat-option *ngFor="let option of availableOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+  <div class="flex flex-row w-full justify-end">
+    <!-- TIMEFRAME FILTER OPTIONS -->
+    <div class="pr-6">
+      <mat-form-field appearance="outline">
+        <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
+          <mat-option *ngFor="let option of availableOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <!-- LINE CHART -->
+  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
+
+  <!-- ALL TIME BALANCE -->
+  <div class="flex flex-row w-full justify-end px-6 pb-2">
+    <mat-card appearance="outlined" class="px-4">
+      <mat-card-content>
+        <p class="text-xl font-bold">
+          Balance: {{ calculateTotalSurplusAllTimeFiltered().toLocaleString('en-US') }}
+        </p>
+      </mat-card-content>
+    </mat-card>
   </div>
 
-  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
   <mat-accordion multi>
     <ng-container *ngFor="let year of storedYears">
@@ -30,7 +44,7 @@
               {{ year }}
             </mat-panel-title>
             <mat-panel-description>
-              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString('en-US') }}
+              <strong>Total Surplus: </strong>&nbsp;{{ calculateTotalSurplusOfYear(year).toLocaleString('en-US') }}
             </mat-panel-description>
           </mat-expansion-panel-header>
     
