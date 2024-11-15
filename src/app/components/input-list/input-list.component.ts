@@ -224,7 +224,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   private updateSavedFormValuesOnFormChanges() {
     this.savedFormValues = this.linkArray.value.slice();
     this.hasChanges = true;
-    this._checkDuplicateName()
   }
 
 
@@ -264,6 +263,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       if (value) {
         this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
         this.checkForNonAllowedNames(value, linkGroup)
+        this.hasDuplicates = this._checkDuplicateName()
       }
     })
 
@@ -493,16 +493,34 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.initialFormState = [...updatedFormData]; // Update the stored form state
   }
 
-  // restrictInput(event: KeyboardEvent) {
-  //   const allowedKeys = /^[0-9.,+\-\s]$/;
-  //   const specialKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  //#region Inline Calculator
+  /** Restrict user 'amount' input. 
+   * Only allow +, -, digits, and decimal points and whitespaces.
+   * Do not allow alphabet and special characters.
+   */
+  validateKeyPress(event: KeyboardEvent): void {
+    const allowedChars = /[0-9+\-.\s]/; // Allows digits, plus, minus, decimal points, and whitespace
+    const key = event.key;
   
-  //   // Allow if the key is in the allowed list or if any modifier key is active
-  //   if (!allowedKeys.test(event.key) && !specialKeys.includes(event.key) && 
-  //       !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
-  //     event.preventDefault(); // Block the key press if it’s not allowed
-  //   }
-  // }
+    if (!allowedChars.test(key)) {
+      event.preventDefault(); // Block invalid characters
+    }
+  }
+
+  validatePaste(event: ClipboardEvent): void {
+    const clipboardData = event.clipboardData;
+    const pastedText = clipboardData?.getData('text') || '';
+  
+    // Remove all characters except digits, +, -, ., and whitespace
+    const sanitizedText = pastedText.replace(/[^0-9+\-.\s]/g, '');
+  
+    if (sanitizedText !== pastedText) {
+      event.preventDefault();
+      const inputField = event.target as HTMLInputElement;
+      inputField.value = sanitizedText;
+    }
+  }
+  //#endregion
 
   checkTaxNodeExists() {
     this.taxNodeExists = this._hasTaxNode(this.linkForm.value.links);
@@ -773,6 +791,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.filteredLinkIds = this.filteredLinkIds.filter(id => id !== link.id);
     this.linkArray.removeAt(index, { emitEvent: false });
     this.updateSavedFormValuesOnFormChanges()
+    this.hasDuplicates = this._checkDuplicateName()
     this.dataService.processInputData(this.linkForm.value.links, this.dataMonth);
   }
   
