@@ -25,6 +25,8 @@ export class ErrorCardComponent implements OnChanges {
 
   @Input() errorMessage: string = this.defaultErrorMessage
 
+  @Input() errorMessageMultiple: { type: string, message: string }[] = []
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['errorMessage'] && changes['errorMessage'].currentValue) {

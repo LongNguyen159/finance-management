@@ -1,7 +1,7 @@
 @if((!linkForm.valid && linkForm.touched) || hasDuplicates || hasInValidRows) {
   <div class="flex flex-row w-full justify-center">
     <div class="fixed top-6 z-[100]">
-      <app-error-card [errorMessage]="errorMessage"></app-error-card>
+      <app-error-card [errorMessageMultiple]="errorMessages"></app-error-card>
     </div>
   </div>
 }
