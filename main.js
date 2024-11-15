@@ -1,5 +1,5 @@
 const { app, BrowserWindow, globalShortcut } = require('electron');
-const { screen } = require('electron');
+const { screen, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 
 const path = require('path');
@@ -46,6 +46,19 @@ function setupAutoUpdater() {
   // Notify the renderer process when an update is available
   autoUpdater.on('update-available', (info) => {
     win.webContents.send('update_available', info);
+
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Restart', 'Later'],
+      title: 'Application Update',
+      detail:
+        'A new version has been downloaded. Restart the application to apply the updates.'
+    }
+
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.quitAndInstall()
+    })
+  
   });
 
   // Notify the renderer process when an update is downloaded

@@ -67,6 +67,11 @@
   "build": {
     "appId": "com.easy-sankey.app",
     "productName": "Easy Sankey",
+    "publish": {
+      "provider": "github",
+      "owner": "LongNguyen159",
+      "repo": "finance-management"
+    },
     "files": [
       "dist/**/*",
       "main.js",
