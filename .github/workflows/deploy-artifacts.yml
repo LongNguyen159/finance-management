@@ -40,11 +40,12 @@ jobs:
       - name: Package Electron App
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         run: |
           if [ "${{ matrix.architecture }}" == "x64" ]; then
-            npm run deploy-win -- --x64 --publish never
+            npm run deploy-win -- --x64 --publish never --config.extraMetadata.version=$VERSION
           elif [ "${{ matrix.architecture }}" == "arm64" ]; then
-            npm run deploy-mac -- --arm64 --publish never
+            npm run deploy-mac -- --arm64 --publish never --config.extraMetadata.version=$VERSION
           fi
         shell: bash
 
