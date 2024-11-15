@@ -76,7 +76,7 @@
       "preload.js"
     ],
     "directories": {
-      "output": "releases/v$(npm run get-version --silent)/${platform}/${arch}"
+      "output": "releases/v__VERSION__/${platform}/${arch}"
     },
     "mac": {
       "target": [

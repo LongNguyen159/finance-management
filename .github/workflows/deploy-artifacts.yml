@@ -34,6 +34,16 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
 
+
+      - name: Print Version
+        run: echo "Version is ${{ env.VERSION }}"
+        shell: bash
+      
+      - name: Replace Version Placeholder
+        run: |
+          sed -i "s/__VERSION__/${{ env.VERSION }}/g" package.json
+        shell: bash
+
       - name: Build Angular App
         run: npm run build
 
