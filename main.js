@@ -41,12 +41,6 @@ function createWindow() {
 // Auto-update logic
 function setupAutoUpdater() {
   autoUpdater.autoDownload = true;
-  
-  // Determine the feed URL based on the operating system
-  const platform = process.platform === 'darwin' ? 'latest-mac.yml' : 'latest.yml';
-  const feedURL = `https://github.com/LongNguyen159/finance-management/releases/download/v${version}/${platform}`;
-  
-  autoUpdater.setFeedURL({ url: feedURL });
 
   // Check for updates
   autoUpdater.checkForUpdatesAndNotify();
