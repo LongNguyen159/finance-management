@@ -1,6 +1,6 @@
 {
   "name": "easy-sankey",
-  "version": "2.0.2",
+  "version": "2.0.1",
   "description": "A finance management tool for tracking expenses and managing budgets. Easy Sankey helps you create clear and simple financial visualisations without the need for Excel or technical skills. Just a few easy inputs, and you can see where your money goes!",
   "author": "Long Nguyen",
   "main": "main.js",
