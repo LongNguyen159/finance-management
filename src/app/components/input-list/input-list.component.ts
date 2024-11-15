@@ -302,8 +302,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   /** Initialise/Populate the form with predefined data */
   populateInputFields(selectedMonthData: SingleMonthData): void {
-    console.log('populating input fields...', selectedMonthData.rawInput)
-
     /** clear the form and repopulate it with new data. */
     this.linkArray.clear({ emitEvent: false });
     

@@ -31,8 +31,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     if (window['electronAPI']) {
-      console.log('Electron object:', window['electronAPI']);
-  
       window['electronAPI'].onUpdateAvailable(() => {
         alert('Update available! Downloading now...');
       });
