@@ -6,7 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import {version} from '../../package.json';
 import { ColorService } from './services/color.service';
 import { DataService } from './services/data.service';
-declare const electron: any;
+declare const window: any;
+
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class AppComponent implements OnInit {
   appVersion = ''
   colorService = inject(ColorService)
   dataService = inject(DataService)
+  
   constructor(private router: Router, renderer: Renderer2) {
     this.colorService.renderer = renderer;
     /** Retrieve theme from service to apply */
@@ -28,18 +30,22 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    electron.onUpdateAvailable(() => {
-      alert('Update available! Downloading now...');
-    });
-
-    electron.onUpdateDownloaded(() => {
-      const restart = confirm('Update downloaded. Restart now?');
-      if (restart) {
-        electron.ipcRenderer.send('restart_app');
-      }
-    });
-
-
+    if (window['electronAPI']) {
+      console.log('Electron object:', window['electronAPI']);
+  
+      window['electronAPI'].onUpdateAvailable(() => {
+        alert('Update available! Downloading now...');
+      });
+  
+      window['electronAPI'].onUpdateDownloaded(() => {
+        const restart = confirm('Update downloaded. Restart now?');
+        if (restart) {
+          window['electronAPI'].ipcRenderer.send('restart_app');
+        }
+      });
+    } else {
+      console.error('Electron object is not available. Ensure preload.js is correctly configured.');
+    }
     // Fetch app version from package.json
     this.appVersion = version;
 
@@ -57,6 +63,8 @@ export class AppComponent implements OnInit {
 
   checkForUpdate() {
     const storedVersion = localStorage.getItem('appVersion');
+    console.log('Stored version:', storedVersion);
+    console.log('Current version pulled from package.json:', this.appVersion);
     if (!storedVersion || storedVersion !== this.appVersion) {
       // If the stored version is missing or different, show the update page
       this.router.navigate(['/updates']);
