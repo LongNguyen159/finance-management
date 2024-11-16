@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
@@ -11,6 +11,7 @@ import { ColorService } from '../../../services/color.service';
   imports: [NgxEchartsDirective, CommonModule],
   providers: [
     provideEcharts(),
+    CurrencyPipe
   ],
   templateUrl: './income-expense-ratio-chart.component.html',
   styleUrls: ['./income-expense-ratio-chart.component.scss']
@@ -21,6 +22,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
+  currencyPipe = inject(CurrencyPipe)
 
   barWidth: string = '10%'
   chartOption: EChartsOption = this.getBaseChartOptions();
@@ -84,7 +86,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         </div>
         &nbsp;
         <div style="flex: 1; text-align: right;">
-          <strong>${item.value.toLocaleString('en-US')}</strong>
+          <strong>${this.currencyPipe.transform(item.value, this.dataService.getSelectedCurrency())}</strong>
         </div>
       </div>`).join('');
   }
