@@ -281,7 +281,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
          */
         this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
         this.checkForNonAllowedNames(value, linkGroup)
-        console.log('Type:', typeValue)
         if (typeValue == '' || !typeValue || typeValue == null) {
           this.addErrorMessage(ErrorType.EmptyType, 'Type is empty. Please select a type.')
         } else {
