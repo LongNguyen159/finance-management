@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
-import { PieData } from '../models';
+import { EntryType, PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -46,7 +46,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   storedYears: string[] = [];
   selectedYear: string = '';
   selectedOption: string = '3-months'; // Default selection for the dropdown
-
+  
+  entryTypeEnums = EntryType;
 
   isFormatBigNumbers: boolean = false;
 
@@ -208,7 +209,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     // Step 1: Extract income entries from rawInput
     const incomeEntries = currentMonthData.rawInput
-    .filter(entry => entry.type === 'income')
+    .filter(entry => entry.type === EntryType.Income)
     .map(entry => ({
         type: 'income',
         name: entry.target,

@@ -98,10 +98,10 @@
                         <p>  <!-- Only display items with no source -->
                           {{ input.name }}: 
                           <span [ngClass]="{
-                            'income-light': input.type === 'income' && !colorService.isDarkMode(),
-                            'income-dark': input.type === 'income' && colorService.isDarkMode(),
-                            'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
-                            'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                            'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
+                            'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
+                            'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
+                            'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
                           }">
                             {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value.toLocaleString('en-US') }}
                           </span>
