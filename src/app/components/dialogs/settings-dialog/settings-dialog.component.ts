@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
 import {MatRadioModule} from '@angular/material/radio';
 import { CommonModule } from '@angular/common';
@@ -13,6 +13,7 @@ import { UiService } from '../../../services/ui.service';
 import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
+import { RestartDialogComponent } from '../restart-dialog/restart-dialog.component';
 
 
 
@@ -34,6 +35,7 @@ export class SettingsDialogComponent implements OnInit{
   dataService = inject(DataService)
   readonly router = inject(Router)
   dialogRef = inject(MatDialogRef);
+  readonly dialog = inject(MatDialog)
   /** 'system', 'light' or 'dark' */
   selectedTheme: Theme = Theme.System;
   theme = Theme
@@ -86,6 +88,14 @@ export class SettingsDialogComponent implements OnInit{
       if (confirmed) {
         localStorage.clear();
         this.uiService.showSnackBar('Local Storage Cleared!', 'Dismiss', 3000)
+        this.dialog.open(RestartDialogComponent, {
+          disableClose: true,
+          width: '45rem',
+          maxWidth: '60vw',
+          height: '12rem',
+          maxHeight: '60vh',
+        })
+        this.dialogRef.close()
       }
     })
   }
