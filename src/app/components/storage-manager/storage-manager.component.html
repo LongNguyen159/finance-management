@@ -103,7 +103,7 @@
                             'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
                             'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
                           }">
-                            {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value.toLocaleString('en-US') }}
+                            {{ isFormatBigNumbers ? dataService.getCurrencySymbol(dataService.getSelectedCurrency()) + formatBigNumbersTemplate(input.value) : input.value | currency: dataService.getSelectedCurrency() }}
                           </span>
                         </p>
                       </li>

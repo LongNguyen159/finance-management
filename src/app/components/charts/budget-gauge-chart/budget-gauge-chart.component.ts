@@ -3,6 +3,8 @@ import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { ColorService } from '../../../services/color.service';
 import { formatBigNumber } from '../../../utils/utils';
+import { CurrencyPipe } from '@angular/common';
+import { DataService } from '../../../services/data.service';
 
 @Component({
   selector: 'app-budget-gauge-chart',
@@ -10,6 +12,7 @@ import { formatBigNumber } from '../../../utils/utils';
   imports: [NgxEchartsDirective],
   providers: [
     provideEcharts(),
+    CurrencyPipe
   ],
   templateUrl: './budget-gauge-chart.component.html',
   styleUrl: './budget-gauge-chart.component.scss'
@@ -21,6 +24,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
   @Input() color: string = '#000'
 
   colorService = inject(ColorService)
+  dataService = inject(DataService)
 
   chartOptions: EChartsOption
 
@@ -139,7 +143,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
               const actualSpending = Math.round(this.actualSpending * 100) / 100;
               const budget = this.budget;
               const difference = Math.abs(budget - actualSpending);
-              const differenceFormatted = formatBigNumber(difference);
+              const differenceFormatted = this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(difference);
             
               let comparisonMessage = '';
               if (actualSpending < budget) {
@@ -150,7 +154,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
                 comparisonMessage = 'On budget';
               }
             
-              return `(${this.computeBudgetPercentage()}%)\n${formatBigNumber(actualSpending)} / ${formatBigNumber(budget)}\n${comparisonMessage}`;
+              return `(${this.computeBudgetPercentage()}%)\n${this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(actualSpending)} / ${this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(budget)}\n${comparisonMessage}`;
             },
             valueAnimation: true,
             offsetCenter: ['0%', '30%']

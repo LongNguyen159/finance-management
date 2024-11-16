@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService, MonthlyData } from '../../services/data.service';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ColorService } from '../../services/color.service';
 import { UiService } from '../../services/ui.service';
@@ -31,6 +31,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSlideToggleModule,
     MatTooltipModule
   ],
+  providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -41,6 +42,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   colorService = inject(ColorService);
   uiService = inject(UiService);
   dialog = inject(MatDialog);
+  currencyPipe = inject(CurrencyPipe);
+
   localStorageData: MonthlyData = {};
   storedMonths: string[] = [];
   storedYears: string[] = [];
@@ -286,7 +289,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
     }
-    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus) : totalSurplus.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(totalSurplus) : this.currencyPipe.transform(totalSurplus, this.dataService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
   }
 
   /** For Calculating all time balance based on selected time frame. */
@@ -305,10 +308,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         }
     }
 
-    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus) : totalSurplus.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(totalSurplus) : this.currencyPipe.transform(totalSurplus, this.dataService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
   }
 
-  /** Calculating all time balance literally, independent from time frame. */
+  /** Calculating all time balance literally, independent from time frame. (NOT IMPLEMENTED) */
   calculateTotalSurplusAllTime(): string {
     let totalSurplus = 0;
 
@@ -326,7 +329,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   getFormattedRemainingBalance(month: string): string {
     const balanceString: string = this.localStorageData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
-    return this.isFormatBigNumbers ? formatBigNumber(numericBalance) : balanceString;
+    return this.isFormatBigNumbers ? this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(numericBalance) : this.currencyPipe.transform(numericBalance, this.dataService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
 
   removeItem(key: string) {
