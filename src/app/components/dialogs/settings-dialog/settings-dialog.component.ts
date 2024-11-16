@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
 import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -19,7 +21,9 @@ import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatCardModule,
     MatRadioModule, CommonModule, FormsModule, MatIconModule,
-    RouterModule
+    RouterModule,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   templateUrl: './settings-dialog.component.html',
   styleUrl: './settings-dialog.component.scss',
@@ -35,17 +39,31 @@ export class SettingsDialogComponent implements OnInit{
   theme = Theme
   uiService = inject(UiService)
 
+  selectedCurrency = ''
+  availableCurrencies: string[] = ['USD', 'EUR', 'VND'];
+
+
   constructor(private renderer: Renderer2) {}
 
   ngOnInit(): void {
     this.selectedTheme = this.colorService.isManualThemeSet() ? (this.colorService.isDarkMode() ? Theme.Dark : Theme.Light) : Theme.System
     this.applySelectedTheme(this.selectedTheme);
+
+
+    this.selectedCurrency = this.dataService.getSelectedCurrency();
+    this.applySelectedCurrency(this.selectedCurrency)
   }
 
   /** On selection change, call apply theme */
   applySelectedTheme(theme: Theme) {
     this.colorService.applyTheme(theme);
     this.selectedTheme = theme;
+  }
+
+
+  applySelectedCurrency(currency: string): void {
+    this.selectedCurrency = currency;
+    this.dataService.setSelectedCurrency(currency);
   }
 
   navigateToDataManager() {
