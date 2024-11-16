@@ -211,7 +211,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const incomeEntries = currentMonthData.rawInput
     .filter(entry => entry.type === EntryType.Income)
     .map(entry => ({
-        type: 'income',
+        type: EntryType.Income,
         name: entry.target,
         value: entry.value
     }));
@@ -224,6 +224,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         name: removeSystemPrefix(entry.name),
         value: entry.value
     }));
+
+    const taxEntry = currentMonthData.rawInput.find(entry => entry.type === EntryType.Tax);
+    if (taxEntry) {
+        incomeEntries.push({
+            type: EntryType.Tax,
+            name: taxEntry.target,
+            value: taxEntry.value
+        });
+    }
 
     // Step 3: Combine the two arrays
     const result = [...incomeEntries, ...expenseEntries];    
