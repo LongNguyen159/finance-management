@@ -92,7 +92,7 @@ export function formatBigNumber(num: number, currencySymbol: string): string {
   } else if (absNum >= 10_000) {
     formattedNumber = (absNum / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
   } else {
-    formattedNumber = absNum.toString();
+    formattedNumber = absNum.toLocaleString('en-US');
   }
 
   return `${sign}${currencySymbol}${formattedNumber}`;
