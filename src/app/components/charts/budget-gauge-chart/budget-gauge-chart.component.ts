@@ -143,7 +143,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
               const actualSpending = Math.round(this.actualSpending * 100) / 100;
               const budget = this.budget;
               const difference = Math.abs(budget - actualSpending);
-              const differenceFormatted = this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(difference);
+              const differenceFormatted =  formatBigNumber(difference, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()));
             
               let comparisonMessage = '';
               if (actualSpending < budget) {
@@ -154,7 +154,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
                 comparisonMessage = 'On budget';
               }
             
-              return `(${this.computeBudgetPercentage()}%)\n${this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(actualSpending)} / ${this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()) + formatBigNumber(budget)}\n${comparisonMessage}`;
+              return `(${this.computeBudgetPercentage()}%)\n${ formatBigNumber(actualSpending, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()))} / ${ formatBigNumber(budget, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()))}\n${comparisonMessage}`;
             },
             valueAnimation: true,
             offsetCenter: ['0%', '30%']

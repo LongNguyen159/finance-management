@@ -80,17 +80,20 @@ export function processStringAmountToNumber(amount: string | number): number | n
  * @param num The number to format
  * @returns The formatted string
  */
-export function formatBigNumber(num: number): string {
+export function formatBigNumber(num: number, currencySymbol: string): string {
   const sign = num < 0 ? '-' : '';
   const absNum = Math.abs(num);
 
+  let formattedNumber: string;
   if (absNum >= 1_000_000_000) {
-      return sign + (absNum / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+    formattedNumber = (absNum / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
   } else if (absNum >= 1_000_000) {
-      return sign + (absNum / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    formattedNumber = (absNum / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
   } else if (absNum >= 10_000) {
-      return sign + (absNum / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+    formattedNumber = (absNum / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
   } else {
-      return sign + absNum.toLocaleString('en-US');
+    formattedNumber = absNum.toString();
   }
+
+  return `${sign}${currencySymbol}${formattedNumber}`;
 }
