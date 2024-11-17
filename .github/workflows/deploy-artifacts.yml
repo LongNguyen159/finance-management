@@ -2,9 +2,9 @@ name: Build Electron App
 # TODO: REMEMBER TO CHANGE VERSION NUMBER IN PATH IF YOU BUMP UP THE VERSION.
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   build:
