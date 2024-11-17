@@ -14,6 +14,7 @@ import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { RestartDialogComponent } from '../restart-dialog/restart-dialog.component';
+import { CurrencyService } from '../../../services/currency.service';
 
 
 
@@ -33,6 +34,7 @@ import { RestartDialogComponent } from '../restart-dialog/restart-dialog.compone
 export class SettingsDialogComponent implements OnInit{
   colorService = inject(ColorService)
   dataService = inject(DataService)
+  currencyService = inject(CurrencyService)
   readonly router = inject(Router)
   dialogRef = inject(MatDialogRef);
   readonly dialog = inject(MatDialog)
@@ -52,7 +54,7 @@ export class SettingsDialogComponent implements OnInit{
     this.applySelectedTheme(this.selectedTheme);
 
 
-    this.selectedCurrency = this.dataService.getSelectedCurrency();
+    this.selectedCurrency = this.currencyService.getSelectedCurrency();
     this.applySelectedCurrency(this.selectedCurrency)
   }
 
@@ -65,7 +67,7 @@ export class SettingsDialogComponent implements OnInit{
 
   applySelectedCurrency(currency: string): void {
     this.selectedCurrency = currency;
-    this.dataService.setSelectedCurrency(currency);
+    this.currencyService.setSelectedCurrency(currency);
   }
 
   navigateToDataManager() {

@@ -4,6 +4,7 @@ import { EChartsOption, SeriesOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
+import { CurrencyService } from '../../../services/currency.service';
 
 @Component({
   selector: 'app-income-expense-ratio-chart',
@@ -23,6 +24,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
+  currencyService = inject(CurrencyService)
 
   barWidth: string = '10%'
   chartOption: EChartsOption = this.getBaseChartOptions();
@@ -86,7 +88,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
         </div>
         &nbsp;
         <div style="flex: 1; text-align: right;">
-          <strong>${this.currencyPipe.transform(item.value, this.dataService.getSelectedCurrency())}</strong>
+          <strong>${this.currencyPipe.transform(item.value, this.currencyService.getSelectedCurrency())}</strong>
         </div>
       </div>`).join('');
   }

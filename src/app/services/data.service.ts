@@ -118,14 +118,6 @@ export class DataService {
     /** Immutable states */
     private readonly copiedLinksKey = 'copiedLinks';
     readonly nonAllowedNames = ['Total Income', 'Usable Income', 'Total Expenses', 'Total Tax', this.REMAINING_BALANCE_LABEL, '-- None --' , ...Object.values(ExpenseCategory)];
-    private readonly currencyKey = 'selectedCurrency';
-    private readonly defaultCurrency = 'EUR';
-
-    private currencySymbols: { [key: string]: string } = {
-        USD: '$',
-        EUR: '€',
-        VND: '₫',
-    };
 
 
     constructor() {
@@ -580,17 +572,6 @@ export class DataService {
             return data[month] || null;
         }
         return null;
-    }
-
-    getSelectedCurrency(): string {
-        return localStorage.getItem(this.currencyKey) || this.defaultCurrency;
-    }
-    getCurrencySymbol(currency: string): string {
-        return this.currencySymbols[currency] || '';
-    }
-    
-    setSelectedCurrency(currency: string): void {
-        localStorage.setItem(this.currencyKey, currency);
     }
 
     /** Return all local storage items

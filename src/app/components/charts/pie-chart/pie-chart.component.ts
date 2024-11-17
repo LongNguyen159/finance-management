@@ -5,6 +5,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { removeSystemPrefix } from '../../../utils/utils';
+import { CurrencyService } from '../../../services/currency.service';
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
@@ -20,6 +21,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
+  currencyService = inject(CurrencyService)
 
   @Input() pieChartData: any[] = []
   @Input() chartTitle: string = ''
@@ -66,7 +68,7 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         },
         formatter: (params: any) => {
           // Use toLocaleString to format the value
-          const value = this.currencyPipe.transform(params.data.value, this.dataService.getSelectedCurrency()); // Format the value
+          const value = this.currencyPipe.transform(params.data.value, this.currencyService.getSelectedCurrency()); // Format the value
           return `${removeSystemPrefix(params.name)}: <b>${value} (${params.percent}%)</b>`; // Bold the params.name
         }
       },

@@ -21,6 +21,7 @@ import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio
 import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-storage-manager',
@@ -43,6 +44,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   uiService = inject(UiService);
   dialog = inject(MatDialog);
   currencyPipe = inject(CurrencyPipe);
+  currencyService = inject(CurrencyService);
 
   localStorageData: MonthlyData = {};
   storedMonths: string[] = [];
@@ -289,7 +291,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
     }
-    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.dataService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.currencyService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
   }
 
   /** For Calculating all time balance based on selected time frame. */
@@ -308,7 +310,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         }
     }
 
-    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.dataService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.currencyService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
   }
 
   /** Calculating all time balance literally, independent from time frame. (NOT IMPLEMENTED) */
@@ -321,7 +323,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
     }
 
-    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency())) : totalSurplus.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : totalSurplus.toLocaleString('en-US');
   }
 
 
@@ -329,7 +331,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   getFormattedRemainingBalance(month: string): string {
     const balanceString: string = this.localStorageData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
-    return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.dataService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
+    return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.currencyService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
 
   removeItem(key: string) {
@@ -352,7 +354,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
   formatBigNumbersTemplate(num: number): string {
-    return formatBigNumber(num, this.dataService.getCurrencySymbol(this.dataService.getSelectedCurrency()));
+    return formatBigNumber(num, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()));
   }
 
   /** This function is used to get details of the corresponding month. It opens the main page dialog.

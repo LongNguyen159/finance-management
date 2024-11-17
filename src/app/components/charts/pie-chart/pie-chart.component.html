@@ -5,12 +5,12 @@
     </h2>
     @if (totalExpenses !== -1) {
         <p class="text-base font-medium">
-            Total expenses: {{ totalExpenses | currency: dataService.getSelectedCurrency() }} of {{ totalIncome | currency: dataService.getSelectedCurrency() }} 
+            Total expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }} of {{ totalIncome | currency: currencyService.getSelectedCurrency() }} 
             (<span class="font-semibold">{{ ((totalExpenses / totalIncome) * 100).toFixed(2) }}%</span>)
         </p>
     } @else {
         <p class="text-base font-medium">
-            Total income: {{ totalIncome | currency: dataService.getSelectedCurrency() }}
+            Total income: {{ totalIncome | currency: currencyService.getSelectedCurrency() }}
         </p>
     }
     

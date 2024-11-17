@@ -9,6 +9,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { parseLocaleStringToNumber, removeSystemPrefix } from '../../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
 import { DialogsService } from '../../../services/dialogs.service';
+import { CurrencyService } from '../../../services/currency.service';
 
 
 @Component({
@@ -37,6 +38,7 @@ export class SankeyChartComponent implements OnChanges {
   colorService = inject(ColorService)
   dialogService = inject(DialogsService)
   currencyPipe = inject(CurrencyPipe)
+  currencyService = inject(CurrencyService)
 
   sankeyOption: EChartsOption = {}
   mergeOption: EChartsOption = {}
@@ -86,11 +88,11 @@ export class SankeyChartComponent implements OnChanges {
         formatter: (params: any) => {
           if (params.dataType === 'node') {
             const nodeName = removeSystemPrefix(params.data.name);
-            return `${nodeName}: <strong>${this.currencyPipe.transform(params.data.value, this.dataService.getSelectedCurrency())}</strong>`;
+            return `${nodeName}: <strong>${this.currencyPipe.transform(params.data.value, this.currencyService.getSelectedCurrency())}</strong>`;
           } else {
             const source = params.data.source ? removeSystemPrefix(params.data.source) : '';
             const target = params.data.target ? removeSystemPrefix(params.data.target) : '';
-            return `${source} → ${target}: <strong>${this.currencyPipe.transform(params.data.value, this.dataService.getSelectedCurrency())}</strong>`;
+            return `${source} → ${target}: <strong>${this.currencyPipe.transform(params.data.value, this.currencyService.getSelectedCurrency())}</strong>`;
           }
         }
       },
