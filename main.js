@@ -73,6 +73,18 @@ function setupAutoUpdater() {
   autoUpdater.on('error', (err) => {
     console.error('Auto-Updater Error:', err);
   });
+
+
+  win.webContents.on('before-input-event', (event, input) => {
+    if (
+      input.type === 'keyDown' &&
+      input.key === 'r' &&
+      (input.control || input.meta) // Detect Ctrl (Windows/Linux) or Cmd (macOS)
+    ) {
+      event.preventDefault(); // Prevent default reload
+      // win.reload(); // Reload the Electron app
+    }
+  });
 }
 
 
@@ -82,16 +94,16 @@ app.on('ready', () => {
   createWindow();
   setupAutoUpdater();
 
-  // Register shortcuts to prevent reloading
-  globalShortcut.register('CommandOrControl+R', () => {
-    // Do nothing to prevent reload
-  });
+  // // Register shortcuts to prevent reloading
+  // globalShortcut.register('CommandOrControl+R', () => {
+  //   // Do nothing to prevent reload
+  // });
 
-  globalShortcut.register('F5', () => {
-    // Do nothing to prevent reload
-  });
-
+  // globalShortcut.register('F5', () => {
+  //   // Do nothing to prevent reload
+  // });
 });
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
