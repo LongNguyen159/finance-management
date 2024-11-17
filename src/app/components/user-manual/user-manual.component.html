@@ -64,7 +64,7 @@
                 <p class="mt-2">For example, entering "100 50" will be understood as "100 + 50 = 150".</p>
                 <br>
                 <p>Easy Sankey will automatically calculate your input.</p>
-            </div>
+        </div>
     </section>
 
     <div class="my-8">
@@ -83,6 +83,20 @@
         <p>Once you've defined your fixed costs, open the input dialog where you'll see the "Paste Fix Costs" button. Clicking this will automatically add your defined fixed costs to your entries.</p>
         <div class="w-full flex flex-row justify-center">
             <img [src]="colorService.isDarkMode() ? 'assets/images/edit-fix-costs-dark.png' : 'assets/images/edit-fix-costs-light.png'" alt="Edit Fix Costs" class="w-[75%] image">
+        </div>
+
+        <div class="rounded-2xl p-4 mt-4"
+            [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}"
+        >
+            <!-- CARD TITLE -->
+            <p class="text-xl font-bold">NOTE</p>
+            <p>
+                Fixed costs defined in Finance Manager are called <span class="font-bold underline">global fixed costs</span> and can be applied to all entries (across all months).
+            </p>
+            <br>
+            <p>
+                If you update your global fixed costs, these changes <span class="font-bold underline">won’t automatically reflect in your existing entries</span>. To apply the updates, <span class="font-bold underline"> click "Update Fix Costs"</span> in the entries section. This ensures you can adjust fixed costs for specific entries without changing your global settings.
+            </p>
         </div>
 
         <h3 class="text-xl font-bold mt-6">Budget Management</h3>
