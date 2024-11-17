@@ -80,6 +80,7 @@ export class SankeyChartComponent implements OnChanges {
       animation: true,
       tooltip: {
         trigger: 'item',
+        position: 'top',
         triggerOn: 'mousemove',
         backgroundColor: isDarkMode ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
