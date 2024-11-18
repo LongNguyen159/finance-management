@@ -3,6 +3,21 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
+
+/**
+ * Manage Logs for each input ID of a month.
+ * 
+ * This logs trace the changes made to 'Amount' input field, and keep the last 3 changes.
+ * 
+ * Purpose: So that user remembers what the entered previously, making it easier to revert back
+ * if they made a mistake in entering the amount.
+ * 
+ * Use Case:
+ * - User enters an amount in the 'Amount' field using inline calculator: 100 + 200 = 300
+ * - And while editing the amount, they might forget "Where am I? What was the previous amount? Did I include them already?"
+ * 
+ * 
+ */
 export class LogsService {
   private logs: { [month: string]: { [inputId: string]: { timestamp: string; value: string }[] } } = {};
   private readonly STORAGE_KEY = 'logs';
@@ -37,7 +52,6 @@ export class LogsService {
 
   /** Get logs for a specific input ID in a specific month */
   getLogs(month: string, inputId: string): { timestamp: string; value: string }[] {
-    const existingLogs = localStorage.getItem('logs');
     return this.logs[month]?.[inputId] || [];
   }
 
