@@ -73,6 +73,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   ngOnInit(): void {
     this.refreshData();
+    this.loadFormatBigNumbersState();
     this.storedYears = this.getStoredYears();
     this.filterMonths(); // Initially filter based on the default option
 
@@ -86,6 +87,20 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         this.filterMonths()
       }
     })
+  }
+
+  loadFormatBigNumbersState(): void {
+    const savedState = sessionStorage.getItem('isFormatBigNumbers');
+    this.isFormatBigNumbers = savedState === 'true';
+  }
+
+  saveFormatBigNumbersState(): void {
+    sessionStorage.setItem('isFormatBigNumbers', this.isFormatBigNumbers.toString());
+  }
+
+  toggleFormatBigNumbers(): void {
+    this.isFormatBigNumbers = !this.isFormatBigNumbers;
+    this.saveFormatBigNumbersState();
   }
 
 

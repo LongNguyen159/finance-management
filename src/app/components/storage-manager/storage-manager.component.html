@@ -17,9 +17,9 @@
   <!-- ALL TIME BALANCE -->
   <div class="flex flex-row w-full justify-between px-6 pb-2">
     <div class="flex flex-row gap-2 items-center">
-      <mat-slide-toggle color="primary" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
+      <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
       <span>Format Numbers</span>
-      <button mat-icon-button matTooltip="Shorten big numbers with 'K', 'M', 'B'">
+      <button mat-icon-button matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
         <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
       </button>
     </div>

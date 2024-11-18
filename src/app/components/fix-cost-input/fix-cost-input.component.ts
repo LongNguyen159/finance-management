@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { expenseCategoryDetails, UserDefinedLink } from '../models';
 import { debounceTime, takeUntil } from 'rxjs';
 import { ErrorCardComponent } from "../error-card/error-card.component";
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @Component({
@@ -25,11 +26,15 @@ import { ErrorCardComponent } from "../error-card/error-card.component";
     MatSelectModule,
     MatIconModule,
     NgxMatSelectSearchModule,
-    MatCardModule, ErrorCardComponent],
+    MatCardModule, ErrorCardComponent,
+    MatTooltipModule
+  ],
   templateUrl: './fix-cost-input.component.html',
   styleUrl: './fix-cost-input.component.scss',
 })
 export class FixCostInputComponent extends InputListComponent {
+  fixCostsInfoTooltip = 'If you change your Fix Costs defined here, you will have to click "Update Fix Costs" in your "Edit Input" dialog to apply the changes.'
+
   constructor(fb: FormBuilder) {
     super(fb); // Pass FormBuilder to the parent constructor
   }
