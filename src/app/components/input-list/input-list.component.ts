@@ -41,6 +41,14 @@ function nonEmptyValidator(): ValidatorFn {
     return value ? null : { emptyOrWhitespace: { value: control.value } };
   };
 }
+
+enum ErrorType {
+  DuplicatedName = 'duplicatedName',
+  EmptyType = 'emptyType',
+  EmptyName = 'emptyName',
+  InvalidValue = 'invalidValue',
+  RowInvalid = 'rowInvalid'
+}
 @Component({
   selector: 'app-input-list',
   standalone: true,
@@ -140,6 +148,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   hasDuplicates: boolean = false;
   duplicatedNames: string[] = []
   errorMessage: string = 'Duplicated names are not allowed! Please check your input.'
+
+  errorMessages: { type: string, message: string }[] = [];
+
 
   hasInValidRows: boolean = false;
 
@@ -259,10 +270,23 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       linkGroup.get('source')?.disable({ emitEvent: false });
     }
 
+    let typeValue = linkGroup.get('type')?.value;
+
     linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
       if (value) {
+        /** Handle error on every target value changes (user types something in target field).
+         * Check for Cycle: If source = target.
+         * Check for Non-allowed names: If target is a non-allowed name (defined in dataService).
+         * Check for Duplicates: If there are duplicate names in the form.
+         */
         this.checkForCycle(value, linkGroup.get('source')?.value, linkGroup, this.linkArray.value);
         this.checkForNonAllowedNames(value, linkGroup)
+        if (typeValue == '' || !typeValue || typeValue == null) {
+          this.addErrorMessage(ErrorType.EmptyType, 'Type is empty. Please select a type.')
+        } else {
+          this.removeErrorMessage(ErrorType.EmptyType)
+        }
+
         this.hasDuplicates = this._checkDuplicateName()
       }
     })
@@ -275,6 +299,10 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
         linkGroup.get('source')?.setValue('', { emitEvent: false }); // Clear source field
       } else {
         linkGroup.get('source')?.enable({ emitEvent: false });  // Enable source otherwise
+      }
+      typeValue = value;
+      if (typeValue && typeValue !== '') {
+        this.removeErrorMessage(ErrorType.EmptyType)
       }
     });
 
@@ -302,8 +330,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   /** Initialise/Populate the form with predefined data */
   populateInputFields(selectedMonthData: SingleMonthData): void {
-    console.log('populating input fields...', selectedMonthData.rawInput)
-
     /** clear the form and repopulate it with new data. */
     this.linkArray.clear({ emitEvent: false });
     
@@ -321,7 +347,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.filterLinks(this.filterQuery)
 
     this.hasDuplicates = this._checkDuplicateName()
-    this.checkForInvalidRows()
 
     // Shallow copy to avoid mutations
     this.initialFormState = [...links];
@@ -456,7 +481,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     if (sum == null) {
       this.uiService.showSnackBar('Invalid value!', 'Dismiss')
       linkGroup?.get('value')?.setErrors({ invalidValue: true }, { emitEvent: false });
-      this.errorMessage = 'One or more values are not valid numbers.'
+      this.addErrorMessage(ErrorType.InvalidValue, 'One or more values are not valid numbers.');
       return;
     }
 
@@ -554,6 +579,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.uiService.showSnackBar('Links pasted!', 'Ok');
       /** Process the pasted links */
       this.dataService.processInputData(newLinks, this.dataMonth);
+      this.updateSavedFormValuesOnFormChanges();
     } else {
       this.uiService.showSnackBar('Clipboard is empty!', 'Dismiss');
     }
@@ -606,6 +632,18 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
 
   /********** Error Handling **********/
+
+  private addErrorMessage(type: string, message: string) {
+    if (!this.errorMessages.some(error => error.message === message)) {
+      this.errorMessages.push({ type, message });
+    }
+  }
+
+  private removeErrorMessage(type: string) {
+    this.errorMessages = this.errorMessages.filter(error => error.type !== type);
+  }
+
+
   //#region Cycle Detection
   private buildAdjacencyList(links: UserDefinedLink[]): Map<string, string[]> {
     const adjacencyList = new Map<string, string[]>();
@@ -727,38 +765,39 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // Handle empty names
     if (emptyNames.length > 0) {
       this.hasDuplicates = true;
-      this.errorMessage = `Empty names are not allowed.`;
+      this.addErrorMessage(ErrorType.EmptyName, 'Empty names are not allowed.');
       return true;
     }
 
     /** FormGroup is used to set error on form. */
     if (duplicateNames.length > 0) {
+      this.removeErrorMessage(ErrorType.DuplicatedName);
       this.uiService.showSnackBar('Duplicate names are not allowed!', 'Dismiss', 5000);
       this.hasDuplicates = true;
-      this.errorMessage = `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`;
+      this.addErrorMessage(ErrorType.DuplicatedName, `Duplicated names: "${this.duplicatedNames.map(name => name).join('", "')}".`);
       return true
     } else {
       this.hasDuplicates = false;
-      this.errorMessage ='';
+      this.removeErrorMessage(ErrorType.DuplicatedName);
       return false
     }
   }
   //#endregion
 
-  checkForInvalidRows(): boolean {
-    console.log('checking for invalid rows...')
-    let hasInvalidRows = false;
-    this.hasInValidRows = false;
-    this.linkArray.controls.forEach((control, index) => {
-      if (!control.valid) {
-        this.uiService.showSnackBar(`Invalid input`, 'Dismiss');
-        hasInvalidRows = true;
-        this.hasInValidRows = true;
-        console.log('Invalid input at row ', index + 1);
-      }
-    });
-    return hasInvalidRows;
-  }
+  // checkForInvalidRows(): boolean {
+  //   console.log('checking for invalid rows...')
+  //   let hasInvalidRows = false;
+  //   this.hasInValidRows = false;
+  //   this.linkArray.controls.forEach((control, index) => {
+  //     if (!control.valid) {
+  //       this.uiService.showSnackBar(`Invalid input at row ${index + 1}`, 'Dismiss', 5000);
+  //       hasInvalidRows = true;
+  //       this.hasInValidRows = true;
+  //       console.log('Invalid input at row ', index + 1);
+  //     }
+  //   });
+  //   return hasInvalidRows;
+  // }
 
   //#region Link Controls
 

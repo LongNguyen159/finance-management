@@ -85,6 +85,30 @@
 
         <mat-card appearance="outlined">
             <mat-card-header class="mb-4">
+                <mat-card-title>Currency</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="flex flex-col justify-center items-start">
+                    <p class="!mb-6">
+                        Select the currency you want to use in the application.
+                    </p>
+                    <mat-form-field appearance="outline">
+                        <!-- <mat-label>Currency</mat-label> -->
+                        <mat-select 
+                            [(value)]="selectedCurrency"
+                            (selectionChange)="applySelectedCurrency(selectedCurrency)"
+                        >
+                            <mat-option *ngFor="let currency of availableCurrencies" [value]="currency">
+                                {{ currency }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+            <mat-card-header class="mb-4">
                 <mat-card-title>Data Control</mat-card-title>
             </mat-card-header>
             <mat-card-content>

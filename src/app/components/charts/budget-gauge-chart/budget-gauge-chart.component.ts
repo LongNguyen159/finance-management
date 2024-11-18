@@ -2,13 +2,16 @@ import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } fr
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { ColorService } from '../../../services/color.service';
-
+import { formatBigNumber } from '../../../utils/utils';
+import { CurrencyPipe } from '@angular/common';
+import { CurrencyService } from '../../../services/currency.service';
 @Component({
   selector: 'app-budget-gauge-chart',
   standalone: true,
   imports: [NgxEchartsDirective],
   providers: [
     provideEcharts(),
+    CurrencyPipe
   ],
   templateUrl: './budget-gauge-chart.component.html',
   styleUrl: './budget-gauge-chart.component.scss'
@@ -20,6 +23,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
   @Input() color: string = '#000'
 
   colorService = inject(ColorService)
+  currencyService = inject(CurrencyService)
 
   chartOptions: EChartsOption
 
@@ -138,7 +142,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
               const actualSpending = Math.round(this.actualSpending * 100) / 100;
               const budget = this.budget;
               const difference = Math.abs(budget - actualSpending);
-              const differenceFormatted = difference.toFixed(2);
+              const differenceFormatted =  formatBigNumber(difference, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()));
             
               let comparisonMessage = '';
               if (actualSpending < budget) {
@@ -149,7 +153,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
                 comparisonMessage = 'On budget';
               }
             
-              return `(${this.computeBudgetPercentage()}%)\n${actualSpending} / ${budget}\n${comparisonMessage}`;
+              return `(${this.computeBudgetPercentage()}%)\n${ formatBigNumber(actualSpending, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))} / ${ formatBigNumber(budget, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))}\n${comparisonMessage}`;
             },
             valueAnimation: true,
             offsetCenter: ['0%', '30%']

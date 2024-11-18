@@ -7,6 +7,9 @@ import { RouterModule } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 import { MatCardModule } from '@angular/material/card';
 
+/**
+ * TODO: UPDATE THIS PAGE EVERY TIME A NEW RELEASE IS MADE.
+ */
 @Component({
   selector: 'app-whats-new-page',
   standalone: true,

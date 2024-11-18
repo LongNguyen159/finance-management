@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, Renderer2, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
 import {MatRadioModule} from '@angular/material/radio';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
 import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { RestartDialogComponent } from '../restart-dialog/restart-dialog.component';
+import { CurrencyService } from '../../../services/currency.service';
 
 
 
@@ -19,7 +23,9 @@ import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatCardModule,
     MatRadioModule, CommonModule, FormsModule, MatIconModule,
-    RouterModule
+    RouterModule,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   templateUrl: './settings-dialog.component.html',
   styleUrl: './settings-dialog.component.scss',
@@ -28,24 +34,40 @@ import { ConfirmDialogData } from '../confirm-dialog/confirm-dialog.component';
 export class SettingsDialogComponent implements OnInit{
   colorService = inject(ColorService)
   dataService = inject(DataService)
+  currencyService = inject(CurrencyService)
   readonly router = inject(Router)
   dialogRef = inject(MatDialogRef);
+  readonly dialog = inject(MatDialog)
   /** 'system', 'light' or 'dark' */
   selectedTheme: Theme = Theme.System;
   theme = Theme
   uiService = inject(UiService)
+
+  selectedCurrency = ''
+  availableCurrencies: string[] = ['USD', 'EUR', 'VND'];
+
 
   constructor(private renderer: Renderer2) {}
 
   ngOnInit(): void {
     this.selectedTheme = this.colorService.isManualThemeSet() ? (this.colorService.isDarkMode() ? Theme.Dark : Theme.Light) : Theme.System
     this.applySelectedTheme(this.selectedTheme);
+
+
+    this.selectedCurrency = this.currencyService.getSelectedCurrency();
+    this.applySelectedCurrency(this.selectedCurrency)
   }
 
   /** On selection change, call apply theme */
   applySelectedTheme(theme: Theme) {
     this.colorService.applyTheme(theme);
     this.selectedTheme = theme;
+  }
+
+
+  applySelectedCurrency(currency: string): void {
+    this.selectedCurrency = currency;
+    this.currencyService.setSelectedCurrency(currency);
   }
 
   navigateToDataManager() {
@@ -68,6 +90,14 @@ export class SettingsDialogComponent implements OnInit{
       if (confirmed) {
         localStorage.clear();
         this.uiService.showSnackBar('Local Storage Cleared!', 'Dismiss', 3000)
+        this.dialog.open(RestartDialogComponent, {
+          disableClose: true,
+          width: '45rem',
+          maxWidth: '60vw',
+          height: '12rem',
+          maxHeight: '60vh',
+        })
+        this.dialogRef.close()
       }
     })
   }

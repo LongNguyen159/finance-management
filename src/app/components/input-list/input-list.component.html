@@ -1,7 +1,7 @@
 @if((!linkForm.valid && linkForm.touched) || hasDuplicates || hasInValidRows) {
   <div class="flex flex-row w-full justify-center">
     <div class="fixed top-6 z-[100]">
-      <app-error-card [errorMessage]="errorMessage"></app-error-card>
+      <app-error-card [errorMessageMultiple]="errorMessages"></app-error-card>
     </div>
   </div>
 }
@@ -91,7 +91,13 @@
     <mat-card class="mb-4 material-background" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isFixCostsExpanded) {
         <mat-card-content>
+
           <div>
+            @if (fixCosts.length == 0) {
+              <div class="flex flex-row items-center justify-center w-full">
+                <p class="text-center">No fix costs pasted. Click "Paste Fix Costs", or start by "Edit Fix Costs" if you haven't defined any.</p>
+              </div>
+            }
             <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
               @if (linkGroup.get('isFixCost')?.value && filteredLinkIds.includes(linkGroup.get('id')?.value)) {
                 <!-- Target -->

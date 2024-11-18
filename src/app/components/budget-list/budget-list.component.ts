@@ -10,6 +10,7 @@ import { BudgetService } from '../../services/budget.service';
 import { BudgetDialogComponent } from '../dialogs/budget-dialog/budget-dialog.component';
 import { UiService } from '../../services/ui.service';
 import { removeSystemPrefix } from '../../utils/utils';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-budget-list',
@@ -28,6 +29,7 @@ export class BudgetListComponent implements OnInit{
   budgetService = inject(BudgetService)
   uiService = inject(UiService)
   expenseCategoryDetails = Object.values(expenseCategoryDetails);
+  currencyService = inject(CurrencyService)
 
   budgets: Budget[] = [];
 
@@ -69,7 +71,7 @@ export class BudgetListComponent implements OnInit{
 
   getBudgetValue(category: string): string {
     const budgetValue = this.budgets.find(budget => budget.category === category)?.value;
-    return budgetValue ? budgetValue.toLocaleString('en-US') : ' _';
+    return budgetValue ? this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()) + budgetValue.toLocaleString('en-US') : ' _';
   }
   
 

@@ -1,5 +1,8 @@
 const { app, BrowserWindow, globalShortcut } = require('electron');
-const { screen } = require('electron');
+const { screen, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
+// Import the app version from package.json
+const { version } = require('./package.json');
 
 const path = require('path');
 
@@ -30,24 +33,68 @@ function createWindow() {
   // Open the DevTools for debugging.
   // win.webContents.openDevTools();
 
+  // Register a shortcut listener
+  win.webContents.on('before-input-event', (event, input) => {
+    if (
+      input.type === 'keyDown' &&
+      input.key === 'r' &&
+      (input.control || input.meta) // Detect Ctrl (Windows/Linux) or Cmd (macOS)
+    ) {
+      event.preventDefault(); // Prevent default reload
+      // win.reload(); // Reload the Electron app
+    }
+  });
+
   win.on('closed', () => {
     win = null;
   });
 }
 
+// Auto-update logic
+function setupAutoUpdater() {
+  autoUpdater.autoDownload = true;
+
+  // Check for updates
+  autoUpdater.checkForUpdatesAndNotify();
+
+
+  // Notify the renderer process when an update is available
+  autoUpdater.on('update-available', (info) => {
+    win.webContents.send('update_available', info);
+
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Restart', 'Later'],
+      title: 'Application Update',
+      detail:
+        'A new version has been downloaded. Restart the application to apply the updates.'
+    }
+
+    dialog.showMessageBox(dialogOpts).then((returnValue) => {
+      if (returnValue.response === 0) autoUpdater.quitAndInstall()
+    })
+  
+  });
+
+  // Notify the renderer process when an update is downloaded
+  autoUpdater.on('update-downloaded', (info) => {
+    win.webContents.send('update_downloaded', info);
+  });
+
+  // Handle errors
+  autoUpdater.on('error', (err) => {
+    console.error('Auto-Updater Error:', err);
+  });
+}
+
+
+
 
 app.on('ready', () => {
   createWindow();
-
-  // Register shortcuts to prevent reloading
-  globalShortcut.register('CommandOrControl+R', () => {
-    // Do nothing to prevent reload
-  });
-
-  globalShortcut.register('F5', () => {
-    // Do nothing to prevent reload
-  });
+  // setupAutoUpdater();
 });
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();

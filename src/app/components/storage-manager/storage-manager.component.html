@@ -1,16 +1,37 @@
 <div class="pt-4">
-  <!-- TIMEFRAME FILTER OPTIONS -->
-  <div class="flex flex-row w-full justify-end pr-6">
-    <mat-form-field appearance="outline">
-      <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
-        <mat-option *ngFor="let option of availableOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
+  <div class="flex flex-row w-full justify-end">
+    <!-- TIMEFRAME FILTER OPTIONS -->
+    <div class="pr-6">
+      <mat-form-field appearance="outline">
+        <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
+          <mat-option *ngFor="let option of availableOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  <!-- LINE CHART -->
+  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
+
+  <!-- ALL TIME BALANCE -->
+  <div class="flex flex-row w-full justify-between px-6 pb-2">
+    <div class="flex flex-row gap-2 items-center">
+      <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
+      <span>Format Numbers</span>
+      <button mat-icon-button matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
+        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+      </button>
+    </div>
+    <mat-card appearance="outlined" class="px-4">
+      <mat-card-content>
+        <p class="text-xl font-bold">
+          Balance: {{ calculateTotalSurplusAllTimeFiltered() }}
+        </p>
+      </mat-card-content>
+    </mat-card>
   </div>
 
-  <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
   <mat-accordion multi>
     <ng-container *ngFor="let year of storedYears">
@@ -30,7 +51,7 @@
               {{ year }}
             </mat-panel-title>
             <mat-panel-description>
-              <strong>Total Balance:</strong>&nbsp;{{ calculateTotalSurplus(year).toLocaleString('en-US') }}
+              <strong>Total Surplus: </strong>&nbsp;{{ calculateTotalSurplusOfYear(year) }}
             </mat-panel-description>
           </mat-expansion-panel-header>
     
@@ -53,7 +74,7 @@
                   {{ month }}
                 </mat-panel-title>
                 <mat-panel-description class="flex flex-row gap-6">
-                  <p><strong>Surplus:</strong> {{ localStorageData[month].remainingBalance }}</p>
+                  <p><strong>Surplus:</strong> {{ getFormattedRemainingBalance(month) }}</p>
                 </mat-panel-description>
                 <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
                   <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
@@ -77,12 +98,12 @@
                         <p>  <!-- Only display items with no source -->
                           {{ input.name }}: 
                           <span [ngClass]="{
-                            'income-light': input.type === 'income' && !colorService.isDarkMode(),
-                            'income-dark': input.type === 'income' && colorService.isDarkMode(),
-                            'expense-light': (input.type === 'tax' || input.type === 'expense') && !colorService.isDarkMode(),
-                            'expense-dark': (input.type === 'tax' || input.type === 'expense') && colorService.isDarkMode()
+                            'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
+                            'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
+                            'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
+                            'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
                           }">
-                            {{ input.value.toLocaleString('en-US') }}
+                            {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
                           </span>
                         </p>
                       </li>

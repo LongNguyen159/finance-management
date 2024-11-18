@@ -159,7 +159,7 @@ export class DataService {
     private loadExistingData(): void {
         const savedData = this.loadData();
         if (savedData && Object.keys(savedData).length > 0) {
-            console.log('Saved data found:', savedData);
+            console.log('Saved data found:');
             this.monthlyData = savedData;  // Load saved data
             // this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']);  // Emit saved data
             this.multiMonthEntries$.next(this.monthlyData);  // Emit all months data
@@ -461,7 +461,6 @@ export class DataService {
         });
 
         const savedSingleMonthData = this.loadSingleMonth(month);
-        console.log('Is different from saved data:', JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput));
         const isDifferent: boolean = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
         const isEmpty: boolean = userDefinedLinks.length === 0;
 
@@ -554,7 +553,6 @@ export class DataService {
          * 
          */
         localStorage.setItem('monthlyData', JSON.stringify(nonEmptyMonthlyData));
-        console.log('Data saved:', nonEmptyMonthlyData);
 
         // Emit all months data
         this.multiMonthEntries$.next(nonEmptyMonthlyData);

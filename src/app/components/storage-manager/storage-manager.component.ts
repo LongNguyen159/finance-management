@@ -3,27 +3,36 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService, MonthlyData } from '../../services/data.service';
 import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { ColorService } from '../../services/color.service';
 import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { formatBigNumber, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
-import { PieData } from '../models';
+import { EntryType, PieData } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
+import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-storage-manager',
   standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatIconModule, CommonModule, MatExpansionModule,
-    MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent],
+    MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent,
+    MatCardModule,
+    MatSlideToggleModule,
+    MatTooltipModule
+  ],
+  providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -34,11 +43,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   colorService = inject(ColorService);
   uiService = inject(UiService);
   dialog = inject(MatDialog);
+  currencyPipe = inject(CurrencyPipe);
+  currencyService = inject(CurrencyService);
+
   localStorageData: MonthlyData = {};
   storedMonths: string[] = [];
   storedYears: string[] = [];
   selectedYear: string = '';
   selectedOption: string = '3-months'; // Default selection for the dropdown
+  
+  entryTypeEnums = EntryType;
+
+  isFormatBigNumbers: boolean = false;
 
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
@@ -57,6 +73,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   ngOnInit(): void {
     this.refreshData();
+    this.loadFormatBigNumbersState();
     this.storedYears = this.getStoredYears();
     this.filterMonths(); // Initially filter based on the default option
 
@@ -70,6 +87,20 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         this.filterMonths()
       }
     })
+  }
+
+  loadFormatBigNumbersState(): void {
+    const savedState = sessionStorage.getItem('isFormatBigNumbers');
+    this.isFormatBigNumbers = savedState === 'true';
+  }
+
+  saveFormatBigNumbersState(): void {
+    sessionStorage.setItem('isFormatBigNumbers', this.isFormatBigNumbers.toString());
+  }
+
+  toggleFormatBigNumbers(): void {
+    this.isFormatBigNumbers = !this.isFormatBigNumbers;
+    this.saveFormatBigNumbersState();
   }
 
 
@@ -198,9 +229,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     // Step 1: Extract income entries from rawInput
     const incomeEntries = currentMonthData.rawInput
-    .filter(entry => entry.type === 'income')
+    .filter(entry => entry.type === EntryType.Income)
     .map(entry => ({
-        type: 'income',
+        type: EntryType.Income,
         name: entry.target,
         value: entry.value
     }));
@@ -213,6 +244,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         name: removeSystemPrefix(entry.name),
         value: entry.value
     }));
+
+    const taxEntry = currentMonthData.rawInput.find(entry => entry.type === EntryType.Tax);
+    if (taxEntry) {
+        incomeEntries.push({
+            type: EntryType.Tax,
+            name: taxEntry.target,
+            value: taxEntry.value
+        });
+    }
 
     // Step 3: Combine the two arrays
     const result = [...incomeEntries, ...expenseEntries];    
@@ -255,7 +295,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       }, {});
   }
 
-  calculateTotalSurplus(year: string): number {
+  calculateTotalSurplusOfYear(year: string): string {
     let totalSurplus = 0;
     const months = this.filteredMonthsByYear[year]; // Use filtered months
 
@@ -266,7 +306,47 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
     }
-    return totalSurplus;
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.currencyService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
+  }
+
+  /** For Calculating all time balance based on selected time frame. */
+  calculateTotalSurplusAllTimeFiltered(): string {
+    let totalSurplus = 0;
+
+    for (const year in this.filteredMonthsByYear) {
+        const months = this.filteredMonthsByYear[year];
+
+        if (months) {
+            for (const month of months) {
+                const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+                const numericBalance: number = parseLocaleStringToNumber(balanceString);
+                totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
+            }
+        }
+    }
+
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(totalSurplus, this.currencyService.getSelectedCurrency()) || totalSurplus.toLocaleString('en-US');
+  }
+
+  /** Calculating all time balance literally, independent from time frame. (NOT IMPLEMENTED) */
+  calculateTotalSurplusAllTime(): string {
+    let totalSurplus = 0;
+
+    for (const month in this.localStorageData) {
+        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+        const numericBalance: number = parseLocaleStringToNumber(balanceString);
+        totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
+    }
+
+    return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : totalSurplus.toLocaleString('en-US');
+  }
+
+
+  /** Get remaining balance formatted to big numbers */
+  getFormattedRemainingBalance(month: string): string {
+    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const numericBalance: number = parseLocaleStringToNumber(balanceString);
+    return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.currencyService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
 
   removeItem(key: string) {
@@ -288,7 +368,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     })
   }
 
-  /** This function is used to get details of the corresponding month. 
+  formatBigNumbersTemplate(num: number): string {
+    return formatBigNumber(num, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()));
+  }
+
+  /** This function is used to get details of the corresponding month. It opens the main page dialog.
    * @param month: string in YYYY-MM format.
    */
   getMonthsDetails(month: string) {

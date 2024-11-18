@@ -40,6 +40,9 @@ export interface ExpenseCategoryDetails {
   colorDark?: string;   // New property for dark mode color
 }
 
+/** The labels and color will be shown in Category selector (Dropdown menu) and in Category Cards in Finance Manger.
+ * The charts use the actual value for the Category name (e.g. Housing@__system/category__), and trim out the system prefix.
+ */
 export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategoryDetails } = {
   [ExpenseCategory.Housing]: { 
     label: 'Housing', 
