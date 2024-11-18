@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
 import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
+import { LogsService } from './logs.service';
 
 /** Interface for multi month data. */
 export interface MonthlyData {
@@ -47,6 +48,7 @@ export interface ExpenseData {
  */
 export class DataService {
     private UiService = inject(UiService)
+    private logService = inject(LogsService)
 
     readonly REMAINING_BALANCE_LABEL = 'Surplus'
 
@@ -201,6 +203,8 @@ export class DataService {
          */
         const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
 
+        /** Sanitise logs on process month data. This is to remove old logs. */
+        this.logService.sanitiseLogs(month, userDefinedLinks.map(item => item.id));
 
 
         /** Early exit if detect negative values. */

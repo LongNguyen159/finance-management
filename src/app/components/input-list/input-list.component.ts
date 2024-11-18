@@ -15,7 +15,7 @@ import { BasePageComponent } from '../../base-components/base-page/base-page.com
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import { UiService } from '../../services/ui.service';
 import { MonthPickerComponent } from "../month-picker/month-picker.component";
-import { formatDateToYYYYMM, processStringAmountToNumber } from '../../utils/utils';
+import { addImplicitPlusSigns, formatDateToYYYYMM, processStringAmountToNumber } from '../../utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { ErrorCardComponent } from "../error-card/error-card.component";
 import { ColorService } from '../../services/color.service';
@@ -24,6 +24,7 @@ import { Router } from '@angular/router';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { MatDividerModule } from '@angular/material/divider';
 import { v4 as uuidv4 } from 'uuid';
+import { LogsService } from '../../services/logs.service';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -103,6 +104,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   uiService = inject(UiService)
   colorService = inject(ColorService)
 
+  logService = inject(LogsService)
+
   router = inject(Router)
 
   @ViewChildren(MatAutocompleteTrigger) autocompleteTriggers!: QueryList<MatAutocompleteTrigger>;
@@ -155,6 +158,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   hasInValidRows: boolean = false;
 
   isSearchDisplayed: boolean = false;
+
+  isLogShown: boolean = false;
 
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
@@ -272,6 +277,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
     let typeValue = linkGroup.get('type')?.value;
 
+
+    /** Subscribe to Name changes */
     linkGroup.get('target')?.valueChanges.pipe(takeUntil(this.componentDestroyed$), debounceTime(200)).subscribe(value => {
       if (value) {
         /** Handle error on every target value changes (user types something in target field).
@@ -292,7 +299,9 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     })
 
 
-    // Subscribe to changes in the type field
+    /** Subscribe to Type changes.
+     * If type = income or tax, disable source (category) field.
+     */
     linkGroup.get('type')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value == EntryType.Income || value == EntryType.Tax) {
         linkGroup.get('source')?.disable({ emitEvent: false }); // Disable source if type = income or tax
@@ -307,7 +316,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     });
 
 
-    // Listen to changes in the source field for filtering options
+    /** Subscribe to changes in source (category) field. If category is chosen, set type = expense automatically. */
     linkGroup.get('source')?.valueChanges.pipe(takeUntil(this.componentDestroyed$)).subscribe(value => {
       if (value) {
         /** Set type automatic to expense if category chosen */
@@ -484,6 +493,12 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.addErrorMessage(ErrorType.InvalidValue, 'One or more values are not valid numbers.');
       return;
     }
+
+    
+    const id: string = linkGroup?.get('id')?.value;
+    const value = addImplicitPlusSigns(linkGroup?.get('value')?.value || '0')
+    /** Save value changes into logs to keep track of value's history changes. */
+    this.logService.setLog(this.dataMonth, id, value)
 
 
     linkGroup?.setValue({ ...linkGroup.value, value: sum, source: linkGroup.value.source ?? '' });

@@ -51,14 +51,7 @@ export function processStringAmountToNumber(amount: string | number): number | n
     return amount; // If the amount is already a number, return it directly
   }
   
-  // Replace commas with dots for German input
-  const normalizedAmount =  amount.replace(/,/g, '.');
-
-  // Remove unnecessary spaces around numbers, "+" and "-" signs
-  const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
-
-  // Convert isolated spaces between numbers into '+' for implicit addition
-  const implicitAddition = cleanedAmount.replace(/(\d)\s+(?=\d)/g, '$1+');
+  const implicitAddition = addImplicitPlusSigns(amount);
 
 
   // Validate the cleaned input: must consist of valid numbers with optional "+" and "-" signs
@@ -73,6 +66,18 @@ export function processStringAmountToNumber(amount: string | number): number | n
   } catch (error) {
     return null; // In case of any error during evaluation
   }
+}
+
+export function addImplicitPlusSigns(amount: string): string {
+  // Replace commas with dots for German input
+  const normalizedAmount =  amount.replace(/,/g, '.');
+
+  // Remove unnecessary spaces around numbers, "+" and "-" signs
+  const cleanedAmount = normalizedAmount.replace(/\s+/g, ' ');
+
+  // Convert isolated spaces between numbers into '+' for implicit addition
+  const implicitAddition = cleanedAmount.replace(/(\d)\s+(?=\d)/g, '$1+');
+  return implicitAddition;
 }
 
 /**
