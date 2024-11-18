@@ -33,6 +33,18 @@ function createWindow() {
   // Open the DevTools for debugging.
   // win.webContents.openDevTools();
 
+  // Register a shortcut listener
+  win.webContents.on('before-input-event', (event, input) => {
+    if (
+      input.type === 'keyDown' &&
+      input.key === 'r' &&
+      (input.control || input.meta) // Detect Ctrl (Windows/Linux) or Cmd (macOS)
+    ) {
+      event.preventDefault(); // Prevent default reload
+      // win.reload(); // Reload the Electron app
+    }
+  });
+
   win.on('closed', () => {
     win = null;
   });
@@ -73,18 +85,6 @@ function setupAutoUpdater() {
   autoUpdater.on('error', (err) => {
     console.error('Auto-Updater Error:', err);
   });
-
-
-  win.webContents.on('before-input-event', (event, input) => {
-    if (
-      input.type === 'keyDown' &&
-      input.key === 'r' &&
-      (input.control || input.meta) // Detect Ctrl (Windows/Linux) or Cmd (macOS)
-    ) {
-      event.preventDefault(); // Prevent default reload
-      // win.reload(); // Reload the Electron app
-    }
-  });
 }
 
 
@@ -92,16 +92,7 @@ function setupAutoUpdater() {
 
 app.on('ready', () => {
   createWindow();
-  setupAutoUpdater();
-
-  // // Register shortcuts to prevent reloading
-  // globalShortcut.register('CommandOrControl+R', () => {
-  //   // Do nothing to prevent reload
-  // });
-
-  // globalShortcut.register('F5', () => {
-  //   // Do nothing to prevent reload
-  // });
+  // setupAutoUpdater();
 });
 
 app.on('window-all-closed', () => {
