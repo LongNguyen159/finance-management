@@ -1,10 +1,10 @@
 <!-- Navbar -->
-<div class="flex flex-row w-full p-3 gap-2 sticky top-0 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-neutral-800' : 'bg-blue-50' ">
+<div class="flex flex-row w-full p-3 gap-2 items-center sticky top-0 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-neutral-800' : 'bg-blue-50' ">
     <!-- input list menu -->
 
     <!-- LEFTHAND SIDE BUTTONS -->
     @if (showBackButton) {
-        <div>
+        <div class="z-50">
             <a mat-button (click)="navigateBack()" class="flex flex-row justify-center items-center gap-2">
                 <mat-icon>arrow_back</mat-icon>
                 <span>Back</span>
@@ -23,7 +23,7 @@
         </div>
     }
 
-    <div class="flex flex-row w-full justify-center">
+    <div class="flex flex-row w-full justify-center items-center absolute">
         <ng-content></ng-content>
     </div>
     
@@ -31,7 +31,7 @@
     <div class="flex flex-row w-full items-center justify-end">
 
         @if (showAddInput) {
-            <div>
+            <div class="z-50">
                 <button mat-button (click)="dialogService.openInputListDialog()">
                     <div class="flex flex-row justify-center items-center gap-2">
                         <mat-icon fontset="material-symbols-outlined">edit_note</mat-icon>
@@ -60,7 +60,7 @@
             </button>
         
             <!-- Help and Features trigger button for nested menu -->
-            <button mat-menu-item [matMenuTriggerFor]="helpAndFeatures" class="flex flex-row justify-center items-center gap-2">
+            <button mat-menu-item [matMenuTriggerFor]="helpAndFeatures" class="flex flex-row justify-center items-center gap-2 z-50">
                 <mat-icon fontSet="material-symbols-outlined">menu</mat-icon>
                 <span>More Options</span>
             </button>
