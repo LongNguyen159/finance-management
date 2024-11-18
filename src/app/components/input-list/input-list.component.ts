@@ -160,6 +160,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   isSearchDisplayed: boolean = false;
 
   isLogShown: boolean = false;
+  readonly isLogShownKey = 'isLogShown'
 
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
@@ -189,6 +190,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
 
   ngOnInit(): void {
+    this.isLogShown = sessionStorage.getItem(this.isLogShownKey) === 'true' ? true : false;
     /** Retrieve fixed costs from local storage */
     this.fixedLinks = this.dataService.retrieveFixCostsLinks()
 
@@ -904,6 +906,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       queryParams: { tab: 2 }
     });
     this.dataService.setNavigateFixCostState(false)
+  }
+
+  toggleLogs() {
+    this.isLogShown = !this.isLogShown
+    sessionStorage.setItem(this.isLogShownKey, this.isLogShown.toString())
   }
 
   

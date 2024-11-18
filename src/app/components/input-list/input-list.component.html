@@ -14,7 +14,7 @@
       <!-- COPY PASTE BUTTONS -->
       <button mat-stroked-button color="primary" [disabled]="dataService.hasDataCycle()" (click)="copyLinks()">Copy</button>
       <button mat-stroked-button (click)="pasteLinks()">Paste</button>
-      <button mat-icon-button (click)="isLogShown = !isLogShown">
+      <button mat-icon-button (click)="toggleLogs()">
         <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
       </button>
     </div>
