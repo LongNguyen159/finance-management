@@ -20,12 +20,12 @@ export enum EntryType {
 
 //#region Route Paths
 export enum RoutePath {
-  Docs = 'docs',
-  MainPage = '',
-  WelcomePage = 'welcome',
-  WhatsNewPage = 'updates',
-  FinanceManagerPage = 'storage',
-  HighlightedFeaturesPage = 'highlights'
+  Docs = '/docs',
+  MainPage = '/',
+  WelcomePage = '/welcome',
+  WhatsNewPage = '/updates',
+  FinanceManagerPage = '/storage',
+  HighlightedFeaturesPage = '/highlights'
 }
 
 //#endregion
