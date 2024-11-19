@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -22,12 +23,13 @@ export class LogsService {
   private logs: { [month: string]: { [inputId: string]: { timestamp: string; value: string }[] } } = {};
   private readonly STORAGE_KEY = 'logs';
 
-  constructor() {
+  constructor(private datePipe: DatePipe) {
     this.loadLogsFromSessionStorage();
   }
 
   setLog(month: string, inputId: string, newValue: string): void {
-    const timestamp = new Date().toLocaleTimeString(); // Current time
+    const _timestamp = new Date()
+    const timestamp = this.datePipe.transform(_timestamp, 'HH:mm:ss') || '';
 
     // Ensure logs for the month exist
     if (!this.logs[month]) {
