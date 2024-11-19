@@ -10,14 +10,20 @@ mat-form-field {
 }
 .link-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.2rem;
 }
 
 
-.material-background {
-  background-color: var(--mdc-dialog-container-color, var(--mat-app-surface, white));
+.material-background-dialog-custom {
+  background-color: var(--mdc-dialog-container-color, var(--mat-app-surface, white)) !important;
 }
 mat-card {
   box-shadow: none !important;
+}
+
+.mat-mdc-form-field-icon-suffix {
+  position: absolute !important;
+  right: 0;
+  top: 8px;
 }

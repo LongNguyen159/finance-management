@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
 import { DateChanges, EntryType, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
@@ -25,6 +25,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { MatDividerModule } from '@angular/material/divider';
 import { v4 as uuidv4 } from 'uuid';
 import { LogsService } from '../../services/logs.service';
+import { MatMenuModule } from '@angular/material/menu';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -64,9 +65,12 @@ enum ErrorType {
     NgxMatSelectSearchModule,
     MatSlideToggleModule, MonthPickerComponent,
     MatCardModule, ErrorCardComponent, MatDividerModule,
-  FormsModule],
+    MatMenuModule,
+    FormsModule
+],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss',
+  encapsulation: ViewEncapsulation.None,
 
   animations: [
     trigger('expandCollapse', [
@@ -159,8 +163,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   isSearchDisplayed: boolean = false;
 
+  //#region Logs
   isLogShown: boolean = false;
   readonly isLogShownKey = 'isLogShown'
+  activeRowId: string = ''
+  //#endregion
 
   /** Fixed links array. This hold the fix costs stored in local storage */
   fixedLinks: UserDefinedLink[] = []
@@ -908,9 +915,24 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     this.dataService.setNavigateFixCostState(false)
   }
 
-  toggleLogs() {
+  toggleLogs(event: MouseEvent) {
+    event.stopPropagation()
     this.isLogShown = !this.isLogShown
     sessionStorage.setItem(this.isLogShownKey, this.isLogShown.toString())
+  }
+
+  toggleRowLog(rowId: string): void {
+    if (this.activeRowId === rowId) {
+      // Toggle log visibility if the same row is clicked
+      this.isLogShown = !this.isLogShown;
+      if (!this.isLogShown) {
+        this.activeRowId = ''; // Reset active row when hiding logs
+      }
+    } else {
+      // Show logs for the new row
+      this.activeRowId = rowId;
+      this.isLogShown = true;
+    }
   }
 
   
