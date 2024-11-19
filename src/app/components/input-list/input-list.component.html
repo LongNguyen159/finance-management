@@ -17,7 +17,7 @@
           <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
           <!-- <span>Last updated</span> -->
           <span matTooltip="Last edited" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}" class="text-highlight">
-            {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY, HH:mm:ss' }}
+            {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY' }}
           </span>
         </div>
       }
@@ -252,14 +252,14 @@
               <!-- Value -->
               <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
-                <input matInput formControlName="value" type="text" placeholder="Value" (keypress)="validateKeyPress($event)" (paste)="validatePaste($event)" (keydown.enter)="updateInput(linkGroup)" (blur)="updateInput(linkGroup)" />
+                <input matInput class="!w-max" formControlName="value" type="text" placeholder="Value" (keypress)="validateKeyPress($event)" (paste)="validatePaste($event)" (keydown.enter)="updateInput(linkGroup)" (blur)="updateInput(linkGroup)" />
 
                 <!-- button to toggle logs. Only show logs of one input row (determined by ID) -->
                 <button
                   mat-icon-button
                   matSuffix
                   (click)="toggleRowLog(linkGroup.get('id')?.value); $event.stopPropagation()"
-                  matTooltip="Show history, most recent change first."
+                  matTooltip="Show recent changes (most recent first)"
                   [matTooltipShowDelay]="1000"
                 >
                   <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
@@ -267,10 +267,10 @@
 
                 <!-- LOGS/TRACE CHANGES OF AMOUNT FIELD -->
                 @if (activeRowId == linkGroup.get('id')?.value && isLogShown) {
-                  <div class="flex flex-col gap-1 mr-4">
+                  <div class="flex flex-col gap-1 mr-4 break-words">
                     <mat-divider></mat-divider>
                     @if(!logService.getLogs(dataMonth, linkGroup.get('id')?.value) || logService.getLogs(dataMonth, linkGroup.get('id')?.value).length == 0) {
-                      <span>No histories available.</span>
+                      <p class="!m-0">No changes in the past 30 days.</p>
                     }
                     @for (log of logService.getLogs(dataMonth, linkGroup.get('id')?.value); track $index) {
                       <p class="!m-0">

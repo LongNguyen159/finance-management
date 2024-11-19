@@ -1,5 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
+import { MonthlyData } from './data.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -24,12 +26,14 @@ export class LogsService {
   private readonly STORAGE_KEY = 'logs';
 
   constructor(private datePipe: DatePipe) {
-    this.loadLogsFromSessionStorage();
+    this.loadLogsFromLocalStorage();
   }
 
   setLog(month: string, inputId: string, newValue: string): void {
     const _timestamp = new Date()
-    const timestamp = this.datePipe.transform(_timestamp, 'HH:mm:ss') || '';
+
+    /** Timestamp for the Logs */
+    const timestamp = this.datePipe.transform(_timestamp, 'HH:mm') || '';
 
     // Ensure logs for the month exist
     if (!this.logs[month]) {
@@ -45,11 +49,11 @@ export class LogsService {
     this.logs[month][inputId].unshift({ timestamp, value: newValue });
 
     // Keep only the last 3 logs for the input ID
-    if (this.logs[month][inputId].length > 3) {
+    if (this.logs[month][inputId].length > 5) {
       this.logs[month][inputId].pop(); // Remove the oldest log
     }
 
-    this.saveLogsToSessionStorage();
+    this.saveLogsToLocalStorage();
   }
 
   /** Get logs for a specific input ID in a specific month */
@@ -61,7 +65,7 @@ export class LogsService {
   removeLogs(month: string, inputId: string): void {
     if (this.logs[month]?.[inputId]) {
       delete this.logs[month][inputId];
-      this.saveLogsToSessionStorage();
+      this.saveLogsToLocalStorage();
     }
   }
 
@@ -69,28 +73,65 @@ export class LogsService {
   removeMonthLogs(month: string): void {
     if (this.logs[month]) {
       delete this.logs[month];
-      this.saveLogsToSessionStorage();
+      this.saveLogsToLocalStorage();
     }
   }
 
   /** Save logs to Session Storage */
-  private saveLogsToSessionStorage(): void {
+  private saveLogsToLocalStorage(): void {
     try {
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.logs));
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.logs));
     } catch (error) {
       console.error('Error saving logs to Session Storage:', error);
     }
   }
 
   /** Load logs from Session Storage */
-  private loadLogsFromSessionStorage(): void {
+  private loadLogsFromLocalStorage(): void {
     try {
-      const storedLogs = sessionStorage.getItem(this.STORAGE_KEY);
+      const storedLogs = localStorage.getItem(this.STORAGE_KEY);
       this.logs = storedLogs ? JSON.parse(storedLogs) : {};
+      const monthlyData: MonthlyData = JSON.parse(localStorage.getItem('monthlyData') || '{}');
+      this.cleanupLogs(monthlyData)
     } catch (error) {
       console.error('Error loading logs from Session Storage:', error);
       this.logs = {};
     }
+  }
+
+  /** Keep logs in LocalStorage no more than 30days since their creation date.
+   * Use "lastUpdated" property of each month to determine when the logs were last updated.
+   * 
+   * This function is called only on app load.
+   * 
+   */
+  cleanupLogs(monthlyData: MonthlyData): void {
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+    const now = Date.now();
+  
+    // Return early if monthlyData is empty
+    if (!monthlyData || Object.keys(monthlyData).length === 0) {
+      console.warn("MonthlyData is empty, skipping cleanup.");
+      return;
+    }
+  
+    for (const month in this.logs) {
+      const lastUpdated = monthlyData[month]?.lastUpdated;
+  
+      // Skip if lastUpdated is missing or invalid
+      if (!lastUpdated) {
+        console.warn(`No valid lastUpdated for month: ${month}, skipping this month.`);
+        continue;
+      }
+  
+      // Delete the logs if lastUpdated is older than 30 days
+      if (now - new Date(lastUpdated).getTime() > THIRTY_DAYS_MS) {
+        console.info(`Deleting logs for month: ${month}, last updated: ${lastUpdated}`);
+        delete this.logs[month];
+      }
+    }
+  
+    this.saveLogsToLocalStorage();
   }
 
 
@@ -113,6 +154,6 @@ export class LogsService {
       Object.entries(this.logs[month]).filter(([inputId]) => validIdsSet.has(inputId))
     );
 
-    this.saveLogsToSessionStorage()
+    this.saveLogsToLocalStorage()
   }
 }
