@@ -14,10 +14,7 @@
     
     @if (showLogo) {
         <div class="flex flex-row w-full items-center gap-2 pl-4">
-            <!-- <span class="material-symbols-outlined" [ngClass]="colorService.isDarkMode() ? 'dark-text' : 'light-text'">
-                water_drop
-            </span> -->
-            <h1 class="font-bold text-lg" [ngClass]="colorService.isDarkMode() ? 'dark-text' : 'light-text'">
+            <h1 class="font-bold text-lg" [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">
                 Easy Sankey
             </h1>
         </div>
