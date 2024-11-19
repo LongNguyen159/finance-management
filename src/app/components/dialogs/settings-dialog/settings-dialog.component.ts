@@ -89,6 +89,7 @@ export class SettingsDialogComponent implements OnInit{
     this.uiService.openConfirmDialog(dialogData).subscribe((confirmed: boolean | undefined) => {
       if (confirmed) {
         localStorage.clear();
+        sessionStorage.clear();
         this.uiService.showSnackBar('Local Storage Cleared!', 'Dismiss', 3000)
         this.dialog.open(RestartDialogComponent, {
           disableClose: true,
