@@ -32,10 +32,20 @@
         <!-- Menu Definition -->
         <mat-menu #menu="matMenu">
           <!-- Copy Button inside the menu -->
-          <button mat-menu-item (click)="copyLinks()" [disabled]="dataService.hasDataCycle()">Copy all entries</button>
+          <button mat-menu-item class="!px-4" (click)="copyLinks()" [disabled]="dataService.hasDataCycle()">
+            <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+            <span>
+              Copy all
+            </span>
+          </button>
           
           <!-- Paste Button inside the menu -->
-          <button mat-menu-item (click)="pasteLinks()">Paste</button>
+          <button mat-menu-item class="!px-4" (click)="pasteLinks()">
+            <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
+            <span>
+              Paste
+            </span>
+          </button>
         </mat-menu>
       </div>
     </div>
