@@ -243,13 +243,19 @@
               <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
                 <input matInput formControlName="value" type="text" placeholder="Value" (keypress)="validateKeyPress($event)" (paste)="validatePaste($event)" (keydown.enter)="updateInput(linkGroup)" (blur)="updateInput(linkGroup)" />
+
+                <!-- button to toggle logs. Only show logs of one input row (determined by ID) -->
                 <button
                   mat-icon-button
                   matSuffix
                   (click)="toggleRowLog(linkGroup.get('id')?.value); $event.stopPropagation()"
+                  matTooltip="Show history, most recent change first."
+                  [matTooltipShowDelay]="1000"
                 >
                   <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
                 </button>
+
+                <!-- LOGS/TRACE CHANGES OF AMOUNT FIELD -->
                 @if (activeRowId == linkGroup.get('id')?.value && isLogShown) {
                   <div class="flex flex-col gap-1 mr-4">
                     <mat-divider></mat-divider>
@@ -257,9 +263,9 @@
                       <span>No histories available.</span>
                     }
                     @for (log of logService.getLogs(dataMonth, linkGroup.get('id')?.value); track $index) {
-                      <span>
-                        [{{log.timestamp}}] {{ log.value }}
-                      </span>
+                      <p class="!m-0">
+                        <span [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">[{{log.timestamp}}]</span> {{ log.value }}
+                      </p>
                     }
                   </div>
                 }
