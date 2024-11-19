@@ -200,7 +200,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   }
 
   ngOnInit(): void {
-    this.isLogShown = sessionStorage.getItem(this.isLogShownKey) === 'true' ? true : false;
     /** Retrieve fixed costs from local storage */
     this.fixedLinks = this.dataService.retrieveFixCostsLinks()
 
@@ -915,12 +914,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       queryParams: { tab: 2 }
     });
     this.dataService.setNavigateFixCostState(false)
-  }
-
-  toggleLogs(event: MouseEvent) {
-    event.stopPropagation()
-    this.isLogShown = !this.isLogShown
-    sessionStorage.setItem(this.isLogShownKey, this.isLogShown.toString())
   }
 
   toggleRowLog(rowId: string): void {
