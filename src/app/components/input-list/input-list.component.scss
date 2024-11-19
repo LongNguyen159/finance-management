@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  padding-top: 12px;
 }
   
 mat-form-field {
@@ -26,4 +25,12 @@ mat-card {
   position: absolute !important;
   right: 0;
   top: 8px;
+}
+
+.text-highlight {
+  border-radius: 8px;
+  padding: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  font-weight: 500;
 }

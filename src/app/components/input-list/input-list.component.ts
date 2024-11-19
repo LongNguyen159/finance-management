@@ -26,6 +26,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { v4 as uuidv4 } from 'uuid';
 import { LogsService } from '../../services/logs.service';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -66,7 +67,8 @@ enum ErrorType {
     MatSlideToggleModule, MonthPickerComponent,
     MatCardModule, ErrorCardComponent, MatDividerModule,
     MatMenuModule,
-    FormsModule
+    FormsModule,
+    MatTooltipModule
 ],
   templateUrl: './input-list.component.html',
   styleUrl: './input-list.component.scss',
@@ -204,7 +206,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     if (this.dataService.isDemo()) {
       this.isFixCostsExpanded = true
     }
-
 
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
       this.allMonthsData = allMonthsData

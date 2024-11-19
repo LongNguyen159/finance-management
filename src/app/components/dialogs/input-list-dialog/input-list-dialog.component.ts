@@ -1,9 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-
-
-
 import { takeUntil } from 'rxjs';
 import { InputListComponent } from '../../input-list/input-list.component';
 import { DataService, MonthlyData, SingleMonthData } from '../../../services/data.service';
@@ -11,11 +8,7 @@ import { BasePageComponent } from '../../../base-components/base-page/base-page.
 import {formatYearMonthToLongDate } from '../../../utils/utils';
 import { NavigationStart, Router } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ColorService } from '../../../services/color.service';
-import { MatIconModule } from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-
+import { CommonModule } from '@angular/common';
 
 
 @Component({
@@ -23,10 +16,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
   standalone: true,
   imports: [MatButtonModule, MatDialogModule,
     InputListComponent,
-    DatePipe,
     CommonModule,
-    MatIconModule,
-    MatTooltipModule
   ],
   templateUrl: './input-list-dialog.component.html',
   styleUrl: './input-list-dialog.component.scss',
@@ -37,7 +27,6 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
   router = inject(Router)
   dialogRef = inject(MatDialogRef)
   uiService = inject(UiService)
-  colorService = inject(ColorService)
 
   monthString: string = ''
   singleMonthData: SingleMonthData

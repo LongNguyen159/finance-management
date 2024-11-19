@@ -9,8 +9,35 @@
 
   <!-- INPUT LIST ACTIONS BAR CONTAINER -->
   <div class="grid w-full py-2 sticky z-50 top-0 material-background-dialog-custom" style="grid-template-columns: 1fr 1fr 1fr;">
-    <div>
 
+    <!-- LAST UPDATED DATE -->
+    <div class="flex flex-row items-center justify-start gap-2">
+      @if (singleMonthData && singleMonthData.lastUpdated && singleMonthData.lastUpdated !== '-') {
+        <div class="text-sm flex flex-row items-center gap-1" [ngClass]="colorService.isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
+          <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+          <!-- <span>Last updated</span> -->
+          <span matTooltip="Last edited" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}" class="text-highlight">
+            {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY, HH:mm:ss' }}
+          </span>
+        </div>
+      }
+
+      <!-- MENU FOR MORE OPTIONS -->
+      <div class="flex flex-row items-center gap-2">
+        <!-- Button to open the menu -->
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon>
+        </button>
+      
+        <!-- Menu Definition -->
+        <mat-menu #menu="matMenu">
+          <!-- Copy Button inside the menu -->
+          <button mat-menu-item (click)="copyLinks()" [disabled]="dataService.hasDataCycle()">Copy all entries</button>
+          
+          <!-- Paste Button inside the menu -->
+          <button mat-menu-item (click)="pasteLinks()">Paste</button>
+        </mat-menu>
+      </div>
     </div>
 
     <!-- MONTH PICKER -->
@@ -27,22 +54,6 @@
           <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
         </mat-form-field>
       </div>
-    </div>
-    <!-- MENU FOR MORE OPTIONS -->
-    <div class="flex flex-row items-center gap-2">
-      <!-- Button to open the menu -->
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon>
-      </button>
-    
-      <!-- Menu Definition -->
-      <mat-menu #menu="matMenu">
-        <!-- Copy Button inside the menu -->
-        <button mat-menu-item (click)="copyLinks()" [disabled]="dataService.hasDataCycle()">Copy all entries</button>
-        
-        <!-- Paste Button inside the menu -->
-        <button mat-menu-item (click)="pasteLinks()">Paste</button>
-      </mat-menu>
     </div>
   </div>
 
@@ -242,6 +253,9 @@
                 @if (activeRowId == linkGroup.get('id')?.value && isLogShown) {
                   <div class="flex flex-col gap-1 mr-4">
                     <mat-divider></mat-divider>
+                    @if(!logService.getLogs(dataMonth, linkGroup.get('id')?.value) || logService.getLogs(dataMonth, linkGroup.get('id')?.value).length == 0) {
+                      <span>No histories available.</span>
+                    }
                     @for (log of logService.getLogs(dataMonth, linkGroup.get('id')?.value); track $index) {
                       <span>
                         [{{log.timestamp}}] {{ log.value }}
