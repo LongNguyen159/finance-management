@@ -81,7 +81,7 @@ export class SettingsDialogComponent implements OnInit{
   clearLocalStorage() {
     const dialogData: ConfirmDialogData = {
       title: 'Are you sure you want to clear Local Storage?',
-      message: 'This will delete all your data. You will see the welcome screen next time you open the app.',
+      message: 'This will erase all your data. You will see the welcome screen next time you open the app.',
       confirmLabel: 'Delete',
       confirmColor: 'warn',
       cancelLabel: 'Cancel'
