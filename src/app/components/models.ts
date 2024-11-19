@@ -14,6 +14,30 @@ export enum EntryType {
   Expense = 'expense',
   Tax = 'tax'
 }
+
+//#endregion
+
+
+//#region Processed Data
+/** Interface for multi month data. */
+export interface MonthlyData {
+  [month: string]: SingleMonthData;
+}
+/** Interface for single month data. */
+export interface SingleMonthData {
+  lastUpdated: Date | string
+  sankeyData: SankeyData;
+  totalUsableIncome: number;
+  totalGrossIncome: number;
+  totalTax: number;
+  totalExpenses: number;
+  remainingBalance: string;
+  pieData: any;
+  rawInput: UserDefinedLink[];
+  month: string
+}
+
+
 //#endregion
 
 

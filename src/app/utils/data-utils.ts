@@ -1,4 +1,5 @@
-import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
+import { DataService } from "../services/data.service";
+import { MonthlyData, SingleMonthData } from "../components/models";
 import { formatDateToYYYYMM } from "./utils";
 
 /** Process data for the requested month.

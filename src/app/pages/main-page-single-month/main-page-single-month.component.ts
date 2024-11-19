@@ -3,7 +3,7 @@ import { SankeyChartComponent } from "../../components/charts/sankey-chart/sanke
 import { PieChartComponent } from "../../components/charts/pie-chart/pie-chart.component";
 import { ColorService } from '../../services/color.service';
 import { MatDividerModule } from '@angular/material/divider';
-import { SingleMonthData } from '../../services/data.service';
+import { SingleMonthData } from '../../components/models';
 import { CommonModule } from '@angular/common';
 
 @Component({
