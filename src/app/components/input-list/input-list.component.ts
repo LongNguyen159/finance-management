@@ -27,6 +27,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LogsService } from '../../services/logs.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RoutePath } from '../models';
 
 /** Prevent user to define a certain node name that coincides with our system generated node name. */
 function restrictedNodeNamesValidator(restrictedNames: string[]): ValidatorFn {
@@ -910,7 +911,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   navigateToFixCosts() {
     this.dataService.setNavigateFixCostState(true)
-    this.router.navigate(['/storage'], {
+    this.router.navigate([RoutePath.FinanceManagerPage], {
       queryParams: { tab: 2 }
     });
     this.dataService.setNavigateFixCostState(false)

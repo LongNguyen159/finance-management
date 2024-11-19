@@ -1,3 +1,4 @@
+//#region Raw Input
 export interface UserDefinedLink {
     id: string;       // Unique identifier
     type: EntryType;  // Type of the entry
@@ -13,8 +14,24 @@ export enum EntryType {
   Expense = 'expense',
   Tax = 'tax'
 }
+//#endregion
 
 
+
+//#region Route Paths
+export enum RoutePath {
+  Docs = 'docs',
+  MainPage = '',
+  WelcomePage = 'welcome',
+  WhatsNewPage = 'updates',
+  FinanceManagerPage = 'storage',
+  HighlightedFeaturesPage = 'highlights'
+}
+
+//#endregion
+
+
+//#region Category
 export const SYSTEM_PREFIX = '__system/category__'
 
 export enum ExpenseCategory {
@@ -136,12 +153,15 @@ export interface Budget {
   value: number;
 }
 
+//#endregion
+
 export interface DateChanges {
   previousMonth: Date;
   currentMonth: Date;
 }
 
 
+//#region Chart Data
 
 export interface SankeyNode {
     name: string;
@@ -163,3 +183,4 @@ export interface PieData {
   name: string
   value: number
 }
+//#endregion

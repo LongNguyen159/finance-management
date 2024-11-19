@@ -9,7 +9,7 @@ import {formatYearMonthToLongDate } from '../../../utils/utils';
 import { NavigationStart, Router } from '@angular/router';
 import { UiService } from '../../../services/ui.service';
 import { CommonModule } from '@angular/common';
-
+import { RoutePath } from '../../models';
 
 @Component({
   selector: 'app-input-list-dialog',
@@ -51,7 +51,7 @@ export class InputListDialogComponent extends BasePageComponent implements OnIni
 
 
     this.dataService.getNavigateFixCostState().pipe(takeUntil(this.componentDestroyed$)).subscribe((navigating: boolean) => {
-        if (navigating && this.router.url == '/storage?tab=2') {
+        if (navigating && this.router.url == `/${RoutePath.FinanceManagerPage}?tab=2`) {
           this.dialogRef.close();
           this.uiService.showSnackBar('Already in Fix Costs Page')
         }

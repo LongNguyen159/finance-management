@@ -8,6 +8,7 @@ import { ColorService } from '../../services/color.service';
 import { CommonModule, Location } from '@angular/common';
 import { DialogsService } from '../../services/dialogs.service';
 import { UiService } from '../../services/ui.service';
+import { RoutePath } from '../models';
 
 @Component({
   selector: 'app-navbar',
@@ -26,9 +27,12 @@ export class NavbarComponent {
   @Input() showLogo: boolean = true;
   @Input() showUpdates: boolean = true;
   @Input() showStorage: boolean = true;
+  @Input() showHighlights: boolean = true;
 
   @Input() backLink: string = '';
   @Input() scrollToTop: boolean = false;
+
+  RoutePath = RoutePath;
 
   dataService = inject(DataService)
   colorService = inject(ColorService)

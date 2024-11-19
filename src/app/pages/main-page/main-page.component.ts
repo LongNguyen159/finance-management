@@ -22,6 +22,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
+import { RoutePath } from '../../components/models';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -161,7 +162,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   }
 
   navigateToBudgetList() {
-    this.router.navigate(['/storage'], {
+    this.router.navigate([RoutePath.FinanceManagerPage], {
       queryParams: { tab: 1 }
     });
   }

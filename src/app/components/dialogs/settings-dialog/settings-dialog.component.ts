@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { RestartDialogComponent } from '../restart-dialog/restart-dialog.component';
 import { CurrencyService } from '../../../services/currency.service';
-
+import { RoutePath } from '../../models';
 
 
 @Component({
@@ -71,11 +71,11 @@ export class SettingsDialogComponent implements OnInit{
   }
 
   navigateToDataManager() {
-    if (this.router.url === '/storage') {
+    if (this.router.url === RoutePath.FinanceManagerPage) {
       this.uiService.showSnackBar('Already in Finance Manager', 'Dismiss', 3000)
       return;
     }
-    this.router.navigate(['/storage']);
+    this.router.navigate([RoutePath.FinanceManagerPage]);
     this.dialogRef.close()
   }
   clearLocalStorage() {
