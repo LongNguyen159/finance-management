@@ -30,6 +30,7 @@ export class NavbarComponent {
   @Input() showHighlights: boolean = true;
 
   @Input() backLink: string = '';
+  @Input() backLabel: string = 'Back';
   @Input() scrollToTop: boolean = false;
 
   RoutePath = RoutePath;
@@ -58,7 +59,7 @@ export class NavbarComponent {
       this.location.back();
     } else {
       // If no back history, navigate to a fallback route (e.g., homepage)
-      this.router.navigate(['/']);
+      this.router.navigate([RoutePath.MainPage]);
     }
     if (this.scrollToTop) {
       this.uiService.scrollToTop();

@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { ColorService } from '../../services/color.service';
 import { BudgetListComponent } from "../../components/budget-list/budget-list.component";
 import { ActivatedRoute, Router } from '@angular/router';
+import { RoutePath } from '../../components/models';
 
 @Component({
   selector: 'app-storage-page',
@@ -22,6 +23,7 @@ export class StoragePageComponent implements OnInit, AfterViewInit {
   colorService = inject(ColorService)
 
   @ViewChild('toTop') toTop!: ElementRef;
+  RoutePath = RoutePath
 
   selectedTabIndex = 0;
 
