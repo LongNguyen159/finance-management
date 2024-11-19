@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import {version} from '../../package.json';
 import { ColorService } from './services/color.service';
 import { DataService } from './services/data.service';
+import { RoutePath } from './components/models';
 declare const window: any;
 
 
@@ -22,6 +23,7 @@ export class AppComponent implements OnInit {
   appVersion = ''
   colorService = inject(ColorService)
   dataService = inject(DataService)
+
   
   constructor(private router: Router, renderer: Renderer2) {
     this.colorService.renderer = renderer;
@@ -65,7 +67,7 @@ export class AppComponent implements OnInit {
     console.log('Current version pulled from package.json:', this.appVersion);
     if (!storedVersion || storedVersion !== this.appVersion) {
       // If the stored version is missing or different, show the update page
-      this.router.navigate(['/updates']);
+      this.router.navigate([RoutePath.WhatsNewPage]);
       
       // Store the new version to prevent showing the update page again
       localStorage.setItem('appVersion', this.appVersion);
@@ -73,7 +75,7 @@ export class AppComponent implements OnInit {
   }
 
   navigateToWelcome() {
-    this.router.navigate(['/welcome']);
+    this.router.navigate([RoutePath.WelcomePage]);
     /** Set app version on welcome to prevent showing updates on next time. */
     localStorage.setItem('appVersion', this.appVersion);
     // Mark the user as having seen the welcome page

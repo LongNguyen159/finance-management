@@ -22,6 +22,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
+import { RoutePath } from '../../components/models';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -83,6 +84,11 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   ngOnInit(): void {
     this.budgets = this.budgetService.getBudgets()
     
+    /** Get all months data to show the orange dot under the months that has entries.
+     * 
+     * TODO: Optimise this, reading all months data might not be efficient.
+     * Maybe all months of one year? Then as user navigates through years, get the data for that year.
+     */
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
       const filteredMonthlyData = Object.keys(data).reduce((result, month) => {
         const dataEntry = data[month];
@@ -156,7 +162,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   }
 
   navigateToBudgetList() {
-    this.router.navigate(['/storage'], {
+    this.router.navigate([RoutePath.FinanceManagerPage], {
       queryParams: { tab: 1 }
     });
   }

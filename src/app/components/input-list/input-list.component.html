@@ -8,13 +8,46 @@
 <div [formGroup]="linkForm" class="link-form-container" #bottomContent id="bottom-content">
 
   <!-- INPUT LIST ACTIONS BAR CONTAINER -->
-  <div class="grid w-full py-2 sticky z-50 top-0 material-background" style="grid-template-columns: 1fr 1fr 1fr;">
+  <div class="grid w-full py-2 sticky z-50 top-0 material-background-dialog-custom" style="grid-template-columns: 1fr 1fr 1fr;">
 
-    <div class="flex flex-row items-center gap-2">
+    <!-- LAST UPDATED DATE -->
+    <div class="flex flex-row items-center justify-start gap-2">
+      @if (singleMonthData && singleMonthData.lastUpdated && singleMonthData.lastUpdated !== '-') {
+        <div class="text-sm flex flex-row items-center gap-1" [ngClass]="colorService.isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
+          <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+          <!-- <span>Last updated</span> -->
+          <span matTooltip="Last edited" [ngClass]="{'bg-neutral-700': colorService.isDarkMode(), 'bg-neutral-200': !colorService.isDarkMode()}" class="text-highlight">
+            {{ singleMonthData.lastUpdated | date: 'dd. MMM YYYY, HH:mm:ss' }}
+          </span>
+        </div>
+      }
 
-      <!-- COPY PASTE BUTTONS -->
-      <button mat-stroked-button color="primary" [disabled]="dataService.hasDataCycle()" (click)="copyLinks()">Copy</button>
-      <button mat-stroked-button (click)="pasteLinks()">Paste</button>
+      <!-- MENU FOR MORE OPTIONS -->
+      <div class="flex flex-row items-center gap-2">
+        <!-- Button to open the menu -->
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon>
+        </button>
+      
+        <!-- Menu Definition -->
+        <mat-menu #menu="matMenu">
+          <!-- Copy Button inside the menu -->
+          <button mat-menu-item class="!px-4" (click)="copyLinks()" [disabled]="dataService.hasDataCycle()">
+            <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+            <span>
+              Copy all
+            </span>
+          </button>
+          
+          <!-- Paste Button inside the menu -->
+          <button mat-menu-item class="!px-4" (click)="pasteLinks()">
+            <mat-icon fontSet="material-symbols-outlined">content_paste</mat-icon>
+            <span>
+              Paste
+            </span>
+          </button>
+        </mat-menu>
+      </div>
     </div>
 
     <!-- MONTH PICKER -->
@@ -31,10 +64,6 @@
           <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
         </mat-form-field>
       </div>
-      <!-- <div>Show categories</div>
-      <div>
-        <mat-slide-toggle color="primary" labelPosition="before"  disableRipple (change)="dataService.toggleAdvanced()" [checked]="dataService.isAdvancedShown"></mat-slide-toggle>
-      </div> -->
     </div>
   </div>
 
@@ -88,7 +117,7 @@
     </div>
 
     <!-- FIX COST ARRAY -->
-    <mat-card class="mb-4 material-background" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
+    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isFixCostsExpanded) {
         <mat-card-content>
 
@@ -186,7 +215,7 @@
     </div>
 
     <!-- VARIABLE COSTS ARRAY -->
-    <mat-card class="mb-4 material-background" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
+    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
       @if (isVariableCostsExpanded) {
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
@@ -219,12 +248,37 @@
                   <mat-option *ngFor="let type of linkTypes" [disabled]="type == entryTypes.Tax && taxNodeExists " [value]="type">{{ type | titlecase }}</mat-option>
                 </mat-select>
               </mat-form-field>
-        
+              
               <!-- Value -->
               <mat-form-field appearance="fill">
                 <mat-label>Amount</mat-label>
                 <input matInput formControlName="value" type="text" placeholder="Value" (keypress)="validateKeyPress($event)" (paste)="validatePaste($event)" (keydown.enter)="updateInput(linkGroup)" (blur)="updateInput(linkGroup)" />
-        
+
+                <!-- button to toggle logs. Only show logs of one input row (determined by ID) -->
+                <button
+                  mat-icon-button
+                  matSuffix
+                  (click)="toggleRowLog(linkGroup.get('id')?.value); $event.stopPropagation()"
+                  matTooltip="Show history, most recent change first."
+                  [matTooltipShowDelay]="1000"
+                >
+                  <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+                </button>
+
+                <!-- LOGS/TRACE CHANGES OF AMOUNT FIELD -->
+                @if (activeRowId == linkGroup.get('id')?.value && isLogShown) {
+                  <div class="flex flex-col gap-1 mr-4">
+                    <mat-divider></mat-divider>
+                    @if(!logService.getLogs(dataMonth, linkGroup.get('id')?.value) || logService.getLogs(dataMonth, linkGroup.get('id')?.value).length == 0) {
+                      <span>No histories available.</span>
+                    }
+                    @for (log of logService.getLogs(dataMonth, linkGroup.get('id')?.value); track $index) {
+                      <p class="!m-0">
+                        <span [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">[{{log.timestamp}}]</span> {{ log.value }}
+                      </p>
+                    }
+                  </div>
+                }
                 <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
                   Amount must be greater than or equal 0.
                 </mat-error>
@@ -232,10 +286,8 @@
 
                 <mat-error *ngIf="linkGroup.get('value')?.hasError('invalidValue')">
                   Invalid value!
-                </mat-error>
-
-                
-              </mat-form-field>
+                </mat-error>                
+              </mat-form-field>              
               
               <!-- Select with search -->
               <mat-form-field appearance="fill" *ngIf="dataService.isAdvancedShown">

@@ -1,28 +1,26 @@
 import { Component, inject } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { ColorService } from '../../services/color.service';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterModule } from '@angular/router';
 import { UiService } from '../../services/ui.service';
-import { MatCardModule } from '@angular/material/card';
+import { ColorService } from '../../services/color.service';
 import { RoutePath } from '../../components/models';
 
-/**
- * TODO: UPDATE THIS PAGE EVERY TIME A NEW RELEASE IS MADE.
- */
 @Component({
-  selector: 'app-whats-new-page',
+  selector: 'app-highlighted-features-page',
   standalone: true,
   imports: [NavbarComponent, CommonModule, MatButtonModule,
     RouterModule, MatCardModule
   ],
-  templateUrl: './whats-new-page.component.html',
-  styleUrl: './whats-new-page.component.scss'
+  templateUrl: './highlighted-features-page.component.html',
+  styleUrl: './highlighted-features-page.component.scss'
 })
-export class WhatsNewPageComponent {
+export class HighlightedFeaturesPageComponent {
   colorService = inject(ColorService)
   uiService = inject(UiService)
 
   RoutePath = RoutePath
+
 }

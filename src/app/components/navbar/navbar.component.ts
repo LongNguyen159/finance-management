@@ -8,6 +8,7 @@ import { ColorService } from '../../services/color.service';
 import { CommonModule, Location } from '@angular/common';
 import { DialogsService } from '../../services/dialogs.service';
 import { UiService } from '../../services/ui.service';
+import { RoutePath } from '../models';
 
 @Component({
   selector: 'app-navbar',
@@ -26,9 +27,13 @@ export class NavbarComponent {
   @Input() showLogo: boolean = true;
   @Input() showUpdates: boolean = true;
   @Input() showStorage: boolean = true;
+  @Input() showHighlights: boolean = true;
 
   @Input() backLink: string = '';
+  @Input() backLabel: string = 'Back';
   @Input() scrollToTop: boolean = false;
+
+  RoutePath = RoutePath;
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
@@ -54,7 +59,7 @@ export class NavbarComponent {
       this.location.back();
     } else {
       // If no back history, navigate to a fallback route (e.g., homepage)
-      this.router.navigate(['/']);
+      this.router.navigate([RoutePath.MainPage]);
     }
     if (this.scrollToTop) {
       this.uiService.scrollToTop();
