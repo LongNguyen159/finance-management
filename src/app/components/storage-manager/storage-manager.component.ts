@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsu
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { MonthlyData } from '../models';
+import { MonthlyData, SurplusBalanceLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -72,7 +72,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
   filteredMonthsByYear: { [key: string]: string[] } = {};
   allFilteredMonths: string[] = [];
-  surplusChartData: { month: string; surplus: number }[] = [];
+  surplusChartData: SurplusBalanceLineChartData[] = [];
 
 
   ngOnInit(): void {
@@ -277,16 +277,27 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         month,
         surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
       }));
-  
+
     // Sort the filtered data by month in chronological order
-    this.surplusChartData = filteredData.sort((a, b) => {
+    const sortedData = filteredData.sort((a, b) => {
       const dateA = new Date(a.month);
       const dateB = new Date(b.month);
       return dateA.getTime() - dateB.getTime();
     });
-  
+
+    // Add 'balance' property by calculating cumulative balance
+    let previousBalance = 0; // Initial balance can be customized
+    this.surplusChartData = sortedData.map((entry) => {
+      const balance = previousBalance + entry.surplus;
+      previousBalance = balance;
+      return {
+        ...entry,
+        balance,
+      };
+    });
+
     /** Scale the chart every time filter changes */
-    this.getScaleValue()
+    this.getScaleValue();
   }
 
 
