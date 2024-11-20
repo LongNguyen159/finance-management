@@ -22,7 +22,7 @@
         <button class="!flex flex-row items-center" mat-icon-button [matMenuTriggerFor]="settingsMenu">
           <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
         </button>
-        <span>Display Settings</span>
+        <span [matMenuTriggerFor]="settingsMenu" class="cursor-pointer">Display Settings</span>
       </div>
     
       <mat-menu #settingsMenu="matMenu">
