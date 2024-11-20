@@ -32,7 +32,7 @@ export interface SingleMonthData {
   totalTax: number;
   totalExpenses: number;
   remainingBalance: string;
-  pieData: any;
+  pieData: PieData[];
   rawInput: UserDefinedLink[];
   month: string
 }
@@ -212,6 +212,6 @@ export interface PieData {
 export interface SurplusBalanceLineChartData {
   month: string
   surplus: number
-  balance: number
+  balance?: number
 }
 //#endregion

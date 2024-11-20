@@ -44,7 +44,7 @@ function initializeEmptyData(monthString: string): SingleMonthData {
       totalTax: 0,
       totalExpenses: 0,
       remainingBalance: '0',
-      pieData: {},
+      pieData: [],
       rawInput: [],
       month: monthString
     };
