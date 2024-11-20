@@ -23,6 +23,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../services/currency.service';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-storage-manager',
@@ -31,7 +32,8 @@ import { CurrencyService } from '../../services/currency.service';
     MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent,
     MatCardModule,
     MatSlideToggleModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
@@ -56,6 +58,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   entryTypeEnums = EntryType;
 
   isFormatBigNumbers: boolean = false;
+  isBarChartScaled: boolean = true;
 
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
@@ -102,6 +105,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   toggleFormatBigNumbers(): void {
     this.isFormatBigNumbers = !this.isFormatBigNumbers;
     this.saveFormatBigNumbersState();
+  }
+
+  toggleScaleBarChart() {
+    this.isBarChartScaled = !this.isBarChartScaled;
+    this.getScaleValue();
   }
 
 
@@ -281,12 +289,29 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.getScaleValue()
   }
 
+
+  /** Scale the bar chart across all months to have the same xAxis.
+   * This is useful for comparing income and expenses across different months.
+   * 
+   * We use this by finding the largest value of either total income or total expenses, then set that as
+   * max xAxis value for the bar chart.
+   */
   getScaleValue() {
+    /** Get all showing months (Filtered month by selected time frame) */
     const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
+    // Get largest value of either total income or total expenses among the showing months
     const largestValue = this.findLargestValue(showingMonths);
-    this.dataService.incomeExpenseScaleValue.set(largestValue);
+
+    // Set the scale value to the largest value; if scale is turned off, set it to 0.
+    this.isBarChartScaled ? this.dataService.incomeExpenseScaleValue.set(largestValue) : this.dataService.incomeExpenseScaleValue.set(0);
   }
 
+  /** Get data of selected months.
+   * @param data: MonthlyData: Data to be filtered, in this case, all months data
+   * @param keys: string[]: Keys to be filtered (yyyy-mm), in this case, months we want to get.
+   * 
+   * @returns MonthlyData: Filtered data based on the keys.
+   */
   filterDataByKeys(data: MonthlyData, keys: string[]) {
     return Object.keys(data)
       .filter(key => keys.includes(key))

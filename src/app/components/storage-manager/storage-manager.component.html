@@ -14,15 +14,48 @@
   <!-- LINE CHART -->
   <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
-  <!-- ALL TIME BALANCE -->
+  <!-- ACTION BUTTONS -->
   <div class="flex flex-row w-full justify-between px-6 pb-2">
-    <div class="flex flex-row gap-2 items-center">
-      <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
-      <span>Format Numbers</span>
-      <button mat-icon-button matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
-        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-      </button>
+
+    <div class="flex flex-row gap-4 items-center flex-wrap">
+      <div class="flex flex-row items-center">
+        <button class="!flex flex-row items-center" mat-icon-button [matMenuTriggerFor]="settingsMenu">
+          <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+        </button>
+        <span>Display Settings</span>
+      </div>
+    
+      <mat-menu #settingsMenu="matMenu">
+        <div class="flex flex-col gap-2 px-4 py-2">
+          <!-- FORMAT NUMBERS -->
+          <div class="flex flex-row gap-2 justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="flex flex-row items-center">
+              <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
+              <span class="ml-2">Format Numbers</span>
+            </div>
+            <button mat-icon-button [matTooltipPosition]="'above'" matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+          </div>
+    
+          <!-- SCALE BAR CHART -->
+          <div class="flex flex-row gap-2 justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="flex flex-row items-center">
+              <mat-slide-toggle color="primary" (toggleChange)="toggleScaleBarChart()" [(ngModel)]="isBarChartScaled"></mat-slide-toggle>
+              <span class="ml-2">Scale Bar Chart</span>
+            </div>
+            <button mat-icon-button matTooltip="Scale all bars on the same axis for visual comparison.">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-menu>
     </div>
+
+    
+
+
+    <!-- ALL TIME BALANCE -->
     <mat-card appearance="outlined" class="px-4">
       <mat-card-content>
         <p class="text-xl font-bold">
