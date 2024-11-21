@@ -38,14 +38,7 @@ export class TotalSurplusLineChartComponent implements OnChanges {
     const balanceValues = this.chartData.map(data => data.balance);
 
     this.chartOptions = {
-      // title: {
-      //   text: 'Monthly Surplus',
-      //   left: 'center',
-      //   textStyle: {
-      //     fontSize: 22,
-      //     color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-      //   },
-      // },
+      darkMode: this.colorService.isDarkMode(),
       tooltip: {
         trigger: 'axis',
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
@@ -54,9 +47,19 @@ export class TotalSurplusLineChartComponent implements OnChanges {
         },
       },
       legend: {
+        itemGap: 22,
         textStyle: {
+          padding: 8,
           color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
+        itemStyle: {
+          opacity: 0,
+        },
+        lineStyle: {
+          width: 10,
+          inactiveWidth: 8,
+          cap: 'round',
+        }
       },
       xAxis: {
         type: 'category',
