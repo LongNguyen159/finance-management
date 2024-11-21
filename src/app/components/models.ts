@@ -212,6 +212,6 @@ export interface PieData {
 export interface SurplusBalanceLineChartData {
   month: string
   surplus: number
-  balance?: number
+  balance: number
 }
 //#endregion
