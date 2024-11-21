@@ -7,7 +7,7 @@ import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsM
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
+import {MatSelectChange, MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import { debounceTime, takeUntil } from 'rxjs';
 import { MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
@@ -404,6 +404,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this._addDefaultNode();
     });
 
+  }
+
+  /** Clear category search field input when category is selected. */
+  onCategorySelected(option: MatSelectChange) {
+    this.sourceSearchControl.setValue('');
   }
   
   //#region Month Changes
