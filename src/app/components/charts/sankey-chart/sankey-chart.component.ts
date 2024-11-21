@@ -40,51 +40,28 @@ export class SankeyChartComponent implements OnChanges {
   currencyPipe = inject(CurrencyPipe)
   currencyService = inject(CurrencyService)
 
-  sankeyOption: EChartsOption = {}
-  mergeOption: EChartsOption = {}
-  
+  sankeyOption: EChartsOption = this.getBaseChartOptions()
+  sankeyMerge: EChartsOption = {}
+
+  isDarkMode = this.colorService.isDarkMode(); // Call the signal
 
   constructor() {
     effect(() => {
       this.updateSankeyChart();
     });
   }
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes && changes['sankeyData']) {
-      this.updateSankeyChart()
-    }
-
-    if (changes && changes['orientation']) {
-      this.updateSankeyChart()
-    }
-  }
-
-  isPositiveBalance(): boolean {
-    const balanceNumber = parseLocaleStringToNumber(this.remainingBalance);
-    return balanceNumber >= 0;
-  }
-
-  parseLocaleStringToNumber(value: string): number {
-    return parseLocaleStringToNumber(value);
-  }
-
-  getBalanceClass(): string {
-    return this.isPositiveBalance() ? 'positive-balance' : 'negative-balance';
-  }
 
 
-  updateSankeyChart() {
-    const isDarkMode = this.colorService.isDarkMode(); // Call the signal
-
-    this.sankeyOption = {
+  getBaseChartOptions(): EChartsOption {
+    return {
       animation: true,
       tooltip: {
         trigger: 'item',
         position: 'top',
         triggerOn: 'mousemove',
-        backgroundColor: isDarkMode ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: this.isDarkMode ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
         formatter: (params: any) => {
           if (params.dataType === 'node') {
@@ -102,10 +79,31 @@ export class SankeyChartComponent implements OnChanges {
         feature: {
           saveAsImage: {
             name: `Financial Flow Sankey_${this.dataService.getTodaysDate()}`,
-            backgroundColor: isDarkMode ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary,
+            backgroundColor: this.isDarkMode ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary,
           },
         },
       },
+      series: [
+      ]
+    }
+  }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['sankeyData']) {
+      this.updateSankeyChart()
+    }
+
+    if (changes && changes['orientation']) {
+      this.updateSankeyChart()
+    }
+  }
+
+  updateSankeyChart() {
+    const isDarkMode = this.colorService.isDarkMode(); // Call the signal
+
+    this.sankeyMerge = {
+      ...this.getBaseChartOptions(),
       series: [
         {
           nodeAlign: 'left',
@@ -147,4 +145,20 @@ export class SankeyChartComponent implements OnChanges {
       ]
     }
   }
+
+
+  //#region Helper Functions
+  isPositiveBalance(): boolean {
+    const balanceNumber = parseLocaleStringToNumber(this.remainingBalance);
+    return balanceNumber >= 0;
+  }
+
+  parseLocaleStringToNumber(value: string): number {
+    return parseLocaleStringToNumber(value);
+  }
+
+  getBalanceClass(): string {
+    return this.isPositiveBalance() ? 'positive-balance' : 'negative-balance';
+  }
+  //#endregion
 }

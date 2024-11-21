@@ -5,6 +5,7 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { CurrencyService } from '../../../services/currency.service';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 
 @Component({
   selector: 'app-income-expense-ratio-chart',
@@ -17,7 +18,7 @@ import { CurrencyService } from '../../../services/currency.service';
   templateUrl: './income-expense-ratio-chart.component.html',
   styleUrls: ['./income-expense-ratio-chart.component.scss']
 })
-export class IncomeExpenseRatioChartComponent implements OnChanges, OnDestroy {
+export class IncomeExpenseRatioChartComponent extends BaseChartComponent implements OnChanges, OnDestroy {
   @Input() totalIncome: number = 0;
   @Input() totalExpense: number = 0;
 
@@ -27,19 +28,18 @@ export class IncomeExpenseRatioChartComponent implements OnChanges, OnDestroy {
   currencyService = inject(CurrencyService)
 
   barWidth: string = '10%'
-  chartOption: EChartsOption = this.getBaseChartOptions();
 
-  protected _chartInstance?: EChartsType
+  /** Chart Options & Update Option. */
+  chartOption: EChartsOption = this.getBaseChartOptions();
   chartMerge: EChartsOption = {}
 
   constructor() {
+    super()
+
+    /** Update chart on Signal changes */
     effect(() => {
       this.updateChart();
     });
-  }
-
-  onChartInit(chart: EChartsType) {
-    this._chartInstance = chart;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,6 +100,9 @@ export class IncomeExpenseRatioChartComponent implements OnChanges, OnDestroy {
       </div>`).join('');
   }
 
+  /** Use merge option to avoid reinitialising the chart.
+   * Reinitalising the chart will raise warning "There is a chart instance already initialised in the DOM".
+   */
   updateChart(): void {
     this.chartMerge = {
       ...this.getBaseChartOptions(),
@@ -137,14 +140,5 @@ export class IncomeExpenseRatioChartComponent implements OnChanges, OnDestroy {
         itemStyle: { color: 'rgba(0,0,0,0)' },
       },
     ];
-  }
-
-
-  ngOnDestroy(): void {
-    if (this._chartInstance && !this._chartInstance.isDisposed()) {
-      this._chartInstance?.dispose();
-    }
-  }
-
-  
+  }  
 }
