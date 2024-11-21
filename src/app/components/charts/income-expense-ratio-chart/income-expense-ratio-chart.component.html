@@ -1,5 +1,7 @@
 <div
     echarts
     [options]="chartOption"
+    [merge]="chartMerge"
     style="height: 120px;"
+    (chartInit)="onChartInit($event)"
 ></div>

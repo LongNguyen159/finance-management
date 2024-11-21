@@ -1,6 +1,6 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { EChartsOption, SeriesOption } from 'echarts';
+import { Component, effect, inject, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { EChartsOption, EChartsType, SeriesOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
@@ -17,7 +17,7 @@ import { CurrencyService } from '../../../services/currency.service';
   templateUrl: './income-expense-ratio-chart.component.html',
   styleUrls: ['./income-expense-ratio-chart.component.scss']
 })
-export class IncomeExpenseRatioChartComponent implements OnChanges {
+export class IncomeExpenseRatioChartComponent implements OnChanges, OnDestroy {
   @Input() totalIncome: number = 0;
   @Input() totalExpense: number = 0;
 
@@ -29,10 +29,17 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
   barWidth: string = '10%'
   chartOption: EChartsOption = this.getBaseChartOptions();
 
+  protected _chartInstance?: EChartsType
+  chartMerge: EChartsOption = {}
+
   constructor() {
     effect(() => {
       this.updateChart();
     });
+  }
+
+  onChartInit(chart: EChartsType) {
+    this._chartInstance = chart;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -94,7 +101,7 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
   }
 
   updateChart(): void {
-    this.chartOption = {
+    this.chartMerge = {
       ...this.getBaseChartOptions(),
       series: this.getSeriesOptions(),
     };
@@ -131,4 +138,13 @@ export class IncomeExpenseRatioChartComponent implements OnChanges {
       },
     ];
   }
+
+
+  ngOnDestroy(): void {
+    if (this._chartInstance && !this._chartInstance.isDisposed()) {
+      this._chartInstance?.dispose();
+    }
+  }
+
+  
 }
