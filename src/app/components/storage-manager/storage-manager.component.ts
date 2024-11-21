@@ -74,6 +74,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   allFilteredMonths: string[] = [];
   surplusChartData: SurplusBalanceLineChartData[] = [];
 
+  // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
+
 
   ngOnInit(): void {
     this.refreshData();
@@ -172,60 +174,44 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   /** This method filters the months based on the selected timeframe */
   filterMonths() {
-    const storedMonthsAllYears = this.getStoredMonths();
-    this.filteredMonthsByYear = {}; // Clear previous filters
-    this.allFilteredMonths = []; // Clear previous month strings
-    
-    // Get current date for reference
     const currentYear = this.currentDate.getFullYear();
-    const currentMonth = this.currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const currentMonth = this.currentDate.getMonth() + 1; // 1-based
   
-    // Handle 'show-all' case
-    if (this.selectedOption === 'show-all') {
-      this.filteredMonthsByYear = storedMonthsAllYears;
-      this.allFilteredMonths = Object.values(storedMonthsAllYears).flat();
-      this.populateChartData(this.allFilteredMonths);
-      return;
-    }
+    this.filteredMonthsByYear = Object.keys(this.localStorageData).reduce((acc, monthKey) => {
+      const [year, monthStr] = monthKey.split('-').map(Number);
+      const monthNumber = year * 12 + monthStr; // Unique month value for comparison
+      const currentMonthNumber = currentYear * 12 + currentMonth;
   
-    // Update: Handle 'whole-year' to show all months of the current year
-    if (this.selectedOption === 'whole-year') {
-      // Only show months for the current year
-      this.filteredMonthsByYear[currentYear] = storedMonthsAllYears[currentYear] || [];
-      this.allFilteredMonths = this.filteredMonthsByYear[currentYear];
-      this.populateChartData(this.allFilteredMonths);
-      return; // Exit early since we're done filtering for this case
-    }
+      let includeMonth = false;
   
-    // Calculate date range based on the selected option
-    const monthsToShow = this.selectedOption === '3-months' ? 3 :
-                         this.selectedOption === '6-months' ? 6 :
-                         this.selectedOption === '12-months' ? 12 : 12;
-  
-    for (const year of Object.keys(storedMonthsAllYears)) {
-      const months = storedMonthsAllYears[year];
-      const monthsToDisplay: string[] = [];
-  
-      // Loop through months and check if they fall within the selected date range
-      for (const month of months) {
-        const [monthYear, monthNumber] = month.split('-').map(Number);
-  
-        // Calculate the difference in months between the current date and this month
-        const monthsDiff = (currentYear - monthYear) * 12 + (currentMonth - monthNumber);
-  
-        // If the difference is within the selected number of months, include it
-        if (monthsDiff >= 0 && monthsDiff < monthsToShow) {
-          monthsToDisplay.push(month);
-          this.allFilteredMonths.push(month);
-        }
+      if (this.selectedOption === 'show-all') {
+        includeMonth = true; // Include all months without any filtering
+      } else if (this.selectedOption === 'whole-year') {
+        includeMonth = year === currentYear; // Include all months from the current year
+      } else {
+        const monthsToShow = this.getMonthsToShow();
+        const diff = currentMonthNumber - monthNumber;
+        includeMonth = diff >= 0 && diff < monthsToShow; // Include only months within the range
       }
   
-      // Only add the filtered months to the result if there are any
-      if (monthsToDisplay.length > 0) {
-        this.filteredMonthsByYear[year] = monthsToDisplay;
+      if (includeMonth) {
+        const yearStr = year.toString();
+        acc[yearStr] = acc[yearStr] || [];
+        acc[yearStr].push(monthKey);
       }
-    }
-    this.populateChartData(this.allFilteredMonths); // Populate chart data based on the filtered months
+  
+      return acc;
+    }, {} as { [key: string]: string[] });
+  
+    this.allFilteredMonths = Object.values(this.filteredMonthsByYear).flat();
+    this.populateChartData(this.allFilteredMonths);
+  }
+  
+  /** Returns the number of months to show based on the selected option */
+  getMonthsToShow(): number {
+    return this.selectedOption === '3-months' ? 3 :
+           this.selectedOption === '6-months' ? 6 :
+           this.selectedOption === '12-months' ? 12 : 0;
   }
 
   /** Trigger filtering when a new option is selected from the dropdown */
@@ -233,39 +219,29 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.filterMonths(); // Filter the months based on selected option
   }
 
+
   getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
+    // if (this.monthInfoCache[month]) {
+    //   return this.monthInfoCache[month];
+    // }
+
     const currentMonthData = this.localStorageData[month];
-
-    // Step 1: Extract income entries from rawInput
     const incomeEntries = currentMonthData.rawInput
-    .filter(entry => entry.type === EntryType.Income)
-    .map(entry => ({
-        type: EntryType.Income,
-        name: entry.target,
-        value: entry.value
-    }));
-
-    // Step 2: Extract entries from pieData, excluding "Remaining Balance"
+      .filter(entry => entry.type === EntryType.Income)
+      .map(entry => ({ type: EntryType.Income, name: entry.target, value: entry.value }));
+    
     const expenseEntries = currentMonthData.pieData
-    .filter((entry: PieData) => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
-    .map((entry: PieData) => ({
-        type: 'expense',
-        name: removeSystemPrefix(entry.name),
-        value: entry.value
-    }));
-
+      .filter(entry => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
+      .map(entry => ({ type: 'expense', name: removeSystemPrefix(entry.name), value: entry.value }));
+    
     const taxEntry = currentMonthData.rawInput.find(entry => entry.type === EntryType.Tax);
     if (taxEntry) {
-        incomeEntries.push({
-            type: EntryType.Tax,
-            name: taxEntry.target,
-            value: taxEntry.value
-        });
+      incomeEntries.push({ type: EntryType.Tax, name: taxEntry.target, value: taxEntry.value });
     }
 
-    // Step 3: Combine the two arrays
-    const result = [...incomeEntries, ...expenseEntries];    
-    return result.sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
+    const result = [...incomeEntries, ...expenseEntries].sort((a, b) => b.value - a.value);
+    // this.monthInfoCache[month] = result; // Cache result
+    return result;
   }
 
 
@@ -288,7 +264,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     // Add 'balance' property by calculating cumulative balance
     let previousBalance = 0; // Initial balance can be customized
     this.surplusChartData = sortedData.map((entry) => {
-      const balance = previousBalance + entry.surplus;
+      const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
       previousBalance = balance;
       return {
         ...entry,
