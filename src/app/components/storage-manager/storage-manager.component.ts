@@ -192,7 +192,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     return monthsByYear;
   }
 
-  /** This method filters the months based on the selected timeframe */
+  /** This method filters the months based on the selected time frame */
   filterMonths() {
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based

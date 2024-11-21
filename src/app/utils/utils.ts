@@ -23,7 +23,7 @@ export function parseLocaleStringToNumber(localeString: string): number {
 
 
 
-export function formatYYYMMtoDate(inputString: string): Date {
+export function formatYYYYMMtoDate(inputString: string): Date {
   const [year, month] = inputString.split('-').map(Number);
   const date = new Date(year, month - 1);
   return date

@@ -101,7 +101,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
   }
 
   /** Use merge option to avoid reinitialising the chart.
-   * Reinitalising the chart will raise warning "There is a chart instance already initialised in the DOM".
+   * Reinitialising the chart will raise warning "There is a chart instance already initialised in the DOM".
    */
   updateChart(): void {
     this.chartMerge = {
