@@ -76,6 +76,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     { value: '6-months', label: 'Last 6 months' },
     { value: '12-months', label: 'Last 12 months' },
     { value: 'whole-year', label: 'This Year' },
+    { value: '2-years', label: '2 Years' },
     { value: 'show-all', label: 'All time' }
   ];
 
@@ -220,7 +221,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         includeMonth = true; // Include all months without any filtering
       } else if (this.selectedOption === 'whole-year') {
         includeMonth = year === currentYear; // Include all months from the current year
-      } else {
+        
+      } else if (this.selectedOption === '2-years') {
+        includeMonth = year === currentYear || year === currentYear - 1;
+      }
+      else {
         const monthsToShow = this.getMonthsToShow();
         const diff = currentMonthNumber - monthNumber;
         includeMonth = diff >= 0 && diff < monthsToShow; // Include only months within the range
