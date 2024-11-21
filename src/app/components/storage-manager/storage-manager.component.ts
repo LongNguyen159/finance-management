@@ -49,17 +49,28 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   currencyPipe = inject(CurrencyPipe);
   currencyService = inject(CurrencyService);
 
+  /** Months data stored in local storage */
   localStorageData: MonthlyData = {};
+
+  /** Extract stored months and years */
   storedMonths: string[] = [];
   storedYears: string[] = [];
+
+  /** Explained in ngOnInit. */
   selectedYear: string = '';
+
   selectedOption: string = '3-months'; // Default selection for the dropdown
   
   entryTypeEnums = EntryType;
 
+  /** Display settings.
+   * Format big numbers: Whether to format large numbers with K, M, B (minimum value: 10K)
+   * Scale bar chart: Whether to scale the bar chart across all months to have the same xAxis for visual comparison.
+   */
   isFormatBigNumbers: boolean = false;
   isBarChartScaled: boolean = true;
 
+  /** Available time frame options for the dropdown menu */
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
     { value: '6-months', label: 'Last 6 months' },
@@ -68,10 +79,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     { value: 'show-all', label: 'All time' }
   ];
 
+  /** Get today's Date */
   currentDate = new Date();
   
   filteredMonthsByYear: { [key: string]: string[] } = {};
+
+  /** Store filtered month strings in YYYY-MM format */
   allFilteredMonths: string[] = [];
+
+  /** Chart data to plot the surplus and balance of each month  */
   surplusChartData: SurplusBalanceLineChartData[] = [];
 
   // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
@@ -115,7 +131,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
 
-  /** Find largest value (total income or total expenses) of given months */
+  /** Find largest value (of either total income or total expenses) of given months.
+   * This will be used later as a scale factor.
+   * 
+   * We will display an 'invisible' bar that has this value to make all the bars to have the same scale (same xAxis length)
+   */
   private findLargestValue(data: { [key: string]: any }) {
     let maxTotalUsableIncome = 0;
     let maxTotalExpenses = 0;
@@ -178,8 +198,20 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
   
     this.filteredMonthsByYear = Object.keys(this.localStorageData).reduce((acc, monthKey) => {
+      /** Since monthKey is in YYYY-MM format, we can split them using '-' here to get the year and the month. */
       const [year, monthStr] = monthKey.split('-').map(Number);
-      const monthNumber = year * 12 + monthStr; // Unique month value for comparison
+
+      /** Convert month into a sequential number, calculated by year * 12 (to get year value) and plus month value.
+       * This way we can compare the differences in time linearly with time complexity of O(1).
+       * 
+       * For example, 
+       * 2021-01 will be converted to 2021 * 12 + 1 = 24253.
+       * 2021-02 will be converted to 2021 * 12 + 2 = 24254.
+       * 
+       * So difference between 2021-01 and 2021-02 will be 24254 - 24253 = 1 (month).
+       * 
+       */
+      const monthNumber = year * 12 + monthStr;
       const currentMonthNumber = currentYear * 12 + currentMonth;
   
       let includeMonth = false;
