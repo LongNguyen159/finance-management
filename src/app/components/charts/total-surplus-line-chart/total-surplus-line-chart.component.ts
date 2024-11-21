@@ -18,26 +18,17 @@ export class TotalSurplusLineChartComponent implements OnChanges {
   @Input() chartData: SurplusBalanceLineChartData[] = [];
 
   colorService = inject(ColorService);
-  chartOptions: EChartsOption = {};
+  chartOptions: EChartsOption = this.getBaseOption()
+  mergeOptions: EChartsOption = {};
 
   constructor() {
     effect(() => {
-      this.setChartOptions();
+      this.updateChart();
     })
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes && changes['chartData']) {
-      this.setChartOptions();
-    }
-  }
-
-  setChartOptions() {
-    const months = this.chartData.map(data => data.month);
-    const surplusValues = this.chartData.map(data => data.surplus);
-    const balanceValues = this.chartData.map(data => data.balance);
-
-    this.chartOptions = {
+  getBaseOption(): EChartsOption {
+    return {
       darkMode: this.colorService.isDarkMode(),
       tooltip: {
         trigger: 'axis',
@@ -63,7 +54,7 @@ export class TotalSurplusLineChartComponent implements OnChanges {
       },
       xAxis: {
         type: 'category',
-        data: months,
+        data: [],
         axisLine: {
           lineStyle: {
             color: this.colorService.isDarkMode() ? '#B0B0B0' : this.colorService.lightTextSecondary,
@@ -81,6 +72,33 @@ export class TotalSurplusLineChartComponent implements OnChanges {
         axisLine: {
           lineStyle: {
             color: this.colorService.isDarkMode() ? '#B0B0B0' : this.colorService.lightTextPrimary,
+          },
+        },
+      },
+      series: []
+    };
+
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['chartData']) {
+      this.updateChart();
+    }
+  }
+
+  updateChart() {
+    const months = this.chartData.map(data => data.month);
+    const surplusValues = this.chartData.map(data => data.surplus);
+    const balanceValues = this.chartData.map(data => data.balance);
+
+    this.mergeOptions = {
+      ...this.getBaseOption(),
+      xAxis: {
+        type: 'category',
+        data: months,
+        axisLine: {
+          lineStyle: {
+            color: this.colorService.isDarkMode() ? '#B0B0B0' : this.colorService.lightTextSecondary,
           },
         },
       },
@@ -120,8 +138,6 @@ export class TotalSurplusLineChartComponent implements OnChanges {
           },
         },
       ]
-      
-      
     };
   }
 }
