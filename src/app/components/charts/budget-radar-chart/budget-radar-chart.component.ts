@@ -14,14 +14,15 @@ import { Budget, ExpenseCategory, expenseCategoryDetails } from '../../models';
   templateUrl: './budget-radar-chart.component.html',
   styleUrl: './budget-radar-chart.component.scss'
 })
-export class BudgetRadarChartComponent implements OnInit, OnChanges {
+export class BudgetRadarChartComponent implements OnChanges {
   @Input() actualSpending: { category: ExpenseCategory, value: number }[] = []
   @Input() budget: Budget[] = []
 
   colorService = inject(ColorService);
 
 
-  options: EChartsOption
+  options: EChartsOption = this.getBaseOptions()
+  mergeOptions: EChartsOption = {}
   SCALE_FACTOR = 1.25
 
   constructor() {
@@ -30,8 +31,18 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
     })
   }
 
-  ngOnInit(): void {
-    // this.updateChart()
+  getBaseOptions(): EChartsOption {
+    return {
+      tooltip: {},
+      legend: {
+        top: 0,
+        textStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
+      },
+      radar: {},
+      series: []
+    };
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -70,14 +81,8 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
       });
 
 
-    this.options = {
-      tooltip: {},
-      legend: {
-        top: 0,
-        textStyle: {
-          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-        },
-      },
+    this.mergeOptions = {
+      ...this.getBaseOptions(),
       radar: {
         indicator: indicators,
         shape: 'circle',
