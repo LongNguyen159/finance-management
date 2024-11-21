@@ -165,7 +165,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   hasInValidRows: boolean = false;
 
-  isSearchDisplayed: boolean = false;
+  /** boolean flag to indicate if user is searching for something. Set to false when input is empty. True when user is typing on search bar. */
+  isSearching: boolean = false;
 
   //#region Logs
   isLogShown: boolean = false;
@@ -880,11 +881,16 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   
   /** For the search function */
   filterLinks(query: string): void {
-    if (!query) {
+    
+    if (!query || query.trim() === '') {
       this.filterQuery = ''; // Reset filter query.
       this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
+      this.isSearching = false;
+      return
     }
-
+    
+    
+    this.isSearching = true;
     this.filterQuery = query; // Update filter query
     this.filteredLinkIds = this.linkArray.controls.filter(control => {
       const target = control.get('target')?.value?.toLowerCase() || '';

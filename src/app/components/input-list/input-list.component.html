@@ -73,7 +73,7 @@
     <!-- FIX COSTS SECTION -->
     <div class="flex flex-row items-center w-full mb-2">
       <button mat-icon-button class="mr-2" (click)="isFixCostsExpanded = !isFixCostsExpanded">
-        @if (isFixCostsExpanded) {
+        @if (isFixCostsExpanded || isSearching) {
           <mat-icon fontSet="material-symbols-outlined">expand_less</mat-icon>
         } @else {
           <mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon>
@@ -117,8 +117,8 @@
     </div>
 
     <!-- FIX COST ARRAY -->
-    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isFixCostsExpanded ? 'expanded' : 'collapsed'">
-      @if (isFixCostsExpanded) {
+    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isFixCostsExpanded || isSearching ? 'expanded' : 'collapsed'">
+      @if (isFixCostsExpanded || isSearching) {
         <mat-card-content>
 
           <div>
@@ -205,7 +205,7 @@
     <!-- VARIABLE COSTS SECTION -->
     <div class="flex flex-row items-center w-full mb-2">
       <button mat-icon-button class="mr-2" (click)="isVariableCostsExpanded = !isVariableCostsExpanded">
-        @if (isVariableCostsExpanded) {
+        @if (isVariableCostsExpanded || isSearching) {
           <mat-icon fontSet="material-symbols-outlined">expand_less</mat-icon>
         } @else {
           <mat-icon fontSet="material-symbols-outlined">expand_more</mat-icon>
@@ -215,8 +215,8 @@
     </div>
 
     <!-- VARIABLE COSTS ARRAY -->
-    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isVariableCostsExpanded ? 'expanded' : 'collapsed'">
-      @if (isVariableCostsExpanded) {
+    <mat-card class="mb-4 material-background-dialog-custom" [@expandCollapse]="isVariableCostsExpanded || isSearching ? 'expanded' : 'collapsed'">
+      @if (isVariableCostsExpanded || isSearching) {
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
 
