@@ -119,30 +119,35 @@
                 </button>
               </div>
               <div class="flex flex-row w-full justify-between">
-                <div class="w-full self-center">
-                  <app-income-expense-ratio-chart [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
-                  ></app-income-expense-ratio-chart>
-                </div>
+                @if (panel.expanded) {
+                  <!-- TOTAL INCOME/TOTAL EXPENSE CHART -->
+                  <div class="w-full self-center">
+                    <app-income-expense-ratio-chart [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
+                    ></app-income-expense-ratio-chart>
+                  </div>
 
-                <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
-                  <ul class="flex flex-col items-end">
-                    @for (input of getMonthDisplayInfos(month); track $index) {
-                      <li>
-                        <p>  <!-- Only display items with no source -->
-                          {{ input.name }}: 
-                          <span [ngClass]="{
-                            'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
-                            'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
-                            'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
-                            'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
-                          }">
-                            {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
-                          </span>
-                        </p>
-                      </li>
-                    }
-                  </ul>
-                </div>
+                  <!-- MONTHLY DETAILS -->
+                  <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
+                    <ul class="flex flex-col items-end">
+                      @for (input of getMonthDisplayInfos(month); track $index) {
+                        <li>
+                          <p>  <!-- Only display items with no source -->
+                            {{ input.name }}: 
+                            <span [ngClass]="{
+                              'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
+                              'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
+                              'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
+                              'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
+                            }">
+                              {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
+                            </span>
+                          </p>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+
               </div>    
             </mat-expansion-panel>
           </mat-accordion>
