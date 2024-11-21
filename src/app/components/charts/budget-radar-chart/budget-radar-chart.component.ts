@@ -14,14 +14,15 @@ import { Budget, ExpenseCategory, expenseCategoryDetails } from '../../models';
   templateUrl: './budget-radar-chart.component.html',
   styleUrl: './budget-radar-chart.component.scss'
 })
-export class BudgetRadarChartComponent implements OnInit, OnChanges {
+export class BudgetRadarChartComponent implements OnChanges {
   @Input() actualSpending: { category: ExpenseCategory, value: number }[] = []
   @Input() budget: Budget[] = []
 
   colorService = inject(ColorService);
 
 
-  options: EChartsOption
+  options: EChartsOption = this.getBaseOptions()
+  mergeOptions: EChartsOption = {}
   SCALE_FACTOR = 1.25
 
   constructor() {
@@ -30,8 +31,18 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
     })
   }
 
-  ngOnInit(): void {
-    // this.updateChart()
+  getBaseOptions(): EChartsOption {
+    return {
+      tooltip: {},
+      legend: {
+        top: 0,
+        textStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
+      },
+      radar: {},
+      series: []
+    };
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -48,6 +59,10 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
 
     /** Generate indicator array based on actual spending.
      * Only include the categories that are in actual spending.
+     * 
+     * Indicator has a 'max' value, this value should be a bit larger than our maximum value to leave room.
+     * 
+     * If max value is not set, the radar chart will be scaled based on the maximum value in the data.
      */
     const indicators = this.actualSpending
       .filter(a => a.value > 0 && this.budget.some(b => b.category === a.category && b.value > 0))
@@ -55,7 +70,7 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
         const budget = this.budget.find(b => b.category === a.category);
         const max = budget ? Math.max(budget.value, a.value) : a.value;
         const paddedMax = max * this.SCALE_FACTOR; // Add 20% padding
-        return { name: expenseCategoryDetails[a.category].label, max: paddedMax };
+        return { name: expenseCategoryDetails[a.category].label, min: 0, max: undefined};
       });
 
     const actualValues = this.actualSpending
@@ -70,14 +85,8 @@ export class BudgetRadarChartComponent implements OnInit, OnChanges {
       });
 
 
-    this.options = {
-      tooltip: {},
-      legend: {
-        top: 0,
-        textStyle: {
-          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-        },
-      },
+    this.mergeOptions = {
+      ...this.getBaseOptions(),
       radar: {
         indicator: indicators,
         shape: 'circle',

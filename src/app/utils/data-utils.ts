@@ -1,4 +1,5 @@
-import { DataService, MonthlyData, SingleMonthData } from "../services/data.service";
+import { DataService } from "../services/data.service";
+import { MonthlyData, SingleMonthData } from "../components/models";
 import { formatDateToYYYYMM } from "./utils";
 
 /** Process data for the requested month.
@@ -43,7 +44,7 @@ function initializeEmptyData(monthString: string): SingleMonthData {
       totalTax: 0,
       totalExpenses: 0,
       remainingBalance: '0',
-      pieData: {},
+      pieData: [],
       rawInput: [],
       month: monthString
     };

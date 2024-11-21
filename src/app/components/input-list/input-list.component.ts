@@ -1,12 +1,13 @@
 import { AfterViewInit, Component, ElementRef, inject, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
-import { DataService, MonthlyData, SingleMonthData } from '../../services/data.service';
+import { DataService } from '../../services/data.service';
+import { MonthlyData, SingleMonthData } from '../models';
 import { DateChanges, EntryType, expenseCategoryDetails, ExpenseCategoryDetails, UserDefinedLink } from '../models';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
+import {MatSelectChange, MatSelectModule} from '@angular/material/select';
 import {MatIconModule} from '@angular/material/icon';
 import { debounceTime, takeUntil } from 'rxjs';
 import { MatAutocompleteModule, MatAutocompleteTrigger} from '@angular/material/autocomplete';
@@ -164,7 +165,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
   hasInValidRows: boolean = false;
 
-  isSearchDisplayed: boolean = false;
+  /** boolean flag to indicate if user is searching for something. Set to false when input is empty. True when user is typing on search bar. */
+  isSearching: boolean = false;
 
   //#region Logs
   isLogShown: boolean = false;
@@ -403,6 +405,11 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this._addDefaultNode();
     });
 
+  }
+
+  /** Clear category search field input when category is selected. */
+  onCategorySelected(option: MatSelectChange) {
+    this.sourceSearchControl.setValue('');
   }
   
   //#region Month Changes
@@ -874,11 +881,16 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
   
   /** For the search function */
   filterLinks(query: string): void {
-    if (!query) {
+    
+    if (!query || query.trim() === '') {
       this.filterQuery = ''; // Reset filter query.
       this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
+      this.isSearching = false;
+      return
     }
-
+    
+    
+    this.isSearching = true;
     this.filterQuery = query; // Update filter query
     this.filteredLinkIds = this.linkArray.controls.filter(control => {
       const target = control.get('target')?.value?.toLowerCase() || '';

@@ -5,24 +5,7 @@ import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
 import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-dialog.component';
 import { LogsService } from './logs.service';
-
-/** Interface for multi month data. */
-export interface MonthlyData {
-    [month: string]: SingleMonthData;
-}
-/** Interface for single month data. */
-export interface SingleMonthData {
-    lastUpdated: Date | string
-    sankeyData: SankeyData;
-    totalUsableIncome: number;
-    totalGrossIncome: number;
-    totalTax: number;
-    totalExpenses: number;
-    remainingBalance: string;
-    pieData: any;
-    rawInput: UserDefinedLink[];
-    month: string
-}
+import { SingleMonthData, MonthlyData } from '../components/models';
 
 interface TreeNode {
     name: string;

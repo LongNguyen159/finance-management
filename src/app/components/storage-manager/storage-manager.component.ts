@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DataService, MonthlyData } from '../../services/data.service';
+import { DataService } from '../../services/data.service';
+import { MonthlyData, SurplusBalanceLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -22,6 +23,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../services/currency.service';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-storage-manager',
@@ -30,7 +32,8 @@ import { CurrencyService } from '../../services/currency.service';
     MatSelectModule, TotalSurplusLineChartComponent, MatButtonModule, IncomeExpenseRatioChartComponent,
     MatCardModule,
     MatSlideToggleModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule
   ],
   providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
@@ -46,29 +49,49 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   currencyPipe = inject(CurrencyPipe);
   currencyService = inject(CurrencyService);
 
+  /** Months data stored in local storage */
   localStorageData: MonthlyData = {};
+
+  /** Extract stored months and years */
   storedMonths: string[] = [];
   storedYears: string[] = [];
+
+  /** Explained in ngOnInit. */
   selectedYear: string = '';
+
   selectedOption: string = '3-months'; // Default selection for the dropdown
   
   entryTypeEnums = EntryType;
 
+  /** Display settings.
+   * Format big numbers: Whether to format large numbers with K, M, B (minimum value: 10K)
+   * Scale bar chart: Whether to scale the bar chart across all months to have the same xAxis for visual comparison.
+   */
   isFormatBigNumbers: boolean = false;
+  isBarChartScaled: boolean = true;
 
+  /** Available time frame options for the dropdown menu */
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
     { value: '6-months', label: 'Last 6 months' },
     { value: '12-months', label: 'Last 12 months' },
     { value: 'whole-year', label: 'This Year' },
+    { value: '2-years', label: '2 Years' },
     { value: 'show-all', label: 'All time' }
   ];
 
+  /** Get today's Date */
   currentDate = new Date();
   
   filteredMonthsByYear: { [key: string]: string[] } = {};
+
+  /** Store filtered month strings in YYYY-MM format */
   allFilteredMonths: string[] = [];
-  surplusChartData: { month: string; surplus: number }[] = [];
+
+  /** Chart data to plot the surplus and balance of each month  */
+  surplusChartData: SurplusBalanceLineChartData[] = [];
+
+  // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
 
 
   ngOnInit(): void {
@@ -103,8 +126,17 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.saveFormatBigNumbersState();
   }
 
+  toggleScaleBarChart() {
+    this.isBarChartScaled = !this.isBarChartScaled;
+    this.getScaleValue();
+  }
 
-  /** Find largest value (total income or total expenses) of given months */
+
+  /** Find largest value (of either total income or total expenses) of given months.
+   * This will be used later as a scale factor.
+   * 
+   * We will display an 'invisible' bar that has this value to make all the bars to have the same scale (same xAxis length)
+   */
   private findLargestValue(data: { [key: string]: any }) {
     let maxTotalUsableIncome = 0;
     let maxTotalExpenses = 0;
@@ -161,62 +193,71 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     return monthsByYear;
   }
 
-  /** This method filters the months based on the selected timeframe */
+  /** This method filters the months based on the selected time frame */
   filterMonths() {
-    const storedMonthsAllYears = this.getStoredMonths();
-    this.filteredMonthsByYear = {}; // Clear previous filters
-    this.allFilteredMonths = []; // Clear previous month strings
-    
-    // Get current date for reference
     const currentYear = this.currentDate.getFullYear();
-    const currentMonth = this.currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const currentMonth = this.currentDate.getMonth() + 1; // 1-based
   
-    // Handle 'show-all' case
-    if (this.selectedOption === 'show-all') {
-      this.filteredMonthsByYear = storedMonthsAllYears;
-      this.allFilteredMonths = Object.values(storedMonthsAllYears).flat();
-      this.populateChartData(this.allFilteredMonths);
-      return;
-    }
+    this.filteredMonthsByYear = Object.keys(this.localStorageData).reduce((acc, monthKey) => {
+      /** Since monthKey is in YYYY-MM format, we can split them using '-' here to get the year and the month. */
+      const [year, monthStr] = monthKey.split('-').map(Number);
+
+      /** Convert month into a sequential number, calculated by year * 12 (to get year value) and plus month value.
+       * This way we can compare the differences in time linearly with time complexity of O(1).
+       * 
+       * For example, 
+       * 2021-01 will be converted to 2021 * 12 + 1 = 24253.
+       * 2021-02 will be converted to 2021 * 12 + 2 = 24254.
+       * 
+       * So difference between 2021-01 and 2021-02 will be 24254 - 24253 = 1 (month).
+       * 
+       */
+      const monthNumber = year * 12 + monthStr;
+      const currentMonthNumber = currentYear * 12 + currentMonth;
   
-    // Update: Handle 'whole-year' to show all months of the current year
-    if (this.selectedOption === 'whole-year') {
-      // Only show months for the current year
-      this.filteredMonthsByYear[currentYear] = storedMonthsAllYears[currentYear] || [];
-      this.allFilteredMonths = this.filteredMonthsByYear[currentYear];
-      this.populateChartData(this.allFilteredMonths);
-      return; // Exit early since we're done filtering for this case
-    }
+      let includeMonth = false;
   
-    // Calculate date range based on the selected option
-    const monthsToShow = this.selectedOption === '3-months' ? 3 :
-                         this.selectedOption === '6-months' ? 6 :
-                         this.selectedOption === '12-months' ? 12 : 12;
-  
-    for (const year of Object.keys(storedMonthsAllYears)) {
-      const months = storedMonthsAllYears[year];
-      const monthsToDisplay: string[] = [];
-  
-      // Loop through months and check if they fall within the selected date range
-      for (const month of months) {
-        const [monthYear, monthNumber] = month.split('-').map(Number);
-  
-        // Calculate the difference in months between the current date and this month
-        const monthsDiff = (currentYear - monthYear) * 12 + (currentMonth - monthNumber);
-  
-        // If the difference is within the selected number of months, include it
-        if (monthsDiff >= 0 && monthsDiff < monthsToShow) {
-          monthsToDisplay.push(month);
-          this.allFilteredMonths.push(month);
-        }
+      if (this.selectedOption === 'show-all') {
+        includeMonth = true; // Include all months without any filtering
+      } else if (this.selectedOption === 'whole-year') {
+        includeMonth = year === currentYear; // Include all months from the current year
+        
+      } else if (this.selectedOption === '2-years') {
+        includeMonth = year === currentYear || year === currentYear - 1;
+      }
+      else {
+        const monthsToShow = this.getMonthsToShow();
+        const diff = currentMonthNumber - monthNumber;
+        includeMonth = diff >= 0 && diff < monthsToShow; // Include only months within the range
       }
   
-      // Only add the filtered months to the result if there are any
-      if (monthsToDisplay.length > 0) {
-        this.filteredMonthsByYear[year] = monthsToDisplay;
+      if (includeMonth) {
+        const yearStr = year.toString();
+        acc[yearStr] = acc[yearStr] || [];
+        acc[yearStr].push(monthKey);
       }
+  
+      return acc;
+    }, {} as { [key: string]: string[] });
+
+    for (let year in this.filteredMonthsByYear) {
+      this.filteredMonthsByYear[year].sort((a, b) => {
+        const [yearA, monthA] = a.split('-').map(Number);
+        const [yearB, monthB] = b.split('-').map(Number);
+        // Sort by month value in descending order (larger months should come first)
+        return monthB - monthA; 
+      });
     }
-    this.populateChartData(this.allFilteredMonths); // Populate chart data based on the filtered months
+  
+    this.allFilteredMonths = Object.values(this.filteredMonthsByYear).flat();
+    this.populateChartData(this.allFilteredMonths);
+  }
+  
+  /** Returns the number of months to show based on the selected option */
+  getMonthsToShow(): number {
+    return this.selectedOption === '3-months' ? 3 :
+           this.selectedOption === '6-months' ? 6 :
+           this.selectedOption === '12-months' ? 12 : 0;
   }
 
   /** Trigger filtering when a new option is selected from the dropdown */
@@ -224,39 +265,29 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.filterMonths(); // Filter the months based on selected option
   }
 
+
   getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
+    // if (this.monthInfoCache[month]) {
+    //   return this.monthInfoCache[month];
+    // }
+
     const currentMonthData = this.localStorageData[month];
-
-    // Step 1: Extract income entries from rawInput
     const incomeEntries = currentMonthData.rawInput
-    .filter(entry => entry.type === EntryType.Income)
-    .map(entry => ({
-        type: EntryType.Income,
-        name: entry.target,
-        value: entry.value
-    }));
-
-    // Step 2: Extract entries from pieData, excluding "Remaining Balance"
+      .filter(entry => entry.type === EntryType.Income)
+      .map(entry => ({ type: EntryType.Income, name: entry.target, value: entry.value }));
+    
     const expenseEntries = currentMonthData.pieData
-    .filter((entry: PieData) => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
-    .map((entry: PieData) => ({
-        type: 'expense',
-        name: removeSystemPrefix(entry.name),
-        value: entry.value
-    }));
-
+      .filter(entry => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
+      .map(entry => ({ type: 'expense', name: removeSystemPrefix(entry.name), value: entry.value }));
+    
     const taxEntry = currentMonthData.rawInput.find(entry => entry.type === EntryType.Tax);
     if (taxEntry) {
-        incomeEntries.push({
-            type: EntryType.Tax,
-            name: taxEntry.target,
-            value: taxEntry.value
-        });
+      incomeEntries.push({ type: EntryType.Tax, name: taxEntry.target, value: taxEntry.value });
     }
 
-    // Step 3: Combine the two arrays
-    const result = [...incomeEntries, ...expenseEntries];    
-    return result.sort((a: any, b: any) => b.value - a.value); // Sort by value, highest to lowest
+    const result = [...incomeEntries, ...expenseEntries].sort((a, b) => b.value - a.value);
+    // this.monthInfoCache[month] = result; // Cache result
+    return result;
   }
 
 
@@ -268,24 +299,52 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         month,
         surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
       }));
-  
+
     // Sort the filtered data by month in chronological order
-    this.surplusChartData = filteredData.sort((a, b) => {
+    const sortedData = filteredData.sort((a, b) => {
       const dateA = new Date(a.month);
       const dateB = new Date(b.month);
       return dateA.getTime() - dateB.getTime();
     });
-  
+
+    // Add 'balance' property by calculating cumulative balance
+    let previousBalance = 0; // Initial balance can be customized
+    this.surplusChartData = sortedData.map((entry) => {
+      const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
+      previousBalance = balance;
+      return {
+        ...entry,
+        balance,
+      };
+    });
+
     /** Scale the chart every time filter changes */
-    this.getScaleValue()
+    this.getScaleValue();
   }
 
+
+  /** Scale the bar chart across all months to have the same xAxis.
+   * This is useful for comparing income and expenses across different months.
+   * 
+   * We use this by finding the largest value of either total income or total expenses, then set that as
+   * max xAxis value for the bar chart.
+   */
   getScaleValue() {
+    /** Get all showing months (Filtered month by selected time frame) */
     const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
+    // Get largest value of either total income or total expenses among the showing months
     const largestValue = this.findLargestValue(showingMonths);
-    this.dataService.incomeExpenseScaleValue.set(largestValue);
+
+    // Set the scale value to the largest value; if scale is turned off, set it to 0.
+    this.isBarChartScaled ? this.dataService.incomeExpenseScaleValue.set(largestValue) : this.dataService.incomeExpenseScaleValue.set(0);
   }
 
+  /** Get data of selected months.
+   * @param data: MonthlyData: Data to be filtered, in this case, all months data
+   * @param keys: string[]: Keys to be filtered (yyyy-mm), in this case, months we want to get.
+   * 
+   * @returns MonthlyData: Filtered data based on the keys.
+   */
   filterDataByKeys(data: MonthlyData, keys: string[]) {
     return Object.keys(data)
       .filter(key => keys.includes(key))

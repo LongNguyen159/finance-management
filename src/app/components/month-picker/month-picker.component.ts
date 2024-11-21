@@ -13,7 +13,7 @@ import { ColorService } from '../../services/color.service';
 import { DataService } from '../../services/data.service';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { takeUntil } from 'rxjs';
-import { formatYYYMMtoDate } from '../../utils/utils';
+import { formatYYYYMMtoDate } from '../../utils/utils';
 import { DateChanges } from '../models';
 
 @Component({
@@ -80,7 +80,7 @@ export class MonthPickerComponent extends BasePageComponent implements OnInit {
        * Each time data changes, mean somewhere in the app a new month is selected.
        */
       if (singleMonth && singleMonth.month) {
-        const date = formatYYYMMtoDate(singleMonth.month);
+        const date = formatYYYYMMtoDate(singleMonth.month);
   
         this.selectedDate.set(date);
       }

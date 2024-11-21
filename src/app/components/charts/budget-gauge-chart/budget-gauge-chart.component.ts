@@ -16,7 +16,7 @@ import { CurrencyService } from '../../../services/currency.service';
   templateUrl: './budget-gauge-chart.component.html',
   styleUrl: './budget-gauge-chart.component.scss'
 })
-export class BudgetGaugeChartComponent implements OnInit, OnChanges {
+export class BudgetGaugeChartComponent implements OnChanges {
   @Input() budget: number = 0
   @Input() actualSpending: number = 1
   @Input() title: string = ''
@@ -25,7 +25,8 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
 
-  chartOptions: EChartsOption
+  chartOptions: EChartsOption = this.getBaseOptions()
+  mergeOptions: EChartsOption = {}
 
   spendingPercentage: number = 0
 
@@ -35,8 +36,8 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
     })
   }
 
-  ngOnInit(): void {
-    // this.updateChart()
+  getBaseOptions(): EChartsOption {
+    return {}
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -83,7 +84,7 @@ export class BudgetGaugeChartComponent implements OnInit, OnChanges {
     
 
     
-    this.chartOptions = {
+    this.mergeOptions = {
       series: [
         {
           type: 'gauge',

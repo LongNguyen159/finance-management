@@ -17,7 +17,7 @@ import { CurrencyService } from '../../../services/currency.service';
   templateUrl: './pie-chart.component.html',
   styleUrl: './pie-chart.component.scss'
 })
-export class PieChartComponent implements OnChanges, OnDestroy {
+export class PieChartComponent implements OnChanges {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
@@ -32,33 +32,17 @@ export class PieChartComponent implements OnChanges, OnDestroy {
 
   @Input() chartHeight: string = '70vh'
 
-  pieOption: EChartsOption = {}
+  pieOption: EChartsOption = this.getBaseChartOptions()
   pieMergeOption: EChartsOption = {}
 
-
-  
-  @ViewChild(NgxEchartsDirective, { static: false }) chartDirective?: NgxEchartsDirective;
-
-
   constructor() {
-    if (this.chartDirective) {
-      this.chartDirective.refreshChart()
-    }
     effect(() => {
       this.updateChart();
     });
   }
 
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes && changes['pieChartData']) {
-      this.updateChart()
-    }
-  }
-
-  updateChart() {
-    this.pieOption = {
-
+  getBaseChartOptions(): EChartsOption {
+    return {
       color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         trigger: 'item',
@@ -91,6 +75,20 @@ export class PieChartComponent implements OnChanges, OnDestroy {
           },
         },
       },
+      series: []
+    }
+  }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes && changes['pieChartData']) {
+      this.updateChart()
+    }
+  }
+
+  updateChart() {
+    this.pieMergeOption = {
+      ...this.getBaseChartOptions(),
       series: [
         {
           type: 'pie',
@@ -115,12 +113,5 @@ export class PieChartComponent implements OnChanges, OnDestroy {
         }
       ]
     }
-  }
-
-  ngOnDestroy(): void {
-    // Dispose chart
-    // if (this.chartDirective) {
-    //   this.chartDirective.refreshChart();  // Dispose the chart instance
-    // }
   }
 }

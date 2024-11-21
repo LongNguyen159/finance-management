@@ -14,15 +14,48 @@
   <!-- LINE CHART -->
   <app-total-surplus-line-chart [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
-  <!-- ALL TIME BALANCE -->
+  <!-- ACTION BUTTONS -->
   <div class="flex flex-row w-full justify-between px-6 pb-2">
-    <div class="flex flex-row gap-2 items-center">
-      <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
-      <span>Format Numbers</span>
-      <button mat-icon-button matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
-        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-      </button>
+
+    <div class="flex flex-row gap-4 items-center flex-wrap">
+      <div class="flex flex-row items-center">
+        <button class="!flex flex-row items-center" mat-icon-button [matMenuTriggerFor]="settingsMenu">
+          <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
+        </button>
+        <span [matMenuTriggerFor]="settingsMenu" class="cursor-pointer">Display Settings</span>
+      </div>
+    
+      <mat-menu #settingsMenu="matMenu">
+        <div class="flex flex-col gap-2 px-4 py-2">
+          <!-- FORMAT NUMBERS -->
+          <div class="flex flex-row gap-2 justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="flex flex-row items-center">
+              <mat-slide-toggle color="primary" (toggleChange)="toggleFormatBigNumbers()" [(ngModel)]="isFormatBigNumbers"></mat-slide-toggle>
+              <span class="ml-2">Format Numbers</span>
+            </div>
+            <button mat-icon-button [matTooltipPosition]="'above'" matTooltip="Format numbers as 'K', 'M', 'B' (Thousands, Millions, Billions). Minimum value: 10K">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+          </div>
+    
+          <!-- SCALE BAR CHART -->
+          <div class="flex flex-row gap-2 justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="flex flex-row items-center">
+              <mat-slide-toggle color="primary" (toggleChange)="toggleScaleBarChart()" [(ngModel)]="isBarChartScaled"></mat-slide-toggle>
+              <span class="ml-2">Scale Bar Chart</span>
+            </div>
+            <button mat-icon-button matTooltip="Scale all bars on the same axis for visual comparison.">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-menu>
     </div>
+
+    
+
+
+    <!-- ALL TIME BALANCE -->
     <mat-card appearance="outlined" class="px-4">
       <mat-card-content>
         <p class="text-xl font-bold">
@@ -86,30 +119,35 @@
                 </button>
               </div>
               <div class="flex flex-row w-full justify-between">
-                <div class="w-full self-center">
-                  <app-income-expense-ratio-chart [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
-                  ></app-income-expense-ratio-chart>
-                </div>
+                @if (panel.expanded) {
+                  <!-- TOTAL INCOME/TOTAL EXPENSE CHART -->
+                  <div class="w-full self-center">
+                    <app-income-expense-ratio-chart [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
+                    ></app-income-expense-ratio-chart>
+                  </div>
 
-                <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
-                  <ul class="flex flex-col items-end">
-                    @for (input of getMonthDisplayInfos(month); track $index) {
-                      <li>
-                        <p>  <!-- Only display items with no source -->
-                          {{ input.name }}: 
-                          <span [ngClass]="{
-                            'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
-                            'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
-                            'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
-                            'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
-                          }">
-                            {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
-                          </span>
-                        </p>
-                      </li>
-                    }
-                  </ul>
-                </div>
+                  <!-- MONTHLY DETAILS -->
+                  <div class="flex flex-row w-[30%] min-w-32 pr-[1.5vw] justify-end">
+                    <ul class="flex flex-col items-end">
+                      @for (input of getMonthDisplayInfos(month); track $index) {
+                        <li>
+                          <p>  <!-- Only display items with no source -->
+                            {{ input.name }}: 
+                            <span [ngClass]="{
+                              'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
+                              'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
+                              'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
+                              'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
+                            }">
+                              {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
+                            </span>
+                          </p>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+
               </div>    
             </mat-expansion-panel>
           </mat-accordion>
