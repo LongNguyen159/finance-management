@@ -59,6 +59,10 @@ export class BudgetRadarChartComponent implements OnChanges {
 
     /** Generate indicator array based on actual spending.
      * Only include the categories that are in actual spending.
+     * 
+     * Indicator has a 'max' value, this value should be a bit larger than our maximum value to leave room.
+     * 
+     * If max value is not set, the radar chart will be scaled based on the maximum value in the data.
      */
     const indicators = this.actualSpending
       .filter(a => a.value > 0 && this.budget.some(b => b.category === a.category && b.value > 0))
