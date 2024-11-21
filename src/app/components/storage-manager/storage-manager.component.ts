@@ -239,6 +239,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
       return acc;
     }, {} as { [key: string]: string[] });
+
+    for (let year in this.filteredMonthsByYear) {
+      this.filteredMonthsByYear[year].sort((a, b) => {
+        const [yearA, monthA] = a.split('-').map(Number);
+        const [yearB, monthB] = b.split('-').map(Number);
+        // Sort by month value in descending order (larger months should come first)
+        return monthB - monthA; 
+      });
+    }
   
     this.allFilteredMonths = Object.values(this.filteredMonthsByYear).flat();
     this.populateChartData(this.allFilteredMonths);
