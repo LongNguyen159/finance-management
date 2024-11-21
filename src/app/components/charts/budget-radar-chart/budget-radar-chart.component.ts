@@ -70,7 +70,7 @@ export class BudgetRadarChartComponent implements OnChanges {
         const budget = this.budget.find(b => b.category === a.category);
         const max = budget ? Math.max(budget.value, a.value) : a.value;
         const paddedMax = max * this.SCALE_FACTOR; // Add 20% padding
-        return { name: expenseCategoryDetails[a.category].label, max: paddedMax };
+        return { name: expenseCategoryDetails[a.category].label, min: 0, max: undefined};
       });
 
     const actualValues = this.actualSpending
