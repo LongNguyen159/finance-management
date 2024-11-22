@@ -114,6 +114,11 @@
                     ></app-pie-chart>
                 </section>
 
+
+                <section>
+                    <app-treemap-chart [treeData]="treeMapData"></app-treemap-chart>
+                </section>
+
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
                 @if (showGrossIncomePieChart) {

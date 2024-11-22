@@ -46,6 +46,7 @@ function initializeEmptyData(monthString: string): SingleMonthData {
       remainingBalance: '0',
       pieData: [],
       rawInput: [],
-      month: monthString
+      month: monthString,
+      treeMapData: []
     };
 }

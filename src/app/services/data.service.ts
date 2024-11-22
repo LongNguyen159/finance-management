@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, EventEmitter } from '@angular/core';
-import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, UserDefinedLink } from '../components/models';
+import { EntryType, ExpenseCategory, SankeyData, SankeyLink, SankeyNode, TreeNode, UserDefinedLink } from '../components/models';
 import { BehaviorSubject } from 'rxjs';
 import { UiService } from './ui.service';
 import { formatDateToYYYYMM } from '../utils/utils';
@@ -7,17 +7,12 @@ import { ConfirmDialogData } from '../components/dialogs/confirm-dialog/confirm-
 import { LogsService } from './logs.service';
 import { SingleMonthData, MonthlyData } from '../components/models';
 
-interface TreeNode {
-    name: string;
-    value: number;
-    isValueChangedDuringCalc: boolean
-    children: TreeNode[];
-}
 
 export interface ExpenseData {
     totalExpenses: number;
     topLevelexpenses: any;
     changedExpensesDuringCalculation: TreeNode[];
+    wholeTree: TreeNode[];
 }
 
 @Injectable({
@@ -56,7 +51,8 @@ export class DataService {
         remainingBalance: this.remainingBalance,
         pieData: [],
         rawInput: [],
-        month: ''
+        month: '',
+        treeMapData: []
     }
 
     demoLinks: UserDefinedLink[] = [
@@ -141,6 +137,9 @@ export class DataService {
         this.processInputData(this.demoLinks, formatDateToYYYYMM(todaysDate), { demo: true, emitObservable: true});
     }
     
+    /** TODO: Refactor: Only save raw input?
+     * - On load, call processInputData with raw input.
+     */
     private loadExistingData(): void {
         const savedData = this.loadData();
         if (savedData && Object.keys(savedData).length > 0) {
@@ -237,7 +236,8 @@ export class DataService {
                 remainingBalance: '-',
                 pieData: [],
                 rawInput: userDefinedLinks,
-                month: month
+                month: month,
+                treeMapData: []
             }
             this.processedSingleMonthEntries$.next(this.defaultEmptySingleMonthEntries);
             return;
@@ -416,7 +416,7 @@ export class DataService {
         */
        let pieSeriesData: {name: string, value: number}[] = []
 
-        const { totalExpenses, topLevelexpenses: pieData, changedExpensesDuringCalculation: changedExpensesDuringCalculation } = this._getExpensesData(uniqueLinks, hasTax, incomeNodes.length);
+        const { totalExpenses, topLevelexpenses: pieData, changedExpensesDuringCalculation: changedExpensesDuringCalculation, wholeTree: treeMapData } = this._getExpensesData(uniqueLinks, hasTax, incomeNodes.length);
         const remainingBalance: number = (totalIncomeValue - totalExpenses - totalTaxValue)
 
         // Push remaining balance number to Pie Data to show how much is left proportionally.
@@ -464,7 +464,8 @@ export class DataService {
             remainingBalance: remainingBalance.toLocaleString('en-US'),
             pieData: pieSeriesData,
             rawInput: updatedRawInput,
-            month: month
+            month: month,
+            treeMapData: treeMapData
         };
 
         // Emit the processed data
@@ -770,7 +771,8 @@ export class DataService {
             return {
                 totalExpenses: 0,
                 topLevelexpenses: [],
-                changedExpensesDuringCalculation: []
+                changedExpensesDuringCalculation: [],
+                wholeTree: []
             }
         }
     
@@ -780,6 +782,9 @@ export class DataService {
         /** Tree might be modified during calculations. So if you want to use the tree structure, write code after these lines. */
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
+
+
+        console.log('Tree stucture:', treeFromRootNode);
         
         /** Tree is in recursive structure, but we only care about Top-level expense for pie data.
          * So only iterate through children of root node to get top level expenses.
@@ -794,7 +799,8 @@ export class DataService {
         return {
             totalExpenses: totalExpenses,
             topLevelexpenses: pieData,
-            changedExpensesDuringCalculation: changedNodes
+            changedExpensesDuringCalculation: changedNodes,
+            wholeTree: treeFromRootNode.children
         }
     }
 
