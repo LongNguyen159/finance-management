@@ -75,6 +75,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   indicators: ExpenseCategoryDetails[] = []
   showGaugeChart: boolean = true
   isSankeyVertical: boolean = false
+
+  viewTreeMap: boolean = false
   
   constructor() {
     super();

@@ -19,10 +19,12 @@
          {{ chartDescription }}
     </p>
 </div>
-<div
-    echarts
-    [options]="pieOption"
-    [merge]="pieMergeOption"
-    [style]="'height: ' + chartHeight"
->
-</div>
+@if (showPieChart) {
+    <div
+        echarts
+        [options]="pieOption"
+        [merge]="pieMergeOption"
+        [style]="'height: ' + chartHeight"
+    >
+    </div>
+}

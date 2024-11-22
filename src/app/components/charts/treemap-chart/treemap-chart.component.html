@@ -1,7 +1,10 @@
-<button mat-button (click)="toggleChartType()">
-    <!-- {{ currentChartType === 'treemap' ? 'Change to Sunburst' : 'Change to Treemap' }} -->
-      Toggle
-</button>
+
+<div class="flex flex-row w-full justify-center py-4">
+    <mat-button-toggle-group aria-label="Tree Map & Sunburst toggle" hideSingleSelectionIndicator (change)="toggleChartType()" [value]="currentChartType">
+        <mat-button-toggle value="treemap">Tree Map</mat-button-toggle>
+        <mat-button-toggle value="sunburst">Advanced Pie</mat-button-toggle>
+    </mat-button-toggle-group>
+</div>
 
 <div
     echarts

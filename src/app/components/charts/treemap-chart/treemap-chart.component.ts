@@ -7,12 +7,13 @@ import { removeSystemPrefix } from '../../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
-
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 @Component({
   selector: 'app-treemap-chart',
   standalone: true,
   imports: [NgxEchartsDirective,
-    MatButtonModule
+    MatButtonModule,
+    MatButtonToggleModule
   ],
   providers: [
     provideEcharts(),
