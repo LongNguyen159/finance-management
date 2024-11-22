@@ -52,6 +52,9 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
     return {
       tooltip: {
         trigger: 'axis',
+        borderColor: this.colorService.isDarkMode() ? '#484753' : '#E0E6F1',
+        borderRadius: 12,
+        padding: [10, 16],
         position: function (pos, params, dom, rect, size) {
           // tooltip will be fixed on the right if mouse hovering on the left,
           // and on the left if hovering on the right.
@@ -59,7 +62,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
           obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
           return obj;
         },
-        axisPointer: { type: 'shadow' },
+        axisPointer: { type: 'none' },
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
