@@ -5,6 +5,8 @@ import { TreeNode } from '../../models';
 import { ColorService } from '../../../services/color.service';
 import { removeSystemPrefix } from '../../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
+import { CurrencyPipe } from '@angular/common';
+import { CurrencyService } from '../../../services/currency.service';
 
 @Component({
   selector: 'app-treemap-chart',
@@ -14,14 +16,18 @@ import { MatButtonModule } from '@angular/material/button';
   ],
   providers: [
     provideEcharts(),
+    CurrencyPipe
   ],
   templateUrl: './treemap-chart.component.html',
   styleUrl: './treemap-chart.component.scss'
 })
 export class TreemapChartComponent implements OnInit, OnChanges {
   @Input() treeData: TreeNode[] = []
+  @Input() totalExpenses: number = 0
 
   colorService = inject(ColorService)
+  currencyPipe = inject(CurrencyPipe)
+  currencyService = inject(CurrencyService)
 
   chartOptions: EChartsOption = this.getBaseOptions()
   mergeOptions: EChartsOption
@@ -41,19 +47,42 @@ export class TreemapChartComponent implements OnInit, OnChanges {
 
   getBaseOptions(): EChartsOption {
     return {
+      color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         formatter: (info: any) => {
-          const value = info.value || 0;
-          return `<b>${removeSystemPrefix(info.name) || 'Total Expenses'}</b>: ${value}`;
+          const value = this.currencyPipe.transform(info.value, this.currencyService.getSelectedCurrency());
+          return `${removeSystemPrefix(info.name) || 'Total Expenses'}: <strong>${value} (${((info.value / this.totalExpenses) * 100).toFixed(2)}%)</strong>`;
         },
       },
       series: [],
     };
   }
 
+  generateColorMapping(data: TreeNode[], parentColor?: string): TreeNode[] {
+    const colorPalette = this.colorService.chartColorPaletteLight;
+    let colorIndex = 0;
+  
+    return data.map((node) => {
+      const color = parentColor ?? colorPalette[colorIndex % colorPalette.length];
+      colorIndex++;
+  
+      // Apply the color to the current node
+      node.itemStyle = { color };
+  
+      // Recursively apply colors to children
+      if (node.children) {
+        node.children = this.generateColorMapping(node.children, color);
+      }
+  
+      return node;
+    });
+  }
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes && changes['treeData']) {
+      /** Assign color for each series to persist colour when switching charts. */
+      this.treeData = this.generateColorMapping([...this.treeData]); // Clone the data for safety
       this.updateChart()
     }
   }
@@ -77,6 +106,7 @@ export class TreemapChartComponent implements OnInit, OnChanges {
           : this.colorService.lightTextPrimary,
       },
       itemStyle: {
+        borderWidth: 1,
         borderColor: this.colorService.isDarkMode() ? '#404040' : '#e5e5e5',
       },
       data: this.treeData,
@@ -95,7 +125,7 @@ export class TreemapChartComponent implements OnInit, OnChanges {
       universalTransition: true,
       itemStyle: {
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,.5)',
+        borderColor: this.colorService.isDarkMode() ? '#404040' : '#e5e5e5',
       },
       label: {
         show: false,

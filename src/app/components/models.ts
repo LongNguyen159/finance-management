@@ -222,5 +222,6 @@ export interface TreeNode {
   value: number;
   isValueChangedDuringCalc: boolean
   children: TreeNode[];
+  itemStyle?: any;
 }
 //#endregion
