@@ -53,6 +53,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
       tooltip: {
         trigger: 'axis',
         borderColor: this.colorService.isDarkMode() ? '#484753' : '#E0E6F1',
+        borderWidth: 2,
         borderRadius: 12,
         padding: [10, 16],
         position: function (pos, params, dom, rect, size) {
