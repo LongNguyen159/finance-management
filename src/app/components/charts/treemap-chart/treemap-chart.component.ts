@@ -91,7 +91,7 @@ export class TreemapChartComponent implements OnInit, OnChanges {
       type: 'sunburst',
       id: 'treemap-sunburst-transition',
       radius: ['20%', '90%'],
-      animationDurationUpdate: 1000,
+      animationDurationUpdate: 600,
       universalTransition: true,
       itemStyle: {
         borderWidth: 1,
@@ -112,17 +112,23 @@ export class TreemapChartComponent implements OnInit, OnChanges {
   }
 
   toggleChartType() {
-    // Hide upper labels before starting the transition
-    this.updateChart(this.getTreemapSeries(true));
-
-    // Perform the actual chart type transition after a short delay
-    setTimeout(() => {
-      this.currentChartType = this.currentChartType === 'treemap' ? 'sunburst' : 'treemap';
-      const newSeries =
-        this.currentChartType === 'treemap'
-          ? this.getTreemapSeries(false)
-          : this.getSunburstSeries();
-      this.updateChart(newSeries);
-    }, 600); // Adjust the delay as needed
+    // Determine the next chart type
+    const isSwitchingToTreemap = this.currentChartType === 'sunburst';
+    const newChartType = isSwitchingToTreemap ? 'treemap' : 'sunburst';
+  
+    // Handle the transition based on the chart type
+    if (isSwitchingToTreemap) {
+      // Hide upper labels, then delay the transition to treemap
+      this.updateChart(this.getTreemapSeries(true));
+  
+      setTimeout(() => {
+        this.currentChartType = newChartType;
+        this.updateChart(this.getTreemapSeries(false));
+      }, 370); // Adjust delay as needed
+    } else {
+      // Immediate transition to sunburst
+      this.currentChartType = newChartType;
+      this.updateChart(this.getSunburstSeries());
+    }
   }
 }
