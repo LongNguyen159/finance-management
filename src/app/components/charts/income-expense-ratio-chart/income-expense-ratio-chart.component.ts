@@ -22,6 +22,9 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
   @Input() totalIncome: number = 0;
   @Input() totalExpense: number = 0;
 
+  @Input() gridLeft: string = '10%';
+  @Input() gridRight: string = '10%';
+
   dataService = inject(DataService)
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
@@ -71,8 +74,8 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         formatter: (params: any) => this.getCustomTooltip(params),
       },
       grid: {
-        left: '2%',
-        right: '5%',
+        left: this.gridLeft,
+        right: this.gridRight,
         bottom: '0%',
         top: '-12%',
         containLabel: true,
@@ -123,6 +126,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         barWidth: this.barWidth,
         itemStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
+          opacity: 0.95,
           borderRadius: [0, 100, 100, 0],
         },
       },
@@ -133,6 +137,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         barWidth: this.barWidth,
         itemStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
+          opacity: 0.95,
           borderRadius: [0, 100, 100, 0],
         },
       },
