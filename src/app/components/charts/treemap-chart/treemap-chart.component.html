@@ -1,8 +1,12 @@
+<button mat-button (click)="toggleChartType()">
+    <!-- {{ currentChartType === 'treemap' ? 'Change to Sunburst' : 'Change to Treemap' }} -->
+      Toggle
+</button>
+
 <div
     echarts
     [options]="chartOptions"
     [merge]="mergeOptions"
     style="height: 70vh; width: 100%;"
 >
-
 </div>

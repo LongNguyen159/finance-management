@@ -4,11 +4,14 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TreeNode } from '../../models';
 import { ColorService } from '../../../services/color.service';
 import { removeSystemPrefix } from '../../../utils/utils';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-treemap-chart',
   standalone: true,
-  imports: [NgxEchartsDirective],
+  imports: [NgxEchartsDirective,
+    MatButtonModule
+  ],
   providers: [
     provideEcharts(),
   ],
@@ -22,6 +25,9 @@ export class TreemapChartComponent implements OnInit, OnChanges {
 
   chartOptions: EChartsOption = this.getBaseOptions()
   mergeOptions: EChartsOption
+
+  currentChartType: 'treemap' | 'sunburst' = 'treemap';
+
 
   constructor() {
     effect(() => {
@@ -52,47 +58,71 @@ export class TreemapChartComponent implements OnInit, OnChanges {
     }
   }
 
-  updateChart() {
+
+  private getTreemapSeries(hideUpperLabels: boolean = false): EChartsOption['series'] {
+    return {
+      type: 'treemap',
+      id: 'treemap-sunburst-transition',
+      animationDurationUpdate: 600,
+      universalTransition: true,
+      label: {
+        show: true,
+        formatter: '{b}', // Show the name of each node
+      },
+      upperLabel: {
+        show: !hideUpperLabels, // Hide or show the labels based on the argument
+        formatter: (params: any) => removeSystemPrefix(params.name),
+        color: this.colorService.isDarkMode()
+          ? this.colorService.darkTextPrimary
+          : this.colorService.lightTextPrimary,
+      },
+      itemStyle: {
+        borderColor: this.colorService.isDarkMode() ? '#404040' : '#e5e5e5',
+      },
+      data: this.treeData,
+      breadcrumb: {
+        show: false,
+      },
+    };
+  }
+
+  private getSunburstSeries(): EChartsOption['series'] {
+    return {
+      type: 'sunburst',
+      id: 'treemap-sunburst-transition',
+      radius: ['20%', '90%'],
+      animationDurationUpdate: 1000,
+      universalTransition: true,
+      itemStyle: {
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,.5)',
+      },
+      label: {
+        show: false,
+      },
+      data: this.treeData,
+    };
+  }
+
+  updateChart(series: EChartsOption['series'] = this.getTreemapSeries()) {
     this.mergeOptions = {
       ...this.getBaseOptions(),
-      series: {
-        type: 'treemap',
-        label: {
-          show: true,
-          formatter: '{b}', // Show the name of each node
-        },
-        upperLabel: {
-          show: true,
-          formatter(params) {
-            return removeSystemPrefix(params.name);
-          },
-          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-        },
-        itemStyle: {
-          borderColor: this.colorService.isDarkMode() ? '#404040' : '#e5e5e5',
-        },
-        data: this.treeData,
-        levels: [
-          {
-            itemStyle: {
-              borderWidth: 0,
-              gapWidth: 5
-            }
-          },
-          {
-            itemStyle: {
-              gapWidth: 1
-            }
-          },
-          {
-            colorSaturation: [0.35, 0.5],
-            itemStyle: {
-              gapWidth: 1,
-              borderColorSaturation: 0.6
-            }
-          }
-        ],
-      },
+      series: series
     }
+  }
+
+  toggleChartType() {
+    // Hide upper labels before starting the transition
+    this.updateChart(this.getTreemapSeries(true));
+
+    // Perform the actual chart type transition after a short delay
+    setTimeout(() => {
+      this.currentChartType = this.currentChartType === 'treemap' ? 'sunburst' : 'treemap';
+      const newSeries =
+        this.currentChartType === 'treemap'
+          ? this.getTreemapSeries(false)
+          : this.getSunburstSeries();
+      this.updateChart(newSeries);
+    }, 600); // Adjust the delay as needed
   }
 }
