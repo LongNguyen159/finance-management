@@ -24,6 +24,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../services/currency.service';
 import { MatMenuModule } from '@angular/material/menu';
+import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.component";
 
 @Component({
   selector: 'app-storage-manager',
@@ -33,8 +34,7 @@ import { MatMenuModule } from '@angular/material/menu';
     MatCardModule,
     MatSlideToggleModule,
     MatTooltipModule,
-    MatMenuModule
-  ],
+    MatMenuModule, TreemapChartComponent],
   providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',

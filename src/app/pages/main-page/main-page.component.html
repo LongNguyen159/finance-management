@@ -122,7 +122,9 @@
                     ></app-pie-chart>
                     @if (viewTreeMap) {
                         <section>
-                            <app-treemap-chart [treeData]="treeMapData" [totalExpenses]="totalExpenses" [totalNetIncome]="totalNetIncome"></app-treemap-chart>
+                            <div class="flex flex-row w-full justify-center">
+                                <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalExpenses]="totalExpenses" [totalNetIncome]="totalNetIncome"></app-treemap-chart>
+                            </div>
                         </section>
                     }
                 </section>

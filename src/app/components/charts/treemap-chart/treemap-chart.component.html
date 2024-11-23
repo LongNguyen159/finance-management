@@ -4,6 +4,18 @@
         <mat-button-toggle value="treemap">Tree Map</mat-button-toggle>
         <mat-button-toggle value="sunburst">Sunburst</mat-button-toggle>
     </mat-button-toggle-group>
+    @if (actionsPosition == 'top') {
+        <div class="flex w-full justify-center">
+            <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+                <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+            </button>
+        
+            <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
+                <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+            </button>
+            <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
+        </div>
+    }
 </div>
 
 <div
@@ -14,13 +26,17 @@
     (chartInit)="onChartInit($event)"
 >
 </div>
-<div class="flex w-full justify-center">
-    <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
-        <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
-    </button>
 
-    <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
-        <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
-    </button>
-    <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
-</div>
+<!-- ACTIONS -->
+@if (actionsPosition == 'bottom') {
+    <div class="flex w-full justify-center">
+        <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+        </button>
+    
+        <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+        </button>
+        <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
+    </div>
+}

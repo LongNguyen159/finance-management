@@ -33,6 +33,8 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
   @Input() totalExpenses: number = -1
   @Input() totalNetIncome: number = -1
 
+  @Input() actionsPosition: 'top' | 'bottom' = 'bottom'
+
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
   uiService = inject(UiService)
@@ -56,7 +58,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
   }
 
   getBaseOptions(): EChartsOption {
-    return {
+    return { 
       color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         formatter: (info: any) => {
@@ -108,6 +110,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
       type: 'treemap',
       id: 'treemap-sunburst-transition',
       animationDurationUpdate: 600,
+      width: '100%',
       universalTransition: true,
       label: {
         show: true,
