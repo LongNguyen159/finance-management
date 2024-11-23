@@ -148,12 +148,15 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       .map(a => {
         return expenseCategoryDetails[a.category];
       });
+
+    /** Gauge MUST be shown when indicators is < 2. Because we can't show Radar chart if there is less than 3 items.
+     */
     if (this.indicators.length <= 2) {
       this.showGaugeChart = true
+    } else if (this.indicators.length > 2) {
+      this.showGaugeChart = false
     }
   }
-
-
 
   getBudgetValue(category: string): number {
     const budget = this.budgets.find(b => b.category === category);
