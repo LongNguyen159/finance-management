@@ -783,8 +783,6 @@ export class DataService {
         const totalExpenses: number = this._calculateNodeExpense(treeFromRootNode, true);
         const changedNodes: TreeNode[] = this._getChangedNodes(treeFromRootNode);
 
-
-        console.log('Tree stucture:', treeFromRootNode);
         
         /** Tree is in recursive structure, but we only care about Top-level expense for pie data.
          * So only iterate through children of root node to get top level expenses.
