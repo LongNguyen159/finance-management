@@ -272,11 +272,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     // }
 
     const currentMonthData = this.localStorageData[month];
-    const incomeEntries = currentMonthData.rawInput
+    if (!currentMonthData) {
+      return [];
+    }
+
+    const incomeEntries = (currentMonthData.rawInput || [])
       .filter(entry => entry.type === EntryType.Income)
       .map(entry => ({ type: EntryType.Income, name: entry.target, value: entry.value }));
     
-    const expenseEntries = currentMonthData.pieData
+    const expenseEntries = (currentMonthData.pieData || [])
       .filter(entry => entry.name !== this.dataService.REMAINING_BALANCE_LABEL)
       .map(entry => ({ type: 'expense', name: removeSystemPrefix(entry.name), value: entry.value }));
     
