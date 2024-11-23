@@ -113,9 +113,9 @@
                 <mat-panel-description class="flex flex-row gap-6">
                   <p><strong>Surplus:</strong> {{ getFormattedRemainingBalance(month) }}</p>
                 </mat-panel-description>
-                <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
+                <!-- <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
                   <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>
-                </button>
+                </button> -->
               </mat-expansion-panel-header>
               <div class="flex flex-row pb-4">
                 <button mat-stroked-button (click)="getMonthsDetails(month)">
