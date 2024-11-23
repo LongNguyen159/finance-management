@@ -67,6 +67,11 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
     };
   }
 
+  /** Map the color to series. This function helps persist color between the same series when switching
+   * between treemap and sunburst charts. 
+   * 
+   * A good side-effect: It also helps matching the color in the Basic pie chart.
+   */
   generateColorMapping(data: TreeNode[], parentColor?: string): TreeNode[] {
     const colorPalette = this.colorService.chartColorPaletteLight;
     let colorIndex = 0;
@@ -176,7 +181,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
       setTimeout(() => {
         this.currentChartType = newChartType;
         this.updateChart(this.getTreemapSeries(false));
-      }, 370); // Adjust delay as needed
+      }, 370);
     } else {
       // Immediate transition to sunburst
       this.currentChartType = newChartType;
