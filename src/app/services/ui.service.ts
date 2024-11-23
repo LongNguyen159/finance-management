@@ -48,12 +48,12 @@ export class UiService {
 
 
   scrollUpBy70vh() {
-    const scrollAmount = Math.min(window.innerHeight * 0.75, 800);
+    const scrollAmount = Math.min(window.innerHeight * 0.80, 800);
     window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
   }
 
   scrollDownBy70vh() {
-    const scrollAmount = Math.min(window.innerHeight * 0.75, 800);
+    const scrollAmount = Math.min(window.innerHeight * 0.80, 800);
     window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
   }
 }
