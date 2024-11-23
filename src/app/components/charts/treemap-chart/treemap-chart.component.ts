@@ -30,7 +30,8 @@ import { BaseChartComponent } from '../../../base-components/base-chart/base-cha
 })
 export class TreemapChartComponent extends BaseChartComponent implements OnInit, OnChanges {
   @Input() treeData: TreeNode[] = []
-  @Input() totalExpenses: number = 0
+  @Input() totalExpenses: number = -1
+  @Input() totalNetIncome: number = -1
 
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
@@ -60,7 +61,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
       tooltip: {
         formatter: (info: any) => {
           const value = this.currencyPipe.transform(info.value, this.currencyService.getSelectedCurrency());
-          return `${removeSystemPrefix(info.name) || 'Total Expenses'}: <strong>${value} (${((info.value / this.totalExpenses) * 100).toFixed(2)}%)</strong>`;
+          return `${removeSystemPrefix(info.name) || 'Total'}: <strong>${value} (${((info.value / this.totalNetIncome) * 100).toFixed(2)}%)</strong>`;
         },
       },
       series: [],

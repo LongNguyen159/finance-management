@@ -220,7 +220,7 @@ export interface SurplusBalanceLineChartData {
 export interface TreeNode {
   name: string;
   value: number;
-  isValueChangedDuringCalc: boolean
+  isValueChangedDuringCalc?: boolean
   children: TreeNode[];
   itemStyle?: any;
 }

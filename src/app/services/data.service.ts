@@ -447,6 +447,11 @@ export class DataService {
             return updatedLink ? { ...link, value: updatedLink.value } : link; // Update value or leave as is
         });
 
+
+        // Add remaining balance to the tree map data        
+        treeMapData.push({ name: this.REMAINING_BALANCE_LABEL, value: remainingBalance, children: [] });
+
+        // If there are changes in the data, update the lastUpdated date and write into Local Storage
         const savedSingleMonthData = this.loadSingleMonth(month);
         const isDifferent: boolean = JSON.stringify(userDefinedLinks) !== JSON.stringify(savedSingleMonthData?.rawInput);
         const isEmpty: boolean = userDefinedLinks.length === 0;
@@ -477,7 +482,7 @@ export class DataService {
             this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
         }
 
-        
+        // Write/Save data into Local Storage (if it's changed)
         if (isDifferent) {
             this.saveData()
         }

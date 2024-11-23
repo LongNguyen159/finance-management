@@ -117,12 +117,12 @@
                     </div>
 
 
-                    <app-pie-chart [showPieChart]="!viewTreeMap" [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'"
+                    <app-pie-chart [showPieChart]="!viewTreeMap" [pieChartData]="pieChartDataNetto" [chartTitle]="'Net Income Distribution'"
                         [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
                     ></app-pie-chart>
                     @if (viewTreeMap) {
                         <section>
-                            <app-treemap-chart [treeData]="treeMapData" [totalExpenses]="totalExpenses"></app-treemap-chart>
+                            <app-treemap-chart [treeData]="treeMapData" [totalExpenses]="totalExpenses" [totalNetIncome]="totalNetIncome"></app-treemap-chart>
                         </section>
                     }
                 </section>

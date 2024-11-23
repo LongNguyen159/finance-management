@@ -7,7 +7,7 @@
     <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
     <!-- NETTO CHART -->
-    <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
+    <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Net Income Distribution'"
         [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
         [chartHeight]="'400px'"
     ></app-pie-chart>
