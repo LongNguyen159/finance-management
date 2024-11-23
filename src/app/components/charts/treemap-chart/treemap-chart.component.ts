@@ -46,12 +46,12 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
   constructor() {
     super()
     effect(() => {
-      this.updateChart()
+      this.updateChart(this.currentChartType === 'treemap' ? this.getTreemapSeries() : this.getSunburstSeries())
     })
   }
 
   ngOnInit(): void {
-    this.updateChart()
+    this.updateChart(this.currentChartType === 'treemap' ? this.getTreemapSeries() : this.getSunburstSeries())
   }
 
   getBaseOptions(): EChartsOption {
@@ -92,7 +92,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
     if (changes && changes['treeData']) {
       /** Assign color for each series to persist colour when switching charts. */
       this.treeData = this.generateColorMapping([...this.treeData]); // Clone the data for safety
-      this.updateChart()
+      this.updateChart(this.currentChartType === 'treemap' ? this.getTreemapSeries() : this.getSunburstSeries())
     }
   }
 
@@ -143,7 +143,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
     };
   }
 
-  updateChart(series: EChartsOption['series'] = this.getTreemapSeries()) {
+  updateChart(series: EChartsOption['series']) {
     this.mergeOptions = {
       ...this.getBaseOptions(),
       series: series
