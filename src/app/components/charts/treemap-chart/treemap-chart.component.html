@@ -1,9 +1,19 @@
 
-<div class="flex flex-row w-full justify-center py-4">
+<div class="flex flex-col w-full items-center justify-center py-4 gap-2">
     <mat-button-toggle-group aria-label="Tree Map & Sunburst toggle" hideSingleSelectionIndicator (change)="toggleChartType()" [value]="currentChartType">
         <mat-button-toggle value="treemap">Tree Map</mat-button-toggle>
         <mat-button-toggle value="sunburst">Advanced Pie</mat-button-toggle>
     </mat-button-toggle-group>
+    <div class="flex flex-row w-full items-center justify-center gap-3 mt-2">
+        <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+        </button>
+
+        <button mat-raised-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
+    </div>
 </div>
 
 <div
@@ -11,5 +21,12 @@
     [options]="chartOptions"
     [merge]="mergeOptions"
     style="height: 70vh; width: 100%;"
+    (chartInit)="onChartInit($event)"
 >
+</div>
+<div class="flex w-full justify-center">
+    <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+        <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+    </button>
+
 </div>

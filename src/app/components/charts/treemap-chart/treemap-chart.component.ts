@@ -8,12 +8,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { UiService } from '../../../services/ui.service';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 @Component({
   selector: 'app-treemap-chart',
   standalone: true,
   imports: [NgxEchartsDirective,
     MatButtonModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   providers: [
     provideEcharts(),
@@ -22,12 +28,13 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
   templateUrl: './treemap-chart.component.html',
   styleUrl: './treemap-chart.component.scss'
 })
-export class TreemapChartComponent implements OnInit, OnChanges {
+export class TreemapChartComponent extends BaseChartComponent implements OnInit, OnChanges {
   @Input() treeData: TreeNode[] = []
   @Input() totalExpenses: number = 0
 
   colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
+  uiService = inject(UiService)
   currencyService = inject(CurrencyService)
 
   chartOptions: EChartsOption = this.getBaseOptions()
@@ -37,6 +44,7 @@ export class TreemapChartComponent implements OnInit, OnChanges {
 
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart()
     })
@@ -139,6 +147,19 @@ export class TreemapChartComponent implements OnInit, OnChanges {
     this.mergeOptions = {
       ...this.getBaseOptions(),
       series: series
+    }
+  }
+
+  /** Reset zoom on treemap. */
+  resetZoom(chartInstance: any): void {
+    if (this.currentChartType === 'treemap') {
+      chartInstance.dispatchAction({
+        type: 'treemapZoomToNode',
+        targetNodeId: 0 // Assuming root node has ID 0
+      });
+    } else if (this.currentChartType === 'sunburst') {
+      // No built-in zoom reset for sunburst, but you can re-apply options
+      this.updateChart(this.getSunburstSeries());
     }
   }
 
