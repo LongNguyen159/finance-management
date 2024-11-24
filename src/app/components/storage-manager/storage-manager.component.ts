@@ -378,7 +378,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
     // Helper function to merge a single node into the result tree
     function mergeNode(node: TreeNode, target: TreeNode[]) {
-      const existingNode = target.find(n => n.name === node.name);
+      const existingNode = target.find(n => n.name.toLowerCase() === node.name.toLowerCase());
       if (existingNode) {
         // If node exists, aggregate values and merge children
         existingNode.value += node.value;
