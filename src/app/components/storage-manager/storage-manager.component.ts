@@ -77,7 +77,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
     { value: '6-months', label: 'Last 6 months' },
-    { value: '12-months', label: 'Last 12 months' },
     { value: 'whole-year', label: 'This Year' },
     { value: '2-years', label: '2 Years' },
     { value: 'show-all', label: 'All time' }
@@ -252,8 +251,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    * Returns the number of months to show based on the selected option */
   private _getMonthsToShow(): number {
     return this.selectedOption === '3-months' ? 3 :
-           this.selectedOption === '6-months' ? 6 :
-           this.selectedOption === '12-months' ? 12 : 0;
+           this.selectedOption === '6-months' ? 6 : 0
   }
 
   /** Trigger filtering when a new option is selected from the dropdown */
