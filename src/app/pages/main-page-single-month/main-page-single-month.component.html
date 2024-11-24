@@ -7,10 +7,26 @@
     <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
     <!-- NETTO CHART -->
-    <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Net Income Distribution'"
-        [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
-        [chartHeight]="'400px'"
-    ></app-pie-chart>
+    <section>
+        <div class="flex flex-row w-full items-center justify-end gap-2">
+            <button mat-button class="flex flex-row items-center" (click)="viewTreeMap = !viewTreeMap">
+                <mat-icon>{{ viewTreeMap ? 'pie_chart' : 'map' }}</mat-icon>
+                <span>{{ viewTreeMap ? 'View Pie Chart' : 'View Tree Map' }}</span>
+            </button>
+        </div>
+
+
+        <app-pie-chart [showPieChart]="!viewTreeMap" [pieChartData]="pieChartDataNetto" [chartTitle]="'Net Income Distribution'"
+            [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
+        ></app-pie-chart>
+        @if (viewTreeMap) {
+            <section>
+                <div class="flex flex-row w-full justify-center">
+                    <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalExpenses]="totalExpenses" [totalNetIncome]="totalNetIncome"></app-treemap-chart>
+                </div>
+            </section>
+        }
+    </section>
 
     @if (showGrossIncomePieChart) {
         <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
