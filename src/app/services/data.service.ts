@@ -143,7 +143,6 @@ export class DataService {
     private loadExistingData(): void {
         const savedData = this.loadData();
         if (savedData && Object.keys(savedData).length > 0) {
-            console.log('Saved data found:');
             this.monthlyData = savedData;  // Load saved data
             // this.processedSingleMonthEntries$.next(this.monthlyData['2024-09']);  // Emit saved data
             this.multiMonthEntries$.next(this.monthlyData);  // Emit all months data
@@ -473,7 +472,6 @@ export class DataService {
             treeMapData: treeMapData
         };
 
-        console.log(`TreeMap for ${month}:`, treeMapData);
 
         // Emit the processed data
         if (emitObservable) {

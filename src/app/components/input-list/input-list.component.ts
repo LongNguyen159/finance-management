@@ -773,9 +773,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
 
 
   //#region Check Duplicates
-  private _checkDuplicateName(formGroup?: FormGroup): boolean {
-    console.log('checking duplicates...')
-    
+  private _checkDuplicateName(formGroup?: FormGroup): boolean {    
     // Get all form values and normalize for comparison
     const formValues: string[] = this.linkArray.value.map((link: UserDefinedLink) => link.target.toLowerCase().trim());
     
