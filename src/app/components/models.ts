@@ -35,7 +35,7 @@ export interface SingleMonthData {
   pieData: PieData[];
   rawInput: UserDefinedLink[];
   month: string
-  treeMapData: any
+  treeMapData: TreeNode[];
 }
 
 

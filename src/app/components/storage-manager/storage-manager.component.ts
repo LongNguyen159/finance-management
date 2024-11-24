@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SurplusBalanceLineChartData } from '../models';
+import { MonthlyData, SurplusBalanceLineChartData, TreeNode } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -17,7 +17,7 @@ import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
-import { EntryType, PieData } from '../models';
+import { EntryType } from '../models';
 import { IncomeExpenseRatioChartComponent } from "../charts/income-expense-ratio-chart/income-expense-ratio-chart.component";
 import { MatCardModule } from '@angular/material/card';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -91,77 +91,35 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Chart data to plot the surplus and balance of each month  */
   surplusChartData: SurplusBalanceLineChartData[] = [];
 
+  treeMapData: TreeNode[] = [];
+
   // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
 
 
   ngOnInit(): void {
+    /** Get all months data and refresh data if input changes */
+    this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
+      this.localStorageData = data;
+      this.refreshData();
+      this.filterMonths();
+    })
+    
     this.refreshData();
     this.loadFormatBigNumbersState();
     this.storedYears = this.getStoredYears();
     this.filterMonths(); // Initially filter based on the default option
 
     /** Sole purpose is to expand the panel if it matches the selected year in date picker */
-    this.selectedYear = this.dataService.selectedActiveDate.getFullYear().toString();
-
-    /** Refresh data if input changes */
-    this.dataService.isDataSaved().pipe(takeUntil(this.componentDestroyed$)).subscribe(isSaved => {
-      if (isSaved) {
-        this.refreshData()
-        this.filterMonths()
-      }
-    })
-  }
-
-  loadFormatBigNumbersState(): void {
-    const savedState = sessionStorage.getItem('isFormatBigNumbers');
-    this.isFormatBigNumbers = savedState === 'true';
-  }
-
-  saveFormatBigNumbersState(): void {
-    sessionStorage.setItem('isFormatBigNumbers', this.isFormatBigNumbers.toString());
-  }
-
-  toggleFormatBigNumbers(): void {
-    this.isFormatBigNumbers = !this.isFormatBigNumbers;
-    this.saveFormatBigNumbersState();
-  }
-
-  toggleScaleBarChart() {
-    this.isBarChartScaled = !this.isBarChartScaled;
-    this.getScaleValue();
+    this.selectedYear = this.dataService.selectedActiveDate.getFullYear().toString();    
   }
 
 
-  /** Find largest value (of either total income or total expenses) of given months.
-   * This will be used later as a scale factor.
-   * 
-   * We will display an 'invisible' bar that has this value to make all the bars to have the same scale (same xAxis length)
-   */
-  private findLargestValue(data: { [key: string]: any }) {
-    let maxTotalUsableIncome = 0;
-    let maxTotalExpenses = 0;
-
-    for (const month in data) {
-      const monthData = data[month];
-
-      // Find max total usable income
-      if (monthData.totalUsableIncome > maxTotalUsableIncome) {
-        maxTotalUsableIncome = monthData.totalUsableIncome;
-      }
-
-      // Find max total expenses
-      if (monthData.totalExpenses > maxTotalExpenses) {
-        maxTotalExpenses = monthData.totalExpenses;
-      }
-    }
-
-    // Return the larger of the two maximums
-    return Math.max(maxTotalUsableIncome, maxTotalExpenses);
-  }
-
+  //#region Retrieve Data
+  /** Refresh data by get stored months again. */
   refreshData() {
-    this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
+    // this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
     this.storedMonths = Object.keys(this.localStorageData);
+    this.storedYears = this.getStoredYears();
   }
 
   getStoredYears(): string[] {
@@ -192,7 +150,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     return monthsByYear;
   }
+  //#endregion
 
+
+  //#region Filtering
   /** This method filters the months based on the selected time frame */
   filterMonths() {
     const currentYear = this.currentDate.getFullYear();
@@ -226,7 +187,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         includeMonth = year === currentYear || year === currentYear - 1;
       }
       else {
-        const monthsToShow = this.getMonthsToShow();
+        const monthsToShow = this._getMonthsToShow();
         const diff = currentMonthNumber - monthNumber;
         includeMonth = diff >= 0 && diff < monthsToShow; // Include only months within the range
       }
@@ -252,9 +213,38 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.allFilteredMonths = Object.values(this.filteredMonthsByYear).flat();
     this.populateChartData(this.allFilteredMonths);
   }
+
+  filterMonthlyData(
+    monthlyData: MonthlyData,
+    keysToKeep: string[]
+  ): MonthlyData {
+    // Use Object.entries to filter and then reconstruct the object
+    const filteredEntries = Object.entries(monthlyData).filter(([key]) =>
+      keysToKeep.includes(key)
+    );
   
-  /** Returns the number of months to show based on the selected option */
-  getMonthsToShow(): number {
+    // Convert the filtered entries back into an object
+    return Object.fromEntries(filteredEntries);
+  }
+
+  /** Get data of selected months.
+   * @param data: MonthlyData: Data to be filtered, in this case, all months data
+   * @param keys: string[]: Keys to be filtered (yyyy-mm), in this case, months we want to get.
+   * 
+   * @returns MonthlyData: Filtered data based on the keys.
+   */
+  filterDataByKeys(data: MonthlyData, keys: string[]) {
+    return Object.keys(data)
+      .filter(key => keys.includes(key))
+      .reduce((acc: MonthlyData, key: string) => {
+        acc[key] = data[key];
+        return acc;
+      }, {});
+  }
+
+  /** Helper Function for `filterMonths()` 
+   * Returns the number of months to show based on the selected option */
+  private _getMonthsToShow(): number {
     return this.selectedOption === '3-months' ? 3 :
            this.selectedOption === '6-months' ? 6 :
            this.selectedOption === '12-months' ? 12 : 0;
@@ -265,7 +255,12 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.filterMonths(); // Filter the months based on selected option
   }
 
-
+  /** Get months display infos to display in template.
+   * @param month: string: Month in YYYY-MM format.
+   * 
+   * @returns: Entries of each month, consists of name, type (income/expenses) and their value.
+   * We get the type to display colour based on the type (red for expenses, green for income).
+   */
   getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
     // if (this.monthInfoCache[month]) {
     //   return this.monthInfoCache[month];
@@ -293,25 +288,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     // this.monthInfoCache[month] = result; // Cache result
     return result;
   }
+  //#endregion
 
-
+  //#region Chart Data
   /** After filtering, we need to re-populate the chart data */
   populateChartData(allMonths: string[] = []) {
-    const filteredData = Object.entries(this.localStorageData)
-      .filter(([month]) => allMonths.includes(month))
-      .map(([month, value]) => ({
-        month,
-        surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
-      }));
+    // Filter the local storage data using filterMonthlyData
+    const filteredData = this.filterMonthlyData(this.localStorageData, allMonths);
 
-    // Sort the filtered data by month in chronological order
-    const sortedData = filteredData.sort((a, b) => {
+    this.treeMapData = this.aggregateYearlyTree(filteredData)
+  
+    // Map the filtered data to extract surplus and add balance
+    const mappedData = Object.entries(filteredData).map(([month, value]) => ({
+      month,
+      surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
+    }));
+  
+    // Sort the data by month in chronological order
+    const sortedData = mappedData.sort((a, b) => {
       const dateA = new Date(a.month);
       const dateB = new Date(b.month);
       return dateA.getTime() - dateB.getTime();
     });
-
-    // Add 'balance' property by calculating cumulative balance
+  
+    // Calculate cumulative balance
     let previousBalance = 0; // Initial balance can be customized
     this.surplusChartData = sortedData.map((entry) => {
       const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
@@ -321,11 +321,72 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         balance,
       };
     });
-
-    /** Scale the chart every time filter changes */
+  
+    // Rescale the chart when filters change
     this.getScaleValue();
   }
 
+
+
+  /** Check TreeMapData of each month: Call DataService if TreeMapData does not exist, use TreeMapData directly if it exists */
+  aggregateYearlyTree(savedData: MonthlyData): TreeNode[] {
+    const monthlyTrees: TreeNode[][] = [];
+  
+    // Iterate through each month in savedData
+    for (const [month, data] of Object.entries(savedData)) {
+      if (data.treeMapData) {
+        // Use existing treeMapData if available
+        monthlyTrees.push(data.treeMapData);
+      } else {
+        // Generate treeMapData using processInputData if missing
+        const generatedTree = this.dataService.processInputData(data.rawInput, data.month, { emitObservable: false })?.treeMapData
+        if (!generatedTree) {
+          continue; // Skip if treeMapData is not generated
+        }
+        monthlyTrees.push(generatedTree);
+  
+        // Optionally, update the savedData object with the generated tree
+        data.treeMapData = generatedTree;
+      }
+    }
+  
+    // Use mergeTrees to aggregate the monthlyTrees
+    return this._mergeTrees(monthlyTrees);
+  }
+
+  /** Merge trees to get Overview/Summarised data, and show treeMap. */
+  _mergeTrees(trees: TreeNode[][]): TreeNode[] {
+    const result: TreeNode[] = [];
+  
+    // Helper function to merge a single node into the result tree
+    function mergeNode(node: TreeNode, target: TreeNode[]) {
+      const existingNode = target.find(n => n.name === node.name);
+      if (existingNode) {
+        // If node exists, aggregate values and merge children
+        existingNode.value += node.value;
+        for (const child of node.children) {
+          mergeNode(child, existingNode.children);
+        }
+      } else {
+        // If node does not exist, add a deep copy to target
+        target.push({ ...node, children: [] });
+        const newNode = target[target.length - 1];
+        for (const child of node.children) {
+          mergeNode(child, newNode.children);
+        }
+      }
+    }
+  
+    // Loop through all monthly trees and merge them
+    for (const monthlyTree of trees) {
+      for (const node of monthlyTree) {
+        mergeNode(node, result);
+      }
+    }
+  
+    return result;
+  }
+  
 
   /** Scale the bar chart across all months to have the same xAxis.
    * This is useful for comparing income and expenses across different months.
@@ -337,27 +398,51 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     /** Get all showing months (Filtered month by selected time frame) */
     const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
     // Get largest value of either total income or total expenses among the showing months
-    const largestValue = this.findLargestValue(showingMonths);
+    const largestValue = this._findLargestValue(showingMonths);
 
     // Set the scale value to the largest value; if scale is turned off, set it to 0.
     this.isBarChartScaled ? this.dataService.incomeExpenseScaleValue.set(largestValue) : this.dataService.incomeExpenseScaleValue.set(0);
   }
 
-  /** Get data of selected months.
-   * @param data: MonthlyData: Data to be filtered, in this case, all months data
-   * @param keys: string[]: Keys to be filtered (yyyy-mm), in this case, months we want to get.
-   * 
-   * @returns MonthlyData: Filtered data based on the keys.
-   */
-  filterDataByKeys(data: MonthlyData, keys: string[]) {
-    return Object.keys(data)
-      .filter(key => keys.includes(key))
-      .reduce((acc: MonthlyData, key: string) => {
-        acc[key] = data[key];
-        return acc;
-      }, {});
-  }
 
+
+  /** 
+ * Helper Function for `getScaleValue()`
+ * Find largest value (of either total income or total expenses) of given months.
+ * This will be used later as a scale factor.
+ * 
+ * We will display an 'invisible' bar that has this value to make all the bars to have the same scale (same xAxis length)
+ */
+  private _findLargestValue(data: { [key: string]: any }) {
+    let maxTotalUsableIncome = 0;
+    let maxTotalExpenses = 0;
+
+    for (const month in data) {
+      const monthData = data[month];
+
+      // Find max total usable income
+      if (monthData.totalUsableIncome > maxTotalUsableIncome) {
+        maxTotalUsableIncome = monthData.totalUsableIncome;
+      }
+
+      // Find max total expenses
+      if (monthData.totalExpenses > maxTotalExpenses) {
+        maxTotalExpenses = monthData.totalExpenses;
+      }
+    }
+
+    // Return the larger of the two maximums
+    return Math.max(maxTotalUsableIncome, maxTotalExpenses);
+  }
+  //#endregion
+
+
+
+  //#region Surplus Calculation
+  /** Calculate total Surplus of the given year.
+   * @param year: string: Year in string format (YYYY).
+   * @returns string: Total surplus of the given year.
+   */
   calculateTotalSurplusOfYear(year: string): string {
     let totalSurplus = 0;
     const months = this.filteredMonthsByYear[year]; // Use filtered months
@@ -403,8 +488,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     return this.isFormatBigNumbers ? formatBigNumber(totalSurplus, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : totalSurplus.toLocaleString('en-US');
   }
+  //#endregion
 
 
+
+  //#region Formatting
   /** Get remaining balance formatted to big numbers */
   getFormattedRemainingBalance(month: string): string {
     const balanceString: string = this.localStorageData[month].remainingBalance || '0';
@@ -412,6 +500,47 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.currencyService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
 
+  /** Expose utils function to template. Format big numbers into K, M, B (Thousands, Millions, Billions)
+   * Min value: 10K
+   */
+  formatBigNumbersTemplate(num: number): string {
+    return formatBigNumber(num, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()));
+  }
+
+  //#endregion
+
+
+
+
+  //#region Toggle Functions
+  /** Persists the state of Big Number formatting */
+  loadFormatBigNumbersState(): void {
+    const savedState = sessionStorage.getItem('isFormatBigNumbers');
+    this.isFormatBigNumbers = savedState === 'true';
+  }
+
+  saveFormatBigNumbersState(): void {
+    sessionStorage.setItem('isFormatBigNumbers', this.isFormatBigNumbers.toString());
+  }
+
+  toggleFormatBigNumbers(): void {
+    this.isFormatBigNumbers = !this.isFormatBigNumbers;
+    this.saveFormatBigNumbersState();
+  }
+
+  toggleScaleBarChart() {
+    this.isBarChartScaled = !this.isBarChartScaled;
+    this.getScaleValue();
+  }
+  //#endregion
+
+
+
+
+
+  /** [NOT IMPLEMENTED]: Remove whole month from local storage. Earlier this page was used as Storage Manager,
+   * but later changed to Finance Manger. So, this feature is not implemented anymore.
+   */
   removeItem(key: string) {
     const dialogData: ConfirmDialogData = {
       title: `Are you sure you want to delete ${key}?`,
@@ -431,9 +560,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     })
   }
 
-  formatBigNumbersTemplate(num: number): string {
-    return formatBigNumber(num, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()));
-  }
 
   /** This function is used to get details of the corresponding month. It opens the main page dialog.
    * @param month: string in YYYY-MM format.

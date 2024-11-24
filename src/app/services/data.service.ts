@@ -178,7 +178,7 @@ export class DataService {
      *   - emitObservable: `boolean` (default: `true`) - If `true`, emits an observable with the processed data for further actions.
      *       If `false`, only saves the processed data in local storage without emitting.
      */
-    processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }): void {
+    processInputData(userDefinedLinks: UserDefinedLink[], month: string, options: { demo?: boolean, showSnackbarWhenDone?: boolean, emitObservable?: boolean } = { demo: false, showSnackbarWhenDone: false, emitObservable: true }) {
         /** Prevent overriding default value if not given.
          * e.g. `emitObservable` defaults to true, but if not provided by caller, it will be undefined.
          * This line below will set it to true if it's not provided.
@@ -473,9 +473,13 @@ export class DataService {
             treeMapData: treeMapData
         };
 
+        console.log(`TreeMap for ${month}:`, treeMapData);
+
         // Emit the processed data
         if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
+            
+            this.multiMonthEntries$.next(this.monthlyData) // emit all months data
         }
 
         if (showSnackbarWhenDone && !this.isDemo()) {
@@ -487,6 +491,7 @@ export class DataService {
             this.saveData()
         }
         //#endregion
+        return this.monthlyData[month];
     }
 
     checkDuplicateNames(links: UserDefinedLink[]): boolean {
