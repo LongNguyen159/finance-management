@@ -1,7 +1,7 @@
-<div class="pt-4">
+<div class="p-4">
   <div class="flex flex-row w-full justify-end">
     <!-- TIMEFRAME FILTER OPTIONS -->
-    <div class="pr-6">
+    <div>
       <mat-form-field appearance="outline">
         <mat-select class="!w-100" [(ngModel)]="selectedOption" (selectionChange)="onOptionSelected()">
           <mat-option *ngFor="let option of availableOptions" [value]="option.value">
@@ -14,6 +14,14 @@
 
   <!-- SURPLUS & BALANCE LINE CHART -->
   <app-total-surplus-line-chart class="w-full" [chartData]="surplusChartData"></app-total-surplus-line-chart>
+  <!-- ALL TIME BALANCE -->
+  <h3 class="font-bold flex flex-row items-center gap-2">
+    <span>Balance: </span>
+    <span [ngClass]="getBalanceClass()" class="flex flex-row items-center rounded-full text-neutral-950 text-base px-5 py-[5px]">
+        {{ parseLocaleStringToNumber(calculateTotalSurplusAllTimeFiltered()) | currency: currencyService.getSelectedCurrency() }}
+    </span>
+  </h3>
+
   <mat-divider class="!my-12" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
   <!-- REPORTING/INSIGHTS SECTION -->
   <section class="mb-3">
@@ -73,18 +81,6 @@
         </div>
       </mat-menu>
     </div>
-
-    
-
-
-    <!-- ALL TIME BALANCE -->
-    <mat-card appearance="outlined" class="px-4">
-      <mat-card-content>
-        <p class="text-xl font-bold">
-          Balance: {{ calculateTotalSurplusAllTimeFiltered() }}
-        </p>
-      </mat-card-content>
-    </mat-card>
   </div>
 
 

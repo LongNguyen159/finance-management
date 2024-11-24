@@ -589,4 +589,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       maxHeight: '90vh',
     })
   }
+
+
+  isPositiveBalance(): boolean {
+    const balanceNumber = parseLocaleStringToNumber(this.calculateTotalSurplusAllTimeFiltered());
+    return balanceNumber >= 0;
+  }
+
+  parseLocaleStringToNumber(value: string): number {
+    return parseLocaleStringToNumber(value);
+  }
+
+  getBalanceClass(): string {
+    return this.isPositiveBalance() ? 'positive-balance' : 'negative-balance';
+  }
 }
