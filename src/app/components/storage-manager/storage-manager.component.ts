@@ -25,6 +25,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CurrencyService } from '../../services/currency.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.component";
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-storage-manager',
@@ -34,7 +35,9 @@ import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.com
     MatCardModule,
     MatSlideToggleModule,
     MatTooltipModule,
-    MatMenuModule, TreemapChartComponent],
+    MatMenuModule, TreemapChartComponent,
+    MatDividerModule
+  ],
   providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
@@ -92,6 +95,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   surplusChartData: SurplusBalanceLineChartData[] = [];
 
   treeMapData: TreeNode[] = [];
+
+  totalNetIncome: number = 0;
+  totalExpenses: number = 0;
 
   // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
 
@@ -295,6 +301,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   populateChartData(allMonths: string[] = []) {
     // Filter the local storage data using filterMonthlyData
     const filteredData = this.filterMonthlyData(this.localStorageData, allMonths);
+    console.log('filteredData', filteredData);
+
+    const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
+      (totals, month) => {
+        totals.totalNetIncome += month.totalUsableIncome;
+        totals.totalExpenses += month.totalExpenses;
+        return totals;
+      },
+      { totalNetIncome: 0, totalExpenses: 0 } // Initial accumulator values
+    );
+    this.totalNetIncome = totalNetIncome;
+    this.totalExpenses = totalExpenses;
 
     this.treeMapData = this.aggregateYearlyTree(filteredData)
   

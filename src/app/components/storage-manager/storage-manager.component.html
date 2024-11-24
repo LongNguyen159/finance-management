@@ -12,11 +12,29 @@
     </div>
   </div>
 
+  <!-- SURPLUS & BALANCE LINE CHART -->
   <app-total-surplus-line-chart class="w-full" [chartData]="surplusChartData"></app-total-surplus-line-chart>
+  <mat-divider class="!my-12" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+  <!-- REPORTING/INSIGHTS SECTION -->
+  <section class="mb-3">
+    <div class="flex flex-col items-center">
+      <!-- INCOME/EXPENSE RATIO CHART -->
+      <div class="flex flex-col w-full justify-center items-center">
+        <h2 class="text-2xl font-bold text-center mt-4">Income / Expense Ratio</h2>
+        <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
+      </div>
 
-  <div class="flex flex-row w-full justify-center">
-    <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [actionsPosition]="'bottom'"></app-treemap-chart>
-  </div>
+      <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+      <!-- TREEMAP CHART -->
+      <div class="flex flex-col w-full justify-center items-center">
+        <h2 class="text-2xl font-bold text-center mt-4">Net Income Distribution</h2>
+        <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalNetIncome]="totalNetIncome" [actionsPosition]="'top'"></app-treemap-chart>
+      </div>
+      
+      <mat-divider class="!my-12" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    </div>
+  </section>
 
   <!-- ACTION BUTTONS -->
   <div class="flex flex-row w-full justify-between px-6 pb-2">
