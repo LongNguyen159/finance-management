@@ -299,8 +299,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   populateChartData(allMonths: string[] = []) {
     // Filter the local storage data using filterMonthlyData
     const filteredData = this.filterMonthlyData(this.localStorageData, allMonths);
-    console.log('filteredData', filteredData);
 
+    // Calculate total net income and total expenses
     const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
       (totals, month) => {
         totals.totalNetIncome += month.totalUsableIncome;
