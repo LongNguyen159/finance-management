@@ -6,6 +6,7 @@ import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { CurrencyService } from '../../../services/currency.service';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
+import { formatBigNumber } from '../../../utils/utils';
 
 @Component({
   selector: 'app-income-expense-ratio-chart',
@@ -46,7 +47,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['totalIncome'] || changes['totalExpense']) {
+    if (changes['totalIncome'] || changes['totalExpense'] || changes['gridLeft'] || changes['gridRight']) {
       this.updateChart();
     }
   }
@@ -84,6 +85,9 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         type: 'value',
         boundaryGap: [0, 0.01],
         splitLine: { show: false },
+        axisLabel: {
+          formatter: (value) => formatBigNumber(value, '', 1000), // Use the utility function
+        },
       },
       yAxis: {
         type: 'category',
