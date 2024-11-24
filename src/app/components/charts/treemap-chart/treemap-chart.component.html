@@ -6,11 +6,11 @@
     </mat-button-toggle-group>
     @if (actionsPosition == 'top') {
         <div class="flex w-full justify-center">
-            <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+            <button mat-icon-button matTooltip="Scroll up" [matTooltipShowDelay]="300" (click)="uiService.scrollUpBy70vh()">
                 <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
             </button>
         
-            <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
+            <button mat-icon-button matTooltip="Scroll down" [matTooltipShowDelay]="300" (click)="uiService.scrollDownBy70vh()">
                 <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
             </button>
             <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
@@ -30,11 +30,11 @@
 <!-- ACTIONS -->
 @if (actionsPosition == 'bottom') {
     <div class="flex w-full justify-center">
-        <button mat-icon-button matTooltip="Scroll up" (click)="uiService.scrollUpBy70vh()">
+        <button mat-icon-button matTooltip="Scroll up" [matTooltipShowDelay]="300" (click)="uiService.scrollUpBy70vh()">
             <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
         </button>
     
-        <button mat-icon-button matTooltip="Scroll down" (click)="uiService.scrollDownBy70vh()">
+        <button mat-icon-button matTooltip="Scroll down" [matTooltipShowDelay]="300" (click)="uiService.scrollDownBy70vh()">
             <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
         </button>
         <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
