@@ -14,41 +14,54 @@
 
   <!-- SURPLUS & BALANCE LINE CHART -->
   <app-total-surplus-line-chart class="w-full" [chartData]="surplusChartData"></app-total-surplus-line-chart>
+
   <!-- ALL TIME BALANCE -->
-  <h3 class="font-bold flex flex-row items-center gap-2">
+  <h3 class="font-bold flex flex-row w-full justify-center items-center gap-2">
     <span>Balance: </span>
     <span [ngClass]="getBalanceClass()" class="flex flex-row items-center rounded-full text-neutral-950 text-base px-5 py-[5px]">
-        {{ parseLocaleStringToNumber(calculateTotalSurplusAllTimeFiltered()) | currency: currencyService.getSelectedCurrency() }}
+        {{ calculateTotalSurplusAllTimeFiltered() }}
     </span>
   </h3>
 
-  <mat-divider class="!my-12" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-  <!-- REPORTING/INSIGHTS SECTION -->
-  <section class="mb-3">
-    <div class="flex flex-col items-center">
-      <!-- INCOME/EXPENSE RATIO CHART -->
-      <div class="flex flex-col w-full justify-center items-center">
-        <h2 class="text-2xl font-bold text-center mt-4">Income / Expense Ratio</h2>
-        <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
-      </div>
+  <div class="flex flex-row w-full justify-end">
+    <button mat-button (click)="showReports = !showReports">
+      <mat-icon>{{ showReports ? 'visibility_off' : 'visibility' }}</mat-icon>
+      {{ showReports ? 'Hide Reports' : 'Show Reports' }}
+    </button>
+  </div>
 
-      <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+  <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
-      <!-- TREEMAP CHART -->
-      <div class="flex flex-col w-full justify-center items-center">
-        <h2 class="text-2xl font-bold text-center mt-4">Net Income Distribution</h2>
-        <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalNetIncome]="totalNetIncome" [actionsPosition]="'top'"></app-treemap-chart>
+  @if (showReports) {
+    <!-- REPORTING/INSIGHTS SECTION -->
+    <section class="mb-3">
+      <div class="flex flex-col items-center">
+        <!-- INCOME/EXPENSE RATIO CHART -->
+        <div class="flex flex-col w-full justify-center items-center mb-14">
+          <h2 class="text-2xl font-bold text-center mt-4">Income - Expense Ratio</h2>
+          <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
+        </div>
+
+
+        <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+  
+        <!-- TREEMAP CHART -->
+        <div class="flex flex-col w-full justify-center items-center">
+          <h2 class="text-2xl font-bold text-center mt-4">Net Income Distribution</h2>
+          <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalNetIncome]="totalNetIncome" [actionsPosition]="'top'"></app-treemap-chart>
+        </div>
+        
       </div>
-      
-      <mat-divider class="!my-12" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-    </div>
-  </section>
+    </section>
+    <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+  }
+
 
   <!-- ACTION BUTTONS -->
   <div class="flex flex-row w-full justify-between px-6 pb-2">
 
     <div class="flex flex-row gap-4 items-center flex-wrap">
-      <div class="flex flex-row items-center">
+      <div class="flex flex-row items-center justify-end">
         <button class="!flex flex-row items-center" mat-icon-button [matMenuTriggerFor]="settingsMenu">
           <mat-icon fontSet="material-symbols-outlined">settings</mat-icon>
         </button>

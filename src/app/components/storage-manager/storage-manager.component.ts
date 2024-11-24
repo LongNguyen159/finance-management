@@ -98,6 +98,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   totalNetIncome: number = 0;
   totalExpenses: number = 0;
 
+  showReports: boolean = false;
+
   // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
 
 
