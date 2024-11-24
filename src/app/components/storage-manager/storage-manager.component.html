@@ -162,7 +162,7 @@
                     <ul class="flex flex-col items-end">
                       @for (input of getMonthDisplayInfos(month); track $index) {
                         <li>
-                          <p>  <!-- Only display items with no source -->
+                          <p>
                             {{ input.name }}: 
                             <span [ngClass]="{
                               'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),

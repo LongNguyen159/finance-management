@@ -100,7 +100,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   showReports: boolean = false;
 
-  // private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
+  private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
+  hasDataChanged: boolean = false;
 
 
   ngOnInit(): void {
@@ -125,6 +126,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Refresh data by get stored months again. */
   refreshData() {
     // this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
+    this.hasDataChanged = true;
     this.storedMonths = Object.keys(this.localStorageData);
     this.storedYears = this.getStoredYears();
   }
@@ -268,9 +270,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    * We get the type to display colour based on the type (red for expenses, green for income).
    */
   getMonthDisplayInfos(month: string): { name: string, type: string, value: number }[] {
-    // if (this.monthInfoCache[month]) {
-    //   return this.monthInfoCache[month];
-    // }
+    if (this.monthInfoCache[month] && !this.hasDataChanged) {
+      return this.monthInfoCache[month];
+    }
 
     const currentMonthData = this.localStorageData[month];
     if (!currentMonthData) {
@@ -291,7 +293,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     }
 
     const result = [...incomeEntries, ...expenseEntries].sort((a, b) => b.value - a.value);
-    // this.monthInfoCache[month] = result; // Cache result
+    this.monthInfoCache[month] = result; // Cache result
+    this.hasDataChanged = false;
     return result;
   }
   //#endregion
