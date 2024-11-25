@@ -6,6 +6,7 @@ import { DataService } from '../../../services/data.service';
 import { ColorService } from '../../../services/color.service';
 import { CurrencyService } from '../../../services/currency.service';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
+import { formatBigNumber } from '../../../utils/utils';
 
 @Component({
   selector: 'app-income-expense-ratio-chart',
@@ -21,6 +22,9 @@ import { BaseChartComponent } from '../../../base-components/base-chart/base-cha
 export class IncomeExpenseRatioChartComponent extends BaseChartComponent implements OnChanges, OnDestroy {
   @Input() totalIncome: number = 0;
   @Input() totalExpense: number = 0;
+
+  @Input() gridLeft: string = '10%';
+  @Input() gridRight: string = '10%';
 
   dataService = inject(DataService)
   colorService = inject(ColorService)
@@ -43,7 +47,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['totalIncome'] || changes['totalExpense']) {
+    if (changes['totalIncome'] || changes['totalExpense'] || changes['gridLeft'] || changes['gridRight']) {
       this.updateChart();
     }
   }
@@ -52,6 +56,10 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
     return {
       tooltip: {
         trigger: 'axis',
+        borderColor: this.colorService.isDarkMode() ? '#484753' : '#E0E6F1',
+        borderWidth: 2,
+        borderRadius: 12,
+        padding: [10, 16],
         position: function (pos, params, dom, rect, size) {
           // tooltip will be fixed on the right if mouse hovering on the left,
           // and on the left if hovering on the right.
@@ -59,7 +67,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
           obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
           return obj;
         },
-        axisPointer: { type: 'shadow' },
+        axisPointer: { type: 'none' },
         backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
@@ -67,8 +75,8 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         formatter: (params: any) => this.getCustomTooltip(params),
       },
       grid: {
-        left: '2%',
-        right: '5%',
+        left: this.gridLeft,
+        right: this.gridRight,
         bottom: '0%',
         top: '-12%',
         containLabel: true,
@@ -77,6 +85,9 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         type: 'value',
         boundaryGap: [0, 0.01],
         splitLine: { show: false },
+        axisLabel: {
+          formatter: (value) => formatBigNumber(value, '', 1000), // Use the utility function
+        },
       },
       yAxis: {
         type: 'category',
@@ -119,6 +130,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         barWidth: this.barWidth,
         itemStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
+          opacity: 0.95,
           borderRadius: [0, 100, 100, 0],
         },
       },
@@ -129,6 +141,7 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
         barWidth: this.barWidth,
         itemStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
+          opacity: 0.95,
           borderRadius: [0, 100, 100, 0],
         },
       },

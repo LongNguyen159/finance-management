@@ -35,6 +35,7 @@ export interface SingleMonthData {
   pieData: PieData[];
   rawInput: UserDefinedLink[];
   month: string
+  treeMapData: TreeNode[];
 }
 
 
@@ -213,5 +214,14 @@ export interface SurplusBalanceLineChartData {
   month: string
   surplus: number
   balance: number
+}
+
+
+export interface TreeNode {
+  name: string;
+  value: number;
+  isValueChangedDuringCalc?: boolean
+  children: TreeNode[];
+  itemStyle?: any;
 }
 //#endregion

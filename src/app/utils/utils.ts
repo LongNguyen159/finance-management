@@ -83,9 +83,13 @@ export function addImplicitPlusSigns(amount: string): string {
 /**
  * Format a number with suffixes for thousands, millions, and billions.
  * @param num The number to format
+ * @param currencySymbol The currency symbol to prepend to the formatted number. If don't want to prepend any currency symbol, pass an empty string.
+ * 
+ * @param minValue The minimum value to format. If the number is less than this value, it will be formatted as a regular number.
+ * for K formatter, it's recommended to use 1000 as the minValue.
  * @returns The formatted string
  */
-export function formatBigNumber(num: number, currencySymbol: string): string {
+export function formatBigNumber(num: number, currencySymbol: string = '', minValue: number = 10_000): string {
   const sign = num < 0 ? '-' : '';
   const absNum = Math.abs(num);
 
@@ -94,7 +98,7 @@ export function formatBigNumber(num: number, currencySymbol: string): string {
     formattedNumber = (absNum / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
   } else if (absNum >= 1_000_000) {
     formattedNumber = (absNum / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  } else if (absNum >= 10_000) {
+  } else if (absNum >= minValue) {
     formattedNumber = (absNum / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
   } else {
     formattedNumber = absNum.toLocaleString('en-US');

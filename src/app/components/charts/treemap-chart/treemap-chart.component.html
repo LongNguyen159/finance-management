@@ -1,0 +1,42 @@
+
+<div class="flex flex-col w-full items-center justify-center py-4 gap-2">
+    <mat-button-toggle-group aria-label="Tree Map & Sunburst toggle" hideSingleSelectionIndicator (change)="toggleChartType()" [value]="currentChartType">
+        <mat-button-toggle value="treemap">Tree Map</mat-button-toggle>
+        <mat-button-toggle value="sunburst">Sunburst</mat-button-toggle>
+    </mat-button-toggle-group>
+    @if (actionsPosition == 'top') {
+        <div class="flex w-full justify-center">
+            <button mat-icon-button matTooltip="Scroll up" [matTooltipShowDelay]="300" (click)="uiService.scrollUpBy70vh()">
+                <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+            </button>
+        
+            <button mat-icon-button matTooltip="Scroll down" [matTooltipShowDelay]="300" (click)="uiService.scrollDownBy70vh()">
+                <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+            </button>
+            <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
+        </div>
+    }
+</div>
+
+<div
+    echarts
+    [options]="chartOptions"
+    [merge]="mergeOptions"
+    style="height: 70vh; width: 100%;"
+    (chartInit)="onChartInit($event)"
+>
+</div>
+
+<!-- ACTIONS -->
+@if (actionsPosition == 'bottom') {
+    <div class="flex w-full justify-center">
+        <button mat-icon-button matTooltip="Scroll up" [matTooltipShowDelay]="300" (click)="uiService.scrollUpBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_upward</mat-icon>
+        </button>
+    
+        <button mat-icon-button matTooltip="Scroll down" [matTooltipShowDelay]="300" (click)="uiService.scrollDownBy70vh()">
+            <mat-icon fontSet="material-symbols-outlined">arrow_downward</mat-icon>
+        </button>
+        <button mat-button (click)="resetZoom(_chartInstance)">Reset Zoom</button>
+    </div>
+}

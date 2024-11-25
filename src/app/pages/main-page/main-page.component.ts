@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SingleMonthData } from '../../components/models';
+import { MonthlyData, SingleMonthData, TreeNode } from '../../components/models';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";
@@ -24,6 +24,7 @@ import { FormsModule } from '@angular/forms';
 import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
 import { RoutePath } from '../../components/models';
+import { TreemapChartComponent } from "../../components/charts/treemap-chart/treemap-chart.component";
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -31,7 +32,7 @@ import { RoutePath } from '../../components/models';
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, MatDividerModule,
     NavbarComponent, MonthPickerComponent,
     MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
-    MatSlideToggleModule, FormsModule],
+    MatSlideToggleModule, FormsModule, TreemapChartComponent],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
   changeDetection: ChangeDetectionStrategy.Default
@@ -68,13 +69,14 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   categories: ExpenseCategoryDetails[] = Object.values(expenseCategoryDetails)
 
   budgets: Budget[] = []
-  
-  
   spending: Budget[] = []
+  treeMapData: TreeNode[] = []
 
   indicators: ExpenseCategoryDetails[] = []
   showGaugeChart: boolean = true
   isSankeyVertical: boolean = false
+
+  viewTreeMap: boolean = false
   
   constructor() {
     super();
@@ -111,6 +113,7 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
         this.totalExpenses = data.totalExpenses
         this.totalGrossIncome = data.totalGrossIncome
         this.totalNetIncome = data.totalUsableIncome
+        this.treeMapData = data.treeMapData
 
         this.getBudgetData()
   
@@ -145,12 +148,15 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
       .map(a => {
         return expenseCategoryDetails[a.category];
       });
+
+    /** Gauge MUST be shown when indicators is < 2. Because we can't show Radar chart if there is less than 3 items.
+     */
     if (this.indicators.length <= 2) {
       this.showGaugeChart = true
+    } else if (this.indicators.length > 2) {
+      this.showGaugeChart = false
     }
   }
-
-
 
   getBudgetValue(category: string): number {
     const budget = this.budgets.find(b => b.category === category);

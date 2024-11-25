@@ -1,12 +1,11 @@
 <div class="flex flex-col w-full justify-center items-center space-y-2">
     <h2 class="text-2xl font-bold">
-        <!-- Expense Distribution -->
          {{ chartTitle}}
     </h2>
     @if (totalExpenses !== -1) {
         <p class="text-base font-medium">
-            Total expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }} of {{ totalIncome | currency: currencyService.getSelectedCurrency() }} 
-            (<span class="font-semibold">{{ ((totalExpenses / totalIncome) * 100).toFixed(2) }}%</span>)
+            Total expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }} of {{ totalIncome | currency: currencyService.getSelectedCurrency() }}
+            (<span class="font-semibold">{{ ((totalExpenses / totalIncome) * 100).toFixed(2) }}% your net income</span>)
         </p>
     } @else {
         <p class="text-base font-medium">
@@ -15,14 +14,15 @@
     }
     
     <p class="text-sm italic" [ngClass]="colorService.isDarkMode() ? 'text-neutral-400' : 'text-neutral-500'">
-        <!-- (The whole pie represents your total net income) -->
          {{ chartDescription }}
     </p>
 </div>
-<div
-    echarts
-    [options]="pieOption"
-    [merge]="pieMergeOption"
-    [style]="'height: ' + chartHeight"
->
-</div>
+@if (showPieChart) {
+    <div
+        echarts
+        [options]="pieOption"
+        [merge]="pieMergeOption"
+        [style]="'height: ' + chartHeight"
+    >
+    </div>
+}

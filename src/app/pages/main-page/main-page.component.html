@@ -103,23 +103,40 @@
 
                 <!-- NETTO CHART -->
                 <section>
-                    <div class="flex flex-row w-full items-center justify-end">
+                    <div class="flex flex-row w-full items-center justify-end gap-2">
+                        <button mat-button class="flex flex-row items-center" (click)="viewTreeMap = !viewTreeMap">
+                            <mat-icon>{{ viewTreeMap ? 'pie_chart' : 'map' }}</mat-icon>
+                            <span>{{ viewTreeMap ? 'View Pie Chart' : 'View Tree Map' }}</span>
+                        </button>
+
                         <button mat-button (click)="dialogService.openDidYouKnowDialog()" class="flex items-center">
                             <mat-icon class="mr-1">lightbulb_outline</mat-icon>
                             <span>Did You Know?</span>
                         </button>
+
                     </div>
-                    <app-pie-chart [pieChartData]="pieChartDataNetto" [chartTitle]="'Expense Distribution'" [chartDescription]="'(The whole pie represents your total net income)'"
+
+
+                    <app-pie-chart [showPieChart]="!viewTreeMap" [pieChartData]="pieChartDataNetto" [chartTitle]="'Net Income Distribution'"
                         [totalIncome]="totalNetIncome" [totalExpenses]="totalExpenses"
                     ></app-pie-chart>
+                    @if (viewTreeMap) {
+                        <section>
+                            <div class="flex flex-row w-full justify-center">
+                                <app-treemap-chart class="w-[80%]" [treeData]="treeMapData" [totalExpenses]="totalExpenses" [totalNetIncome]="totalNetIncome"></app-treemap-chart>
+                            </div>
+                        </section>
+                    }
                 </section>
+
+
 
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
 
                 @if (showGrossIncomePieChart) {
                     <section>
                         <!-- BRUTTO CHART -->
-                        <app-pie-chart [pieChartData]="pieChartDataBrutto" [chartTitle]="'Total Income Distribution'" [chartDescription]="'(The whole pie represents your total gross income)'"
+                        <app-pie-chart [pieChartData]="pieChartDataBrutto" [chartTitle]="'Total Gross Income Distribution'"
                             [totalIncome]="totalGrossIncome"
                         ></app-pie-chart>
                     </section>

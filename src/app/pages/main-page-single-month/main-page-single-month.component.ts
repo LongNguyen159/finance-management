@@ -3,14 +3,20 @@ import { SankeyChartComponent } from "../../components/charts/sankey-chart/sanke
 import { PieChartComponent } from "../../components/charts/pie-chart/pie-chart.component";
 import { ColorService } from '../../services/color.service';
 import { MatDividerModule } from '@angular/material/divider';
-import { PieData, SingleMonthData } from '../../components/models';
+import { PieData, SingleMonthData, TreeNode } from '../../components/models';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { TreemapChartComponent } from '../../components/charts/treemap-chart/treemap-chart.component';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-main-page-single-month',
   standalone: true,
   imports: [SankeyChartComponent, PieChartComponent,
-    MatDividerModule, CommonModule
+    MatDividerModule, CommonModule,
+    MatIconModule,
+    TreemapChartComponent,
+    MatButtonModule
   ],
   templateUrl: './main-page-single-month.component.html',
   styleUrl: './main-page-single-month.component.scss'
@@ -28,7 +34,9 @@ export class MainPageSingleMonthComponent implements OnChanges {
 
   pieChartDataBrutto: PieData[] = []
   pieChartDataNetto: PieData[] = []
+  viewTreeMap: boolean = false
 
+  treeMapData: TreeNode[] = []
 
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -43,6 +51,7 @@ export class MainPageSingleMonthComponent implements OnChanges {
     this.totalExpenses = this.chartData.totalExpenses
     this.totalGrossIncome = this.chartData.totalGrossIncome
     this.totalNetIncome = this.chartData.totalUsableIncome
+    this.treeMapData = this.chartData.treeMapData
   
   
     if (this.chartData.totalTax == 0) {

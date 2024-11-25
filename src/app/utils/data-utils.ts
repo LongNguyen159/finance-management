@@ -14,23 +14,18 @@ export function onMonthChanges(selectedMonth: Date, allMonthsData: MonthlyData, 
       return
     }
 
-    const monthString = formatDateToYYYYMM(selectedMonth);
-
-    console.log('processing data for month: ', monthString)
-    
+    const monthString = formatDateToYYYYMM(selectedMonth);    
     // Check if the month exists in the MonthlyData
     if (allMonthsData[monthString]) {
       // Month exists, retrieve the processed data
       const existingData = allMonthsData[monthString];
       singleMonthEntries = existingData; // Update processed output data
-      console.log(`month ${monthString} exists, calling service to process input`)
       dataService.processInputData(existingData.rawInput, monthString);
       
     } else {
       // Month does not exist, create a new empty entry
       singleMonthEntries = initializeEmptyData(monthString); // Initialize empty data
       allMonthsData[monthString] = singleMonthEntries; // Add to the monthlyData
-      console.log(`No data for ${monthString}. Initialized new entry.`);
       dataService.processInputData([], monthString);
     }
 }
@@ -46,6 +41,7 @@ function initializeEmptyData(monthString: string): SingleMonthData {
       remainingBalance: '0',
       pieData: [],
       rawInput: [],
-      month: monthString
+      month: monthString,
+      treeMapData: []
     };
 }

@@ -45,4 +45,15 @@ export class UiService {
   scrollToBottom() {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
+
+
+  scrollUpBy70vh() {
+    const scrollAmount = Math.min(window.innerHeight * 0.80, 800);
+    window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+  }
+
+  scrollDownBy70vh() {
+    const scrollAmount = Math.min(window.innerHeight * 0.80, 800);
+    window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+  }
 }
