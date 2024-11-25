@@ -47,6 +47,7 @@
     "@cspell/dict-en-gb": "^4.1.51",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^22.7.5",
+    "angular-cli-ghpages": "^2.0.3",
     "autoprefixer": "^10.4.20",
     "cspell": "^8.16.0",
     "electron": "^32.1.2",

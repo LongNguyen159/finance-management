@@ -21,7 +21,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false, // disable devTools for production
+      devTools: true, // disable devTools for production
     },
     frame: true,         // Show the window frame (this allows you to drag and resize the window)
     resizable: true,     // Allow resizing the window (optional)
