@@ -113,6 +113,7 @@ export class SankeyChartComponent implements OnChanges {
           emphasis: { focus: 'adjacency' },
           orient: this.orientation,
           label: {
+            show: false,
             position: this.orientation === 'horizontal' ? 'right' : 'top',
             fontSize: 12,
             color: isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
