@@ -1,7 +1,10 @@
-<div class="flex flex-row w-full justify-center">
+<div class="flex flex-row w-full justify-center items-center gap-2">
     <h2 class="font-bold">
         Income Flow and Expense Allocation
     </h2>
+    <button mat-icon-button class="!flex" matTooltip="You can edit values directly by clicking the Sankey">
+        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+    </button>
 </div>
 <div class="flex flex-row w-full p-4 justify-center">
     @if (dataService.isDemo()) {

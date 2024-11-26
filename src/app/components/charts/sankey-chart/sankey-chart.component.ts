@@ -12,12 +12,17 @@ import { DialogsService } from '../../../services/dialogs.service';
 import { CurrencyService } from '../../../services/currency.service';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 import { UiService } from '../../../services/ui.service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 @Component({
   selector: 'app-sankey-chart',
   standalone: true,
-  imports: [NgxEchartsDirective, CommonModule, MatChipsModule, MatButtonModule],
+  imports: [NgxEchartsDirective, CommonModule, MatChipsModule, MatButtonModule,
+    MatIconModule,
+    MatTooltipModule
+  ],
   providers: [
     provideEcharts(),
     CurrencyPipe
