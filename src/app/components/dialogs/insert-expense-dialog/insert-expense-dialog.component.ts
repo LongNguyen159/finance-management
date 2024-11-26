@@ -44,6 +44,8 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   entryToUpdateIndex: number = -1;
   entryToUpdate: UserDefinedLink
+  
+  calculatedAmount: number | null = null;
 
   newValueUpdated: string | number = 0;
 
@@ -100,17 +102,15 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   updateInput() {
     const amount = this.form.value.amount;
-    const totalAmount = processStringAmountToNumber(amount);
+    this.calculatedAmount = processStringAmountToNumber(amount);
     this.newValueUpdated = addImplicitPlusSigns(amount.toString() || '0')
-
-
   
-    if (totalAmount === null) {
+    if (this.calculatedAmount === null) {
       this.uiService.showSnackBar('Invalid input!', 'OK');
       return;
     }
   
-    this.form.get('amount')?.setValue(totalAmount);
+    this.form.get('amount')?.setValue(this.calculatedAmount);
   }
 
   /** Submit form, refactored version, not modifying original `rawInput` array. */
@@ -119,10 +119,7 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       return;
     }
   
-    const amount = this.form.value.amount;
-    const totalAmount = processStringAmountToNumber(amount);
-  
-    if (totalAmount === null) {
+    if (this.calculatedAmount === null) {
       this.uiService.showSnackBar('Invalid input!', 'OK');
       return;
     }
@@ -131,9 +128,14 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       this.uiService.showSnackBar('No matching entry found!');
       return;
     }
+
+    if (this.calculatedAmount === this.entryToUpdate.value) {
+      this.uiService.showSnackBar('No changes');
+      return;
+    }
     
     // Update the value immutably (patch the value of the entry, everything else remains the same)
-    this.entryToUpdate.value = totalAmount;
+    this.entryToUpdate.value = this.calculatedAmount;
 
     /** Update log */
     this.logService.setLog(this.userSingleMonthEntries.month, this.entryToUpdate.id, this.newValueUpdated)
