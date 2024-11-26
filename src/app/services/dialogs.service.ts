@@ -32,8 +32,8 @@ export class DialogsService {
     this.dialog.open(InsertExpenseDialogComponent, {
         width: '45rem',
         maxWidth: '60vw',
-        height: '30rem',
-        maxHeight: '90vh',
+        height: '25rem',
+        // maxHeight: '90vh',
         data: entryToModify
     })
   }

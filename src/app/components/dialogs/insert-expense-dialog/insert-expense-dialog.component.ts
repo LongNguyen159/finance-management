@@ -3,23 +3,29 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
 import { DataService } from '../../../services/data.service';
-import { SingleMonthData } from '../../models';
+import { SingleMonthData, UserDefinedLink } from '../../models';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-import { debounceTime, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
 import { ColorService } from '../../../services/color.service';
 import { addImplicitPlusSigns, processStringAmountToNumber } from '../../../utils/utils';
 import { LogsService } from '../../../services/logs.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-insert-expense-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatInputModule, ReactiveFormsModule, MatSelectModule,
-    CommonModule, NgxMatSelectSearchModule
+    CommonModule, NgxMatSelectSearchModule,
+    MatTooltipModule,
+    MatIconModule,
+    MatDividerModule
   ],
   templateUrl: './insert-expense-dialog.component.html',
   styleUrl: './insert-expense-dialog.component.scss'
@@ -36,7 +42,12 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   userSingleMonthEntries: SingleMonthData
 
+  entryToUpdateIndex: number = -1;
+  entryToUpdate: UserDefinedLink
+
   newValueUpdated: string | number = 0;
+
+  isHistoryVisible: boolean = false;
 
 
   constructor(
@@ -51,9 +62,15 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   ngOnInit(): void {
     this.form.get('amount')?.setValue(this.data.value);
 
-    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
-      this.userSingleMonthEntries = data;
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((oneMonthEntries: SingleMonthData) => {
+      this.userSingleMonthEntries = oneMonthEntries;
       
+      this.entryToUpdateIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.data.name);
+      if (this.entryToUpdateIndex !== -1) {
+        // Create a shallow copy of the matching entry
+        this.entryToUpdate = { ...this.userSingleMonthEntries.rawInput[this.entryToUpdateIndex] };
+      }
+
     })
   }
 
@@ -109,33 +126,32 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       this.uiService.showSnackBar('Invalid input!', 'OK');
       return;
     }
-    
-    // Find the index of the matching entry based on "target"
-    const entryIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.data.name);
-  
-    if (entryIndex !== -1) {
-      // Create a shallow copy of the matching entry
-      const updatedEntry = { ...this.userSingleMonthEntries.rawInput[entryIndex] };
-  
-      // Update the value immutably (patch the value of the entry, everything else remains the same)
-      updatedEntry.value = totalAmount;
 
-      /** Update log */
-      this.logService.setLog(this.userSingleMonthEntries.month, updatedEntry.id, this.newValueUpdated)
-
-  
-      // Create a new array with the updated entry
-      const updatedRawInput = [
-        ...this.userSingleMonthEntries.rawInput.slice(0, entryIndex),
-        updatedEntry,
-        ...this.userSingleMonthEntries.rawInput.slice(entryIndex + 1)
-      ];
-  
-      // Send the updated array to the service
-      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
-    } else {
-      this.uiService.showSnackBar('No matching entry found!', 'Error');
+    if (!this.entryToUpdate) {
+      this.uiService.showSnackBar('No matching entry found!');
+      return;
     }
+    
+    // Update the value immutably (patch the value of the entry, everything else remains the same)
+    this.entryToUpdate.value = totalAmount;
+
+    /** Update log */
+    this.logService.setLog(this.userSingleMonthEntries.month, this.entryToUpdate.id, this.newValueUpdated)
+
+
+    // Create a new array with the updated entry
+    const updatedRawInput = [
+      ...this.userSingleMonthEntries.rawInput.slice(0, this.entryToUpdateIndex),
+      this.entryToUpdate,
+      ...this.userSingleMonthEntries.rawInput.slice(this.entryToUpdateIndex + 1)
+    ];
+
+    // Send the updated array to the service
+    this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
+  }
+
+  toggleHistory() {
+    this.isHistoryVisible = !this.isHistoryVisible;
   }
 
 }
