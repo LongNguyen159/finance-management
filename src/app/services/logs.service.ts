@@ -33,7 +33,7 @@ export class LogsService {
     const _timestamp = new Date()
 
     /** Timestamp for the Logs */
-    const timestamp = this.datePipe.transform(_timestamp, 'HH:mm') || '';
+    const timestamp = this.datePipe.transform(_timestamp, 'MMM dd, HH:mm') || '';
 
     // Ensure logs for the month exist
     if (!this.logs[month]) {
