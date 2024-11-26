@@ -4,24 +4,17 @@
   <mat-dialog-content class="mat-typography">
     <form [formGroup]="form">
         <div class="flex flex-row w-full items-center justify-center gap-4">
-          <!-- Dropdown with search -->
-          <mat-form-field class="w-full">
-            <mat-select formControlName="insertInto" placeholder="Select an option">
-              <mat-option>
-                <ngx-mat-select-search [formControl]="searchControl" placeholderLabel="Search..." noEntriesFoundLabel="No results found"></ngx-mat-select-search>
-              </mat-option>
-  
-              <mat-option *ngFor="let option of filteredOptions" [value]="option">{{ option }}</mat-option>
-            </mat-select>
-          </mat-form-field>
+
           <!-- Regular value input -->
           <mat-form-field class="w-full">
             <mat-label>Amount</mat-label>
-            <input matInput formControlName="amount" placeholder="Enter value">
+            <input matInput formControlName="amount" placeholder="Enter value" (keypress)="validateKeyPress($event)" (blur)="updateInput()" (keydown.enter)="updateInput()" (paste)="validatePaste($event)">
           </mat-form-field>
         </div>
     </form>
 
+
+    <!-- Description -->
     <div class="mb-4">
       <p>
         Modify the amount of your existing entries. If your expenses, e.g., Shopping, Groceries, change frequently, you can insert them here.

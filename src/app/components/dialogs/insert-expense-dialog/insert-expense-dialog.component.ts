@@ -1,6 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, Inject, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
 import { DataService } from '../../../services/data.service';
 import { SingleMonthData } from '../../models';
@@ -12,7 +12,8 @@ import { debounceTime, takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
 import { ColorService } from '../../../services/color.service';
-import { processStringAmountToNumber } from '../../../utils/utils';
+import { addImplicitPlusSigns, processStringAmountToNumber } from '../../../utils/utils';
+import { LogsService } from '../../../services/logs.service';
 
 @Component({
   selector: 'app-insert-expense-dialog',
@@ -28,51 +29,71 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   fb = inject(FormBuilder);
   uiService = inject(UiService)
   colorService = inject(ColorService)
+  logService = inject(LogsService)
 
   form: FormGroup;
   searchControl = new FormControl()
 
-
-  allOptions: string[] = []
-  filteredOptions: string[] = []
   userSingleMonthEntries: SingleMonthData
 
+  newValueUpdated: string | number = 0;
 
-  constructor() {
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: {name: string, value: number}
+  ) {
     super();
     this.form = this.fb.group({
-      insertInto: ['', Validators.required],
       amount: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
+    this.form.get('amount')?.setValue(this.data.value);
+
     this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
       this.userSingleMonthEntries = data;
-      this.allOptions = data.rawInput.map(item => item.target)
-      /** Assign a shallow copy of the `allOptions` array to avoid mutations */
-      this.filteredOptions = this.allOptions.slice();
+      
     })
+  }
 
+  validateKeyPress(event: KeyboardEvent): void {
+    const allowedChars = /[0-9+\-.\s]/; // Allows digits, plus, minus, decimal points, and whitespace
+    const key = event.key;
+  
+    if (!allowedChars.test(key)) {
+      event.preventDefault(); // Block invalid characters
+    }
+  }
 
-    this.searchControl.valueChanges
-      .pipe(takeUntil(this.componentDestroyed$), debounceTime(250))
-      .subscribe((searchTerm: string) => {
-        this.filterOptions(searchTerm);
-      });
+  validatePaste(event: ClipboardEvent): void {
+    const clipboardData = event.clipboardData;
+    const pastedText = clipboardData?.getData('text') || '';
+  
+    // Remove all characters except digits, +, -, ., and whitespace
+    const sanitizedText = pastedText.replace(/[^0-9+\-.\s]/g, '');
+  
+    if (sanitizedText !== pastedText) {
+      event.preventDefault();
+      const inputField = event.target as HTMLInputElement;
+      inputField.value = sanitizedText;
+    }
   }
 
 
-  private filterOptions(searchTerm: string): void {
-    const normalisedSearchTerm = searchTerm.toLowerCase();
-    if (!normalisedSearchTerm) {
-      /** Assign a shallow copy of the `allOptions` array to avoid mutations */
-      this.filteredOptions = this.allOptions.slice();
-    } else {
-      this.filteredOptions = this.allOptions.filter(option =>
-        option.toLowerCase().includes(normalisedSearchTerm)
-      );
+  updateInput() {
+    const amount = this.form.value.amount;
+    const totalAmount = processStringAmountToNumber(amount);
+    this.newValueUpdated = addImplicitPlusSigns(amount.toString() || '0')
+
+
+  
+    if (totalAmount === null) {
+      this.uiService.showSnackBar('Invalid input!', 'OK');
+      return;
     }
+  
+    this.form.get('amount')?.setValue(totalAmount);
   }
 
   /** Submit form, refactored version, not modifying original `rawInput` array. */
@@ -90,14 +111,18 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
     }
     
     // Find the index of the matching entry based on "target"
-    const entryIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.form.value.insertInto);
+    const entryIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.data.name);
   
     if (entryIndex !== -1) {
       // Create a shallow copy of the matching entry
       const updatedEntry = { ...this.userSingleMonthEntries.rawInput[entryIndex] };
   
-      // Update the value immutably
-      updatedEntry.value += totalAmount;
+      // Update the value immutably (patch the value of the entry, everything else remains the same)
+      updatedEntry.value = totalAmount;
+
+      /** Update log */
+      this.logService.setLog(this.userSingleMonthEntries.month, updatedEntry.id, this.newValueUpdated)
+
   
       // Create a new array with the updated entry
       const updatedRawInput = [

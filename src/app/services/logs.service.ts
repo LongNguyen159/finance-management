@@ -22,14 +22,21 @@ import { MonthlyData } from '../components/models';
  * 
  */
 export class LogsService {
-  private logs: { [month: string]: { [inputId: string]: { timestamp: string; value: string }[] } } = {};
+  private logs: { [month: string]: { [inputId: string]: { timestamp: string; value: string | number }[] } } = {};
   private readonly STORAGE_KEY = 'logs';
 
   constructor(private datePipe: DatePipe) {
     this.loadLogsFromLocalStorage();
   }
 
-  setLog(month: string, inputId: string, newValue: string): void {
+
+  /** Write into logs (history) of given input and month.
+   * 
+   * @param month The month to log the change for.
+   * @param inputId The ID of the input field to log the change for.
+   * @param newValue The value to write into the log.
+   */
+  setLog(month: string, inputId: string, newValue: string | number): void {
     const _timestamp = new Date()
 
     /** Timestamp for the Logs */
@@ -56,8 +63,12 @@ export class LogsService {
     this.saveLogsToLocalStorage();
   }
 
-  /** Get logs for a specific input ID in a specific month */
-  getLogs(month: string, inputId: string): { timestamp: string; value: string }[] {
+  /** Get logs for a specific input ID in a specific month 
+   * 
+   * @param month The month to get logs for.
+   * @param inputId The ID of the input field to get logs for.
+  */
+  getLogs(month: string, inputId: string): { timestamp: string; value: string | number }[] {
     return this.logs[month]?.[inputId] || [];
   }
 
