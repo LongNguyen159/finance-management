@@ -1,18 +1,17 @@
 name: Build Electron App
-# TODO: REMEMBER TO CHANGE VERSION NUMBER IN PATH IF YOU BUMP UP THE VERSION.
 on:
   push:
     branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     strategy:
       matrix:
         node-version: [20.x]  # Ensure compatibility with Electron
-        architecture: [x64]    # Only target Windows x64
-    runs-on: windows-latest  # Always use Windows runner for x64 builds
+        architecture: [windows-x64, mac-intel]  # Target Windows x64 and Mac Intel
+    runs-on: ${{ matrix.architecture == 'windows-x64' && 'windows-latest' || 'macos-latest' }}
 
     steps:
       - name: Checkout Code
@@ -37,7 +36,7 @@ jobs:
       - name: Print Version
         run: echo "Version is ${{ env.VERSION }}"
         shell: bash
-      
+
       - name: Replace Version Placeholder
         run: |
           if [[ "$RUNNER_OS" == "macOS" ]]; then
@@ -55,8 +54,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           VERSION: ${{ env.VERSION }}
         run: |
-          if [ "${{ matrix.architecture }}" == "x64" ]; then
+          if [ "${{ matrix.architecture }}" == "windows-x64" ]; then
             npm run deploy-win -- --x64 --publish never --config.extraMetadata.version=$VERSION
+          elif [ "${{ matrix.architecture }}" == "mac-intel" ]; then
+            npm run deploy-mac -- --x64 --publish never --config.extraMetadata.version=$VERSION
           fi
         shell: bash
 
@@ -67,5 +68,8 @@ jobs:
           path: |
             releases/v${{ env.VERSION }}/win32/x64/*.exe  
             releases/v${{ env.VERSION }}/win32/x64/*.blockmap  
-            releases/v${{ env.VERSION }}/win32/x64/latest.yml
+            releases/v${{ env.VERSION }}/win32/x64/latest.yml  
+            releases/v${{ env.VERSION }}/darwin/x64/*.dmg
+            releases/v${{ env.VERSION }}/darwin/x64/*.blockmap
+            releases/v${{ env.VERSION }}/darwin/x64/latest-mac.yml
           overwrite: true
