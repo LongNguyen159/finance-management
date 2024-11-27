@@ -281,14 +281,22 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   /** Trigger filtering when a new option is selected from the dropdown */
   onOptionSelected() {
+    if (this.selectedOption == 'custom-range') {
+      this.onDateChanges()
+      return
+    }
     this.startMonth = '';
     this.endMonth = '';
+    this.availableOptions = this.availableOptions.filter(option => option.value !== 'custom-range');
     this.filterMonths(); // Filter the months based on selected option
   }
   
   /** Custom-Range: When user uses the calendar to choose range. */
   onDateChanges() {
     this.selectedOption = 'custom-range';
+    if (!this.availableOptions.find(option => option.value === 'custom-range')) {
+      this.availableOptions.push({ value: 'custom-range', label: 'Custom' });
+    }
     this.filterMonths();
   }
 
