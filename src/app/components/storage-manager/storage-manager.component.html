@@ -1,5 +1,16 @@
 <div class="p-4">
-  <div class="flex flex-row w-full justify-end">
+  <div class="flex flex-row w-full justify-between items-baseline">
+    <div class="flex flex-row gap-4 items-center">
+      <div class="flex flex-row gap-2 items-center font-bold">
+        <span>From: </span>
+        <app-simple-month-picker type="start" [dateValue]="startMonthDate" [comparator]="endMonthDate" (selectedMonth)="startMonth = $event; onDateChanges()"></app-simple-month-picker>
+      </div>
+      <div class="flex flex-row gap-2 items-center font-bold">
+        <span>To: </span>
+        <app-simple-month-picker type="end" [dateValue]="endMonthDate" [comparator]="startMonthDate" (selectedMonth)="endMonth = $event; onDateChanges()"></app-simple-month-picker>
+      </div>
+    </div>
+
     <!-- TIMEFRAME FILTER OPTIONS -->
     <div>
       <mat-form-field appearance="outline">

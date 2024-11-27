@@ -1,0 +1,22 @@
+<div class="flex flex-row justify-center items-center">
+    <button mat-button (click)="toggleCalendar()" [matMenuTriggerFor]="calendarMenu">
+      <span class="px-4">
+        {{ selectedDate() | date: 'MMM yyyy' }}
+      </span>
+    </button>
+</div>
+<div class="flex flex-row w-full justify-center">
+  <mat-menu #calendarMenu="matMenu" class="!w-fit !max-w-none p-4" (closed)="calendarVisible.set(false)">
+    @if (calendarVisible()) {
+        <mat-calendar class="w-80" startView="year"
+            [selected]="selectedDate()"
+            (monthSelected)="onMonthSelected($event);"
+            [startAt]="selectedDate()"
+            [headerComponent]="customHeaderComponent"
+            [dateFilter]="rangeValidator"
+            (click)="$event.stopPropagation();"
+            >
+        </mat-calendar>
+    }
+  </mat-menu>
+</div>
