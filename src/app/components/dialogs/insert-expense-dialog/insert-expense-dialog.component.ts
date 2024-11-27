@@ -1,24 +1,31 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, Inject, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { BasePageComponent } from '../../../base-components/base-page/base-page.component';
 import { DataService } from '../../../services/data.service';
-import { SingleMonthData } from '../../models';
+import { SingleMonthData, UserDefinedLink } from '../../models';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { CommonModule } from '@angular/common';
-import { debounceTime, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { UiService } from '../../../services/ui.service';
 import { ColorService } from '../../../services/color.service';
-import { processStringAmountToNumber } from '../../../utils/utils';
+import { addImplicitPlusSigns, processStringAmountToNumber } from '../../../utils/utils';
+import { LogsService } from '../../../services/logs.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-insert-expense-dialog',
   standalone: true,
   imports: [MatButtonModule, MatDialogModule, MatInputModule, ReactiveFormsModule, MatSelectModule,
-    CommonModule, NgxMatSelectSearchModule
+    CommonModule, NgxMatSelectSearchModule,
+    MatTooltipModule,
+    MatIconModule,
+    MatDividerModule
   ],
   templateUrl: './insert-expense-dialog.component.html',
   styleUrl: './insert-expense-dialog.component.scss'
@@ -28,51 +35,84 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
   fb = inject(FormBuilder);
   uiService = inject(UiService)
   colorService = inject(ColorService)
+  logService = inject(LogsService)
 
   form: FormGroup;
   searchControl = new FormControl()
 
-
-  allOptions: string[] = []
-  filteredOptions: string[] = []
   userSingleMonthEntries: SingleMonthData
 
+  entryToUpdateIndex: number = -1;
+  entryToUpdate: UserDefinedLink
+  
+  calculatedAmount: number | null = null;
 
-  constructor() {
+  newValueUpdated: string | number = 0;
+
+  isHistoryVisible: boolean = false;
+
+  infoTooltip = `You can separate numbers by spaces. For example, "50 60" means "50+60".`
+
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: {name: string, value: number}
+  ) {
     super();
     this.form = this.fb.group({
-      insertInto: ['', Validators.required],
       amount: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((data: SingleMonthData) => {
-      this.userSingleMonthEntries = data;
-      this.allOptions = data.rawInput.map(item => item.target)
-      /** Assign a shallow copy of the `allOptions` array to avoid mutations */
-      this.filteredOptions = this.allOptions.slice();
+    this.form.get('amount')?.setValue(this.data.value);
+
+    this.dataService.getSingleMonthData().pipe(takeUntil(this.componentDestroyed$)).subscribe((oneMonthEntries: SingleMonthData) => {
+      this.userSingleMonthEntries = oneMonthEntries;
+      
+      this.entryToUpdateIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.data.name);
+      if (this.entryToUpdateIndex !== -1) {
+        // Create a shallow copy of the matching entry
+        this.entryToUpdate = { ...this.userSingleMonthEntries.rawInput[this.entryToUpdateIndex] };
+      }
+
     })
+  }
 
+  validateKeyPress(event: KeyboardEvent): void {
+    const allowedChars = /[0-9+\-.\s]/; // Allows digits, plus, minus, decimal points, and whitespace
+    const key = event.key;
+  
+    if (!allowedChars.test(key)) {
+      event.preventDefault(); // Block invalid characters
+    }
+  }
 
-    this.searchControl.valueChanges
-      .pipe(takeUntil(this.componentDestroyed$), debounceTime(250))
-      .subscribe((searchTerm: string) => {
-        this.filterOptions(searchTerm);
-      });
+  validatePaste(event: ClipboardEvent): void {
+    const clipboardData = event.clipboardData;
+    const pastedText = clipboardData?.getData('text') || '';
+  
+    // Remove all characters except digits, +, -, ., and whitespace
+    const sanitizedText = pastedText.replace(/[^0-9+\-.\s]/g, '');
+  
+    if (sanitizedText !== pastedText) {
+      event.preventDefault();
+      const inputField = event.target as HTMLInputElement;
+      inputField.value = sanitizedText;
+    }
   }
 
 
-  private filterOptions(searchTerm: string): void {
-    const normalisedSearchTerm = searchTerm.toLowerCase();
-    if (!normalisedSearchTerm) {
-      /** Assign a shallow copy of the `allOptions` array to avoid mutations */
-      this.filteredOptions = this.allOptions.slice();
-    } else {
-      this.filteredOptions = this.allOptions.filter(option =>
-        option.toLowerCase().includes(normalisedSearchTerm)
-      );
+  updateInput() {
+    const amount = this.form.value.amount;
+    this.calculatedAmount = processStringAmountToNumber(amount);
+    this.newValueUpdated = addImplicitPlusSigns(amount.toString() || '0')
+  
+    if (this.calculatedAmount === null) {
+      this.uiService.showSnackBar('Invalid input!', 'OK');
+      return;
     }
+  
+    this.form.get('amount')?.setValue(this.calculatedAmount);
   }
 
   /** Submit form, refactored version, not modifying original `rawInput` array. */
@@ -81,36 +121,41 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
       return;
     }
   
-    const amount = this.form.value.amount;
-    const totalAmount = processStringAmountToNumber(amount);
-  
-    if (totalAmount === null) {
+    if (this.calculatedAmount === null) {
       this.uiService.showSnackBar('Invalid input!', 'OK');
       return;
     }
-    
-    // Find the index of the matching entry based on "target"
-    const entryIndex = this.userSingleMonthEntries.rawInput.findIndex(item => item.target === this.form.value.insertInto);
-  
-    if (entryIndex !== -1) {
-      // Create a shallow copy of the matching entry
-      const updatedEntry = { ...this.userSingleMonthEntries.rawInput[entryIndex] };
-  
-      // Update the value immutably
-      updatedEntry.value += totalAmount;
-  
-      // Create a new array with the updated entry
-      const updatedRawInput = [
-        ...this.userSingleMonthEntries.rawInput.slice(0, entryIndex),
-        updatedEntry,
-        ...this.userSingleMonthEntries.rawInput.slice(entryIndex + 1)
-      ];
-  
-      // Send the updated array to the service
-      this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
-    } else {
-      this.uiService.showSnackBar('No matching entry found!', 'Error');
+
+    if (!this.entryToUpdate) {
+      this.uiService.showSnackBar('No matching entry found!');
+      return;
     }
+
+    if (this.calculatedAmount === this.entryToUpdate.value) {
+      this.uiService.showSnackBar('No changes');
+      return;
+    }
+    
+    // Update the value immutably (patch the value of the entry, everything else remains the same)
+    this.entryToUpdate.value = this.calculatedAmount;
+
+    /** Update log */
+    this.logService.setLog(this.userSingleMonthEntries.month, this.entryToUpdate.id, this.newValueUpdated)
+
+
+    // Create a new array with the updated entry
+    const updatedRawInput = [
+      ...this.userSingleMonthEntries.rawInput.slice(0, this.entryToUpdateIndex),
+      this.entryToUpdate,
+      ...this.userSingleMonthEntries.rawInput.slice(this.entryToUpdateIndex + 1)
+    ];
+
+    // Send the updated array to the service
+    this.dataService.processInputData(updatedRawInput, this.userSingleMonthEntries.month, { showSnackbarWhenDone: true });
+  }
+
+  toggleHistory() {
+    this.isHistoryVisible = !this.isHistoryVisible;
   }
 
 }

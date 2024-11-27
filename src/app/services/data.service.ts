@@ -184,7 +184,7 @@ export class DataService {
          */
         const { demo = false, showSnackbarWhenDone = false, emitObservable = true } = options;
 
-        /** Sanitise logs on process month data. This is to remove old logs. */
+        /** Sanitise logs on process month data. This is to remove invalid logs (Items ID has been changed, or item has been deleted). */
         this.logService.sanitiseLogs(month, userDefinedLinks.map(item => item.id));
 
 
@@ -481,7 +481,7 @@ export class DataService {
         }
 
         if (showSnackbarWhenDone && !this.isDemo()) {
-            this.UiService.showSnackBar('Data processed successfully!', 'OK', 3000);
+            this.UiService.showSnackBar('Data updated successfully!', 'OK', 3000);
         }
 
         // Write/Save data into Local Storage (if it's changed)

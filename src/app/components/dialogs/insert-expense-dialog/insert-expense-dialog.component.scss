@@ -9,3 +9,9 @@
     padding: 2px 4px; /* Optional: Add some padding for better appearance */
     border-radius: 3px; /* Optional: Add rounded corners */
 }
+
+.custom-position {
+    position: absolute;
+    right: calc(50% - 90px); /* Offset the button */
+    transform: translateX(100%);
+}

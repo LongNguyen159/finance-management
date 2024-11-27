@@ -13,6 +13,34 @@
 
         <div class="feature-card grid-display">
             <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Interactive Sankey Editing</h2>
+                <span>
+                    Edit values <strong>directly by clicking on Sankey nodes</strong>. This new feature makes refining your data faster and easier than ever before.
+                </span>
+            </div>
+
+            <div class="image-section">
+                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/sankey-click-dark.png' : 'assets/images/whats-new/sankey-click-light.png'" alt="whats-new">
+            </div>
+        </div>
+
+        
+
+        <div class="feature-card grid-display">
+            <div class="image-section">
+                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/logs-dark.png' : 'assets/images/whats-new/logs-light.png'" alt="whats-new">
+            </div>
+
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">History: Recall Your Inputs</h2>
+                <span>
+                    Long calculations? No problem! The new <strong>History</strong> feature keeps track of your most recent 5 entries in the 'Amount' field. Review recent changes with ease and focus on your totals, worry-free.
+                </span>
+            </div>
+        </div>
+
+        <div class="feature-card grid-display">
+            <div class="text-section">
                 <h2 class="font-bold mb-4 text-3xl">Finance Manager: Fresher Look, Better Insights</h2>
                 <h3 class="font-bold text-xl mt-3">New "Balance" Tracking</h3>
                 <span>
@@ -33,19 +61,6 @@
                     [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'"
                     [src]="colorService.isDarkMode() ? 'assets/images/manager-dark.png' : 'assets/images/manager-light.png'"
                     alt="Finance Manager">
-            </div>
-        </div>
-
-        <div class="feature-card grid-display">
-            <div class="image-section">
-                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/logs-dark.png' : 'assets/images/whats-new/logs-light.png'" alt="whats-new">
-            </div>
-
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">History: Recall Your Inputs</h2>
-                <span>
-                    Long calculations? No problem! The new <strong>History</strong> feature keeps track of your most recent 5 entries in the 'Amount' field. Review recent changes with ease and focus on your totals, worry-free.
-                </span>
             </div>
         </div>
 

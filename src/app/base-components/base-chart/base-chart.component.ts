@@ -17,6 +17,7 @@ export class BaseChartComponent implements OnDestroy {
 
   protected _chartInstance?: EChartsType
 
+  /** On chart init, assign chart instance. */
   onChartInit(chart: EChartsType) {
     this._chartInstance = chart;
   }
