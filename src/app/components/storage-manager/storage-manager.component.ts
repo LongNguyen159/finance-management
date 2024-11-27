@@ -11,7 +11,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { formatBigNumber, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { formatBigNumber, formatYYYYMMtoDate, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -26,6 +26,7 @@ import { CurrencyService } from '../../services/currency.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.component";
 import { MatDividerModule } from '@angular/material/divider';
+import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-picker.component";
 
 @Component({
   selector: 'app-storage-manager',
@@ -36,9 +37,11 @@ import { MatDividerModule } from '@angular/material/divider';
     MatSlideToggleModule,
     MatTooltipModule,
     MatMenuModule, TreemapChartComponent,
-    MatDividerModule
+    MatDividerModule,
+    SimpleMonthPickerComponent],
+  providers: [
+    CurrencyPipe,
   ],
-  providers: [CurrencyPipe],
   templateUrl: './storage-manager.component.html',
   styleUrl: './storage-manager.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -81,6 +84,13 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     { value: '2-years', label: '2 Years' },
     { value: 'show-all', label: 'All time' }
   ];
+
+  /** New properties for selecting month range */
+  startMonth: string = '';
+  endMonth: string = '';
+
+  startMonthDate: Date = new Date();
+  endMonthDate: Date = new Date();
 
   /** Get today's Date */
   currentDate = new Date();
@@ -163,7 +173,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
 
   //#region Filtering
-  /** This method filters the months based on the selected time frame */
+  /** This method filters the months based on the selected time frame or custom range */
   filterMonths() {
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
@@ -195,7 +205,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       } else if (this.selectedOption === '2-years') {
         includeMonth = year === currentYear || year === currentYear - 1;
       }
-      else {
+      else if (this.selectedOption === 'custom-range') {
+        const startMonthNumber = this._convertToMonthNumber(this.startMonth);
+        const endMonthNumber = this._convertToMonthNumber(this.endMonth);
+        includeMonth = monthNumber >= startMonthNumber && monthNumber <= endMonthNumber;
+      } else {
         const monthsToShow = this._getMonthsToShow();
         const diff = currentMonthNumber - monthNumber;
         includeMonth = diff >= 0 && diff < monthsToShow; // Include only months within the range
@@ -220,6 +234,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     }
   
     this.allFilteredMonths = Object.values(this.filteredMonthsByYear).flat();
+
     this.populateChartData(this.allFilteredMonths);
   }
 
@@ -258,10 +273,25 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
            this.selectedOption === '6-months' ? 6 : 0
   }
 
+  /** Helper function to convert YYYY-MM to a sequential month number */
+  private _convertToMonthNumber(month: string): number {
+    const [year, monthStr] = month.split('-').map(Number);
+    return year * 12 + monthStr;
+  }
+
   /** Trigger filtering when a new option is selected from the dropdown */
   onOptionSelected() {
+    this.startMonth = '';
+    this.endMonth = '';
     this.filterMonths(); // Filter the months based on selected option
   }
+  
+  /** Custom-Range: When user uses the calendar to choose range. */
+  onDateChanges() {
+    this.selectedOption = 'custom-range';
+    this.filterMonths();
+  }
+
 
   /** Get months display infos to display in template.
    * @param month: string: Month in YYYY-MM format.
@@ -331,6 +361,22 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       const dateB = new Date(b.month);
       return dateA.getTime() - dateB.getTime();
     });
+
+
+    /** Get the start and end month of the custom range.
+     * We do it here because it's sorted.
+     */
+    const sortedMonths = sortedData.map(entry => entry.month);
+    /** Edge case: User select date that does not satisfy start <= end: sorted months would return [].
+     */
+    this.startMonth = sortedMonths[0] || '';
+    this.endMonth = sortedMonths[sortedMonths.length - 1] || '';
+
+    this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
+    this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
+    
+
+
   
     // Calculate cumulative balance
     let previousBalance = 0; // Initial balance can be customized
