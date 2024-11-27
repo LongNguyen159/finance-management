@@ -51,8 +51,6 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
   sankeyOption: EChartsOption = this.getBaseChartOptions()
   sankeyMerge: EChartsOption = {}
 
-  isDarkMode = this.colorService.isDarkMode(); // Call the signal
-
   /** Drag threshold.
    * If the mouse movement under this threshold, it will be considered as a click event.
    * 
@@ -144,9 +142,9 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
         trigger: 'item',
         position: 'top',
         triggerOn: 'mousemove',
-        backgroundColor: this.isDarkMode ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
         textStyle: {
-          color: this.isDarkMode ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
         formatter: (params: any) => {
           if (params.dataType === 'node') {
@@ -164,7 +162,7 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
         feature: {
           saveAsImage: {
             name: `Financial Flow Sankey_${this.dataService.getTodaysDate()}`,
-            backgroundColor: this.isDarkMode ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary,
+            backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundPrimary : this.colorService.lightBackgroundPrimary,
           },
         },
       },
