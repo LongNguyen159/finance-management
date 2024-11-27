@@ -104,6 +104,20 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   updateInput() {
     const amount = this.form.value.amount;
+
+    /** 
+     * Early exit if no changes detected (to prevent unnecessary processing).
+     * 
+     * Furthermore, prevents overriding the 'amount' field with the same value, which make the history save meaningless.
+     * For example 200 is made up of 180 + 20, but if this function is called multiple times, 'amount' would be overridden to 200.
+     * 
+     * Thus, makes the history only save 200 instead of actual 180 + 20.
+     * 
+     * */ 
+    if (amount === this.calculatedAmount) {
+      return
+    }
+
     this.calculatedAmount = processStringAmountToNumber(amount);
     this.newValueUpdated = addImplicitPlusSigns(amount.toString() || '0')
   
