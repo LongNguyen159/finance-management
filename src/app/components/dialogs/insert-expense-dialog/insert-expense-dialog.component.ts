@@ -51,6 +51,8 @@ export class InsertExpenseDialogComponent extends BasePageComponent implements O
 
   isHistoryVisible: boolean = false;
 
+  infoTooltip = `You can separate numbers by spaces. For example, "50 60" means "50+60".`
+
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {name: string, value: number}

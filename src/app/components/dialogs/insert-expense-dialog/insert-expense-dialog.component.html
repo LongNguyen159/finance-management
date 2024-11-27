@@ -1,62 +1,70 @@
-<h2 mat-dialog-title class="!font-bold text-xl">
-    {{ data.name }}
+<div class="mb-4 flex flex-row items-center justify-between pr-6 w-full">
+  <h2 mat-dialog-title class="!font-bold text-xl">
+    Edit values for {{ data.name }}
   </h2>
-  <mat-dialog-content class="mat-typography">
-    <div class="flex flex-row w-full h-full items-center justify-center">
-      <form [formGroup]="form" class="w-[80%]">
-          <div class="flex flex-row w-full items-center justify-center gap-4">
-  
-            <!-- Regular value input -->
-            <mat-form-field class="w-full">
-              <mat-label>Amount</mat-label>
-              <input matInput formControlName="amount" placeholder="Enter value" (keypress)="validateKeyPress($event)" (blur)="updateInput()" (keydown.enter)="updateInput()" (paste)="validatePaste($event)">
+</div>
 
-              <!-- button to toggle logs. Only show logs of one input row (determined by ID) -->
-              <button
-                mat-icon-button
-                matSuffix
-                (click)="isHistoryVisible = !isHistoryVisible"
-                matTooltip="Show recent changes (most recent first)"
-                [matTooltipShowDelay]="1000"
-              >
-                <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
-              </button>
+<mat-dialog-content class="mat-typography">
+  <div class="flex flex-row w-full h-full items-center justify-center">
+    <form [formGroup]="form" class="w-[80%]">
+        <div class="flex flex-col w-full items-center justify-center gap-2">
+          <!-- Regular value input -->
+          <mat-form-field class="w-full">
+            <mat-label>Amount</mat-label>
+            <input matInput formControlName="amount" placeholder="Enter value" (keypress)="validateKeyPress($event)" (blur)="updateInput()" (keydown.enter)="updateInput()" (paste)="validatePaste($event)">
 
-              <!-- LOGS/TRACE CHANGES OF AMOUNT FIELD -->
-              @if (isHistoryVisible) {
-                <div class="flex flex-col gap-1 mr-4 break-words">
-                  <mat-divider></mat-divider>
-                  @if(!logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id) || logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id).length == 0) {
-                    <p class="!m-0">No changes in the past 30 days.</p>
-                  }
-                  @for (log of logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id); track $index) {
-                    <p class="!m-0">
-                      <span [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">[{{log.timestamp}}]</span> {{ log.value }}
-                    </p>
-                  }
-                </div>
-              }
-            </mat-form-field>
+            <!-- button to toggle logs. Only show logs of one input row (determined by ID) -->
+            <button
+              mat-icon-button
+              matSuffix
+              (click)="isHistoryVisible = !isHistoryVisible"
+              matTooltip="Show recent changes (most recent first)"
+              [matTooltipShowDelay]="1000"
+            >
+              <mat-icon fontSet="material-symbols-outlined">history</mat-icon>
+            </button>
+
+            <!-- LOGS/TRACE CHANGES OF AMOUNT FIELD -->
+            @if (isHistoryVisible) {
+              <div class="flex flex-col gap-1 mr-4 break-words">
+                <mat-divider></mat-divider>
+                @if(!logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id) || logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id).length == 0) {
+                  <p class="!m-0">No changes in the past 30 days.</p>
+                }
+                @for (log of logService.getLogs(userSingleMonthEntries.month, entryToUpdate.id); track $index) {
+                  <p class="!m-0">
+                    <span [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">[{{log.timestamp}}]</span> {{ log.value }}
+                  </p>
+                }
+              </div>
+            }
+          </mat-form-field>
+          <div class="flex flex-row items-center gap-2 w-full justify-center">
+            <span class="text-center">Inline Calculator supported</span>
+            <button mat-icon-button class="!flex flex-row items-center custom-position" [matTooltip]="infoTooltip">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+
           </div>
-      </form>
-    </div>
+        </div>
+    </form>
+  </div>
 
 
-    <!-- Description -->
-    <!-- <div class="mb-4">
-      <p>
-        Modify the amount of your existing entries. If your expenses, e.g., Shopping, Groceries, change frequently, you can insert them here.
-        Examples:
-      </p>
-      <ul class="leading-loose">
-        <li><strong>Single Value:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20</span> or <span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">-30</span></li>
-        <li><strong>Multiple Values:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 + 30 - 10</span></li>
-      </ul>
-      <p class="!mt-4">Letters and special characters are not allowed.</p>
-    </div> -->
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-stroked-button [mat-dialog-close]="false">Cancel</button>
-    <button mat-flat-button [mat-dialog-close]="true" [disabled]="!form.valid" (click)="submitForm()">Ok</button>
-  </mat-dialog-actions>
-  
+  <!-- Description -->
+  <!-- <div class="mb-4">
+    <p>
+      Modify the amount of your existing entries. If your expenses, e.g., Shopping, Groceries, change frequently, you can insert them here.
+      Examples:
+    </p>
+    <ul class="leading-loose">
+      <li><strong>Single Value:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20</span> or <span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">-30</span></li>
+      <li><strong>Multiple Values:</strong>&nbsp;<span [ngClass]="colorService.isDarkMode() ? 'bg-gray-dark' : 'bg-gray'">20 + 30 - 10</span></li>
+    </ul>
+    <p class="!mt-4">Letters and special characters are not allowed.</p>
+  </div> -->
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-stroked-button [mat-dialog-close]="false">Cancel</button>
+  <button mat-flat-button [mat-dialog-close]="true" [disabled]="!form.valid" (click)="submitForm()">Ok</button>
+</mat-dialog-actions>
