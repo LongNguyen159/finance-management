@@ -49,6 +49,19 @@
             </div>
         </div>
 
+        <div class="feature-card grid-display">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Interactive Sankey Editing</h2>
+                <span>
+                    Edit values directly by clicking on Sankey nodes. This new feature makes refining your data faster and easier than ever before.
+                </span>
+            </div>
+
+            <div class="image-section">
+                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/sankey-click-dark.png' : 'assets/images/whats-new/sankey-click-light.png'" alt="whats-new">
+            </div>
+        </div>
+
 
         <div>
             <mat-card class="flex flex-col items-center gap-2 w-full px-40 py-20 !rounded-[28px] max-w-[1240px]">
