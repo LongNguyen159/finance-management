@@ -370,19 +370,30 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return dateA.getTime() - dateB.getTime();
     });
 
-
+    
     /** Get the start and end month of the custom range.
      * We do it here because it's sorted.
-     */
+    */
     const sortedMonths = sortedData.map(entry => entry.month);
-    /** Edge case: User select date that does not satisfy start <= end: sorted months would return [].
-     */
-    this.startMonth = sortedMonths[0] || '';
-    this.endMonth = sortedMonths[sortedMonths.length - 1] || '';
+    if (this.selectedOption !== 'custom-range') {
+      /** Edge case: User select date that does not satisfy start <= end: sorted months would return [].
+       */
+      this.startMonth = sortedMonths[0] || '';
+      this.endMonth = sortedMonths[sortedMonths.length - 1] || '';
+  
+      this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
+      this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
+    } else {
+      if (!sortedMonths.includes(this.startMonth) || !sortedMonths.includes(this.endMonth)) {
+        this.startMonth = sortedMonths[0] || '';
+        this.endMonth = sortedMonths[sortedMonths.length - 1] || '';
 
-    this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
-    this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
-    
+        this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
+        this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
+
+        this.uiService.showSnackBar('No data found for selected range. Showing available range instead.', 'OK', 5000);
+      }
+    }
 
 
   
