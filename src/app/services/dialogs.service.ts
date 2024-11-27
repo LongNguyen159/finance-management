@@ -30,9 +30,10 @@ export class DialogsService {
 
   openInsertIntoDialog(entryToModify: {name: string, value: number} ) {
     this.dialog.open(InsertExpenseDialogComponent, {
-        width: '45rem',
+        width: '40rem',
         maxWidth: '60vw',
-        height: '25rem',
+        // minHeight: '23rem',
+        // height: '27rem',
         // maxHeight: '90vh',
         data: entryToModify
     })
