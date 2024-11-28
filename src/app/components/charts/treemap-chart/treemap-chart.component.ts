@@ -76,9 +76,7 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
    * A good side-effect: It also helps matching the color in the Basic pie chart.
    */
   generateColorMapping(data: TreeNode[], parentColor?: string): TreeNode[] {
-    const colorPalette = this.colorService.isDarkMode()
-      ? this.colorService.chartColorPaletteDark
-      : this.colorService.chartColorPaletteLight;
+    const colorPalette = this.colorService.chartColorPaletteLight;
   
     // A variable to keep track of the color index
     let colorIndex = 0;
