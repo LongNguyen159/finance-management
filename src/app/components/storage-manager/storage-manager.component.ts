@@ -76,6 +76,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   isFormatBigNumbers: boolean = false;
   isBarChartScaled: boolean = true;
 
+  isHighlightSurplus: boolean = false;
+
   /** Available time frame options for the dropdown menu */
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
@@ -672,5 +674,14 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   getBalanceClass(): string {
     return this.isPositiveBalance() ? 'positive-balance' : 'negative-balance';
+  }
+
+  getSurplusClass(month: string): string {
+    if (!this.isHighlightSurplus) {
+      return ''
+    }
+    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const numericBalance: number = parseLocaleStringToNumber(balanceString);
+    return numericBalance >= 0 ? 'positive-balance' : 'negative-balance';
   }
 }

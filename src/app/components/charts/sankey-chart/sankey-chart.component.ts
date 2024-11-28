@@ -35,6 +35,8 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
   /** Chart data input */
   @Input() sankeyData: SankeyData
   @Input() remainingBalance: string = '-'
+  @Input() showTooltip: boolean = true
+  @Input() allowInteractiveEdit: boolean = true
 
   /** Chart Configs input */
   @Input() chartHeight: string = '75vh'
@@ -87,6 +89,10 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
 
   override onChartInit(chart: EChartsType): void {
     super.onChartInit(chart);
+
+    if (!this.allowInteractiveEdit) {
+      return
+    }
   
     let isDragging = false;
     let startX = 0;
