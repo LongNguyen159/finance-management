@@ -2,9 +2,11 @@
     <h2 class="font-bold">
         Income Flow and Expense Allocation
     </h2>
-    <button mat-icon-button class="!flex custom-position" matTooltip="You can edit values directly by clicking on them">
-        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-    </button>
+    @if (showTooltip) {
+        <button mat-icon-button class="!flex custom-position" matTooltip="You can edit values directly by clicking on them">
+            <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+        </button>
+    }
 </div>
 <div class="flex flex-row w-full p-4 justify-center">
     @if (dataService.isDemo()) {
