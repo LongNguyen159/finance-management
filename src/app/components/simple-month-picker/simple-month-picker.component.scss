@@ -1,0 +1,22 @@
+button.highlight-date {
+    background: #4f7be261 !important;
+    border-radius: 100px;
+}
+
+button.highlight-start-date {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+button.highlight-end-date {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+button.highlight-in-between-date {
+    border-radius: 0 !important;
+}
+
+tr {
+    border: 4px solid transparent;
+}

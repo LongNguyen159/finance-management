@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, signal, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, signal, SimpleChanges, ViewChild, ViewEncapsulation } from '@angular/core';
 import { MonthPickerHeaderComponent } from '../month-picker-header/month-picker-header.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatCalendarCellClassFunction, MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { formatDateToYYYYMM } from '../../utils/utils';
@@ -20,7 +20,8 @@ import { formatDateToYYYYMM } from '../../utils/utils';
     provideNativeDateAdapter()
   ],
   templateUrl: './simple-month-picker.component.html',
-  styleUrl: './simple-month-picker.component.scss'
+  styleUrl: './simple-month-picker.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class SimpleMonthPickerComponent implements OnChanges {
   @Input() dateValue: Date = new Date();
@@ -51,6 +52,30 @@ export class SimpleMonthPickerComponent implements OnChanges {
     }
     return true
   };
+
+  /** Highlight the selected date, start date, end date and in-between dates */
+  dateClass: MatCalendarCellClassFunction<Date> = (cellDate, view) => {
+    if (this.type === 'start') {
+      if (cellDate.getTime() === this.dateValue.getTime()) {
+        return 'highlight-date highlight-start-date';
+      } else if (cellDate.getTime() === this.comparator.getTime()) {
+        return 'highlight-date highlight-end-date';
+      } else if (cellDate > this.dateValue && cellDate < this.comparator) {
+        return 'highlight-date highlight-in-between-date';
+      }
+    } else if (this.type === 'end') {
+      if (cellDate.getTime() === this.dateValue.getTime()) {
+        return 'highlight-date highlight-end-date';
+      } else if (cellDate.getTime() === this.comparator.getTime()) {
+        return 'highlight-date highlight-start-date';
+      } else if (cellDate > this.comparator && cellDate < this.dateValue) {
+        return 'highlight-date highlight-in-between-date';
+      }
+    }
+    return '';
+  };
+
+  
 
   @ViewChild(MatMenuTrigger) calendarMenuTrigger!: MatMenuTrigger; // Inject MatMenuTrigger
 
