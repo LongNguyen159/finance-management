@@ -102,6 +102,17 @@
               <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
             </button>
           </div>
+
+
+          <div class="flex flex-row gap-2 justify-between items-center" (click)="$event.stopPropagation()">
+            <div class="flex flex-row items-center">
+              <mat-slide-toggle color="primary" (toggleChange)="isHighlightSurplus = !isHighlightSurplus" [(ngModel)]="isHighlightSurplus"></mat-slide-toggle>
+              <span class="ml-2">Highlight Surplus</span>
+            </div>
+            <button mat-icon-button matTooltip="Highlight surplus values with colours.">
+              <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            </button>
+          </div>
         </div>
       </mat-menu>
     </div>
@@ -149,7 +160,13 @@
                   {{ month }}
                 </mat-panel-title>
                 <mat-panel-description class="flex flex-row gap-6">
-                  <p><strong>Surplus:</strong> {{ getFormattedRemainingBalance(month) }}</p>
+                  <!-- <p><strong>Surplus:</strong> {{ getFormattedRemainingBalance(month) }}</p> -->
+                  <p class="font-bold flex flex-row items-center gap-2">
+                    <span>Surplus: </span>
+                    <span [ngClass]="getSurplusClass(month)" class="flex flex-row items-center rounded-full text-base px-5 py-[5px]">
+                      {{ getFormattedRemainingBalance(month) }}
+                    </span>
+                  </p>
                 </mat-panel-description>
                 <!-- <button mat-icon-button (click)="$event.stopPropagation(); removeItem(month)">
                   <mat-icon fontSet="material-symbols-outlined" color="warn">delete</mat-icon>

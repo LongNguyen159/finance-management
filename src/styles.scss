@@ -125,9 +125,12 @@ html {
 
 
 .positive-balance {
-  background-color: #9EE49E; // Green background for positive balance
+  background-color: rgb(158 228 158 / 90%); // Green background for positive balance
+  color: #0a0a0a;
+  
 }
 
 .negative-balance {
-  background-color: #f87171; // Red background for negative balance
+  background-color: rgb(248 113 113 / 95%); // Red background for negative balance
+  color: #0a0a0a;
 }
