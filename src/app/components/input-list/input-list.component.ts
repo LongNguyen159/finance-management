@@ -850,7 +850,7 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     // scroll to bottom after adding new form field
     setTimeout(() => {
       this.scrollToBottom()
-    }, 200)
+    }, this.isVariableCostsExpanded ? 200 : 300);
   }
 
   // Remove an input row
