@@ -91,13 +91,31 @@ export class PieChartComponent implements OnChanges {
   }
 
   updateChart() {
+
+    const colorPalette = this.colorService.isDarkMode() 
+      ? this.colorService.chartColorPaletteDark 
+      : this.colorService.chartColorPaletteLight;
+
+    // Create a staggered color assignment for slices
+    const colorAssignedData = this.pieChartData.map((data, index) => {
+      // Shift the color start after each full cycle to avoid adjacent slices having the same color
+      const colorIndex = (index + Math.floor(index / colorPalette.length)) % colorPalette.length;
+      return {
+        ...data,
+        itemStyle: {
+          // Assign the color based on the shifted index
+          color: colorPalette[colorIndex]
+        }
+      };
+    });
+    
     this.pieMergeOption = {
       ...this.getBaseChartOptions(),
       series: [
         {
           type: 'pie',
           radius: '50%',
-          data: this.pieChartData,
+          data: colorAssignedData,
           emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } },
           label: {
             formatter: (params: any) =>  {
