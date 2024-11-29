@@ -1,7 +1,7 @@
 import { SYSTEM_PREFIX } from "../components/models";
 import { evaluate } from 'mathjs/number';
 
-
+//#region Date utils
 /** Format a Date object into YYYY-MM format */
 export function formatDateToYYYYMM(date: Date): string {
     const year = date.getFullYear(); // Get the full year
@@ -16,12 +16,6 @@ export function formatYearMonthToLongDate(yearMonth: string): string {
     return date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
 }
 
-export function parseLocaleStringToNumber(localeString: string): number {
-    return parseFloat(localeString.replace(/[^0-9.-]+/g, ''))
-}
-
-
-
 
 export function formatYYYYMMtoDate(inputString: string): Date {
   const [year, month] = inputString.split('-').map(Number);
@@ -34,11 +28,58 @@ export function sortYearsDescending(years: string[]): string[] {
   return years.sort((a, b) => Number(b) - Number(a));
 }
 
+/** Get last month value from a YYYY-MM string.
+ * @param monthStr The input month in YYYY-MM format
+ * 
+ * @returns The last month in YYYY-MM format
+ */
+export function getLastMonth(monthStr: string | undefined): string | undefined {
+  // Early exit if the input is empty or undefined
+  if (!monthStr) {
+    return undefined;
+  }
+
+  // Split the input into year and month
+  let [year, month] = monthStr.split('-').map(Number);
+
+  // Ensure valid year and month
+  if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+    return undefined;
+  }
+
+  // Subtract one month
+  month -= 1;
+
+  // If month becomes 0 (January), move to December of the previous year
+  if (month === 0) {
+    month = 12;
+    year -= 1;
+  }
+
+  // Format the result back into YYYY-MM
+  return `${year}-${month.toString().padStart(2, '0')}`;
+}
+
+
+
+//#endregion
+
+
+//#region String Format
 /** Remove system prefixes from name. We use system prefix to avoid
  * name collisions in our data, but we don't want to show it in the UI.
  */
 export function removeSystemPrefix(name: string): string {
   return name.replace(new RegExp(`@${SYSTEM_PREFIX}`, 'g'), '');
+}
+
+//#endregion
+
+
+//#region Number Format
+
+export function parseLocaleStringToNumber(localeString: string): number {
+  return parseFloat(localeString.replace(/[^0-9.-]+/g, ''))
 }
 
 
@@ -106,3 +147,4 @@ export function formatBigNumber(num: number, currencySymbol: string = '', minVal
 
   return `${sign}${currencySymbol}${formattedNumber}`;
 }
+//#endregion
