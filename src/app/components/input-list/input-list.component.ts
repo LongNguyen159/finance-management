@@ -882,8 +882,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     
     if (!query || query.trim() === '') {
       this.filterQuery = ''; // Reset filter query.
-      this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
       this.isSearching = false;
+      this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
       return
     }
     
