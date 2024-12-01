@@ -27,6 +27,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.component";
 import { MatDividerModule } from '@angular/material/divider';
 import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-picker.component";
+import { TrendsLineChartComponent } from "../charts/trends-line-chart/trends-line-chart.component";
 
 @Component({
   selector: 'app-storage-manager',
@@ -38,7 +39,7 @@ import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-
     MatTooltipModule,
     MatMenuModule, TreemapChartComponent,
     MatDividerModule,
-    SimpleMonthPickerComponent],
+    SimpleMonthPickerComponent, TrendsLineChartComponent],
   providers: [
     CurrencyPipe,
   ],
@@ -56,7 +57,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   currencyService = inject(CurrencyService);
 
   /** Months data stored in local storage */
-  localStorageData: MonthlyData = {};
+  allMonthsData: MonthlyData = {};
 
   /** Extract stored months and years */
   storedMonths: string[] = [];
@@ -119,7 +120,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   ngOnInit(): void {
     /** Get all months data and refresh data if input changes */
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.localStorageData = data;
+      this.allMonthsData = data;
       this.refreshData();
       this.filterMonths();
     })
@@ -139,12 +140,12 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   refreshData() {
     // this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
     this.hasDataChanged = true;
-    this.storedMonths = Object.keys(this.localStorageData);
+    this.storedMonths = Object.keys(this.allMonthsData);
     this.storedYears = this.getStoredYears();
   }
 
   getStoredYears(): string[] {
-    const years = Object.keys(this.localStorageData).map(month => month.split('-')[0]);
+    const years = Object.keys(this.allMonthsData).map(month => month.split('-')[0]);
     const sortedYears = sortYearsDescending(Array.from(new Set(years))); 
     return sortedYears
   }
@@ -152,7 +153,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   getStoredMonths(): { [key: string]: string[] } {
     const monthsByYear: { [key: string]: string[] } = {};
     // Iterate over the months stored in localStorageData
-    for (const month in this.localStorageData) {
+    for (const month in this.allMonthsData) {
       const year = month.split('-')[0];
 
       // Initialize the year key if it doesn't exist
@@ -180,7 +181,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
   
-    this.filteredMonthsByYear = Object.keys(this.localStorageData).reduce((acc, monthKey) => {
+    this.filteredMonthsByYear = Object.keys(this.allMonthsData).reduce((acc, monthKey) => {
       /** Since monthKey is in YYYY-MM format, we can split them using '-' here to get the year and the month. */
       const [year, monthStr] = monthKey.split('-').map(Number);
 
@@ -314,7 +315,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return this.monthInfoCache[month];
     }
 
-    const currentMonthData = this.localStorageData[month];
+    const currentMonthData = this.allMonthsData[month];
     if (!currentMonthData) {
       return [];
     }
@@ -341,74 +342,90 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   //#region Chart Data
   /** After filtering, we need to re-populate the chart data */
-  populateChartData(allMonths: string[] = []) {
-    // Filter the local storage data using filterMonthlyData
-    const filteredData = this.filterMonthlyData(this.localStorageData, allMonths);
 
-    // Calculate total net income and total expenses
+  /** Populate Chart data, tree map, and trends line */
+  populateChartData(allMonths: string[] = []) {
+    // Filter and process data
+    const filteredData = this.filterMonthlyData(this.allMonthsData, allMonths);
+
+    // Calculate and update total net income and expenses
+    this.updateTotals(filteredData);
+
+    // Aggregate yearly tree map data
+    this.treeMapData = this.aggregateYearlyTree(filteredData);
+
+    // Prepare sorted surplus data
+    const sortedData = this.prepareSortedSurplusData(filteredData);
+
+    // Handle and validate date range
+    this.updateDateRange(sortedData);
+
+    // Compute and update surplus chart data
+    this.surplusChartData = this.computeSurplusChartData(sortedData);
+
+    // Adjust chart scale
+    this.getScaleValue();
+  }
+
+  /** Helper function: Calculate and update total net income and expenses */
+  private updateTotals(filteredData: Record<string, any>) {
     const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
-      (totals, month) => {
-        totals.totalNetIncome += month.totalUsableIncome;
-        totals.totalExpenses += month.totalExpenses;
-        return totals;
-      },
-      { totalNetIncome: 0, totalExpenses: 0 } // Initial accumulator values
+      (totals, month) => ({
+        totalNetIncome: totals.totalNetIncome + month.totalUsableIncome,
+        totalExpenses: totals.totalExpenses + month.totalExpenses,
+      }),
+      { totalNetIncome: 0, totalExpenses: 0 }
     );
+
     this.totalNetIncome = totalNetIncome;
     this.totalExpenses = totalExpenses;
+  }
 
-    this.treeMapData = this.aggregateYearlyTree(filteredData)
-  
-    // Map the filtered data to extract surplus and add balance
-    const mappedData = Object.entries(filteredData).map(([month, value]) => ({
-      month,
-      surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
-    }));
-  
-    // Sort the data by month in chronological order
-    const sortedData = mappedData.sort((a, b) => {
-      const dateA = new Date(a.month);
-      const dateB = new Date(b.month);
-      return dateA.getTime() - dateB.getTime();
-    });
+  /** Helper function: Prepare sorted surplus data */
+  private prepareSortedSurplusData(filteredData: Record<string, any>) {
+    return Object.entries(filteredData)
+      .map(([month, value]) => ({
+        month,
+        surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
+      }))
+      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  }
 
-    
-    /** Get the start and end month of the custom range.
-     * We do it here because it's sorted.
-    */
+  /** Helper function: Update start and end months based on sorted data */
+  private updateDateRange(sortedData: Array<{ month: string }>) {
     const sortedMonths = sortedData.map(entry => entry.month);
-    /** Edge case: User select date that does not satisfy start <= end: sorted months would return [].
-     */
-    if ((this.startMonth && this.endMonth) && (!sortedMonths.includes(this.startMonth) || !sortedMonths.includes(this.endMonth))) {
-      this.uiService.showSnackBar('No data found for the selected range. Showing available range instead.', 'OK', 5000);
+
+    if (
+      (this.startMonth &&
+      this.endMonth) &&
+      (!sortedMonths.includes(this.startMonth) || !sortedMonths.includes(this.endMonth))
+    ) {
+      this.uiService.showSnackBar(
+        'No data found for the selected range. Showing available range instead.',
+        'OK',
+        5000
+      );
     }
 
-
     this.startMonth = sortedMonths[0] || '';
-    this.endMonth = sortedMonths[sortedMonths.length - 1] || '';    
-
+    this.endMonth = sortedMonths.at(-1) || '';
     this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
     this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
+  }
 
-
-  
-    // Calculate cumulative balance
-    let previousBalance = 0; // Initial balance can be customized
-    this.surplusChartData = sortedData.map((entry) => {
+  /** Helper function: Compute surplus chart data */
+  private computeSurplusChartData(sortedData: Array<{ month: string; surplus: number }>) {
+    let previousBalance = 0;
+    return sortedData.map(entry => {
       const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
       previousBalance = balance;
-      return {
-        ...entry,
-        balance,
-      };
+      return { ...entry, balance };
     });
-  
-    // Rescale the chart when filters change
-    this.getScaleValue();
   }
 
 
 
+  //#region Tree Map
   /** Check TreeMapData of each month: Call DataService if TreeMapData does not exist, use TreeMapData directly if it exists */
   aggregateYearlyTree(savedData: MonthlyData): TreeNode[] {
     const monthlyTrees: TreeNode[][] = [];
@@ -467,6 +484,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
     return result;
   }
+  //#endregion
   
 
   /** Scale the bar chart across all months to have the same xAxis.
@@ -477,7 +495,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    */
   getScaleValue() {
     /** Get all showing months (Filtered month by selected time frame) */
-    const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
+    const showingMonths = this.filterDataByKeys(this.allMonthsData, this.allFilteredMonths);
     // Get largest value of either total income or total expenses among the showing months
     const largestValue = this._findLargestValue(showingMonths);
 
@@ -530,7 +548,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     if (months) {
       for (const month of months) {
-        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+        const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
         const numericBalance: number = parseLocaleStringToNumber(balanceString);
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
@@ -547,7 +565,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
         if (months) {
             for (const month of months) {
-                const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+                const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
                 const numericBalance: number = parseLocaleStringToNumber(balanceString);
                 totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
             }
@@ -561,8 +579,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   calculateTotalSurplusAllTime(): string {
     let totalSurplus = 0;
 
-    for (const month in this.localStorageData) {
-        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    for (const month in this.allMonthsData) {
+        const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
         const numericBalance: number = parseLocaleStringToNumber(balanceString);
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
     }
@@ -576,7 +594,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#region Formatting
   /** Get remaining balance formatted to big numbers */
   getFormattedRemainingBalance(month: string): string {
-    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.currencyService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
@@ -647,7 +665,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    */
   getMonthsDetails(month: string) {
     this.dialog.open(MainPageDialogComponent, {
-      data: this.localStorageData[month],
+      data: this.allMonthsData[month],
       width: '100%',
       height: '80vh',
       maxWidth: '100vw',
@@ -673,7 +691,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     if (!this.isHighlightSurplus) {
       return ''
     }
-    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return numericBalance >= 0 ? 'positive-balance' : 'negative-balance';
   }

@@ -26,6 +26,8 @@
   <!-- SURPLUS & BALANCE LINE CHART -->
   <app-total-surplus-line-chart class="w-full" [chartData]="surplusChartData"></app-total-surplus-line-chart>
 
+  <app-trends-line-chart></app-trends-line-chart>
+
   <!-- ALL TIME BALANCE -->
   <h3 class="font-bold flex flex-row w-full justify-center items-center gap-2">
     <span>Balance: </span>
@@ -181,7 +183,7 @@
                 @if (panel.expanded) {
                   <!-- TOTAL INCOME/TOTAL EXPENSE CHART -->
                   <div class="w-full self-center">
-                    <app-income-expense-ratio-chart [gridLeft]="'2%'" [gridRight]="'5%'" [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
+                    <app-income-expense-ratio-chart [gridLeft]="'2%'" [gridRight]="'5%'" [totalIncome]="allMonthsData[month].totalUsableIncome" [totalExpense]="allMonthsData[month].totalExpenses"
                     ></app-income-expense-ratio-chart>
                   </div>
 
