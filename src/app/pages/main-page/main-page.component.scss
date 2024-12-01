@@ -3,3 +3,9 @@
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 16px;
 }
+
+.mdc-evolution-chip-set__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}

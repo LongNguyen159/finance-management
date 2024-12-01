@@ -8,7 +8,7 @@
             <div class="flex flex-col gap-8">
                 <!-- SANKEY CHART -->
                 <section>
-                    <div class="flex flex-row w-full items-center justify-end gap-2">
+                    <div class="flex flex-row w-full items-center justify-end gap-4">
                         <!-- <button mat-button (click)="dialogService.openInsertIntoDialog()">
                             <mat-icon>add</mat-icon>
                             <span>Insert Into</span>
@@ -19,42 +19,21 @@
                                 <mat-slide-toggle [(ngModel)]="isSankeyVertical" color="primary" labelPosition="before"></mat-slide-toggle>
                             </div>
                         </div>
+
+                        <div class="flex flex-row items-center gap-1">
+                            <div class="text-sm">Show Insights</div>
+                            <div>
+                                <mat-slide-toggle [(ngModel)]="isShowInsights" color="primary" labelPosition="before"></mat-slide-toggle>
+                            </div>
+                        </div>
                     </div>
                     <app-sankey-chart
                         [sankeyData]="entriesOfOneMonth.sankeyData"
                         [remainingBalance]="entriesOfOneMonth.remainingBalance"
                         [orientation]="isSankeyVertical ? 'vertical' : 'horizontal'"
+                        [showInsights]="isShowInsights"
+                        [monthInsights]="monthInsights"
                     ></app-sankey-chart>
-
-                    <div class="flex flex-row gap-2 mt-4">
-                        <mat-chip-set>
-                            @for (item of monthInsights; track $index) {
-                                <mat-chip disableRipple>
-                                    <div class="flex flex-row gap-2 items-center justify-center">
-                                        <span>{{ removeSystemPrefix(item.name) }}:</span>
-                                        @if (item.isPositive === undefined) {
-                                            <span 
-                                                class="font-bold"
-                                                [ngClass]="colorService.isDarkMode() ? 'text-blue-300' : 'text-blue-500'"
-                                            >{{ item.difference }}</span>
-                                        } @else {
-                                            <span
-                                                class="font-bold"
-                                                [ngClass]="{
-                                                    'positive-dark': item.isPositive && colorService.isDarkMode(),
-                                                    'positive-light': item.isPositive && !colorService.isDarkMode(),
-                                                    'negative-dark': !item.isPositive && colorService.isDarkMode(),
-                                                    'negative-light': !item.isPositive && !colorService.isDarkMode()
-                                                }"
-                                            
-                                            >{{ item.difference }}</span>
-                                        }
-                                    </div>
-                                </mat-chip>
-                            }
-                            
-                        </mat-chip-set>
-                    </div>
                 </section>
 
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>

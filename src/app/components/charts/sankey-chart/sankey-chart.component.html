@@ -15,6 +15,40 @@
         </mat-chip>
     }
 </div>
+
+<!-- MONTH INSIGHTS -->
+@if (showInsights) {
+    <div class="flex flex-row gap-2 mb-4 w-full justify-center">
+        <mat-chip-set>
+            @for (item of monthInsights; track $index) {
+                <mat-chip disableRipple>
+                    <div class="flex flex-row gap-2 items-center justify-center w-full">
+                        <span>{{ removeSystemPrefix(item.name) }}:</span>
+                        @if (item.isPositive === undefined) {
+                            <span 
+                                class="font-bold"
+                                [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'"
+                            >{{ item.difference }}</span>
+                        } @else {
+                            <span
+                                class="font-bold"
+                                [ngClass]="{
+                                    'positive-dark': item.isPositive && colorService.isDarkMode(),
+                                    'positive-light': item.isPositive && !colorService.isDarkMode(),
+                                    'negative-dark': !item.isPositive && colorService.isDarkMode(),
+                                    'negative-light': !item.isPositive && !colorService.isDarkMode()
+                                }"
+                            
+                            >{{ item.difference }}</span>
+                        }
+                    </div>
+                </mat-chip>
+            }
+            
+        </mat-chip-set>
+    </div>
+}
+
 @if(!sankeyData || sankeyData.nodes.length === 0) {
     <div class="flex flex-col items-center gap-2">
         <p>No entries defined...</p>
