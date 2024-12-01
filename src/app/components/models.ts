@@ -209,6 +209,22 @@ export interface PieData {
   value: number
 }
 
+export interface DifferenceItem {
+  name: string;
+  difference: string | number; // "New" | "No spending this month" | Percentage Difference
+  lastValue?: number;
+  currentValue?: number;
+  isNew?: boolean; // true for new items
+
+  /** True if the change is positive/good. For example: If expense gone down (-x%), this is true.
+   * Or if surplus has increased (+x%), this is true.
+   * 
+   * False otherwise, and neutral if the change is 0, or the item is new (untracked)
+   */
+  isPositive: boolean | undefined; 
+}
+
+
 
 export interface SurplusBalanceLineChartData {
   month: string

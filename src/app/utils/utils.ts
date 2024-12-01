@@ -1,4 +1,4 @@
-import { SYSTEM_PREFIX } from "../components/models";
+import { DifferenceItem, PieData, SYSTEM_PREFIX } from "../components/models";
 import { evaluate } from 'mathjs/number';
 
 //#region Date utils
@@ -148,3 +148,62 @@ export function formatBigNumber(num: number, currencySymbol: string = '', minVal
   return `${sign}${currencySymbol}${formattedNumber}`;
 }
 //#endregion
+
+
+export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData[]): DifferenceItem[] {
+  const lastMonthMap = new Map(lastMonth.map(item => [item.name, item.value]));
+  const differences: DifferenceItem[] = [];
+
+  // Process current month data
+  for (const currentItem of currentMonth) {
+    const lastValue = lastMonthMap.get(currentItem.name);
+
+    if (lastValue !== undefined) {
+      // Calculate percentage difference
+      const percentageChange = ((currentItem.value - lastValue) / Math.abs(lastValue)) * 100;
+      const roundedChange = Math.round(percentageChange * 100) / 100;
+      const isSurplus = currentItem.name === "Surplus";
+
+      
+      differences.push({
+        name: currentItem.name,
+        lastValue: lastValue,
+        currentValue: currentItem.value,
+        difference:
+          roundedChange === 0
+            ? "Stable"
+            : roundedChange > 0
+            ? `+${roundedChange}%`
+            : `${roundedChange}%`, // Add "+" sign for positive changes
+        isPositive: roundedChange === 0 
+          ? undefined // Neutral for stable
+          : isSurplus 
+          ? roundedChange > 0 // Surplus is positive if it increases
+          : roundedChange < 0, // For other items, negative change is good
+      });
+
+
+      // Remove processed item from last month map
+      lastMonthMap.delete(currentItem.name);
+    } else {
+      // New item
+      differences.push({
+        name: currentItem.name,
+        difference: "New",
+        isNew: true,
+        isPositive: false, // Neutral for new items
+      });
+    }
+  }
+
+  // Process remaining items in last month map
+  // for (const [name] of lastMonthMap.entries()) {
+  //   differences.push({
+  //     name,
+  //     difference: "No spending",
+  //     isPositive: true, // Good for no spending on current month
+  //   });
+  // }
+
+  return differences;
+}

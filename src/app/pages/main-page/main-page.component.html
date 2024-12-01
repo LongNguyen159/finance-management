@@ -25,6 +25,36 @@
                         [remainingBalance]="entriesOfOneMonth.remainingBalance"
                         [orientation]="isSankeyVertical ? 'vertical' : 'horizontal'"
                     ></app-sankey-chart>
+
+                    <div class="flex flex-row gap-2 mt-4">
+                        <mat-chip-set>
+                            @for (item of monthInsights; track $index) {
+                                <mat-chip disableRipple>
+                                    <div class="flex flex-row gap-2 items-center justify-center">
+                                        <span>{{ removeSystemPrefix(item.name) }}:</span>
+                                        @if (item.isPositive === undefined) {
+                                            <span 
+                                                class="font-bold"
+                                                [ngClass]="colorService.isDarkMode() ? 'text-blue-300' : 'text-blue-500'"
+                                            >{{ item.difference }}</span>
+                                        } @else {
+                                            <span
+                                                class="font-bold"
+                                                [ngClass]="{
+                                                    'positive-dark': item.isPositive && colorService.isDarkMode(),
+                                                    'positive-light': item.isPositive && !colorService.isDarkMode(),
+                                                    'negative-dark': !item.isPositive && colorService.isDarkMode(),
+                                                    'negative-light': !item.isPositive && !colorService.isDarkMode()
+                                                }"
+                                            
+                                            >{{ item.difference }}</span>
+                                        }
+                                    </div>
+                                </mat-chip>
+                            }
+                            
+                        </mat-chip-set>
+                    </div>
                 </section>
 
                 <mat-divider [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
