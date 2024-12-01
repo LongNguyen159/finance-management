@@ -7,6 +7,7 @@ import { ColorService } from '../../../services/color.service';
 import { removeSystemPrefix } from '../../../utils/utils';
 import { CurrencyService } from '../../../services/currency.service';
 import { PieData } from '../../models';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
@@ -18,7 +19,7 @@ import { PieData } from '../../models';
   templateUrl: './pie-chart.component.html',
   styleUrl: './pie-chart.component.scss'
 })
-export class PieChartComponent implements OnChanges {
+export class PieChartComponent extends BaseChartComponent implements OnChanges {
   @Input() pieChartData: PieData[] = []
   @Input() chartTitle: string = ''
   @Input() chartDescription: string = ''
@@ -32,7 +33,6 @@ export class PieChartComponent implements OnChanges {
 
 
   dataService = inject(DataService)
-  colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
   currencyService = inject(CurrencyService)
 
@@ -40,6 +40,7 @@ export class PieChartComponent implements OnChanges {
   pieMergeOption: EChartsOption = {}
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart();
     });

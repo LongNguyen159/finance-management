@@ -35,7 +35,6 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
 
   @Input() actionsPosition: 'top' | 'bottom' = 'bottom'
 
-  colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
   uiService = inject(UiService)
   currencyService = inject(CurrencyService)

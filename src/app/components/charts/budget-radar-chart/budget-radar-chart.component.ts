@@ -1,8 +1,8 @@
-import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { EChartsOption } from 'echarts';
-import { ColorService } from '../../../services/color.service';
 import { Budget, ExpenseCategory, expenseCategoryDetails } from '../../models';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 
 @Component({
   selector: 'app-budget-radar-chart',
@@ -14,11 +14,9 @@ import { Budget, ExpenseCategory, expenseCategoryDetails } from '../../models';
   templateUrl: './budget-radar-chart.component.html',
   styleUrl: './budget-radar-chart.component.scss'
 })
-export class BudgetRadarChartComponent implements OnChanges {
+export class BudgetRadarChartComponent extends BaseChartComponent implements OnChanges {
   @Input() actualSpending: { category: ExpenseCategory, value: number }[] = []
   @Input() budget: Budget[] = []
-
-  colorService = inject(ColorService);
 
 
   options: EChartsOption = this.getBaseOptions()
@@ -26,6 +24,7 @@ export class BudgetRadarChartComponent implements OnChanges {
   SCALE_FACTOR = 1.25
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart()
     })

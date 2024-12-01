@@ -47,7 +47,6 @@ export class SankeyChartComponent extends BaseChartComponent implements OnChange
 
 
   dataService = inject(DataService)
-  colorService = inject(ColorService)
   dialogService = inject(DialogsService)
   currencyPipe = inject(CurrencyPipe)
   currencyService = inject(CurrencyService)

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { EChartsType } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
+import { ColorService } from '../../services/color.service';
 
 @Component({
   selector: 'app-base-chart',
@@ -14,7 +15,7 @@ import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
   styleUrl: './base-chart.component.scss'
 })
 export class BaseChartComponent implements OnDestroy {
-
+  protected colorService = inject(ColorService)
   protected _chartInstance?: EChartsType
 
   /** On chart init, assign chart instance. */

@@ -1,8 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, effect, inject } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, effect } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { ColorService } from '../../../services/color.service';
 import { SurplusBalanceLineChartData } from '../../models';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 
 @Component({
   selector: 'app-total-surplus-line-chart',
@@ -14,14 +14,14 @@ import { SurplusBalanceLineChartData } from '../../models';
   templateUrl: './total-surplus-line-chart.component.html',
   styleUrls: ['./total-surplus-line-chart.component.scss'],
 })
-export class TotalSurplusLineChartComponent implements OnChanges {
+export class TotalSurplusLineChartComponent extends BaseChartComponent implements OnChanges {
   @Input() chartData: SurplusBalanceLineChartData[] = [];
 
-  colorService = inject(ColorService);
   chartOptions: EChartsOption = this.getBaseOption()
   mergeOptions: EChartsOption = {};
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart();
     })

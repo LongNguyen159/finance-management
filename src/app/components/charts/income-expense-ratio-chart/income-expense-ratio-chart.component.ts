@@ -27,7 +27,6 @@ export class IncomeExpenseRatioChartComponent extends BaseChartComponent impleme
   @Input() gridRight: string = '10%';
 
   dataService = inject(DataService)
-  colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
   currencyService = inject(CurrencyService)
 
