@@ -258,6 +258,16 @@ export interface SurplusBalanceLineChartData {
   balance: number
 }
 
+export interface TrendsLineChartData {
+  month: string
+  surplus: number
+  balance: number
+  
+  totalNetIncome: number
+  totalExpenses: number
+  categories: PieData[]
+}
+
 
 export interface TreeNode {
   name: string;

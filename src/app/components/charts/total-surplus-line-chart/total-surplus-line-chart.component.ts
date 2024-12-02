@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, effect } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { SurplusBalanceLineChartData } from '../../models';
+import { TrendsLineChartData } from '../../models';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 
 @Component({
@@ -15,7 +15,7 @@ import { BaseChartComponent } from '../../../base-components/base-chart/base-cha
   styleUrls: ['./total-surplus-line-chart.component.scss'],
 })
 export class TotalSurplusLineChartComponent extends BaseChartComponent implements OnChanges {
-  @Input() chartData: SurplusBalanceLineChartData[] = [];
+  @Input() chartData: TrendsLineChartData[] = [];
 
   chartOptions: EChartsOption = this.getBaseOption()
   mergeOptions: EChartsOption = {};

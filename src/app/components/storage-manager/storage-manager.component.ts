@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SurplusBalanceLineChartData, TreeNode } from '../models';
+import { MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -79,6 +79,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   isHighlightSurplus: boolean = false;
 
+  showIncomeGrowth: boolean = true
+  stackCategories: boolean = true
+
   /** Available time frame options for the dropdown menu */
   availableOptions: { value: string, label: string }[] = [
     { value: '3-months', label: 'Last 3 months' },
@@ -104,7 +107,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   allFilteredMonths: string[] = [];
 
   /** Chart data to plot the surplus and balance of each month  */
-  surplusChartData: SurplusBalanceLineChartData[] = [];
+  trendsLineChartData: TrendsLineChartData[] = [];
 
   treeMapData: TreeNode[] = [];
 
@@ -138,7 +141,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#region Retrieve Data
   /** Refresh data by get stored months again. */
   refreshData() {
-    // this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
     this.hasDataChanged = true;
     this.storedMonths = Object.keys(this.allMonthsData);
     this.storedYears = this.getStoredYears();
@@ -355,20 +357,20 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.treeMapData = this.aggregateYearlyTree(filteredData);
 
     // Prepare sorted surplus data
-    const sortedData = this.prepareSortedSurplusData(filteredData);
+    const sortedData = this.prepareSortedTrendsData(filteredData);
 
     // Handle and validate date range
     this.updateDateRange(sortedData);
 
     // Compute and update surplus chart data
-    this.surplusChartData = this.computeSurplusChartData(sortedData);
+    this.trendsLineChartData = this.computeSurplusChartData(sortedData);
 
     // Adjust chart scale
     this.getScaleValue();
   }
 
   /** Helper function: Calculate and update total net income and expenses */
-  private updateTotals(filteredData: Record<string, any>) {
+  private updateTotals(filteredData: Record<string, SingleMonthData>) {
     const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
       (totals, month) => ({
         totalNetIncome: totals.totalNetIncome + month.totalUsableIncome,
@@ -382,13 +384,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
 
   /** Helper function: Prepare sorted surplus data */
-  private prepareSortedSurplusData(filteredData: Record<string, any>) {
-    return Object.entries(filteredData)
-      .map(([month, value]) => ({
-        month,
-        surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
-      }))
-      .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  private prepareSortedTrendsData(filteredData: Record<string, SingleMonthData>) {
+    return Object.entries(filteredData).map(([month, value]) => ({
+      month,
+      totalNetIncome: value.totalUsableIncome,
+      totalExpenses: value.totalExpenses,
+      surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
+      categories: value.pieData.filter(item => item.name !== this.dataService.REMAINING_BALANCE_LABEL)
+    }))
+    .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
   }
 
   /** Helper function: Update start and end months based on sorted data */
@@ -413,8 +417,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
   }
 
-  /** Helper function: Compute surplus chart data */
-  private computeSurplusChartData(sortedData: Array<{ month: string; surplus: number }>) {
+  /** Helper function: Compute surplus chart data (cummulate balance) */
+  private computeSurplusChartData(sortedData: Array<any>) {
     let previousBalance = 0;
     return sortedData.map(entry => {
       const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
@@ -486,7 +490,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
   //#endregion
   
-
+  //#region Scale Bar Chart
   /** Scale the bar chart across all months to have the same xAxis.
    * This is useful for comparing income and expenses across different months.
    * 
@@ -533,6 +537,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     // Return the larger of the two maximums
     return Math.max(maxTotalUsableIncome, maxTotalExpenses);
   }
+  //#endregion
+
   //#endregion
 
 
