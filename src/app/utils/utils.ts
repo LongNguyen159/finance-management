@@ -234,11 +234,15 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
   // Step 2: Detect abnormalities in each category
   const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
     const nonZeroValues = values.filter(value => value > 0);
-    const average = nonZeroValues.reduce((sum, val) => sum + val, 0) / nonZeroValues.length;
+
+    const median = calculateMedian(nonZeroValues);
 
     // Standard deviation calculation
-    const variance = nonZeroValues.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / nonZeroValues.length;
+    const variance = nonZeroValues.reduce((sum, val) => sum + Math.pow(val - median, 2), 0) / nonZeroValues.length;
     const stdDev = Math.sqrt(variance);
+
+    // Spike threshold
+    const spikeThreshold = median * 1.5;
 
     const abnormalities: Abnormality[] = [];
 
@@ -255,7 +259,7 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
 
     // Abnormality 2: Spikes
     values.forEach((value, index) => {
-      if (value > average + 2 * stdDev) {
+      if (value > median + 1.2 * stdDev) {
         abnormalities.push({
           type: AbnormalityType.Spike,
           description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
@@ -267,11 +271,11 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
 
     // Abnormality 3: High fluctuation
     if (nonZeroValues.length > 1) {
-      const fluctuation = stdDev / average;
+      const fluctuation = stdDev / median;
       if (fluctuation >= 0.5 && fluctuation < 1) {
         // Detecting months where spending is higher than the usual
         const highMonths = values
-          .map((value, index) => value > average + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+          .map((value, index) => value > median + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
           .filter(Boolean) as string[];
 
         if (highMonths.length > 0) {
@@ -284,7 +288,7 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
       } else if (fluctuation >= 1) {
         // Detecting extreme fluctuations
         const extremeMonths = values
-          .map((value, index) => value > average + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+          .map((value, index) => value > median + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
           .filter(Boolean) as string[];
 
         if (extremeMonths.length > 0) {
@@ -303,4 +307,18 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
   });
 
   return analysis.filter(category => category.abnormalities.length > 0); // Exclude categories without abnormalities
+}
+
+/** Helper function to calculate median values. */
+function calculateMedian(values: number[]): number {
+  const sortedValues = values.sort((a, b) => a - b);
+  const n = sortedValues.length;
+  
+  if (n % 2 === 1) {
+    // Odd number of elements, return the middle element
+    return sortedValues[Math.floor(n / 2)];
+  } else {
+    // Even number of elements, return the average of the two middle elements
+    return (sortedValues[n / 2 - 1] + sortedValues[n / 2]) / 2;
+  }
 }
