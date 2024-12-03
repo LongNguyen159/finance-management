@@ -69,7 +69,7 @@
           <app-trends-line-chart class="w-full" [chartData]="trendsLineChartData" [showCategories]="!showIncomeGrowth" [stackCategories]="stackCategories"></app-trends-line-chart>
 
 
-          <!-- anomalies reports -->
+          <!-- ANOMALIES REPORT -->
           <section>
             <h2 class="font-bold text-2xl mb-4 text-center">Anomalies Detection</h2>
             <div class="grid grid-cols-2 gap-4">
@@ -128,7 +128,7 @@
                 @for (category of secondHalf; track $index) {
                   <mat-expansion-panel class="no-shadows">
                     <mat-expansion-panel-header>
-                      <mat-panel-title>{{ category.name }}</mat-panel-title>
+                      <mat-panel-title class="!text-xl">{{ category.name }}</mat-panel-title>
                     </mat-expansion-panel-header>
             
                     <mat-card-content>
