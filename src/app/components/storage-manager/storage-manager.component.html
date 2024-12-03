@@ -71,14 +71,21 @@
 
           <!-- ANOMALIES REPORT -->
           <section>
-            <h2 class="font-bold text-2xl mb-4 text-center">Anomalies Detection</h2>
+            <h2 class="font-bold text-2xl mb-4 text-center">Pattern Analysis</h2>
             <div class="grid grid-cols-2 gap-4">
               <!-- Left Column (1st Set of Categories) -->
               <div class="w-full flex flex-col gap-3">
                 @for (category of firstHalf; track $index) {
                   <mat-expansion-panel class="no-shadows">
                     <mat-expansion-panel-header>
-                      <mat-panel-title class="!text-xl">{{ category.name }}</mat-panel-title>
+                      <mat-panel-title class="!text-xl">
+                        <div class="flex flex-row items-center gap-2">
+                          <span class="flex flex-row items-center">
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryColorDark : category.categoryColorLight }">{{ category.categoryIcon }}</mat-icon>
+                          </span>
+                          <span class="flex flex-row items-center">{{ category.name }}</span>
+                        </div>
+                      </mat-panel-title>
                     </mat-expansion-panel-header>
             
                     <mat-card-content>
@@ -128,7 +135,14 @@
                 @for (category of secondHalf; track $index) {
                   <mat-expansion-panel class="no-shadows">
                     <mat-expansion-panel-header>
-                      <mat-panel-title class="!text-xl">{{ category.name }}</mat-panel-title>
+                      <mat-panel-title class="!text-xl">
+                        <div class="flex flex-row items-center gap-2">
+                          <span class="flex flex-row items-center">
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryColorDark : category.categoryColorLight }">{{ category.categoryIcon }}</mat-icon>
+                          </span>
+                          <span class="flex flex-row items-center">{{ category.name }}</span>
+                        </div>
+                      </mat-panel-title>
                     </mat-expansion-panel-header>
             
                     <mat-card-content>

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { Abnormality, AbnormalityConfig, AbnormalityType, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -374,13 +374,24 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const insights = detectAbnormalities(this.trendsLineChartData, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
     this.anomalyReports = insights
 
-    this.anomalyReports = this.anomalyReports.map(category => ({
-      ...category,
-      abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
-        ...abnormality,
-        ...this.getAnomaliesConfig(abnormality.type),
-      })),
-    }));
+    // Enrich the anomalyReports with category icon and color at root level
+    this.anomalyReports = this.anomalyReports.map(category => {
+      // Lookup category icon and color from the expenseCategoryDetails based on category.name
+      const categoryDetails = expenseCategoryDetails[category.categoryName as ExpenseCategory];
+
+
+      // Add category-specific icon and color at root level
+      return {
+        ...category,
+        categoryIcon: categoryDetails?.icon || 'category',  // Fallback icon
+        categoryColorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
+        categoryColorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
+        abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
+          ...abnormality,
+          ...this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
+        })),
+      };
+    });
   }
 
   /** Helper function: Calculate and update total net income and expenses */

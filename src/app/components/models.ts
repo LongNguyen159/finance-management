@@ -127,7 +127,7 @@ export const expenseCategoryDetails: { [key in ExpenseCategory]: ExpenseCategory
   [ExpenseCategory.Commute]: { 
     label: 'Transportation', 
     value: ExpenseCategory.Commute, 
-    icon: 'commute', 
+    icon: 'directions_car', 
     colorLight: '#1976d2', // Blue for light mode
     colorDark: '#90caf9'   // Light Blue for dark mode
   },
@@ -297,6 +297,7 @@ export interface CategoryInsight {
 // Represents the result of analyzing a category for abnormalities
 export interface AbnormalityAnalysis {
   name: string;  // The name of the category being analyzed
+  categoryName: string;  // The user-friendly name of the category
   abnormalities: Abnormality[];  // A list of detected abnormalities for the category
 }
 

@@ -299,7 +299,7 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
     
     const cleanedName = removeSystemPrefix(name);
 
-    return { name: cleanedName, abnormalities };
+    return { name: cleanedName, abnormalities, categoryName: name };
   });
 
   return analysis.filter(category => category.abnormalities.length > 0); // Exclude categories without abnormalities
