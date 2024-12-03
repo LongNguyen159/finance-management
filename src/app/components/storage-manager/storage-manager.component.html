@@ -71,7 +71,13 @@
 
           <!-- ANOMALIES REPORT -->
           <section>
-            <h2 class="font-bold text-2xl mb-4 text-center">Pattern Analysis</h2>
+            <h2 class="font-bold text-2xl mb-6 text-center">Spending Pattern Analysis</h2>
+
+            @if (firstHalf.length == 0 || secondHalf.length == 0) {
+              <p class="text-center">
+                No anomalies detected.
+              </p>
+            }
             <div class="grid grid-cols-2 gap-4">
               <!-- Left Column (1st Set of Categories) -->
               <div class="w-full flex flex-col gap-3">
@@ -122,9 +128,6 @@
                           }
                         </tbody>
                       </table>
-                      @if (category.abnormalities.length === 0) {
-                        <p class="text-gray-500 dark:text-gray-400">No anomalies detected.</p>
-                      }
                     </mat-card-content>
                   </mat-expansion-panel>
                 }
@@ -179,9 +182,6 @@
                           }
                         </tbody>
                       </table>
-                      @if (category.abnormalities.length === 0) {
-                        <p class="text-gray-500 dark:text-gray-400">No anomalies detected.</p>
-                      }
                     </mat-card-content>
                   </mat-expansion-panel>
                 }
@@ -196,7 +196,7 @@
 
         <!-- INCOME/EXPENSE RATIO CHART -->
         <div class="flex flex-col w-full justify-center items-center mb-14">
-          <h2 class="text-2xl font-bold text-center mt-4">Income - Expense Ratio</h2>
+          <h2 class="text-2xl font-bold text-center mt-4">Total Income - Total Expense</h2>
           <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
         </div>
 
