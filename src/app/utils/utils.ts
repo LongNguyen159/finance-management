@@ -246,6 +246,19 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
 
     const abnormalities: Abnormality[] = [];
 
+    console.log('name', name);
+    console.log('values', values);
+    console.log('---------------------')
+    const growthDetected = detectGrowth(values);
+
+    if (growthDetected) {
+      abnormalities.push({
+        type: AbnormalityType.ConsistentGrowth,
+        description: `Spending shows a consistent growth over time.`,
+      });
+    }
+
+
     // Abnormality 1: Single occurrence
     if (nonZeroValues.length === 1) {
       const singleIndex = values.findIndex(value => value > 0);
@@ -258,8 +271,11 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
     }
 
     // Abnormality 2: Spikes
+    let spikedMonths: string[] = []
     values.forEach((value, index) => {
-      if (value > median + 1.2 * stdDev) {
+      if (value > median + 1.5 * stdDev) {
+        spikedMonths.push(months[index]);
+        console.log('spikedMonths', spikedMonths);
         abnormalities.push({
           type: AbnormalityType.Spike,
           description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
@@ -277,11 +293,14 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
         const highMonths = values
           .map((value, index) => value > median + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
           .filter(Boolean) as string[];
+        
+        /** Substring 0-7 means only extract YYYY-MM from the string. */
+        const filteredHighMonths = highMonths.filter((month) => !spikedMonths.includes(month.substring(0, 7)));
 
         if (highMonths.length > 0) {
           abnormalities.push({
             type: AbnormalityType.HighFluctuation,
-            description: `Spending varies noticeably month to month.\nHigher than normal in:\n${highMonths.join("\n")}.`,
+            description: `Spending varies noticeably month to month.\n${filteredHighMonths.length > 0 ? `Higher than normal in:\n${filteredHighMonths.join("\n")}.` : ''}`,
             fluctuation,
           });
         }
@@ -290,11 +309,11 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
         const extremeMonths = values
           .map((value, index) => value > median + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
           .filter(Boolean) as string[];
-
+        const filteredHighMonths = extremeMonths.filter((month) => !spikedMonths.includes(month.substring(0, 7)));
         if (extremeMonths.length > 0) {
           abnormalities.push({
             type: AbnormalityType.ExtremeFluctuation,
-            description: `Spending is highly inconsistent with large ups and downs.\nHigher than normal in:\n${extremeMonths.join("\n")}.`,
+            description: `Spending is highly inconsistent with large ups and downs.\n${filteredHighMonths.length > 0 ? `Higher than normal in:\n${filteredHighMonths.join("\n")}.`: ''}`,
             fluctuation,
           });
         }
@@ -307,6 +326,37 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
   });
 
   return analysis.filter(category => category.abnormalities.length > 0); // Exclude categories without abnormalities
+}
+
+
+function detectGrowth(values: number[]): boolean {
+  // Ensure there are at least 3 values to detect growth
+  if (values.length < 3) {
+    return false;
+  }
+
+  // Calculate the linear regression slope (simple approach)
+  let xSum = 0;
+  let ySum = 0;
+  let x2Sum = 0;
+  let xySum = 0;
+
+  for (let i = 0; i < values.length; i++) {
+    const x = i; // Month index (0, 1, 2, ...)
+    const y = values[i]; // Spending value
+
+    xSum += x;
+    ySum += y;
+    x2Sum += x * x;
+    xySum += x * y;
+  }
+
+  // Calculate slope (m) and intercept (b) for the line equation: y = mx + b
+  const n = values.length;
+  const slope = (n * xySum - xSum * ySum) / (n * x2Sum - xSum * xSum);
+
+  // Check if slope is positive (indicating upward trend)
+  return slope > 0.1; // Threshold to ensure significant growth, can be adjusted
 }
 
 /** Helper function to calculate median values. */
