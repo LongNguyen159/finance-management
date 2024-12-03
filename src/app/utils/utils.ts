@@ -247,7 +247,7 @@ export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol:
       const singleIndex = values.findIndex(value => value > 0);
       abnormalities.push({
         type: AbnormalityType.SingleOccurrence,
-        description: `Unusually high spending in ${months[singleIndex]}: ${currencySymbol}${values[singleIndex].toLocaleString('en-US')}.`,
+        description: `One-time expense recorded in ${months[singleIndex]}: ${currencySymbol}${values[singleIndex].toLocaleString('en-US')}.`,
         month: months[singleIndex],
         value: values[singleIndex],
       });
