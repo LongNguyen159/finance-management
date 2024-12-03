@@ -1,4 +1,4 @@
-import { DifferenceItem, PieData, SYSTEM_PREFIX } from "../components/models";
+import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, PieData, SYSTEM_PREFIX, TrendsLineChartData } from "../components/models";
 import { evaluate } from 'mathjs/number';
 
 //#region Date utils
@@ -150,6 +150,12 @@ export function formatBigNumber(num: number, currencySymbol: string = '', minVal
 //#endregion
 
 
+/** Function to compute differences (in percentage) between two months Pie Data (Top Level expenses, often include categories spending).
+ * @param currentMonth The Pie Data for the current month
+ * @param lastMonth The Pie Data for the last month
+ * 
+ * @returns An array of DifferenceItem objects.
+ */
 export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData[]): DifferenceItem[] {
   const lastMonthMap = new Map(lastMonth.map(item => [item.name, item.value]));
   const differences: DifferenceItem[] = [];
@@ -206,4 +212,95 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
   // }
 
   return differences;
+}
+
+/** Detect Anomalies in Spending of each Categories. */
+export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol: string = ''): AbnormalityAnalysis[] {
+  // Step 1: Aggregate all categories
+  const categoryMap = new Map<string, { values: number[]; months: string[] }>();
+
+  data.forEach(monthData => {
+    monthData.categories.forEach(category => {
+      const categoryName = category.name;
+      if (!categoryMap.has(categoryName)) {
+        categoryMap.set(categoryName, { values: [], months: [] });
+      }
+      const categoryEntry = categoryMap.get(categoryName)!;
+      categoryEntry.values.push(category.value);
+      categoryEntry.months.push(monthData.month);
+    });
+  });
+
+  // Step 2: Detect abnormalities in each category
+  const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
+    const nonZeroValues = values.filter(value => value > 0);
+    const average = nonZeroValues.reduce((sum, val) => sum + val, 0) / nonZeroValues.length;
+
+    // Standard deviation calculation
+    const variance = nonZeroValues.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / nonZeroValues.length;
+    const stdDev = Math.sqrt(variance);
+
+    const abnormalities: Abnormality[] = [];
+
+    // Abnormality 1: Single occurrence
+    if (nonZeroValues.length === 1) {
+      const singleIndex = values.findIndex(value => value > 0);
+      abnormalities.push({
+        type: AbnormalityType.SingleOccurrence,
+        description: `Unusually high spending in ${months[singleIndex]}: ${currencySymbol}${values[singleIndex].toLocaleString('en-US')}.`,
+        month: months[singleIndex],
+        value: values[singleIndex],
+      });
+    }
+
+    // Abnormality 2: Spikes
+    values.forEach((value, index) => {
+      if (value > average + 2 * stdDev) {
+        abnormalities.push({
+          type: AbnormalityType.Spike,
+          description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
+          month: months[index],
+          value: value,
+        });
+      }
+    });
+
+    // Abnormality 3: High fluctuation
+    if (nonZeroValues.length > 1) {
+      const fluctuation = stdDev / average;
+      if (fluctuation >= 0.5 && fluctuation < 1) {
+        // Detecting months where spending is higher than the usual
+        const highMonths = values
+          .map((value, index) => value > average + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+          .filter(Boolean) as string[];
+
+        if (highMonths.length > 0) {
+          abnormalities.push({
+            type: AbnormalityType.HighFluctuation,
+            description: `Spending varies noticeably month to month.\nHigher than normal in:\n${highMonths.join("\n")}.`,
+            fluctuation,
+          });
+        }
+      } else if (fluctuation >= 1) {
+        // Detecting extreme fluctuations
+        const extremeMonths = values
+          .map((value, index) => value > average + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+          .filter(Boolean) as string[];
+
+        if (extremeMonths.length > 0) {
+          abnormalities.push({
+            type: AbnormalityType.ExtremeFluctuation,
+            description: `Spending is highly inconsistent with large ups and downs.\nHigher than normal in:\n${extremeMonths.join("\n")}.`,
+            fluctuation,
+          });
+        }
+      }
+    }
+    
+    const cleanedName = removeSystemPrefix(name);
+
+    return { name: cleanedName, abnormalities };
+  });
+
+  return analysis.filter(category => category.abnormalities.length > 0); // Exclude categories without abnormalities
 }

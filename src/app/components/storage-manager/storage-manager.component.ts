@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityConfig, AbnormalityType, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -11,7 +11,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { formatBigNumber, formatYYYYMMtoDate, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -114,7 +114,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   totalNetIncome: number = 0;
   totalExpenses: number = 0;
 
-  showReports: boolean = false;
+  showReports: boolean = true;
+
+  anomalyReports: any[] = [];
+
 
   private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
   hasDataChanged: boolean = false;
@@ -364,9 +367,20 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     // Compute and update surplus chart data
     this.trendsLineChartData = this.computeSurplusChartData(sortedData);
-
     // Adjust chart scale
     this.getScaleValue();
+
+    /** Get Anomalies Dections */
+    const insights = detectAbnormalities(this.trendsLineChartData, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
+    this.anomalyReports = insights
+
+    this.anomalyReports = this.anomalyReports.map(category => ({
+      ...category,
+      abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
+        ...abnormality,
+        ...this.getAnomaliesConfig(abnormality.type),
+      })),
+    }));
   }
 
   /** Helper function: Calculate and update total net income and expenses */
@@ -679,6 +693,21 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     })
   }
 
+  //#region Getters
+
+  /** Dislay first half and second half in the template */
+  get firstHalf() {
+    return this.anomalyReports.slice(0, Math.ceil(this.anomalyReports.length / 2));
+  }
+
+  get secondHalf() {
+    return this.anomalyReports.slice(Math.ceil(this.anomalyReports.length / 2));
+  }
+
+
+  getAnomaliesConfig(type: AbnormalityType) {
+    return AbnormalityConfig[type];
+  }
 
   isPositiveBalance(): boolean {
     const balanceNumber = parseLocaleStringToNumber(this.calculateTotalSurplusAllTimeFiltered());
@@ -701,4 +730,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return numericBalance >= 0 ? 'positive-balance' : 'negative-balance';
   }
+
+  //#endregion
 }

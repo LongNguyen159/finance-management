@@ -67,6 +67,113 @@
             </button>
           </div>
           <app-trends-line-chart class="w-full" [chartData]="trendsLineChartData" [showCategories]="!showIncomeGrowth" [stackCategories]="stackCategories"></app-trends-line-chart>
+
+
+          <!-- anomalies reports -->
+          <section>
+            <h3 class="font-bold text-xl mb-4 text-center">Anomalies Detection</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Left Column (1st Set of Categories) -->
+              <div class="w-full flex flex-col gap-3">
+                @for (category of firstHalf; track $index) {
+                  <mat-expansion-panel class="no-shadows">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>{{ category.name }}</mat-panel-title>
+                    </mat-expansion-panel-header>
+            
+                    <mat-card-content>
+                      <table class="w-full border-collapse border-spacing-0 border border-gray-300 dark:border-gray-700">
+                        <thead>
+                          <tr>
+                            <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Type</th>
+                            <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (abnormality of category.abnormalities; track $index) {
+                            <tr [ngClass]="{
+                                  'bg-gray-100': !colorService.isDarkMode(),
+                                  'even:bg-gray-200': !colorService.isDarkMode(),
+                                  'odd:bg-white': !colorService.isDarkMode(),
+
+                                  'bg-gray-800': colorService.isDarkMode(),
+                                  'even:bg-gray-700': colorService.isDarkMode(),
+                                  'odd:bg-gray-900': colorService.isDarkMode()
+                                }">
+                              <td class="px-4 py-2 flex items-center gap-2">
+                                <mat-icon
+                                  fontSet="material-symbols-outlined"
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.colorDark : abnormality.colorLight }">
+                                  {{ abnormality.icon }}
+                                </mat-icon>
+                                <strong>{{ abnormality.type }}</strong>
+                              </td>
+                              <td class="px-4 py-2">
+                                <span class="whitespace-pre-line">{{ abnormality.description }}</span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      @if (category.abnormalities.length === 0) {
+                        <p class="text-gray-500 dark:text-gray-400">No anomalies detected.</p>
+                      }
+                    </mat-card-content>
+                  </mat-expansion-panel>
+                }
+              </div>
+            
+              <!-- Right Column (2nd Set of Categories) -->
+              <div class="w-full flex flex-col gap-3">
+                @for (category of secondHalf; track $index) {
+                  <mat-expansion-panel class="no-shadows">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>{{ category.name }}</mat-panel-title>
+                    </mat-expansion-panel-header>
+            
+                    <mat-card-content>
+                      <table class="w-full border-collapse border-spacing-0 border border-gray-300 dark:border-gray-700">
+                        <thead>
+                          <tr>
+                            <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Type</th>
+                            <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (abnormality of category.abnormalities; track $index) {
+                            <tr [ngClass]="{
+                                  'bg-gray-100': !colorService.isDarkMode(),
+                                  'even:bg-gray-200': !colorService.isDarkMode(),
+                                  'odd:bg-white': !colorService.isDarkMode(),
+
+                                  'bg-gray-800': colorService.isDarkMode(),
+                                  'even:bg-gray-700': colorService.isDarkMode(),
+                                  'odd:bg-gray-900': colorService.isDarkMode()
+                                }">
+                              <td class="px-4 py-2 flex items-center gap-2">
+                                <mat-icon
+                                  fontSet="material-symbols-outlined"
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.colorDark : abnormality.colorLight }">
+                                  {{ abnormality.icon }}
+                                </mat-icon>
+                                <strong>{{ abnormality.type }}</strong>
+                              </td>
+                              <td class="px-4 py-2">
+                                <span class="whitespace-pre-line">{{ abnormality.description }}</span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      @if (category.abnormalities.length === 0) {
+                        <p class="text-gray-500 dark:text-gray-400">No anomalies detected.</p>
+                      }
+                    </mat-card-content>
+                  </mat-expansion-panel>
+                }
+              </div>
+            </div>
+          </section>
         </div>
 
 

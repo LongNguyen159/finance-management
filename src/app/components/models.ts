@@ -277,3 +277,84 @@ export interface TreeNode {
   itemStyle?: any;
 }
 //#endregion
+
+
+export interface CategoryAnalysis {
+  name: string;
+  averageSpending: number;
+  spikes: { month: string; value: number }[];
+  totalMonths: number;
+  nonZeroMonths: number;
+  standardDeviation: number;
+}
+export interface CategoryInsight {
+  name: string;
+  insights: { key: string; value: string }[];
+}
+
+
+//#region Abnormality Detection
+// Represents the result of analyzing a category for abnormalities
+export interface AbnormalityAnalysis {
+  name: string;  // The name of the category being analyzed
+  abnormalities: Abnormality[];  // A list of detected abnormalities for the category
+}
+
+
+export enum AbnormalityType {
+  SingleOccurrence = "Single Occurrence",
+  Spike = "Spike",
+  HighFluctuation = "High Fluctuation",
+  ExtremeFluctuation = "Extreme Fluctuation",
+  ConsistentGrowth = "Consistent Growth",
+  FluctuatingGrowth = "Fluctuating Growth",
+}
+
+// Represents an individual abnormality detected in a category
+export interface Abnormality {
+  type: AbnormalityType;
+  description: string;  // A user-friendly description of the abnormality
+  month?: string;  // The month when the abnormality occurred (for single occurrence or spike)
+  value?: number;  // The specific value associated with the abnormality (for spikes or single occurrences)
+  fluctuation?: number;  // The fluctuation value (for high or extreme fluctuations)
+  growthRate?: number;  // The growth rate (for consistent or fluctuating growth)
+}
+
+
+export const AbnormalityConfig: Record<AbnormalityType, { colorDark: string; colorLight: string; icon: string }> = {
+  [AbnormalityType.SingleOccurrence]: {
+    colorDark: "#FFCDD2",  // Light red
+    colorLight: "#B71C1C", // Deep red
+    icon: "warning",       // Material Symbol for warnings
+  },
+  [AbnormalityType.Spike]: {
+    colorDark: "#F8BBD0",  // Pink shade
+    colorLight: "#880E4F", // Dark pink
+    icon: "show_chart",    // Material Symbol for a chart spike
+  },
+  [AbnormalityType.HighFluctuation]: {
+    colorDark: "#BBDEFB",  // Light blue
+    colorLight: "#0D47A1", // Deep blue
+    icon: "trending_up",   // Material Symbol for fluctuation
+  },
+  [AbnormalityType.ExtremeFluctuation]: {
+    colorDark: "#B3E5FC",  // Cyan
+    colorLight: "#006064", // Deep cyan
+    icon: "bolt",          // Material Symbol for extreme change
+  },
+  [AbnormalityType.ConsistentGrowth]: {
+    colorDark: "#C8E6C9",  // Light green
+    colorLight: "#1B5E20", // Dark green
+    icon: "trending_flat", // Material Symbol for consistent growth
+  },
+  [AbnormalityType.FluctuatingGrowth]: {
+    colorDark: "#DCEDC8",  // Lime green
+    colorLight: "#33691E", // Deep lime green
+    icon: "change_circle", // Material Symbol for fluctuating growth
+  },
+};
+
+//#endregion
+
+
+
