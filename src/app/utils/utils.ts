@@ -236,25 +236,25 @@ export function detectAbnormalities(
     
     if (growthDetected && fluctuation < 0.5) {
       abnormalities.push({
-        type: AbnormalityType.ConsistentGrowth,
-        description: `Spending shows consistent growth over time.`,
+        type: AbnormalityType.Growth,
+        description: `Spending for ${removeSystemPrefix(name)} seems to have a rising pattern`,
       });
     }
 
     if (growthDetected && fluctuation >= 0.5) {
       abnormalities.push({
         type: AbnormalityType.FluctuatingGrowth,
-        description: `Spending grows overall with significant fluctuations.`,
+        description: `Your spending on ${removeSystemPrefix(name)} fluctuates a lot and tends to grow over time.`,
       });
     }
 
 
-    const isSingleOccurence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
+    const isSingleOccurrence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
     const spikeIndices = detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
     detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     const cleanedName = removeSystemPrefix(name);
-    return { name: cleanedName, abnormalities, categoryName: name, totalSpending: isSingleOccurence ? 0 : Math.round(total * 100) / 100 };
+    return { name: cleanedName, abnormalities, categoryName: name, totalSpending: isSingleOccurrence ? 0 : Math.round(total * 100) / 100 };
   });
 
   /** Filter out categories with no anomalies. */
@@ -389,7 +389,7 @@ function calculateMedian(values: number[]): number {
 
 
 
-/** Detect upward trend with linear regressinon.
+/** Detect upward trend with linear regression.
  * @param data The data to analyze
  * @param smoothingWindow The window size for moving average smoothing
  * 
@@ -430,7 +430,7 @@ function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
 
   const normalizedSlope = m / range;
 
-  /** If the slope is positive, we have an upward trend. Ajdust the threshold as needed.
+  /** If the slope is positive, we have an upward trend. Adjust the threshold as needed.
    * 0 means detect even slight upward trends. The larger the value, the more pronounced the trend must be.
    */
   return normalizedSlope > 0.002;

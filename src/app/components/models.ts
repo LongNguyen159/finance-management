@@ -308,7 +308,7 @@ export enum AbnormalityType {
   Spike = "Spike",
   HighFluctuation = "High Fluctuation",
   ExtremeFluctuation = "Extreme Fluctuation",
-  ConsistentGrowth = "Consistent Growth",
+  Growth = "Growth",
   FluctuatingGrowth = "Fluctuating Growth",
 }
 
@@ -344,7 +344,7 @@ export const AbnormalityConfig: Record<AbnormalityType, { colorDark: string; col
     colorLight: "#006064", // Deep cyan
     icon: "bolt",          // Material Symbol for extreme change
   },
-  [AbnormalityType.ConsistentGrowth]: {
+  [AbnormalityType.Growth]: {
     colorDark: "#C8E6C9",  // Light green
     colorLight: "#1B5E20", // Dark green
     icon: "trending_flat", // Material Symbol for consistent growth
