@@ -26,10 +26,10 @@ export class UiService {
    * @param dialogData Data to be displayed in the dialog
    * @returns Observable<boolean> that emits true if confirmed, false if canceled.
    */
-  openConfirmDialog(dialogData: ConfirmDialogData) {
+  openConfirmDialog(dialogData: ConfirmDialogData, width: string = '50vw', height: string = '14rem') {
     const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '50vw',
-      height: '14rem',
+      width: width,
+      height: height,
       maxHeight: '80vh',
       data: dialogData
     });
