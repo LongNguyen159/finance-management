@@ -214,7 +214,6 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
   return differences;
 }
 
-/** Detect Anomalies in Spending of each Categories. */
 /** Detect Anomalies in Spending of each Category. */
 export function detectAbnormalities(
   data: TrendsLineChartData[],
@@ -231,11 +230,7 @@ export function detectAbnormalities(
     const abnormalities: Abnormality[] = [];
     const fluctuation = calculateFluctuation(nonZeroValues, median, stdDev);
 
-    console.log('category', name)
     const growthDetected = isUpwardTrend(values);
-    console.log('growthDetected', growthDetected)
-    console.log('fluctuation', fluctuation)
-    console.log('-----------------')
     
     if (growthDetected && fluctuation < 0.5) {
       abnormalities.push({
@@ -247,14 +242,14 @@ export function detectAbnormalities(
     if (growthDetected && fluctuation >= 0.5) {
       abnormalities.push({
         type: AbnormalityType.FluctuatingGrowth,
-        description: `Spending grows overall but with significant fluctuations.`,
+        description: `Spending grows overall with significant fluctuations.`,
       });
     }
 
 
     detectSingleOccurrence(values, months, abnormalities, currencySymbol);
-    detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
-    detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol);
+    const spikeIndices = detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
+    detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     const cleanedName = removeSystemPrefix(name);
     return { name: cleanedName, abnormalities, categoryName: name };
@@ -313,9 +308,12 @@ function detectSpikes(
   median: number,
   stdDev: number,
   currencySymbol: string
-): void {
+): Set<number> {
+  const spikeIndices = new Set<number>();
+
   values.forEach((value, index) => {
     if (value > median + 1.5 * stdDev) {
+      spikeIndices.add(index); // Add the month index to the spike set
       abnormalities.push({
         type: AbnormalityType.Spike,
         description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
@@ -324,6 +322,8 @@ function detectSpikes(
       });
     }
   });
+
+  return spikeIndices;
 }
 
 /** Step 6: Detect fluctuations. */
@@ -334,11 +334,16 @@ function detectFluctuations(
   fluctuation: number,
   median: number,
   stdDev: number,
-  currencySymbol: string
+  currencySymbol: string,
+  excludedIndices: Set<number>
 ): void {
   if (fluctuation >= 0.5 && fluctuation < 1) {
     const highMonths = values
-      .map((value, index) => value > median + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+      .map((value, index) =>
+        !excludedIndices.has(index) && value > median + stdDev
+          ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})`
+          : null
+      )
       .filter(Boolean) as string[];
 
     if (highMonths.length > 0) {
@@ -350,7 +355,11 @@ function detectFluctuations(
     }
   } else if (fluctuation >= 1) {
     const extremeMonths = values
-      .map((value, index) => value > median + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+      .map((value, index) =>
+        !excludedIndices.has(index) && value > median + 2 * stdDev
+          ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})`
+          : null
+      )
       .filter(Boolean) as string[];
 
     if (extremeMonths.length > 0) {
@@ -386,12 +395,10 @@ function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
       return false; // No trend or insufficient data
   }
 
-  console.log('raw data', data)
 
   // Apply moving average to smooth out fluctuations
   const smoothedData = movingAverage(data, smoothingWindow);
 
-  console.log('smoothed data', smoothedData)
 
   // Calculate the linear regression slope (m) on the smoothed data
   const n = smoothedData.length;
