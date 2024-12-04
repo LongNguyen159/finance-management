@@ -9,10 +9,6 @@
                 <!-- SANKEY CHART -->
                 <section>
                     <div class="flex flex-row w-full items-center justify-end gap-4">
-                        <!-- <button mat-button (click)="dialogService.openInsertIntoDialog()">
-                            <mat-icon>add</mat-icon>
-                            <span>Insert Into</span>
-                        </button> -->
                         <div class="flex flex-row items-center gap-1">
                             <div class="text-sm">Vertical View</div>
                             <div>
@@ -21,9 +17,9 @@
                         </div>
 
                         <div class="flex flex-row items-center gap-1">
-                            <div class="text-sm">Show Insights</div>
+                            <div class="text-sm">Show Trends</div>
                             <div>
-                                <mat-slide-toggle [(ngModel)]="isShowInsights" color="primary" labelPosition="before"></mat-slide-toggle>
+                                <mat-slide-toggle matTooltip="Show trends compared to last month" [matTooltipShowDelay]="800" [(ngModel)]="isShowInsights" color="primary" labelPosition="before"></mat-slide-toggle>
                             </div>
                         </div>
                     </div>

@@ -26,6 +26,7 @@ import { Router } from '@angular/router';
 import { RoutePath } from '../../components/models';
 import { TreemapChartComponent } from "../../components/charts/treemap-chart/treemap-chart.component";
 import { calculateDifferences, getLastMonth, removeSystemPrefix } from '../../utils/utils';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -33,7 +34,9 @@ import { calculateDifferences, getLastMonth, removeSystemPrefix } from '../../ut
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, MatDividerModule,
     NavbarComponent, MonthPickerComponent,
     MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
-    MatSlideToggleModule, FormsModule, TreemapChartComponent],
+    MatSlideToggleModule, FormsModule, TreemapChartComponent,
+    MatTooltipModule
+  ],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
   encapsulation: ViewEncapsulation.None,
