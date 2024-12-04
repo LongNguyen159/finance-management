@@ -28,6 +28,7 @@ import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.com
 import { MatDividerModule } from '@angular/material/divider';
 import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-picker.component";
 import { TrendsLineChartComponent } from "../charts/trends-line-chart/trends-line-chart.component";
+import { DialogsService } from '../../services/dialogs.service';
 
 @Component({
   selector: 'app-storage-manager',
@@ -55,6 +56,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   dialog = inject(MatDialog);
   currencyPipe = inject(CurrencyPipe);
   currencyService = inject(CurrencyService);
+  dialogService = inject(DialogsService)
 
   /** Months data stored in local storage */
   allMonthsData: MonthlyData = {};
@@ -752,5 +754,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#endregion
 
   openInsightsDialog() {
+    this.dialogService.openInsightsDialog()
   }
 }

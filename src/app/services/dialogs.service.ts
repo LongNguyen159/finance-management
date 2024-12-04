@@ -4,6 +4,7 @@ import { DidYouKnowDialogComponent } from '../components/dialogs/did-you-know-di
 import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/settings-dialog.component';
 import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
 import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expense-dialog/insert-expense-dialog.component';
+import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/insights-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +37,15 @@ export class DialogsService {
         // height: '27rem',
         // maxHeight: '90vh',
         data: entryToModify
+    })
+  }
+
+  openInsightsDialog() {
+    this.dialog.open(InsightsDialogComponent, {
+      width: '55rem',
+        maxWidth: '70vw',
+        height: '35rem',
+        maxHeight: '90vh',
     })
   }
 
