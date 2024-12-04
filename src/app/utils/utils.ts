@@ -225,6 +225,8 @@ export function detectAbnormalities(
   const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
     const nonZeroValues = values.filter(value => value > 0);
     const median = calculateMedian(nonZeroValues);
+    const total = nonZeroValues.reduce((sum, value) => sum + value, 0);
+
     const stdDev = calculateStdDev(nonZeroValues, median);
 
     const abnormalities: Abnormality[] = [];
@@ -247,15 +249,16 @@ export function detectAbnormalities(
     }
 
 
-    detectSingleOccurrence(values, months, abnormalities, currencySymbol);
+    const isSingleOccurence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
     const spikeIndices = detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
     detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     const cleanedName = removeSystemPrefix(name);
-    return { name: cleanedName, abnormalities, categoryName: name };
+    return { name: cleanedName, abnormalities, categoryName: name, totalSpending: isSingleOccurence ? 0 : Math.round(total * 100) / 100 };
   });
 
-  return analysis.filter(category => category.abnormalities.length > 0);
+  /** Filter out categories with no anomalies. */
+  return analysis
 }
 
 /** Step 1: Aggregate data by category. */
@@ -288,7 +291,7 @@ function calculateFluctuation(values: number[], median: number, stdDev: number):
 }
 
 /** Step 4: Detect single occurrences. */
-function detectSingleOccurrence(values: number[], months: string[], abnormalities: Abnormality[], currencySymbol: string): void {
+function detectSingleOccurrence(values: number[], months: string[], abnormalities: Abnormality[], currencySymbol: string): boolean {
   if (values.filter(value => value > 0).length === 1) {
     const singleIndex = values.findIndex(value => value > 0);
     abnormalities.push({
@@ -297,7 +300,9 @@ function detectSingleOccurrence(values: number[], months: string[], abnormalitie
       month: months[singleIndex],
       value: values[singleIndex],
     });
+    return true;
   }
+  return false;
 }
 
 /** Step 5: Detect spikes. */

@@ -32,3 +32,10 @@
     // background-color: rgb(62,62,62) !important; /* Darker gray for dark mode */
     background-color: #353535 !important; /* Darker gray for dark mode */
 }
+
+
+.custom-header.mat-expansion-panel-header {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    height: auto !important;
+}

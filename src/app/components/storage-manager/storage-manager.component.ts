@@ -387,6 +387,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         categoryIcon: categoryDetails?.icon || 'category',  // Fallback icon
         categoryColorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
         categoryColorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
+        averageSpending: category.totalSpending / allMonths.length,
         abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
           ...abnormality,
           ...this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
@@ -746,6 +747,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return numericBalance >= 0 ? 'positive-balance' : 'negative-balance';
   }
+
 
   //#endregion
 

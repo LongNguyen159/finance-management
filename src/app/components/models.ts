@@ -299,6 +299,7 @@ export interface AbnormalityAnalysis {
   name: string;  // The name of the category being analyzed
   categoryName: string;  // The user-friendly name of the category
   abnormalities: Abnormality[];  // A list of detected abnormalities for the category
+  totalSpending?: number;  // The average spending for the category
 }
 
 

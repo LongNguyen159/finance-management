@@ -98,7 +98,7 @@
               <div class="w-full flex flex-col gap-3">
                 @for (category of firstHalf; track $index) {
                   <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
-                    <mat-expansion-panel-header>
+                    <mat-expansion-panel-header class="custom-header">
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
                           <span class="flex flex-row items-center">
@@ -107,6 +107,9 @@
                           <span class="flex flex-row items-center">{{ category.name }}</span>
                         </div>
                       </mat-panel-title>
+                      @if (category.averageSpending && category.averageSpending > 0) {
+                        <mat-panel-description>Monthly average: {{ category.averageSpending | currency: currencyService.getSelectedCurrency() }}</mat-panel-description>
+                      }
                     </mat-expansion-panel-header>
             
                     <mat-card-content>
@@ -152,7 +155,7 @@
               <div class="w-full flex flex-col gap-3">
                 @for (category of secondHalf; track $index) {
                   <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
-                    <mat-expansion-panel-header>
+                    <mat-expansion-panel-header class="custom-header">
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
                           <span class="flex flex-row items-center">
@@ -161,6 +164,9 @@
                           <span class="flex flex-row items-center">{{ category.name }}</span>
                         </div>
                       </mat-panel-title>
+                      @if (category.averageSpending && category.averageSpending > 0) {
+                        <mat-panel-description>Monthly average: {{ category.averageSpending | currency: currencyService.getSelectedCurrency() }}</mat-panel-description>
+                      }
                     </mat-expansion-panel-header>
             
                     <mat-card-content>
