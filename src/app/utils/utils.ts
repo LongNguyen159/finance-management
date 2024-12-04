@@ -215,160 +215,222 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
 }
 
 /** Detect Anomalies in Spending of each Categories. */
-export function detectAbnormalities(data: TrendsLineChartData[], currencySymbol: string = ''): AbnormalityAnalysis[] {
-  // Step 1: Aggregate all categories
+/** Detect Anomalies in Spending of each Category. */
+export function detectAbnormalities(
+  data: TrendsLineChartData[],
+  currencySymbol: string = ''
+): AbnormalityAnalysis[] {
+  const categoryMap = aggregateCategoryData(data);
+
+  // Analyze each category
+  const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
+    const nonZeroValues = values.filter(value => value > 0);
+    const median = calculateMedian(nonZeroValues);
+    const stdDev = calculateStdDev(nonZeroValues, median);
+
+    const abnormalities: Abnormality[] = [];
+    const fluctuation = calculateFluctuation(nonZeroValues, median, stdDev);
+
+    console.log('category', name)
+    const growthDetected = isUpwardTrend(values);
+    console.log('growthDetected', growthDetected)
+    console.log('fluctuation', fluctuation)
+    console.log('-----------------')
+    
+    if (growthDetected && fluctuation < 0.5) {
+      abnormalities.push({
+        type: AbnormalityType.ConsistentGrowth,
+        description: `Spending shows consistent growth over time.`,
+      });
+    }
+
+    if (growthDetected && fluctuation >= 0.5) {
+      abnormalities.push({
+        type: AbnormalityType.FluctuatingGrowth,
+        description: `Spending grows overall but with significant fluctuations.`,
+      });
+    }
+
+
+    detectSingleOccurrence(values, months, abnormalities, currencySymbol);
+    detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
+    detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol);
+
+    const cleanedName = removeSystemPrefix(name);
+    return { name: cleanedName, abnormalities, categoryName: name };
+  });
+
+  return analysis.filter(category => category.abnormalities.length > 0);
+}
+
+/** Step 1: Aggregate data by category. */
+function aggregateCategoryData(data: TrendsLineChartData[]): Map<string, { values: number[]; months: string[] }> {
   const categoryMap = new Map<string, { values: number[]; months: string[] }>();
 
   data.forEach(monthData => {
     monthData.categories.forEach(category => {
-      const categoryName = category.name;
-      if (!categoryMap.has(categoryName)) {
-        categoryMap.set(categoryName, { values: [], months: [] });
+      if (!categoryMap.has(category.name)) {
+        categoryMap.set(category.name, { values: [], months: [] });
       }
-      const categoryEntry = categoryMap.get(categoryName)!;
+      const categoryEntry = categoryMap.get(category.name)!;
       categoryEntry.values.push(category.value);
       categoryEntry.months.push(monthData.month);
     });
   });
 
-  // Step 2: Detect abnormalities in each category
-  const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
-    const nonZeroValues = values.filter(value => value > 0);
+  return categoryMap;
+}
 
-    const median = calculateMedian(nonZeroValues);
+/** Step 2: Calculate standard deviation. */
+function calculateStdDev(values: number[], median: number): number {
+  const variance = values.reduce((sum, val) => sum + Math.pow(val - median, 2), 0) / values.length;
+  return Math.sqrt(variance);
+}
 
-    // Standard deviation calculation
-    const variance = nonZeroValues.reduce((sum, val) => sum + Math.pow(val - median, 2), 0) / nonZeroValues.length;
-    const stdDev = Math.sqrt(variance);
+/** Step 3: Calculate fluctuation as a coefficient of variation. */
+function calculateFluctuation(values: number[], median: number, stdDev: number): number {
+  return stdDev / median;
+}
 
-    // Spike threshold
-    const spikeThreshold = median * 1.5;
-
-    const abnormalities: Abnormality[] = [];
-
-    console.log('name', name);
-    console.log('values', values);
-    console.log('---------------------')
-    const growthDetected = detectGrowth(values);
-
-    if (growthDetected) {
-      abnormalities.push({
-        type: AbnormalityType.ConsistentGrowth,
-        description: `Spending shows a consistent growth over time.`,
-      });
-    }
-
-
-    // Abnormality 1: Single occurrence
-    if (nonZeroValues.length === 1) {
-      const singleIndex = values.findIndex(value => value > 0);
-      abnormalities.push({
-        type: AbnormalityType.SingleOccurrence,
-        description: `One-time expense recorded in ${months[singleIndex]}: ${currencySymbol}${values[singleIndex].toLocaleString('en-US')}.`,
-        month: months[singleIndex],
-        value: values[singleIndex],
-      });
-    }
-
-    // Abnormality 2: Spikes
-    let spikedMonths: string[] = []
-    values.forEach((value, index) => {
-      if (value > median + 1.5 * stdDev) {
-        spikedMonths.push(months[index]);
-        console.log('spikedMonths', spikedMonths);
-        abnormalities.push({
-          type: AbnormalityType.Spike,
-          description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
-          month: months[index],
-          value: value,
-        });
-      }
+/** Step 4: Detect single occurrences. */
+function detectSingleOccurrence(values: number[], months: string[], abnormalities: Abnormality[], currencySymbol: string): void {
+  if (values.filter(value => value > 0).length === 1) {
+    const singleIndex = values.findIndex(value => value > 0);
+    abnormalities.push({
+      type: AbnormalityType.SingleOccurrence,
+      description: `One-time expense recorded in ${months[singleIndex]}: ${currencySymbol}${values[singleIndex].toLocaleString('en-US')}.`,
+      month: months[singleIndex],
+      value: values[singleIndex],
     });
+  }
+}
 
-    // Abnormality 3: High fluctuation
-    if (nonZeroValues.length > 1) {
-      const fluctuation = stdDev / median;
-      if (fluctuation >= 0.5 && fluctuation < 1) {
-        // Detecting months where spending is higher than the usual
-        const highMonths = values
-          .map((value, index) => value > median + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
-          .filter(Boolean) as string[];
-        
-        /** Substring 0-7 means only extract YYYY-MM from the string. */
-        const filteredHighMonths = highMonths.filter((month) => !spikedMonths.includes(month.substring(0, 7)));
-
-        if (highMonths.length > 0) {
-          abnormalities.push({
-            type: AbnormalityType.HighFluctuation,
-            description: `Spending varies noticeably month to month.\n${filteredHighMonths.length > 0 ? `Higher than normal in:\n${filteredHighMonths.join("\n")}.` : ''}`,
-            fluctuation,
-          });
-        }
-      } else if (fluctuation >= 1) {
-        // Detecting extreme fluctuations
-        const extremeMonths = values
-          .map((value, index) => value > median + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
-          .filter(Boolean) as string[];
-        const filteredHighMonths = extremeMonths.filter((month) => !spikedMonths.includes(month.substring(0, 7)));
-        if (extremeMonths.length > 0) {
-          abnormalities.push({
-            type: AbnormalityType.ExtremeFluctuation,
-            description: `Spending is highly inconsistent with large ups and downs.\n${filteredHighMonths.length > 0 ? `Higher than normal in:\n${filteredHighMonths.join("\n")}.`: ''}`,
-            fluctuation,
-          });
-        }
-      }
+/** Step 5: Detect spikes. */
+function detectSpikes(
+  values: number[],
+  months: string[],
+  abnormalities: Abnormality[],
+  median: number,
+  stdDev: number,
+  currencySymbol: string
+): void {
+  values.forEach((value, index) => {
+    if (value > median + 1.5 * stdDev) {
+      abnormalities.push({
+        type: AbnormalityType.Spike,
+        description: `Spending spike in ${months[index]}: ${currencySymbol}${value.toLocaleString('en-US')}.`,
+        month: months[index],
+        value: value,
+      });
     }
-    
-    const cleanedName = removeSystemPrefix(name);
-
-    return { name: cleanedName, abnormalities, categoryName: name };
   });
-
-  return analysis.filter(category => category.abnormalities.length > 0); // Exclude categories without abnormalities
 }
 
+/** Step 6: Detect fluctuations. */
+function detectFluctuations(
+  values: number[],
+  months: string[],
+  abnormalities: Abnormality[],
+  fluctuation: number,
+  median: number,
+  stdDev: number,
+  currencySymbol: string
+): void {
+  if (fluctuation >= 0.5 && fluctuation < 1) {
+    const highMonths = values
+      .map((value, index) => value > median + stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+      .filter(Boolean) as string[];
 
-function detectGrowth(values: number[]): boolean {
-  // Ensure there are at least 3 values to detect growth
-  if (values.length < 3) {
-    return false;
+    if (highMonths.length > 0) {
+      abnormalities.push({
+        type: AbnormalityType.HighFluctuation,
+        description: `Spending varies noticeably month to month. Higher than normal in:\n${highMonths.join("\n")}.`,
+        fluctuation,
+      });
+    }
+  } else if (fluctuation >= 1) {
+    const extremeMonths = values
+      .map((value, index) => value > median + 2 * stdDev ? `${months[index]} (${currencySymbol}${value.toLocaleString('en-US')})` : null)
+      .filter(Boolean) as string[];
+
+    if (extremeMonths.length > 0) {
+      abnormalities.push({
+        type: AbnormalityType.ExtremeFluctuation,
+        description: `Spending is highly inconsistent with large ups and downs. Higher than normal in:\n${extremeMonths.join("\n")}.`,
+        fluctuation,
+      });
+    }
   }
-
-  // Calculate the linear regression slope (simple approach)
-  let xSum = 0;
-  let ySum = 0;
-  let x2Sum = 0;
-  let xySum = 0;
-
-  for (let i = 0; i < values.length; i++) {
-    const x = i; // Month index (0, 1, 2, ...)
-    const y = values[i]; // Spending value
-
-    xSum += x;
-    ySum += y;
-    x2Sum += x * x;
-    xySum += x * y;
-  }
-
-  // Calculate slope (m) and intercept (b) for the line equation: y = mx + b
-  const n = values.length;
-  const slope = (n * xySum - xSum * ySum) / (n * x2Sum - xSum * xSum);
-
-  // Check if slope is positive (indicating upward trend)
-  return slope > 0.1; // Threshold to ensure significant growth, can be adjusted
 }
 
-/** Helper function to calculate median values. */
+/** Helper function: Calculate median. */
 function calculateMedian(values: number[]): number {
-  const sortedValues = values.sort((a, b) => a - b);
+  const sortedValues = [...values].sort((a, b) => a - b);
   const n = sortedValues.length;
-  
-  if (n % 2 === 1) {
-    // Odd number of elements, return the middle element
-    return sortedValues[Math.floor(n / 2)];
-  } else {
-    // Even number of elements, return the average of the two middle elements
-    return (sortedValues[n / 2 - 1] + sortedValues[n / 2]) / 2;
+  return n % 2 === 0
+    ? (sortedValues[n / 2 - 1] + sortedValues[n / 2]) / 2
+    : sortedValues[Math.floor(n / 2)];
+}
+
+
+
+
+/** Detect upward trend with linear regressinon.
+ * @param data The data to analyze
+ * @param smoothingWindow The window size for moving average smoothing
+ * 
+ * @returns True if an upward trend is detected, false otherwise
+ */
+function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
+  if (data.length <= 1) {
+      return false; // No trend or insufficient data
   }
+
+  console.log('raw data', data)
+
+  // Apply moving average to smooth out fluctuations
+  const smoothedData = movingAverage(data, smoothingWindow);
+
+  console.log('smoothed data', smoothedData)
+
+  // Calculate the linear regression slope (m) on the smoothed data
+  const n = smoothedData.length;
+  const sumX = (n - 1) * n / 2; // Sum of indices (0, 1, 2, ..., n-1)
+  const sumY = smoothedData.reduce((sum, value) => sum + value, 0); // Sum of all smoothed data points
+  const sumXY = smoothedData.reduce((sum, value, index) => sum + (index * value), 0); // Sum of x * y
+  const sumX2 = smoothedData.reduce((sum, _, index) => sum + (index * index), 0); // Sum of x^2
+
+  // Calculate the slope (m)
+  const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const range = Math.max(...smoothedData) - Math.min(...smoothedData);
+
+  // Calculate the mean of the smoothed data
+  const meanY = sumY / n;
+
+  // Normalize the slope to calculate growth rate as a percentage
+  const growthRate = (m / meanY) * 100;
+  
+
+  // Handle edge case where range is 0
+  if (range === 0) {
+    return false; // No variation, no trend
+  }
+
+  const normalizedSlope = m / range;
+
+  /** If the slope is positive, we have an upward trend. Ajdust the threshold as needed.
+   * 0 means detect even slight upward trends. The larger the value, the more pronounced the trend must be.
+   */
+  return normalizedSlope > 0.002;
+}
+function movingAverage(data: number[], windowSize: number): number[] {
+  const result = [];
+  for (let i = 0; i < data.length; i++) {
+      const start = Math.max(0, i - Math.floor(windowSize / 2));
+      const end = Math.min(data.length - 1, i + Math.floor(windowSize / 2));
+      const window = data.slice(start, end + 1);
+      const avg = window.reduce((sum, num) => sum + num, 0) / window.length;
+      result.push(avg);
+  }
+  return result;
 }
