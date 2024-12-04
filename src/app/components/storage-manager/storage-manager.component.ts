@@ -118,6 +118,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   anomalyReports: any[] = [];
 
+  anomalyReportsExpanded: boolean = true;
 
   private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
   hasDataChanged: boolean = false;
@@ -661,6 +662,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   toggleScaleBarChart() {
     this.isBarChartScaled = !this.isBarChartScaled;
     this.getScaleValue();
+  }
+
+  toggleAnomalyReports() {
+    this.anomalyReportsExpanded = !this.anomalyReportsExpanded;
   }
   //#endregion
 

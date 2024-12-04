@@ -71,7 +71,22 @@
 
           <!-- ANOMALIES REPORT -->
           <section>
-            <h2 class="font-bold text-2xl mb-6 text-center">Spending Pattern Analysis</h2>
+            <div class="flex flex-col w-full justify-center items-center gap-2 mb-6">
+              <h2 class="font-bold text-2xl text-center">Spending Pattern Analysis</h2>
+              <button mat-button>
+                <div class="flex flex-row gap-2 items-center">
+                  <mat-icon fontSet="material-symbols-outlined">lightbulb_2</mat-icon>
+                  <span>Insights</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="flex flex-row w-full justify-end mb-2">
+              <button mat-button (click)="toggleAnomalyReports()">
+                <mat-icon>{{ anomalyReportsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                {{ anomalyReportsExpanded ? 'Close All' : 'Open All' }}
+              </button>
+            </div>
 
             @if (firstHalf.length == 0 || secondHalf.length == 0) {
               <p class="text-center">
@@ -82,7 +97,7 @@
               <!-- Left Column (1st Set of Categories) -->
               <div class="w-full flex flex-col gap-3">
                 @for (category of firstHalf; track $index) {
-                  <mat-expansion-panel class="no-shadows">
+                  <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
                     <mat-expansion-panel-header>
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
@@ -136,7 +151,7 @@
               <!-- Right Column (2nd Set of Categories) -->
               <div class="w-full flex flex-col gap-3">
                 @for (category of secondHalf; track $index) {
-                  <mat-expansion-panel class="no-shadows">
+                  <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
                     <mat-expansion-panel-header>
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
