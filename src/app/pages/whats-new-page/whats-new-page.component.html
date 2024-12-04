@@ -11,59 +11,39 @@
     <!-- CONTENTS -->
     <div class="page-container">
 
-        <div class="feature-card grid-display">
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">Interactive Sankey Editing</h2>
-                <span>
-                    Edit values <strong>directly by clicking on Sankey nodes</strong>. This new feature makes refining your data faster and easier than ever before.
-                </span>
-            </div>
-
-            <div class="image-section">
-                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/sankey-click-dark.png' : 'assets/images/whats-new/sankey-click-light.png'" alt="whats-new">
-            </div>
-        </div>
-
-        
-
-        <div class="feature-card grid-display">
-            <div class="image-section">
-                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/logs-dark.png' : 'assets/images/whats-new/logs-light.png'" alt="whats-new">
-            </div>
-
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">History: Recall Your Inputs</h2>
-                <span>
-                    Long calculations? No problem! The new <strong>History</strong> feature keeps track of your most recent 5 entries in the 'Amount' field. Review recent changes with ease and focus on your totals, worry-free.
-                </span>
-            </div>
-        </div>
-
-        <div class="feature-card grid-display">
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">Finance Manager: Fresher Look, Better Insights</h2>
-                <h3 class="font-bold text-xl mt-3">New "Balance" Tracking</h3>
-                <span>
-                    Gives you a clearer, more complete view of your finances.
-                </span>
-                <br>
-        
-                <h3 class="font-bold text-xl">Sleeker UI</h3>
-                <span>
-                    A streamlined, intuitive interface for effortless navigation and data management.
-                </span>
-        
-                <br>
-            </div>
+        <!-- <div class="feature-card grid-display">
             
-            <div class="image-section">
-                <img class="object-cover h-full w-[800px] image p-3 pt-4"
-                    [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'"
-                    [src]="colorService.isDarkMode() ? 'assets/images/manager-dark.png' : 'assets/images/manager-light.png'"
-                    alt="Finance Manager">
+        </div> -->
+        <div class="flex flex-col w-[75vw] max-w-[1240px] min-w-[600px]">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Spending Pattern Recognition</h2>
+                <span>
+                    Spot spending patterns with <strong>Advanced Machine Learning Algorithms and Statistics</strong>. This powerful feature helps you make smarter financial decisions by understanding your habits.
+                </span>
+            </div>
+            <div class="flex flex-row gap-4 items-stretch">
+                <div class="image-section">
+                    <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/pattern-chart-dark.png' : 'assets/images/whats-new/pattern-chart-light.png'" alt="whats-new">
+                </div>
+                <div class="image-section">
+                    <img class="object-contain w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/pattern-detail-dark.png' : 'assets/images/whats-new/pattern-detail-light.png'" alt="whats-new">
+                </div>
             </div>
         </div>
+        
 
+        <div class="feature-card grid-display">
+            <div class="text-section">
+                <h2 class="font-bold mb-4 text-3xl">Current Trends: Compare Spending Across Months</h2>
+                <span>
+                    Stay on top of your finances with the new <strong>Current Trends</strong> feature. Easily compare your spending in each category from the current month to the previous month, giving you a clear view of your financial progress.
+                </span>
+            </div>
+        
+            <div class="image-section">
+                <img class="object-cover w-[600px] h-full image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/whats-new/trend-chip-dark.png' : 'assets/images/whats-new/trend-chip-light.png'" alt="whats-new">
+            </div>
+        </div>
 
         <div>
             <mat-card class="flex flex-col items-center gap-2 w-full px-40 py-20 !rounded-[28px] max-w-[1240px]">
