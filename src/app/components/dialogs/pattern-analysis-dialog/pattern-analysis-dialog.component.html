@@ -1,0 +1,9 @@
+<h2 mat-dialog-title class="!font-bold text-2xl">Analysis for {{ data.categoryName }} </h2>
+<mat-dialog-content class="mat-typography">
+    <div class="p-4">
+        <app-category-regression-chart [chartData]="data" ></app-category-regression-chart>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button [mat-dialog-close]="true" cdkFocusInitial>Close</button>
+</mat-dialog-actions>

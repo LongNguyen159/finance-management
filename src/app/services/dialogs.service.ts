@@ -5,6 +5,8 @@ import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/s
 import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
 import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expense-dialog/insert-expense-dialog.component';
 import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/insights-dialog.component';
+import { PatternAnalysisDialogComponent } from '../components/dialogs/pattern-analysis-dialog/pattern-analysis-dialog.component';
+import { AbnormalityChartdata } from '../components/models';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +39,17 @@ export class DialogsService {
         // height: '27rem',
         // maxHeight: '90vh',
         data: entryToModify
+    })
+  }
+
+
+  openPatternAnalysisDialog(chartData: AbnormalityChartdata) {
+    this.dialog.open(PatternAnalysisDialogComponent, {
+      width: '75rem',
+      height: '83vh',
+      maxHeight: '90vh',
+      maxWidth: '98vw',
+      data: chartData
     })
   }
 

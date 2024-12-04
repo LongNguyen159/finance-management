@@ -24,8 +24,5 @@ export class BaseChartComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this._chartInstance && !this._chartInstance.isDisposed()) {
-      this._chartInstance?.dispose();
-    }
   }
 }

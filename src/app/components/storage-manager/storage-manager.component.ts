@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { Abnormality, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -377,6 +377,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const insights = detectAbnormalities(this.trendsLineChartData, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
     this.anomalyReports = insights
 
+    console.log('Anomaly Reports:', this.anomalyReports)
+
     // Enrich the anomalyReports with category icon and color at root level
     this.anomalyReports = this.anomalyReports.map(category => {
       // Lookup category icon and color from the expenseCategoryDetails based on category.name
@@ -396,6 +398,26 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         })),
       };
     });
+  }
+
+  /** Plot the raw values & fitted values of the selected category.
+   * @param categoryName: string: Name of the category (raw, with system prefix to pinpoint instead of confusion)
+   */
+  getCategoryPlotData(categoryName: string) {
+    const matchingCategory = this.anomalyReports.find(category => category.categoryName === categoryName);
+
+    if (!matchingCategory) {
+      return;
+    }
+
+    // Extract raw values & fitted values and open the dialog to plot them.
+    const chartData: AbnormalityChartdata = {
+      categoryName: removeSystemPrefix(categoryName),
+      rawValues: matchingCategory.rawValues,
+      fittedValues: matchingCategory.fittedValues,
+      xAxisData: matchingCategory.xAxisData,
+    }
+    this.dialogService.openPatternAnalysisDialog(chartData)
   }
 
   /** Helper function: Calculate and update total net income and expenses */

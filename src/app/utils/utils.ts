@@ -214,6 +214,9 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
   return differences;
 }
 
+
+//#region Abnormality Detection
+
 /** Detect Anomalies in Spending of each Category. */
 export function detectAbnormalities(
   data: TrendsLineChartData[],
@@ -234,19 +237,23 @@ export function detectAbnormalities(
 
     const growthDetected = isUpwardTrend(values);
     
-    if (growthDetected && fluctuation < 0.5) {
+    if (growthDetected.isUpwardTrend && fluctuation < 0.5) {
       abnormalities.push({
         type: AbnormalityType.Growth,
         description: `Spending for ${removeSystemPrefix(name)} seems to have a rising pattern`,
       });
     }
 
-    if (growthDetected && fluctuation >= 0.5) {
+    if (growthDetected.isUpwardTrend && fluctuation >= 0.5) {
       abnormalities.push({
         type: AbnormalityType.FluctuatingGrowth,
         description: `Your spending on ${removeSystemPrefix(name)} fluctuates a lot and tends to grow over time.`,
       });
     }
+
+    console.log('Category:', name)
+    console.log('Values:', values)
+    console.log('Months:', months)
 
 
     const isSingleOccurrence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
@@ -254,13 +261,23 @@ export function detectAbnormalities(
     detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     const cleanedName = removeSystemPrefix(name);
-    return { name: cleanedName, abnormalities, categoryName: name, totalSpending: isSingleOccurrence ? 0 : Math.round(total * 100) / 100 };
+    return { 
+      name: cleanedName, 
+      abnormalities,
+      categoryName: name,
+      totalSpending: isSingleOccurrence ? 0 : Math.round(total * 100) / 100,
+
+      rawValues: values,
+      xAxisData: months,
+      fittedValues: growthDetected.smoothedData
+    };
   });
 
   /** Filter out categories with no anomalies. */
   return analysis
 }
 
+//#region Helper Functions
 /** Step 1: Aggregate data by category. */
 function aggregateCategoryData(data: TrendsLineChartData[]): Map<string, { values: number[]; months: string[] }> {
   const categoryMap = new Map<string, { values: number[]; months: string[] }>();
@@ -386,23 +403,29 @@ function calculateMedian(values: number[]): number {
     : sortedValues[Math.floor(n / 2)];
 }
 
+//#endregion
 
 
-
+//#region Upward Trend Detection
 /** Detect upward trend with linear regression.
  * @param data The data to analyze
  * @param smoothingWindow The window size for moving average smoothing
  * 
  * @returns True if an upward trend is detected, false otherwise
  */
-function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
+function isUpwardTrend(data: number[], smoothingWindow: number = 5): { isUpwardTrend: boolean, smoothedData: number[]} {
   if (data.length <= 1) {
-      return false; // No trend or insufficient data
+      return {
+          isUpwardTrend: false,
+          smoothedData: data
+      }; // No trend or insufficient data
   }
 
 
   // Apply moving average to smooth out fluctuations
   const smoothedData = movingAverage(data, smoothingWindow);
+
+  console.log('Smoothed Data:', smoothedData)
 
 
   // Calculate the linear regression slope (m) on the smoothed data
@@ -425,7 +448,10 @@ function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
 
   // Handle edge case where range is 0
   if (range === 0) {
-    return false; // No variation, no trend
+    return {
+      isUpwardTrend: false,
+      smoothedData
+    }; // No variation, no trend
   }
 
   const normalizedSlope = m / range;
@@ -433,7 +459,10 @@ function isUpwardTrend(data: number[], smoothingWindow: number = 5): boolean {
   /** If the slope is positive, we have an upward trend. Adjust the threshold as needed.
    * 0 means detect even slight upward trends. The larger the value, the more pronounced the trend must be.
    */
-  return normalizedSlope > 0.002;
+  return {
+    isUpwardTrend: normalizedSlope > 0.002,
+    smoothedData
+  };
 }
 function movingAverage(data: number[], windowSize: number): number[] {
   const result = [];
@@ -446,3 +475,6 @@ function movingAverage(data: number[], windowSize: number): number[] {
   }
   return result;
 }
+//#endregion
+
+//#endregion
