@@ -227,6 +227,9 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
       name: category,
       type: 'bar',
       showSymbol: false,
+      itemStyle: {
+        opacity: 0.9,
+      },
       stack: this.stackCategories ? 'categories' : '',
       data: this.xAxisData.map(month => {
         // Find the month's data
