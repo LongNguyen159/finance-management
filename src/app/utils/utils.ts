@@ -294,6 +294,47 @@ export function detectAbnormalities(
   return analysis
 }
 
+/** Evaluate Trend metrics and return a natural language string */
+export function evaluateMetrics(categoryName: string, growthRate: number, trend: 'upward' | 'downward' | 'neutral', strength: 'weak' | 'moderate' | 'strong'): string {
+  let result = '';
+
+  // Evaluate trend
+  switch (trend) {
+    case 'upward':
+      result += `${categoryName} has increased `;
+      break;
+    case 'downward':
+      result += `${categoryName} has decreased `;
+      break;
+    case 'neutral':
+      result += `${categoryName} has remained stable `;
+      break;
+  }
+
+  // Evaluate growth rate
+  if (growthRate !== 0) {
+    result += `by ${Math.abs(growthRate).toFixed(2)}% `;
+  } else {
+    result += `with no significant change `;
+  }
+
+  // Evaluate strength
+  switch (strength) {
+    case 'strong':
+      result += `with a strong and clear trend.`;
+      break;
+    case 'moderate':
+      result += `with a moderate and noticeable trend.`;
+      break;
+    case 'weak':
+      result += `with a minimal trend.`;
+      break;
+  }
+
+  return result;
+}
+
+
 //#region Helper Functions
 /** Step 1: Aggregate data by category. */
 function aggregateCategoryData(

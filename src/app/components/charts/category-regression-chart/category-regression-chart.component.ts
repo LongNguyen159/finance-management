@@ -3,13 +3,18 @@ import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { AbnormalityChartdata } from '../../models';
 import { ColorService } from '../../../services/color.service';
-import { CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
+import { evaluateMetrics } from '../../../utils/utils';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-category-regression-chart',
   standalone: true,
-  imports: [NgxEchartsDirective],
+  imports: [NgxEchartsDirective,
+    MatChipsModule,
+    CommonModule
+  ],
   providers: [
     provideEcharts(),
     CurrencyPipe
@@ -26,6 +31,15 @@ export class CategoryRegressionChartComponent implements OnChanges {
 
   chartOption: EChartsOption = this.getBaseOption()
   mergeOption: EChartsOption
+
+  insights: string = ''
+  trendDescription: string;
+
+  trendMap: { [key: string]: string } = {
+    'upward': 'Increasing',
+    'downward': 'Decreasing',
+    'neutral': 'Stable'
+  };
 
 
   getBaseOption(): EChartsOption {
@@ -111,7 +125,13 @@ export class CategoryRegressionChartComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes) {
       this.updateChart()
+      this.getTrendDetails()
     }
+  }
+
+  getTrendDetails() {
+    this.insights = evaluateMetrics(this.chartData.categoryName, this.chartData.details.growthRate, this.chartData.details.trend, this.chartData.details.strength)
+    this.trendDescription = this.trendMap[this.chartData.details.trend];
   }
 
   updateChart() {
