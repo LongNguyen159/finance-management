@@ -1,5 +1,8 @@
 import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, PieData, SYSTEM_PREFIX, TrendsLineChartData } from "../components/models";
 import { evaluate } from 'mathjs/number';
+import { PolynomialRegression } from 'ml-regression-polynomial';
+
+
 
 //#region Date utils
 /** Format a Date object into YYYY-MM format */
@@ -220,9 +223,10 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
 /** Detect Anomalies in Spending of each Category. */
 export function detectAbnormalities(
   data: TrendsLineChartData[],
-  currencySymbol: string = ''
+  allMonths: string[],
+  currencySymbol: string = '',
 ): AbnormalityAnalysis[] {
-  const categoryMap = aggregateCategoryData(data);
+  const categoryMap = aggregateCategoryData(data, allMonths);
 
   // Analyze each category
   const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
@@ -235,28 +239,38 @@ export function detectAbnormalities(
     const abnormalities: Abnormality[] = [];
     const fluctuation = calculateFluctuation(nonZeroValues, median, stdDev);
 
-    const growthDetected = isUpwardTrend(values);
+    /** Detect Single Occurrence */
+    const isSingleOccurrence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
     
-    if (growthDetected.isUpwardTrend && fluctuation < 0.5) {
+
+    console.log('Category:', name)
+    console.log('Values:', values)
+    
+
+    const result = detectTrend(values, 2, 5, 1.5, isSingleOccurrence);
+
+    console.log(result)
+    console.log('Fluctuation:', fluctuation)
+
+    /** Detect Upward trend */
+    if (result.trend == 'upward' && fluctuation < 0.5) {
       abnormalities.push({
         type: AbnormalityType.Growth,
         description: `Spending for ${removeSystemPrefix(name)} seems to have a rising pattern`,
       });
     }
 
-    if (growthDetected.isUpwardTrend && fluctuation >= 0.5) {
+    if (result.trend == 'upward' && fluctuation >= 0.5) {
       abnormalities.push({
         type: AbnormalityType.FluctuatingGrowth,
         description: `Your spending on ${removeSystemPrefix(name)} fluctuates a lot and tends to grow over time.`,
       });
     }
-
-    console.log('Category:', name)
-    console.log('Values:', values)
-    console.log('Months:', months)
+    
+    console.log('-------------------')
 
 
-    const isSingleOccurrence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
+    /** Detect Spikes & Fluctuations */
     const spikeIndices = detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
     detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
@@ -268,8 +282,11 @@ export function detectAbnormalities(
       totalSpending: isSingleOccurrence ? 0 : Math.round(total * 100) / 100,
 
       rawValues: values,
-      xAxisData: months,
-      fittedValues: growthDetected.smoothedData
+      xAxisData: allMonths,
+      fittedValues: result.fittedValues,
+      smoothedData: result.smoothedData,
+
+      detailedAnalysis: result,
     };
   });
 
@@ -279,17 +296,32 @@ export function detectAbnormalities(
 
 //#region Helper Functions
 /** Step 1: Aggregate data by category. */
-function aggregateCategoryData(data: TrendsLineChartData[]): Map<string, { values: number[]; months: string[] }> {
+function aggregateCategoryData(
+  data: TrendsLineChartData[],
+  allMonths: string[]
+): Map<string, { values: number[]; months: string[] }> {
   const categoryMap = new Map<string, { values: number[]; months: string[] }>();
 
+  // Initialize the map with all categories and months set to 0
   data.forEach(monthData => {
     monthData.categories.forEach(category => {
       if (!categoryMap.has(category.name)) {
-        categoryMap.set(category.name, { values: [], months: [] });
+        categoryMap.set(category.name, {
+          values: Array(allMonths.length).fill(0), // Start with all months set to 0
+          months: [...allMonths],
+        });
       }
+    });
+  });
+
+  // Populate the data into the correct months
+  data.forEach(monthData => {
+    monthData.categories.forEach(category => {
       const categoryEntry = categoryMap.get(category.name)!;
-      categoryEntry.values.push(category.value);
-      categoryEntry.months.push(monthData.month);
+      const monthIndex = allMonths.indexOf(monthData.month);
+      if (monthIndex !== -1) {
+        categoryEntry.values[monthIndex] = category.value; // Update with actual value
+      }
     });
   });
 
@@ -407,63 +439,10 @@ function calculateMedian(values: number[]): number {
 
 
 //#region Upward Trend Detection
-/** Detect upward trend with linear regression.
- * @param data The data to analyze
- * @param smoothingWindow The window size for moving average smoothing
- * 
- * @returns True if an upward trend is detected, false otherwise
+
+/** Moving Average to calculate the average in a range (in a window size), then move to next
+ * window to calculate the average again. This helps smoothing out the noise.
  */
-function isUpwardTrend(data: number[], smoothingWindow: number = 5): { isUpwardTrend: boolean, smoothedData: number[]} {
-  if (data.length <= 1) {
-      return {
-          isUpwardTrend: false,
-          smoothedData: data
-      }; // No trend or insufficient data
-  }
-
-
-  // Apply moving average to smooth out fluctuations
-  const smoothedData = movingAverage(data, smoothingWindow);
-
-  console.log('Smoothed Data:', smoothedData)
-
-
-  // Calculate the linear regression slope (m) on the smoothed data
-  const n = smoothedData.length;
-  const sumX = (n - 1) * n / 2; // Sum of indices (0, 1, 2, ..., n-1)
-  const sumY = smoothedData.reduce((sum, value) => sum + value, 0); // Sum of all smoothed data points
-  const sumXY = smoothedData.reduce((sum, value, index) => sum + (index * value), 0); // Sum of x * y
-  const sumX2 = smoothedData.reduce((sum, _, index) => sum + (index * index), 0); // Sum of x^2
-
-  // Calculate the slope (m)
-  const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-  const range = Math.max(...smoothedData) - Math.min(...smoothedData);
-
-  // Calculate the mean of the smoothed data
-  const meanY = sumY / n;
-
-  // Normalize the slope to calculate growth rate as a percentage
-  const growthRate = (m / meanY) * 100;
-  
-
-  // Handle edge case where range is 0
-  if (range === 0) {
-    return {
-      isUpwardTrend: false,
-      smoothedData
-    }; // No variation, no trend
-  }
-
-  const normalizedSlope = m / range;
-
-  /** If the slope is positive, we have an upward trend. Adjust the threshold as needed.
-   * 0 means detect even slight upward trends. The larger the value, the more pronounced the trend must be.
-   */
-  return {
-    isUpwardTrend: normalizedSlope > 0.002,
-    smoothedData
-  };
-}
 function movingAverage(data: number[], windowSize: number): number[] {
   const result = [];
   for (let i = 0; i < data.length; i++) {
@@ -474,6 +453,190 @@ function movingAverage(data: number[], windowSize: number): number[] {
       result.push(avg);
   }
   return result;
+}
+
+
+/** Detect Trend and their instensity using Regression. Fallback to linear if not enough data points.
+ * @param data The input data to analyze
+ * @param degree The degree of the polynomial regression (default: 1 for linear)
+ * @param smoothingWindow The window size for moving average smoothing (default: 5)
+ * @param sensitivity The sensitivity factor for trend strength (default: 1.5)
+ * @param isSingleOccurrence Whether to detect single occurrences (default: false). If true, early exit with neutral trend.
+ * 
+ * @returns The trend, strength, growth rate, smoothed data, fitted values, and model description
+ * 
+ */
+function detectTrend(
+  data: number[],
+  degree: number = 1,
+  smoothingWindow: number = 5,
+  sensitivity: number = 1.5,
+  isSingleOccurrence: boolean = false
+): {
+  trend: 'upward' | 'downward' | 'neutral';
+  strength: 'weak' | 'moderate' | 'strong';
+  growthRate: number;
+  smoothedData: number[];
+  fittedValues: number[];
+  model: string;
+} {
+  // Step 0: Handle insufficient data
+  if (data.length <= 1) {
+    return {
+      trend: 'neutral',
+      strength: 'weak',
+      growthRate: 0,
+      smoothedData: data,
+      fittedValues: data,
+      model: 'Insufficient data for analysis',
+    };
+  }
+
+  if (isSingleOccurrence) {
+    return {
+      trend: 'neutral',
+      strength: 'weak',
+      growthRate: 0,
+      smoothedData: data,
+      fittedValues: data,
+      model: 'Single occurrence detected',
+    };
+  }
+
+  // Step 1: Smooth the data using a moving average
+  const smoothedData = movingAverage(data, smoothingWindow);
+
+  // Step 2: Prepare X and Y arrays for regression
+  const dataX = smoothedData.map((_, index) => index);
+  const dataY = smoothedData;
+
+  // Step 3: Adjust degree if necessary
+  if (degree >= smoothedData.length) {
+    console.warn(`Degree (${degree}) is too high for data length (${smoothedData.length}). Falling back to linear regression.`);
+    degree = 1;
+  }
+
+  let regression: PolynomialRegression;
+  let fittedValues: number[] = [];
+  let slope: number = 0;
+  let model: string = '';
+
+  try {
+    // Step 4: Perform polynomial regression
+    regression = new PolynomialRegression(dataX, dataY, degree);
+    fittedValues = dataX.map(x => regression.predict(x));
+  } catch (error) {
+    console.error('Error performing regression:', error);
+
+    // Safe fallback for regression failures
+    slope = 0;
+    fittedValues = Array(dataY.length).fill(smoothedData[0]); // Flat line fallback
+    model = 'Regression failed, returning flat line';
+
+    // Calculate growth rate based on start-to-end difference
+    const growthRate = smoothedData[0] !== 0
+    ? ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100
+    : 0; // Avoid division by 0
+
+
+    return {
+      trend: growthRate > 0 ? 'upward' : growthRate < 0 ? 'downward' : 'neutral',
+      strength: 'weak',
+      growthRate,
+      smoothedData,
+      fittedValues,
+      model,
+    };
+  }
+
+  // Step 5: Analyze trend and strength
+  const growthRate = smoothedData[0] !== 0
+  ? ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100
+  : 0; // Avoid division by 0
+
+
+  // Step 6: Calculate the derivative manually
+  const avgSlope = calculateAverageSlope(regression.coefficients, dataX.length);
+
+  console.log('Avg Slope:', avgSlope)
+  console.log('Growth Rate:', growthRate)
+
+  // Step 7: Determine trend and strength based on growth rate and average slope
+  let trend: 'upward' | 'downward' | 'neutral' = 'neutral';
+  let strength: 'weak' | 'moderate' | 'strong' = 'weak';
+
+  // Classification logic using both growthRate and avgSlope
+  if (growthRate < 0) {
+    trend = 'downward';
+  } else if (growthRate > 0) {
+    trend = 'upward';
+  } else {
+    trend = 'neutral';
+  }
+  
+  // Adjust trend or add warnings if avgSlope conflicts
+  if ((growthRate > 0 && avgSlope < 0) || (growthRate < 0 && avgSlope > 0)) {
+    console.warn('Conflicting indicators: growthRate and avgSlope differ');
+    // Optionally, refine classification based on weights
+    const trendIndicator = 0.7 * growthRate + 0.3 * avgSlope;
+    if (trendIndicator > 0) {
+      trend = 'upward';
+    } else if (trendIndicator < 0) {
+      trend = 'downward';
+    } else {
+      trend = 'neutral';
+    }
+  }
+  
+  // Strength adjustment remains unchanged
+  if (Math.abs(growthRate) > 50 || Math.abs(avgSlope) > sensitivity * 2) {
+    strength = 'strong';
+  } else if (Math.abs(growthRate) > 20 || Math.abs(avgSlope) > sensitivity) {
+    strength = 'moderate';
+  } else {
+    strength = 'weak';
+  }
+
+
+
+  // Step 8: Return the results
+  return {
+    trend,
+    strength,
+    growthRate,
+    smoothedData,
+    fittedValues,
+    model,
+  };
+}
+/**
+ * Calculate the average slope from the derivative at start, middle, and end.
+ * @param coefficients Polynomial coefficients from regression
+ * @param dataLength The length of the data
+ * @returns The average slope
+ */
+function calculateAverageSlope(coefficients: number[], dataLength: number): number {
+  // Polynomial: c0 + c1*x + c2*x^2 + ... + cn*x^n
+  // Derivative: c1 + 2*c2*x + 3*c3*x^2 + ... + n*cn*x^(n-1)
+
+  /**
+   * Calculate the derivative at a specific x
+   * @param x The x value
+   * @returns The derivative value at x
+   */
+  function derivativeAt(x: number): number {
+    return coefficients
+      .map((coeff, index) => (index === 0 ? 0 : coeff * index * Math.pow(x, index - 1)))
+      .reduce((sum, val) => sum + val, 0);
+  }
+
+  const midIndex = Math.floor(dataLength / 2);
+  const startSlope = derivativeAt(0);
+  const midSlope = derivativeAt(midIndex);
+  const endSlope = derivativeAt(dataLength - 1);
+
+  const avgSlope = (startSlope + midSlope + endSlope) / 3;
+  return avgSlope;
 }
 //#endregion
 

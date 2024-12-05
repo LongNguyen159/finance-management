@@ -302,8 +302,18 @@ export interface AbnormalityAnalysis {
   totalSpending?: number;  // The average spending for the category
 
   rawValues: number[];  // Raw values for the category
-  fittedValues?: number[];  // Fitted values for the category
+  fittedValues?: number[];  // Fitted values by the Machine Learning algorithm for the category
+  smoothedValues?: number[];  // Smoothed values for the category
   xAxisData: string[];  // X-axis data for the category
+}
+
+export interface TrendAnalysis {
+  trend: "upward" | "downward" | "neutral";
+  strength: "weak" | "moderate" | "strong";
+  growthRate: number;
+  smoothedData: number[];
+  fittedValues: number[];
+  model: string;
 }
 
 
@@ -332,6 +342,8 @@ export interface AbnormalityChartdata {
   fittedValues: number[];
   xAxisData: string[];
   categoryName: string
+  smoothedValues: number[];
+  details: TrendAnalysis
 }
 
 

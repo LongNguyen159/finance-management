@@ -181,6 +181,11 @@
                     </mat-expansion-panel-header>
             
                     <mat-card-content>
+                      <div class="flex flex-row w-full justify-start pb-2">
+                        <button mat-button (click)="$event.stopPropagation(); getCategoryPlotData(category.categoryName)">
+                          Show Analysis
+                        </button>
+                      </div>
                       <table class="w-full border-collapse border-spacing-0 border border-gray-300 dark:border-gray-700">
                         @if (category.abnormalities && category.abnormalities.length > 0) {
                           <thead>

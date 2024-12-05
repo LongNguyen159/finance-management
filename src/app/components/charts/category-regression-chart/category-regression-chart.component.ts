@@ -142,6 +142,21 @@ export class CategoryRegressionChartComponent implements OnChanges {
             color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00',
           },
         },
+
+        // {
+        //   name: `Smoothed Data`,
+        //   type: 'line',
+        //   data: this.chartData.smoothedValues,
+        //   showSymbol: false,
+        //   itemStyle: {
+        //     color: this.colorService.isDarkMode() ? 'green' : '#4682b4', // Blue for both dark and light modes
+        //   },
+        //   lineStyle: {
+        //     width: 2,
+        //     color: this.colorService.isDarkMode() ? 'green' : '#4682b4',
+        //   },
+        // },
+
         {
           name: `Fitted Regression Line`,
           type: 'line',

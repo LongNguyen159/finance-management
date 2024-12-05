@@ -370,11 +370,19 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     // Compute and update surplus chart data
     this.trendsLineChartData = this.computeSurplusChartData(sortedData);
+
     // Adjust chart scale
     this.getScaleValue();
 
+    const sortedArray = allMonths.sort((a, b) => {
+      const dateA = new Date(a + '-01'); // Append a dummy day to ensure valid date
+      const dateB = new Date(b + '-01');
+      
+      return dateA.getTime() - dateB.getTime();
+    });
+
     /** Get Anomalies Dections */
-    const insights = detectAbnormalities(this.trendsLineChartData, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
+    const insights = detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
     this.anomalyReports = insights
 
     console.log('Anomaly Reports:', this.anomalyReports)
@@ -416,6 +424,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       rawValues: matchingCategory.rawValues,
       fittedValues: matchingCategory.fittedValues,
       xAxisData: matchingCategory.xAxisData,
+      smoothedValues: matchingCategory.smoothedData,
+      details: matchingCategory.detailedAnalysis,
     }
     this.dialogService.openPatternAnalysisDialog(chartData)
   }
