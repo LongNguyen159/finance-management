@@ -385,7 +385,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const insights = detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
     this.anomalyReports = insights
 
-    console.log('Anomaly Reports:', this.anomalyReports)
 
     // Enrich the anomalyReports with category icon and color at root level
     this.anomalyReports = this.anomalyReports.map(category => {

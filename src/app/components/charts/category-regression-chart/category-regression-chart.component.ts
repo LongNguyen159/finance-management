@@ -177,7 +177,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
         // },
 
         {
-          name: `Analysed Pattern`,
+          name: `Prediction`,
           type: 'line',
           data: this.chartData.fittedValues,
           showSymbol: false,
