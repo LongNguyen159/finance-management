@@ -1,4 +1,4 @@
-import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, PieData, SYSTEM_PREFIX, TrendsLineChartData } from "../components/models";
+import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, PieData, SYSTEM_PREFIX, TrendAnalysis, TrendsLineChartData } from "../components/models";
 import { evaluate } from 'mathjs/number';
 import { PolynomialRegression } from 'ml-regression-polynomial';
 
@@ -505,14 +505,7 @@ function detectTrend(
   smoothingWindow: number = 5,
   sensitivity: number = 1.5,
   isSingleOccurrence: boolean = false
-): {
-  trend: 'upward' | 'downward' | 'neutral';
-  strength: 'weak' | 'moderate' | 'strong';
-  growthRate: number;
-  smoothedData: number[];
-  fittedValues: number[];
-  model: string;
-} {
+): TrendAnalysis {
   // Step 0: Handle insufficient data
   if (data.length <= 1) {
     return {
@@ -522,6 +515,7 @@ function detectTrend(
       smoothedData: data,
       fittedValues: data,
       model: 'Insufficient data for analysis',
+      isSingleOccurrence
     };
   }
 
@@ -533,6 +527,7 @@ function detectTrend(
       smoothedData: data,
       fittedValues: data,
       model: 'Single occurrence detected',
+      isSingleOccurrence
     };
   }
 
@@ -579,6 +574,7 @@ function detectTrend(
       smoothedData,
       fittedValues,
       model,
+      isSingleOccurrence
     };
   }
 
@@ -641,6 +637,7 @@ function detectTrend(
     smoothedData,
     fittedValues,
     model,
+    isSingleOccurrence
   };
 }
 /**

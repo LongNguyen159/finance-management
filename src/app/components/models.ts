@@ -314,6 +314,7 @@ export interface TrendAnalysis {
   smoothedData: number[];
   fittedValues: number[];
   model: string;
+  isSingleOccurrence: boolean;
 }
 
 
