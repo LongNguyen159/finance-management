@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { AbnormalityChartdata } from '../../models';
@@ -40,6 +40,12 @@ export class CategoryRegressionChartComponent implements OnChanges {
     'downward': 'Decreasing',
     'neutral': 'Stable'
   };
+
+  constructor() {
+    effect(() => {
+      this.updateChart()
+    })
+  }
 
 
   getBaseOption(): EChartsOption {
