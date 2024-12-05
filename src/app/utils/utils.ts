@@ -309,19 +309,19 @@ export function evaluateMetrics(categoryName: string, growthRate: number, trend:
   if (growthRate !== 0) {
     result += `by ${Math.abs(growthRate).toFixed(2)}% `;
   } else {
-    result += `with no significant change `;
+    result += `with no significant change. `;
   }
 
   // Evaluate strength
   switch (strength) {
     case 'strong':
-      result += `with a strong and clear trend.`;
+      result += `The trend is strong and clearly defined.`;
       break;
     case 'moderate':
-      result += `with a moderate and noticeable trend.`;
+      result += `The trend is moderate and noticeable.`;
       break;
     case 'weak':
-      result += `with a minimal trend.`;
+      result += `The trend is weak and minimal.`;
       break;
   }
 
