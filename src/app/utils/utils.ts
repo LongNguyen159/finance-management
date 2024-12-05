@@ -289,16 +289,28 @@ export function detectAbnormalities(
 }
 
 /** Evaluate Trend metrics and return a natural language string */
-export function evaluateMetrics(categoryName: string, growthRate: number, trend: 'upward' | 'downward' | 'neutral', strength: 'weak' | 'moderate' | 'strong'): string {
+export function evaluateMetrics(
+  categoryName: string,
+  growthRate: number,
+  trend: 'upward' | 'downward' | 'neutral',
+  strength: 'weak' | 'moderate' | 'strong'
+): string {
   let result = '';
+
+  // Interpret strength in natural language
+  const strengthAdjectives: Record<typeof strength, string> = {
+    weak: 'slightly',
+    moderate: 'moderately',
+    strong: 'sharply',
+  };
 
   // Evaluate trend
   switch (trend) {
     case 'upward':
-      result += `${categoryName} has increased `;
+      result += `${categoryName} has ${strengthAdjectives[strength]} increased `;
       break;
     case 'downward':
-      result += `${categoryName} has decreased `;
+      result += `${categoryName} has ${strengthAdjectives[strength]} decreased `;
       break;
     case 'neutral':
       result += `${categoryName} has remained stable `;
@@ -307,27 +319,13 @@ export function evaluateMetrics(categoryName: string, growthRate: number, trend:
 
   // Evaluate growth rate
   if (growthRate !== 0) {
-    result += `by ${Math.abs(growthRate).toFixed(2)}% `;
+    result += `by ${Math.abs(growthRate).toFixed(2)}%. `;
   } else {
     result += `with no significant change. `;
   }
 
-  // Evaluate strength
-  switch (strength) {
-    case 'strong':
-      result += `The trend is strong and clearly defined.`;
-      break;
-    case 'moderate':
-      result += `The trend is moderate and noticeable.`;
-      break;
-    case 'weak':
-      result += `The trend is weak and minimal.`;
-      break;
-  }
-
   return result;
 }
-
 
 //#region Helper Functions
 /** Step 1: Aggregate data by category. */
