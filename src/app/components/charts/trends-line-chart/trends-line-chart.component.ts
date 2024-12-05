@@ -67,6 +67,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
     this._clearSeries()
 
     const finalOptions: EChartsOption = {
+      color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
       tooltip: {
         borderColor: this.colorService.isDarkMode() ? '#484753' : '#E0E6F1',
         borderWidth: 2,
