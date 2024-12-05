@@ -5,3 +5,17 @@
     [merge]="mergeOption"
 >
 </div>
+
+<div class="flex flex-row items-center justify-center gap-4 text-xl font-bold w-full">
+    <div>
+        Trend: {{ chartData.details.trend }}
+    </div>
+    
+    <div>
+        Strength: {{ chartData.details.strength }}
+    </div>
+    
+    <div>
+        Growth Rate: {{ chartData.details.growthRate.toFixed(2) }}%
+    </div>
+</div>

@@ -115,7 +115,6 @@ export class CategoryRegressionChartComponent implements OnChanges {
   }
 
   updateChart() {
-
     this.mergeOption = {
       ...this.getBaseOption(),
       xAxis: {
@@ -158,7 +157,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
         // },
 
         {
-          name: `Fitted Regression Line`,
+          name: `Analysed Pattern`,
           type: 'line',
           data: this.chartData.fittedValues,
           showSymbol: false,
@@ -167,6 +166,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
           },
           lineStyle: {
             width: 2,
+            type: 'dashed',
             color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4',
           },
         },

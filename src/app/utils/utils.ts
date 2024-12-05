@@ -247,7 +247,7 @@ export function detectAbnormalities(
     console.log('Values:', values)
     
 
-    const result = detectTrend(values, 2, 5, 1.5, isSingleOccurrence);
+    const result = detectTrend(values, 2, 5, 2, isSingleOccurrence);
 
     console.log(result)
     console.log('Fluctuation:', fluctuation)
@@ -550,10 +550,14 @@ function detectTrend(
   }
 
   // Step 5: Analyze trend and strength
-  const growthRate = smoothedData[0] !== 0
-  ? ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100
-  : 0; // Avoid division by 0
+  let growthRate = 0;
 
+  if (smoothedData[0] === 0) {
+    // If start is 0, growth rate could be calculated as total increase divided by the final value
+    growthRate = smoothedData[smoothedData.length - 1] * 100;  // End value * 100 (since start is 0)
+  } else {
+    growthRate = ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100;
+  }
 
   // Step 6: Calculate the derivative manually
   const avgSlope = calculateAverageSlope(regression.coefficients, dataX.length);
@@ -589,7 +593,7 @@ function detectTrend(
   }
   
   // Strength adjustment remains unchanged
-  if (Math.abs(growthRate) > 50 || Math.abs(avgSlope) > sensitivity * 2) {
+  if (Math.abs(growthRate) > 50 || Math.abs(avgSlope) > sensitivity * 2.2) {
     strength = 'strong';
   } else if (Math.abs(growthRate) > 20 || Math.abs(avgSlope) > sensitivity) {
     strength = 'moderate';
