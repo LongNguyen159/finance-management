@@ -242,15 +242,10 @@ export function detectAbnormalities(
     /** Detect Single Occurrence */
     const isSingleOccurrence = detectSingleOccurrence(values, months, abnormalities, currencySymbol);
     
-
-    console.log('Category:', name)
-    console.log('Values:', values)
     
 
-    const result = detectTrend(values, 2, 5, 2, isSingleOccurrence);
+    const result = detectTrend(values, 1, 5, 2, isSingleOccurrence);
 
-    console.log(result)
-    console.log('Fluctuation:', fluctuation)
 
     /** Detect Upward trend */
     if (result.trend == 'upward' && fluctuation < 0.5) {
@@ -267,7 +262,6 @@ export function detectAbnormalities(
       });
     }
     
-    console.log('-------------------')
 
 
     /** Detect Spikes & Fluctuations */
@@ -602,9 +596,6 @@ function detectTrend(
 
   // Step 6: Calculate the derivative manually
   const avgSlope = calculateAverageSlope(regression.coefficients, dataX.length);
-
-  console.log('Avg Slope:', avgSlope)
-  console.log('Growth Rate:', growthRate)
 
   // Step 7: Determine trend and strength based on growth rate and average slope
   let trend: 'upward' | 'downward' | 'neutral' = 'neutral';
