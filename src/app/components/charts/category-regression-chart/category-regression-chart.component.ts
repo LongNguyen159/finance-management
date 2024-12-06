@@ -139,9 +139,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
     this.trendDescription = this.trendMap[this.chartData.details.trend];
   }
 
-  updateChart() {
-    console.log("Chart Data: ", this.chartData);
-  
+  updateChart() {  
     // Get the next X months (e.g., 3 months ahead) from the last date in xAxisData
     const nextMonths = getNextMonths(this.chartData.xAxisData[this.chartData.xAxisData.length - 1], MONTHS_TO_PREDICT);
     
@@ -164,8 +162,6 @@ export class CategoryRegressionChartComponent implements OnChanges {
       ])
     ];
 
-    console.log('Raw Data Mapped: ', rawDataMapped);
-    console.log('Predicted Data Mapped: ', predictedDataMapped);
 
   
     // Update chart options with the mapped data
