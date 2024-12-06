@@ -3,6 +3,7 @@ import { evaluate } from 'mathjs/number';
 import { PolynomialRegression } from 'ml-regression-polynomial';
 import { PredictService } from "../services/predict.service";
 import { firstValueFrom, takeLast } from "rxjs";
+import { UiService } from "../services/ui.service";
 
 
 
@@ -253,7 +254,8 @@ export async function detectAbnormalities(
   data: TrendsLineChartData[],
   allMonths: string[],
   currencySymbol: string = '',
-  predictService: PredictService | null = null
+  predictService: PredictService,
+  uiService: UiService
 ): Promise<AbnormalityAnalysis[]> {
   const categoryMap = _aggregateCategoryData(data, allMonths);
 
@@ -278,7 +280,7 @@ export async function detectAbnormalities(
 
     
     console.log('Name:', name)
-    const result = await detectTrend(values, 1, 5, 2, isSingleOccurrence, predictService);
+    const result = await detectTrend(values, 1, 5, 2, isSingleOccurrence, predictService, uiService);
     console.log('Trend:', result.trend)
     console.log('Strength:', result.strength)
     console.log('Growth Rate:', result.growthRate)
@@ -565,26 +567,33 @@ function _calculateEMA(data: number[], period: number): number[] {
 }
 
 
-async function _predictFutureValues(dataToPredict: number[], predictService: PredictService): Promise<ForecastData | null> {
+async function _predictFutureValues(dataToPredict: number[], predictService: PredictService, uiService: UiService): Promise<ForecastData | null> {
   try {
     const predictionObservable = predictService.getPrediction(dataToPredict).pipe(takeLast(1));
     const predictedValues= await firstValueFrom(predictionObservable);
     return predictedValues;
   } catch (error) {
     console.error('Error performing regression prediction:', error);
+
+    /** Todo: Add show error card for UI service. */
+    uiService.showSnackBar('Error predicting data. Please try again later.', 'OK', 8000);
     return null;
   }
 }
 
 export const MONTHS_TO_PREDICT = 5;
 
+/** TODO: 
+ * Since we use linear regression to determine the trend, simplify the slope calculation logic.
+ */
 async function detectTrend(
   data: number[],
   degree: number = 1,
   smoothingWindow: number = 5,
   sensitivity: number = 1.5,
   isSingleOccurrence: boolean = false,
-  predictService: PredictService | null = null
+  predictService: PredictService,
+  uiService: UiService
 ): Promise<TrendAnalysis> {
   // Step 0: Handle insufficient data
   if (data.length <= 1) {
@@ -634,7 +643,7 @@ async function detectTrend(
 
   let predictedValues: ForecastData | null = null;
   if (predictService) {
-    predictedValues = await _predictFutureValues(data, predictService);
+    predictedValues = await _predictFutureValues(data, predictService, uiService);
   }
 
 

@@ -384,7 +384,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     });
 
     /** Get Anomalies Dections */
-    detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService)
+    detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService, this.uiService)
       .then(insights => {
         this.anomalyReports = insights;
         /** Add configs (colour, icons, etc.) for display purposes */
