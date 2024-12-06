@@ -142,24 +142,39 @@ export class CategoryRegressionChartComponent implements OnChanges {
   updateChart() {  
     // Get the next X months (e.g., 3 months ahead) from the last date in xAxisData
     const nextMonths = getNextMonths(this.chartData.xAxisData[this.chartData.xAxisData.length - 1], MONTHS_TO_PREDICT);
-    
-    // Add the next months to the xAxisData
+    /** Push into xAxis the months to predict also, to contain the 'Prediction' line */
     const xAxisData = [...this.chartData.xAxisData];
     xAxisData.push(...nextMonths);
   
-    // Map data to [index, value] pairs
+    /** Map data to [index, value] pairs:
+     * Because we want the "prediction" line to start from the last point of the raw data.
+     */
     const rawDataMapped = this.chartData.rawValues.map((value, index) => [index, value]);
     const fittedValuesMapped = this.chartData.details.fittedValues.map((value, index) => [index, value]);
+
+    const forecast = this.chartData.details.predictedValues?.forecast[0] || []
+  
+    const errors = this.chartData.details.predictedValues?.forecast[1] || [];
+    
+    const upperBound = forecast.map((val, i) => val + errors[i]);
+    const lowerBound = forecast.map((val, i) => val - errors[i]);
+    
+
   
     // Map predicted data to [index, value] pairs, starting from the next index after the raw data
     const predictedDataMapped = [
-      // Add overlap: prediction starts from the last raw value at index 2
       [this.chartData.rawValues.length - 1, this.chartData.rawValues[this.chartData.rawValues.length - 1]],
-  
-      // Then, continue with the predicted values, starting from the next index (index 3)
-      ...this.chartData.details.predictedValues.map((value, index) => [
-        this.chartData.rawValues.length + index, value
-      ])
+      ...forecast.map((value, index) => [this.chartData.rawValues.length + index, value]),
+    ];
+
+    const mappedUpperBound = [
+      [this.chartData.rawValues.length - 1, this.chartData.rawValues[this.chartData.rawValues.length - 1]],
+      ...upperBound.map((value, index) => [this.chartData.rawValues.length + index, value]),
+    ];
+
+    const mappedLowerBound = [
+      [this.chartData.rawValues.length - 1, this.chartData.rawValues[this.chartData.rawValues.length - 1]],
+      ...lowerBound.map((value, index) => [this.chartData.rawValues.length + index, value]),
     ];
 
 
@@ -220,6 +235,29 @@ export class CategoryRegressionChartComponent implements OnChanges {
             color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4',
           },
         },
+
+        // {
+        //   name: 'Confidence Interval',
+        //   type: 'line',
+        //   areaStyle: {
+        //     opacity: 0.2,
+        //   },
+        //   smooth: true,
+        //   data: mappedUpperBound,
+        //   showSymbol: false,
+        //   z: -1
+        // },
+        // {
+        //   name: 'Confidence Interval',
+        //   type: 'line',
+        //   smooth: true,
+        //   areaStyle: {
+        //     opacity: 0.2,
+        //   },
+        //   data: mappedLowerBound,
+        //   showSymbol: false,
+        //   z: -1
+        // }
       ]
     }
   }

@@ -1,6 +1,8 @@
-import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, PieData, SYSTEM_PREFIX, TrendAnalysis, TrendsLineChartData } from "../components/models";
+import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, ForecastData, PieData, SYSTEM_PREFIX, TrendAnalysis, TrendsLineChartData } from "../components/models";
 import { evaluate } from 'mathjs/number';
 import { PolynomialRegression } from 'ml-regression-polynomial';
+import { PredictService } from "../services/predict.service";
+import { firstValueFrom, takeLast } from "rxjs";
 
 
 
@@ -247,15 +249,16 @@ export function calculateDifferences(currentMonth: PieData[], lastMonth: PieData
 //#region Abnormality Detection
 
 /** Detect Anomalies in Spending of each Category. */
-export function detectAbnormalities(
+export async function detectAbnormalities(
   data: TrendsLineChartData[],
   allMonths: string[],
   currencySymbol: string = '',
-): AbnormalityAnalysis[] {
+  predictService: PredictService | null = null
+): Promise<AbnormalityAnalysis[]> {
   const categoryMap = _aggregateCategoryData(data, allMonths);
 
   // Analyze each category
-  const analysis: AbnormalityAnalysis[] = Array.from(categoryMap.entries()).map(([name, { values, months }]) => {
+  const analysis: AbnormalityAnalysis[] = await Promise.all(Array.from(categoryMap.entries()).map(async ([name, { values, months }]) => {
     const nonZeroValues = values.filter(value => value > 0);
     const median = _calculateMedian(nonZeroValues);
     const total = nonZeroValues.reduce((sum, value) => sum + value, 0);
@@ -267,15 +270,20 @@ export function detectAbnormalities(
 
     /** Detect Single Occurrence */
     const isSingleOccurrence = _detectSingleOccurrence(values, months, abnormalities, currencySymbol);
-    
+
+
+    /** Detect Spikes & Fluctuations */
+    const spikeIndices = _detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
+    _detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
+
     
     console.log('Name:', name)
-    const result = detectTrend(values, 1, 5, 2, isSingleOccurrence);
-
-
+    const result = await detectTrend(values, 1, 5, 2, isSingleOccurrence, predictService);
+    console.log('Trend:', result.trend)
+    console.log('Strength:', result.strength)
+    console.log('Growth Rate:', result.growthRate)
     console.log('________________________')
 
-    /** Detect Upward trend */
     if (result.trend == 'upward' && fluctuation < 0.5) {
       abnormalities.push({
         type: AbnormalityType.Growth,
@@ -289,12 +297,6 @@ export function detectAbnormalities(
         description: `Your spending on ${removeSystemPrefix(name)} fluctuates a lot and tends to grow over time.`,
       });
     }
-    
-
-
-    /** Detect Spikes & Fluctuations */
-    const spikeIndices = _detectSpikes(values, months, abnormalities, median, stdDev, currencySymbol);
-    _detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     const cleanedName = removeSystemPrefix(name);
     return { 
@@ -302,6 +304,7 @@ export function detectAbnormalities(
       abnormalities,
       categoryName: name,
       totalSpending: isSingleOccurrence ? 0 : Math.round(total * 100) / 100,
+      averageSpending: Math.round((total / values.length) * 100) / 100,
 
       rawValues: values,
       xAxisData: allMonths,
@@ -310,7 +313,7 @@ export function detectAbnormalities(
 
       detailedAnalysis: result,
     };
-  });
+  }));
 
   /** Filter out categories with no anomalies. */
   return analysis
@@ -562,49 +565,27 @@ function _calculateEMA(data: number[], period: number): number[] {
 }
 
 
-function _predictFutureValues(dataX: number[], dataY: number[], degree: number): { predictedValues: number[], model: string } {
-  let predictedValues: number[] = [];
-  let model: string = '';
-
+async function _predictFutureValues(dataToPredict: number[], predictService: PredictService): Promise<ForecastData | null> {
   try {
-    // Fallback to linear regression if data length is too short for higher degree polynomial
-    if (dataX.length < 5) {  // You can adjust the threshold based on your needs
-      degree = 1;  // Linear regression
-      model = 'Data length too short, switching to Linear Regression (degree 1)';
-    } else {
-      model = `Polynomial Regression (degree ${degree}) used for prediction`;
-    }
-    
-    // Fit the selected regression model (linear or polynomial)
-    const regression = new PolynomialRegression(dataX, dataY, degree);
-    
-    // Predict the next N values (e.g., predict the next 3 points)
-    const futureX = Array.from({ length: MONTHS_TO_PREDICT }, (_, i) => dataX[dataX.length - 1] + i + 1); // Future X values
-    
-    // Predict corresponding Y values and apply constraint (no negative values)
-    predictedValues = futureX.map(x => {
-      const predictedValue = regression.predict(x);
-      return predictedValue < 0 ? 0 : predictedValue;  // Ensure the value is not negative
-    });
-
+    const predictionObservable = predictService.getPrediction(dataToPredict).pipe(takeLast(1));
+    const predictedValues= await firstValueFrom(predictionObservable);
+    return predictedValues;
   } catch (error) {
     console.error('Error performing regression prediction:', error);
-    predictedValues = [];
-    model = 'Prediction failed';
+    return null;
   }
-
-  return { predictedValues, model };
 }
 
-export const MONTHS_TO_PREDICT = 10;
+export const MONTHS_TO_PREDICT = 5;
 
-function detectTrend(
+async function detectTrend(
   data: number[],
   degree: number = 1,
   smoothingWindow: number = 5,
   sensitivity: number = 1.5,
-  isSingleOccurrence: boolean = false
-): TrendAnalysis {
+  isSingleOccurrence: boolean = false,
+  predictService: PredictService | null = null
+): Promise<TrendAnalysis> {
   // Step 0: Handle insufficient data
   if (data.length <= 1) {
     return {
@@ -612,7 +593,7 @@ function detectTrend(
       strength: 'weak',
       growthRate: 0,
       smoothedData: data,
-      predictedValues: [],
+      predictedValues: null,
       fittedValues: [],
       model: 'Insufficient data for analysis',
       isSingleOccurrence
@@ -626,7 +607,7 @@ function detectTrend(
       growthRate: 0,
       smoothedData: data,
       fittedValues: [],
-      predictedValues: [],
+      predictedValues: null,
       model: 'Single occurrence detected',
       isSingleOccurrence
     };
@@ -648,10 +629,13 @@ function detectTrend(
     degree = 1;
   }
 
-  // Step 3: Perform polynomial regression using the helper function
+  // Step 3: Perform polynomial regression using the helper function to determine the trend.
   const { fittedValues, model, regression } = _fitRegressionCurve(dataX, dataY, degree);
 
-  const futureValues = _predictFutureValues(rawX, rawY, degree);
+  let predictedValues: ForecastData | null = null;
+  if (predictService) {
+    predictedValues = await _predictFutureValues(data, predictService);
+  }
 
 
   // Step 4: Analyze trend and strength
@@ -713,7 +697,7 @@ function detectTrend(
     smoothedData,
     fittedValues,
     model,
-    predictedValues: futureValues.predictedValues,
+    predictedValues: predictedValues || null,
     isSingleOccurrence
   };
 }

@@ -318,11 +318,14 @@ export interface TrendAnalysis {
   growthRate: number;
   smoothedData: number[];
   fittedValues: number[];
-  predictedValues: number[];
+  predictedValues: ForecastData | null
   model: string;
   isSingleOccurrence: boolean;
 }
 
+export interface ForecastData {
+  forecast: number[][]
+}
 
 export enum AbnormalityType {
   SingleOccurrence = "Single Occurrence",

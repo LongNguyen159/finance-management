@@ -29,6 +29,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-picker.component";
 import { TrendsLineChartComponent } from "../charts/trends-line-chart/trends-line-chart.component";
 import { DialogsService } from '../../services/dialogs.service';
+import { PredictService } from '../../services/predict.service';
 
 @Component({
   selector: 'app-storage-manager',
@@ -57,6 +58,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   currencyPipe = inject(CurrencyPipe);
   currencyService = inject(CurrencyService);
   dialogService = inject(DialogsService)
+  predictionService = inject(PredictService)
 
   /** Months data stored in local storage */
   allMonthsData: MonthlyData = {};
@@ -382,35 +384,33 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     });
 
     /** Get Anomalies Dections */
-    const insights = detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()))
-    this.anomalyReports = insights
-
-
-    // Enrich the anomalyReports with category icon and color at root level
-    this.anomalyReports = this.anomalyReports.map(category => {
-      // Lookup category icon and color from the expenseCategoryDetails based on category.name
-      const categoryDetails = expenseCategoryDetails[category.categoryName as ExpenseCategory];
-
-
-      // Add category-specific icon and color at root level
-      return {
-        ...category,
-        categoryConfig: {
-          label: categoryDetails?.label || category.categoryName,  // Fallback label
-          value: categoryDetails?.value || category.categoryName,  // Fallback value
-          icon: categoryDetails?.icon || 'category',  // Fallback icon
-          colorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
-          colorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
-        },
-        averageSpending: category.totalSpending ?? 0 / allMonths.length,
-        abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
-          ...abnormality,
-          config: this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
-        })),
-      };
-    });
-  }
-
+    detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService)
+      .then(insights => {
+        this.anomalyReports = insights;
+        /** Add configs (colour, icons, etc.) for display purposes */
+        this.anomalyReports = this.anomalyReports.map(category => {
+          // Lookup category icon and color from the expenseCategoryDetails based on category.name
+          const categoryDetails = expenseCategoryDetails[category.categoryName as ExpenseCategory];
+          
+          // Add category-specific icon and color at root level
+          return {
+            ...category,
+            categoryConfig: {
+              label: categoryDetails?.label || category.categoryName,  // Fallback label
+              value: categoryDetails?.value || category.categoryName,  // Fallback value
+              icon: categoryDetails?.icon || 'category',  // Fallback icon
+              colorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
+              colorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
+            },
+            abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
+              ...abnormality,
+              config: this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
+            })),
+          };
+        });
+      });
+    }
+    
   /** Plot the raw values & fitted values of the selected category.
    * @param categoryName: string: Name of the category (raw, with system prefix to pinpoint instead of confusion)
    */
