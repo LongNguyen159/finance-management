@@ -5,7 +5,7 @@ import { AbnormalityChartdata } from '../../models';
 import { ColorService } from '../../../services/color.service';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
-import { evaluateMetrics } from '../../../utils/utils';
+import { evaluateMetrics, getNextMonths } from '../../../utils/utils';
 import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
@@ -112,7 +112,6 @@ export class CategoryRegressionChartComponent implements OnChanges {
     
     // If series type is bar chart, calculate total
     let tooltip = `${params[0].axisValueLabel}<br>`;
-    
     tooltip += visibleParams.map((item: any) => `
       <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
         <div style="flex: 1; display: flex; align-items: center;">
@@ -120,7 +119,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
         </div>
         <div style="width: 16px;"></div>
         <div style="flex: 1; text-align: right;">
-          <strong>${this.currencyPipe.transform(item.value, this.currencyService.getSelectedCurrency())}</strong>
+          <strong>${this.currencyPipe.transform(item.value[1], this.currencyService.getSelectedCurrency())}</strong>
         </div>
       </div>`).join('');
   
@@ -141,11 +140,40 @@ export class CategoryRegressionChartComponent implements OnChanges {
   }
 
   updateChart() {
+    console.log("Chart Data: ", this.chartData);
+  
+    // Get the next X months (e.g., 3 months ahead) from the last date in xAxisData
+    const nextMonths = getNextMonths(this.chartData.xAxisData[this.chartData.xAxisData.length - 1], 10);
+    
+    // Add the next months to the xAxisData
+    const xAxisData = [...this.chartData.xAxisData];
+    xAxisData.push(...nextMonths);
+  
+    // Map data to [index, value] pairs
+    const rawDataMapped = this.chartData.rawValues.map((value, index) => [index, value]);
+    const fittedValuesMapped = this.chartData.details.fittedValues.map((value, index) => [index, value]);
+  
+    // Map predicted data to [index, value] pairs, starting from the next index after the raw data
+    const predictedDataMapped = [
+      // Add overlap: prediction starts from the last raw value at index 2
+      [this.chartData.rawValues.length - 1, this.chartData.rawValues[this.chartData.rawValues.length - 1]],
+  
+      // Then, continue with the predicted values, starting from the next index (index 3)
+      ...this.chartData.details.predictedValues.map((value, index) => [
+        this.chartData.rawValues.length + index, value
+      ])
+    ];
+
+    console.log('Raw Data Mapped: ', rawDataMapped);
+    console.log('Predicted Data Mapped: ', predictedDataMapped);
+
+  
+    // Update chart options with the mapped data
     this.mergeOption = {
       ...this.getBaseOption(),
       xAxis: {
         type: 'category',
-        data: this.chartData.xAxisData,
+        data: xAxisData,
         axisLine: {
           lineStyle: {
             color: this.colorService.isDarkMode() ? '#B0B0B0' : this.colorService.lightTextSecondary,
@@ -153,11 +181,10 @@ export class CategoryRegressionChartComponent implements OnChanges {
         },
       },
       series: [
-        
         {
           name: `Actual Spending`,
           type: 'line',
-          data: this.chartData.rawValues,
+          data: rawDataMapped,
           showSymbol: false,
           itemStyle: {
             color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00', // Orange for both dark and light modes
@@ -167,25 +194,26 @@ export class CategoryRegressionChartComponent implements OnChanges {
             color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00',
           },
         },
-
-        // {
-        //   name: `Smoothed Data`,
-        //   type: 'line',
-        //   data: this.chartData.smoothedValues,
-        //   showSymbol: false,
-        //   itemStyle: {
-        //     color: this.colorService.isDarkMode() ? 'green' : '#4682b4', // Blue for both dark and light modes
-        //   },
-        //   lineStyle: {
-        //     width: 2,
-        //     color: this.colorService.isDarkMode() ? 'green' : '#4682b4',
-        //   },
-        // },
+        
+        {
+          name: `Pattern`,
+          type: 'line',
+          data: fittedValuesMapped,
+          showSymbol: false,
+          itemStyle: {
+            color: this.colorService.isDarkMode() ? '#a5d6a7' : '#4caf50', // Green for both dark and light modes
+          },
+          lineStyle: {
+            width: 2,
+            type: 'dashed',
+            color: this.colorService.isDarkMode() ? '#a5d6a7' : '#4caf50',
+          },
+        },
 
         {
           name: `Prediction`,
           type: 'line',
-          data: this.chartData.fittedValues,
+          data: predictedDataMapped,
           showSymbol: false,
           itemStyle: {
             color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes

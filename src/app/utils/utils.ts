@@ -5,6 +5,32 @@ import { PolynomialRegression } from 'ml-regression-polynomial';
 
 
 //#region Date utils
+
+/** Get next N month in YYYY-MM format given a starting point. For example: 2024-12, next 2 months are 2025-01, 2025-02.
+ * @param lastMonth The starting month in YYYY-MM format
+ * @param numMonths The next N months to get
+ * 
+ * @returns An array of next N months in YYYY-MM format
+ */
+export function getNextMonths(lastMonth: string, numMonths: number): string[] {
+  const nextMonths = [];
+  const [year, month] = lastMonth.split('-').map(Number);
+
+  let currentYear = year;
+  let currentMonth = month;
+
+  for (let i = 0; i < numMonths; i++) {
+    currentMonth++;
+    if (currentMonth > 12) {
+      currentMonth = 1;
+      currentYear++;
+    }
+    nextMonths.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
+  }
+
+  return nextMonths;
+}
+
 /** Format a Date object into YYYY-MM format */
 export function formatDateToYYYYMM(date: Date): string {
     const year = date.getFullYear(); // Get the full year
@@ -243,9 +269,11 @@ export function detectAbnormalities(
     const isSingleOccurrence = _detectSingleOccurrence(values, months, abnormalities, currencySymbol);
     
     
+    console.log('Name:', name)
+    const result = detectTrend(values, 1, 5, 2, isSingleOccurrence);
 
-    const result = detectTrend(values, 2, 5, 2, isSingleOccurrence);
 
+    console.log('________________________')
 
     /** Detect Upward trend */
     if (result.trend == 'upward' && fluctuation < 0.5) {
@@ -473,10 +501,14 @@ function _calculateMedian(values: number[]): number {
 
 //#region Upward Trend Detection
 
-/** Moving Average to calculate the average in a range (in a window size), then move to next
- * window to calculate the average again. This helps smoothing out the noise.
+/** Calculate the Simple Moving Average.
+ * Pros: Smooth out short-term fluctuations to make the trend more clear in the long run.
+ * 
+ * Cons: Not responsive to recent changes, as it includes all data points equally.
+ * 
+ * Use this if you want to view a clear trend over a longer period.
  */
-function _movingAverage(data: number[], windowSize: number): number[] {
+function _calculateSMA(data: number[], windowSize: number): number[] {
   const result = [];
   for (let i = 0; i < data.length; i++) {
       const start = Math.max(0, i - Math.floor(windowSize / 2));
@@ -506,6 +538,64 @@ function _fitRegressionCurve(dataX: number[], dataY: number[], degree: number): 
   return { fittedValues, model, regression };
 }
 
+
+/** Calculate the Exponential Moving Average (EMA).
+ * Pros: More responsive to recent changes compared to SMA, because it gives more weight to recent data.
+ * 
+ * Cons: More sensitive to short-term fluctuations, which may not be desirable for long-term trends.
+ * 
+ * Use this if you want to detect recent changes quickly, suitable for where you want to make the decision based on the latest data.
+ */
+function _calculateEMA(data: number[], period: number): number[] {
+  const k = 2 / (period + 1);  // Smoothing factor
+  let ema: number[] = [];
+  
+  // Start with the first data point as the initial EMA
+  ema[0] = data[0];
+  
+  // Calculate the EMA for the rest of the data
+  for (let i = 1; i < data.length; i++) {
+    ema[i] = (data[i] - ema[i - 1]) * k + ema[i - 1];
+  }
+  
+  return ema;
+}
+
+
+function _predictFutureValues(dataX: number[], dataY: number[], degree: number): { predictedValues: number[], model: string } {
+  let predictedValues: number[] = [];
+  let model: string = '';
+
+  try {
+    // Fallback to linear regression if data length is too short for higher degree polynomial
+    if (dataX.length < 5) {  // You can adjust the threshold based on your needs
+      degree = 1;  // Linear regression
+      model = 'Data length too short, switching to Linear Regression (degree 1)';
+    } else {
+      model = `Polynomial Regression (degree ${degree}) used for prediction`;
+    }
+    
+    // Fit the selected regression model (linear or polynomial)
+    const regression = new PolynomialRegression(dataX, dataY, degree);
+    
+    // Predict the next N values (e.g., predict the next 3 points)
+    const futureX = Array.from({ length: 10 }, (_, i) => dataX[dataX.length - 1] + i + 1); // Future X values
+    
+    // Predict corresponding Y values and apply constraint (no negative values)
+    predictedValues = futureX.map(x => {
+      const predictedValue = regression.predict(x);
+      return predictedValue < 0 ? 0 : predictedValue;  // Ensure the value is not negative
+    });
+
+  } catch (error) {
+    console.error('Error performing regression prediction:', error);
+    predictedValues = [];
+    model = 'Prediction failed';
+  }
+
+  return { predictedValues, model };
+}
+
 function detectTrend(
   data: number[],
   degree: number = 1,
@@ -520,7 +610,8 @@ function detectTrend(
       strength: 'weak',
       growthRate: 0,
       smoothedData: data,
-      fittedValues: data,
+      predictedValues: [],
+      fittedValues: [],
       model: 'Insufficient data for analysis',
       isSingleOccurrence
     };
@@ -532,14 +623,18 @@ function detectTrend(
       strength: 'weak',
       growthRate: 0,
       smoothedData: data,
-      fittedValues: data,
+      fittedValues: [],
+      predictedValues: [],
       model: 'Single occurrence detected',
       isSingleOccurrence
     };
   }
 
   // Step 1: Smooth the data using a moving average
-  const smoothedData = _movingAverage(data, smoothingWindow);
+  const smoothedData = _calculateEMA(data, smoothingWindow);
+
+  const rawX = data.map((_, index) => index);
+  const rawY = data;
 
   // Step 2: Prepare X and Y arrays for regression
   const dataX = smoothedData.map((_, index) => index);
@@ -553,6 +648,9 @@ function detectTrend(
 
   // Step 3: Perform polynomial regression using the helper function
   const { fittedValues, model, regression } = _fitRegressionCurve(dataX, dataY, degree);
+
+  const futureValues = _predictFutureValues(rawX, rawY, degree);
+
 
   // Step 4: Analyze trend and strength
   let growthRate = 0;
@@ -613,6 +711,7 @@ function detectTrend(
     smoothedData,
     fittedValues,
     model,
+    predictedValues: futureValues.predictedValues,
     isSingleOccurrence
   };
 }

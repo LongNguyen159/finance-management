@@ -313,6 +313,7 @@ export interface TrendAnalysis {
   growthRate: number;
   smoothedData: number[];
   fittedValues: number[];
+  predictedValues: number[];
   model: string;
   isSingleOccurrence: boolean;
 }
@@ -340,10 +341,8 @@ export interface Abnormality {
 
 export interface AbnormalityChartdata {
   rawValues: number[];
-  fittedValues: number[];
   xAxisData: string[];
   categoryName: string
-  smoothedValues: number[];
   details: TrendAnalysis
 }
 

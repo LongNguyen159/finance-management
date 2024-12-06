@@ -421,9 +421,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const chartData: AbnormalityChartdata = {
       categoryName: removeSystemPrefix(categoryName),
       rawValues: matchingCategory.rawValues,
-      fittedValues: matchingCategory.fittedValues,
       xAxisData: matchingCategory.xAxisData,
-      smoothedValues: matchingCategory.smoothedData,
       details: matchingCategory.detailedAnalysis,
     }
     this.dialogService.openPatternAnalysisDialog(chartData)
