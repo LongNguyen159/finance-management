@@ -658,7 +658,7 @@ async function detectTrend(
   }
 
   // Step 5: Calculate the derivative manually
-  const avgSlope = regression ? _calculateAverageSlope(regression.coefficients, dataX.length) : 0;
+  const slope = regression ? _calculateSlope(regression.coefficients, dataX.length) : 0;
 
   // Step 7: Determine trend and strength based on growth rate and average slope
   let trend: 'upward' | 'downward' | 'neutral' = 'neutral';
@@ -674,10 +674,10 @@ async function detectTrend(
   }
   
   // Adjust trend or add warnings if avgSlope conflicts
-  if ((growthRate > 0 && avgSlope < 0) || (growthRate < 0 && avgSlope > 0)) {
+  if ((growthRate > 0 && slope < 0) || (growthRate < 0 && slope > 0)) {
     console.warn('Conflicting indicators: growthRate and avgSlope differ');
     // Optionally, refine classification based on weights
-    const trendIndicator = 0.7 * growthRate + 0.3 * avgSlope;
+    const trendIndicator = 0.7 * growthRate + 0.3 * slope;
     if (trendIndicator > 0) {
       trend = 'upward';
     } else if (trendIndicator < 0) {
@@ -688,9 +688,9 @@ async function detectTrend(
   }
   
   // Strength adjustment remains unchanged
-  if (Math.abs(growthRate) > 50 || Math.abs(avgSlope) > sensitivity * 2.2) {
+  if (Math.abs(growthRate) > 50 || Math.abs(slope) > sensitivity * 2.2) {
     strength = 'strong';
-  } else if (Math.abs(growthRate) > 20 || Math.abs(avgSlope) > sensitivity) {
+  } else if (Math.abs(growthRate) > 20 || Math.abs(slope) > sensitivity) {
     strength = 'moderate';
   } else {
     strength = 'weak';
@@ -712,33 +712,16 @@ async function detectTrend(
 }
 
 
-/**
- * Calculate the average slope from the derivative at start, middle, and end.
- * @param coefficients Polynomial coefficients from regression
- * @param dataLength The length of the data
- * @returns The average slope
- */
-function _calculateAverageSlope(coefficients: number[], dataLength: number): number {
-  // Polynomial: c0 + c1*x + c2*x^2 + ... + cn*x^n
-  // Derivative: c1 + 2*c2*x + 3*c3*x^2 + ... + n*cn*x^(n-1)
+/** Calculate the slope of a linear function y = mx + b */
+function _calculateSlope(coefficients: number[], dataLength: number): number {
+  // Assuming the coefficients represent a linear function
+  // Derivative of a linear function is just the coefficient of x (first degree term)
 
-  /**
-   * Calculate the derivative at a specific x
-   * @param x The x value
-   * @returns The derivative value at x
-   */
-  function derivativeAt(x: number): number {
-    return coefficients
-      .map((coeff, index) => (index === 0 ? 0 : coeff * index * Math.pow(x, index - 1)))
-      .reduce((sum, val) => sum + val, 0);
-  }
+  // Calculate the slope between the first and last data points
+  const startY = coefficients[0]; // y at x = 0
+  const endY = coefficients[0] + coefficients[1] * (dataLength - 1); // y at x = dataLength-1
+  const avgSlope = (endY - startY) / (dataLength - 1);
 
-  const midIndex = Math.floor(dataLength / 2);
-  const startSlope = derivativeAt(0);
-  const midSlope = derivativeAt(midIndex);
-  const endSlope = derivativeAt(dataLength - 1);
-
-  const avgSlope = (startSlope + midSlope + endSlope) / 3;
   return avgSlope;
 }
 //#endregion
