@@ -51,6 +51,15 @@
       <!-- Chart Container -->
       <div class="flex flex-col items-center">
 
+        <!-- INCOME/EXPENSE RATIO CHART -->
+        <div class="flex flex-col w-full justify-center items-center mb-14">
+          <h2 class="text-2xl font-bold text-center mt-4">Total Income - Total Expense</h2>
+          <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
+        </div>
+
+        <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+
         <!-- INCOME GROWTH & EXPENSE TRENDS -->
         <div class="flex flex-col w-full">
           <!-- actions buttons -->
@@ -231,16 +240,6 @@
               </div>
             </div>
           </section>
-        </div>
-
-
-        <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-
-
-        <!-- INCOME/EXPENSE RATIO CHART -->
-        <div class="flex flex-col w-full justify-center items-center mb-14">
-          <h2 class="text-2xl font-bold text-center mt-4">Total Income - Total Expense</h2>
-          <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
         </div>
 
 
