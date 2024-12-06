@@ -5,7 +5,7 @@ import { AbnormalityChartdata } from '../../models';
 import { ColorService } from '../../../services/color.service';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
-import { evaluateMetrics, getNextMonths } from '../../../utils/utils';
+import { evaluateMetrics, getNextMonths, MONTHS_TO_PREDICT } from '../../../utils/utils';
 import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
@@ -143,7 +143,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
     console.log("Chart Data: ", this.chartData);
   
     // Get the next X months (e.g., 3 months ahead) from the last date in xAxisData
-    const nextMonths = getNextMonths(this.chartData.xAxisData[this.chartData.xAxisData.length - 1], 10);
+    const nextMonths = getNextMonths(this.chartData.xAxisData[this.chartData.xAxisData.length - 1], MONTHS_TO_PREDICT);
     
     // Add the next months to the xAxisData
     const xAxisData = [...this.chartData.xAxisData];
@@ -196,7 +196,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
         },
         
         {
-          name: `Pattern`,
+          name: `Trend`,
           type: 'line',
           data: fittedValuesMapped,
           showSymbol: false,

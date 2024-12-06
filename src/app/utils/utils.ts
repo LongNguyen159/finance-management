@@ -579,7 +579,7 @@ function _predictFutureValues(dataX: number[], dataY: number[], degree: number):
     const regression = new PolynomialRegression(dataX, dataY, degree);
     
     // Predict the next N values (e.g., predict the next 3 points)
-    const futureX = Array.from({ length: 10 }, (_, i) => dataX[dataX.length - 1] + i + 1); // Future X values
+    const futureX = Array.from({ length: MONTHS_TO_PREDICT }, (_, i) => dataX[dataX.length - 1] + i + 1); // Future X values
     
     // Predict corresponding Y values and apply constraint (no negative values)
     predictedValues = futureX.map(x => {
@@ -595,6 +595,8 @@ function _predictFutureValues(dataX: number[], dataY: number[], degree: number):
 
   return { predictedValues, model };
 }
+
+export const MONTHS_TO_PREDICT = 10;
 
 function detectTrend(
   data: number[],
