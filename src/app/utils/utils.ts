@@ -279,12 +279,8 @@ export async function detectAbnormalities(
     _detectFluctuations(values, months, abnormalities, fluctuation, median, stdDev, currencySymbol, spikeIndices);
 
     
-    console.log('Name:', name)
     const result = await detectTrend(values, 1, 5, 2, isSingleOccurrence, predictService, uiService);
-    console.log('Trend:', result.trend)
-    console.log('Strength:', result.strength)
-    console.log('Growth Rate:', result.growthRate)
-    console.log('________________________')
+
 
     if (result.trend == 'upward' && fluctuation < 0.5) {
       abnormalities.push({
@@ -583,8 +579,23 @@ async function _predictFutureValues(dataToPredict: number[], predictService: Pre
 
 export const MONTHS_TO_PREDICT = 5;
 
-/** TODO: 
- * Since we use linear regression to determine the trend, simplify the slope calculation logic.
+
+/**
+ * TODO:
+ * Add loading indicator for the prediction service
+ * 
+ * 
+ */
+/** Detect the trend of the data.
+ * @param data The input data to analyze
+ * @param degree The degree of the polynomial regression curve (default: 1 for linear)
+ * @param smoothingWindow The window size for smoothing the data (default: 5)
+ * @param sensitivity The sensitivity factor for detecting trend strength (default: 1.5)
+ * @param isSingleOccurrence A flag to indicate if the data is a single occurrence
+ * @param predictService The prediction service to forecast future values
+ * @param uiService The UI service to show error messages
+ * 
+ * @returns A TrendAnalysis object with the analysis results
  */
 async function detectTrend(
   data: number[],

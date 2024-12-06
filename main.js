@@ -24,9 +24,9 @@ server.post('/predict', (req, res) => {
 
   // Set up ARIMA model
   const model = new Arima({
-    p: 0,   // AR part
-    d: 1,   // Differencing
-    q: 1    // MA part
+    p: 1,   // AR part, start with 1 for capturing the previous value
+    d: 1,   // Differencing, try 1 for a simple trend removal
+    q: 1    // MA part, start with 1 for modeling the error term
   });
 
   model.train(data);
