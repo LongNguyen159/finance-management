@@ -3,8 +3,48 @@ const { screen, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 // Import the app version from package.json
 const { version } = require('./package.json');
-
 const path = require('path');
+
+
+/** Set up server to host the Machine Learning model. */
+const express = require('express');
+const Arima = require('arima');
+const cors = require('cors');
+const server = express();
+const port = 3000;
+
+
+server.use(cors()); // Add this line before your routes
+// Middleware to parse JSON body data
+server.use(express.json());
+
+// Define API endpoint for ARIMA prediction
+server.post('/predict', (req, res) => {
+  const data = req.body.data; // Assuming data is an array of numbers
+
+  // Set up ARIMA model
+  const model = new Arima({
+    p: 0,   // AR part
+    d: 1,   // Differencing
+    q: 1    // MA part
+  });
+
+  model.train(data);
+  const forecast = model.predict(5); // Forecast the next 5 values
+
+  // Send the prediction back as a response
+  res.json({ forecast });
+});
+
+// Start the server
+const serverInstance = server.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+});
+
+
+
+
+/** Set up Electron App. */
 
 let win;
 
@@ -21,7 +61,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
-      devTools: false, // disable devTools for production
+      devTools: true, // disable devTools for production
     },
     frame: true,         // Show the window frame (this allows you to drag and resize the window)
     resizable: true,     // Allow resizing the window (optional)
@@ -97,8 +137,20 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+
+    serverInstance.close(() => {
+      console.log('Express server closed');
+    });
+
+
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  serverInstance.close(() => {
+    console.log('Express server closed before quit');
+  });
 });
 
 app.on('activate', () => {

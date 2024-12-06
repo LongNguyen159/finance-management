@@ -1,15 +1,15 @@
 const express = require('express');
 const Arima = require('arima');
 const cors = require('cors');
-const app = express();
+const server = express();
 const port = 3000;
 
-app.use(cors()); // Add this line before your routes
+server.use(cors()); // Add this line before your routes
 // Middleware to parse JSON body data
-app.use(express.json());
+server.use(express.json());
 
 // Define API endpoint for ARIMA prediction
-app.post('/predict', (req, res) => {
+server.post('/predict', (req, res) => {
   const data = req.body.data; // Assuming data is an array of numbers
 
   // Set up ARIMA model
@@ -27,6 +27,6 @@ app.post('/predict', (req, res) => {
 });
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
