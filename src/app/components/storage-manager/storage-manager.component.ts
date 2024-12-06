@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { Abnormality, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityAnalysis, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -118,7 +118,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   showReports: boolean = true;
 
-  anomalyReports: any[] = [];
+  anomalyReports: AbnormalityAnalysis[] = [];
 
   anomalyReportsExpanded: boolean = false;
 
@@ -395,13 +395,17 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       // Add category-specific icon and color at root level
       return {
         ...category,
-        categoryIcon: categoryDetails?.icon || 'category',  // Fallback icon
-        categoryColorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
-        categoryColorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
-        averageSpending: category.totalSpending / allMonths.length,
+        categoryConfig: {
+          label: categoryDetails?.label || category.categoryName,  // Fallback label
+          value: categoryDetails?.value || category.categoryName,  // Fallback value
+          icon: categoryDetails?.icon || 'category',  // Fallback icon
+          colorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
+          colorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
+        },
+        averageSpending: category.totalSpending ?? 0 / allMonths.length,
         abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
           ...abnormality,
-          ...this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
+          config: this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
         })),
       };
     });

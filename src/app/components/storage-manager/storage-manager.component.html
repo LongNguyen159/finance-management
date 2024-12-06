@@ -111,7 +111,7 @@
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
                           <span class="flex flex-row items-center">
-                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryColorDark : category.categoryColorLight }">{{ category.categoryIcon }}</mat-icon>
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryConfig?.colorDark : category.categoryConfig?.colorLight }">{{ category.categoryConfig?.icon }}</mat-icon>
                           </span>
                           <span class="flex flex-row items-center">{{ category.name }}</span>
                         </div>
@@ -154,8 +154,8 @@
                               <td class="px-4 py-2 flex items-center gap-2">
                                 <mat-icon
                                   fontSet="material-symbols-outlined"
-                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.colorDark : abnormality.colorLight }">
-                                  {{ abnormality.icon }}
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.config?.colorDark : abnormality.config?.colorLight }">
+                                  {{ abnormality.config?.icon }}
                                 </mat-icon>
                                 <strong>{{ abnormality.type }}</strong>
                               </td>
@@ -179,7 +179,7 @@
                       <mat-panel-title class="!text-xl">
                         <div class="flex flex-row items-center gap-2">
                           <span class="flex flex-row items-center">
-                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryColorDark : category.categoryColorLight }">{{ category.categoryIcon }}</mat-icon>
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryConfig?.colorDark : category.categoryConfig?.colorLight }">{{ category.categoryConfig?.icon }}</mat-icon>
                           </span>
                           <span class="flex flex-row items-center">{{ category.name }}</span>
                         </div>
@@ -222,8 +222,8 @@
                               <td class="px-4 py-2 flex items-center gap-2">
                                 <mat-icon
                                   fontSet="material-symbols-outlined"
-                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.colorDark : abnormality.colorLight }">
-                                  {{ abnormality.icon }}
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.config?.colorDark : abnormality.config?.colorLight }">
+                                  {{ abnormality.config?.icon }}
                                 </mat-icon>
                                 <strong>{{ abnormality.type }}</strong>
                               </td>

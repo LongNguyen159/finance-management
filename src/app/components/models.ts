@@ -300,13 +300,18 @@ export interface AbnormalityAnalysis {
   categoryName: string;  // Raw category name (include system prefix for internal lookups)
   abnormalities: Abnormality[];  // A list of detected abnormalities for the category
   totalSpending?: number;  // The average spending for the category
+  averageSpending?: number;  // The average spending for the category
 
   rawValues: number[];  // Raw values for the category
   fittedValues?: number[];  // Fitted values by the Machine Learning algorithm for the category
   smoothedValues?: number[];  // Smoothed values for the category
   xAxisData: string[];  // X-axis data for the category
+  detailedAnalysis: TrendAnalysis;  // Detailed trend analysis for the category
+
+  categoryConfig?: ExpenseCategoryDetails;  // Configuration for the category
 }
 
+/** Interface for detecting Trend Results */
 export interface TrendAnalysis {
   trend: "upward" | "downward" | "neutral";
   strength: "weak" | "moderate" | "strong";
@@ -336,6 +341,7 @@ export interface Abnormality {
   value?: number;  // The specific value associated with the abnormality (for spikes or single occurrences)
   fluctuation?: number;  // The fluctuation value (for high or extreme fluctuations)
   growthRate?: number;  // The growth rate (for consistent or fluctuating growth)
+  config?: { colorDark: string; colorLight: string; icon: string };  // Configuration for the abnormality type
 }
 
 
