@@ -2,18 +2,20 @@ import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@ang
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { AbnormalityChartdata } from '../../models';
-import { ColorService } from '../../../services/color.service';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
 import { evaluateMetrics, getNextMonths, MONTHS_TO_PREDICT } from '../../../utils/utils';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonModule } from '@angular/material/button';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 
 @Component({
   selector: 'app-category-regression-chart',
   standalone: true,
   imports: [NgxEchartsDirective,
     MatChipsModule,
-    CommonModule
+    CommonModule,
+    MatButtonModule
   ],
   providers: [
     provideEcharts(),
@@ -22,10 +24,9 @@ import { MatChipsModule } from '@angular/material/chips';
   templateUrl: './category-regression-chart.component.html',
   styleUrl: './category-regression-chart.component.scss'
 })
-export class CategoryRegressionChartComponent implements OnChanges {
+export class CategoryRegressionChartComponent extends BaseChartComponent implements OnChanges {
   @Input() chartData: AbnormalityChartdata
 
-  colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
   currencyPipe = inject(CurrencyPipe)
 
@@ -34,6 +35,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
 
   insights: string = ''
   trendDescription: string;
+  isBoundSelected: boolean = true;
 
   trendMap: { [key: string]: string } = {
     'upward': 'Increasing',
@@ -42,10 +44,12 @@ export class CategoryRegressionChartComponent implements OnChanges {
   };
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart()
     })
   }
+
 
 
   getBaseOption(): EChartsOption {
@@ -101,6 +105,14 @@ export class CategoryRegressionChartComponent implements OnChanges {
         }, 
         // {
         //   name: 'Lower Bound',
+        //   lineStyle: {
+        //     opacity: 1,
+        //     width: 4,
+        //     color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
+        //   }
+        // },
+        // {
+        //   name: 'Upper Bound',
         //   lineStyle: {
         //     opacity: 1,
         //     width: 4,
@@ -185,10 +197,11 @@ export class CategoryRegressionChartComponent implements OnChanges {
      * Because we want the "prediction" line to start from the last point of the raw data.
      */
     const rawDataMapped: number[][] = this.chartData.rawValues.map((value, index) => [index, value]);
-    const fittedValuesMapped = this.chartData.details.fittedValues.map((value, index) => [index, value]);
+    // const fittedValuesMapped = this.chartData.details.fittedValues.map((value, index) => [index, value]);
 
     const forecast: number[] = this.chartData.details.predictedValues?.forecast[0] || []
-  
+    const positiveForecast: number[] = forecast.map((value) => Math.max(0, value));
+
     const errors: number[] = this.chartData.details.predictedValues?.forecast[1] || [];
 
 
@@ -202,7 +215,7 @@ export class CategoryRegressionChartComponent implements OnChanges {
     // Map predicted data to [index, value] pairs, starting from the next index after the raw data
     const predictedDataMapped: number[][] = [
       [this.chartData.rawValues.length - 1, this.chartData.rawValues[this.chartData.rawValues.length - 1]],
-      ...forecast.map((value, index) => [this.chartData.rawValues.length + index, value]),
+      ...positiveForecast.map((value, index) => [this.chartData.rawValues.length + index, value]),
     ];
 
     const mappedUpperBound: number[][] = [
@@ -226,6 +239,16 @@ export class CategoryRegressionChartComponent implements OnChanges {
           lineStyle: {
             color: this.colorService.isDarkMode() ? '#B0B0B0' : this.colorService.lightTextSecondary,
           },
+        },
+      },
+      legend: {
+        selectedMode: false,
+        selected: {
+          'Upper Bound': this.isBoundSelected,
+          'Lower Bound': this.isBoundSelected,
+          'Upper & Lower Bound': this.isBoundSelected,
+          'Actual Spending': true,  // Assuming it's always visible
+          'Prediction': true,      // Assuming it's always visible
         },
       },
       series: [

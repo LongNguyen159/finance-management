@@ -1,9 +1,15 @@
+<div class="flex flex-row w-full items-center justify-end">
+    <button mat-button (click)="isBoundSelected = !isBoundSelected; updateChart()">
+        {{ isBoundSelected ? 'Hide uncertainty' : 'Show uncertainty' }}
+    </button>
 
+</div>
 <div
     echarts
     [options]="chartOption"
     [merge]="mergeOption"
     style="height: 450px; width: 100%;"
+    (chartInit)="onChartInit($event)"
 >
 </div>
 
