@@ -77,12 +77,16 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Display settings.
    * Format big numbers: Whether to format large numbers with K, M, B (minimum value: 10K)
    * Scale bar chart: Whether to scale the bar chart across all months to have the same xAxis for visual comparison.
+   * Highlight surplus: Whether to highlight surplus in green (positive) or red (negative).
    */
   isFormatBigNumbers: boolean = false;
   isBarChartScaled: boolean = true;
-
   isHighlightSurplus: boolean = false;
 
+  /** Display settings for the charts.
+   * Show income growth: Whether to show the income growth chart.
+   * Stack categories: Whether to stack the categories in the income-expense ratio chart
+   **/
   showIncomeGrowth: boolean = true
   stackCategories: boolean = true
 
@@ -120,10 +124,14 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   showReports: boolean = true;
 
+  /** Annomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
   anomalyReports: AbnormalityAnalysis[] = [];
-
   anomalyReportsExpanded: boolean = false;
+  
 
+  /** Cache month infos to avoid repeated processing. If data changes (hasDataChanged = true on subscription changes),
+   * we will re-process the data.
+   */
   private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
   hasDataChanged: boolean = false;
 
