@@ -6,6 +6,7 @@ import { TrendsLineChartData } from '../../models';
 import { removeSystemPrefix } from '../../../utils/utils';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
+import { isArray } from 'mathjs';
 
 @Component({
   selector: 'app-trends-line-chart',
@@ -59,7 +60,6 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
     // Extract financial trends
     const totalNetIncome = this.chartData.map(data => data.totalNetIncome);
     const totalExpenses = this.chartData.map(data => data.totalExpenses);
-
 
     /** Clear Series before changing chart type to avoid conflicts.
      * 
@@ -140,12 +140,19 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
       series: this.showCategories ? this._getCategoriesSeries() : this._getIncomeGrowthAndExpenseSeries(totalExpenses, totalNetIncome),
     };
 
+    console.log('chart data', this.chartData)
+
     this.mergeOptions = finalOptions;
   }
 
+  /** TODO:
+   * Also map [x, y] pairs for the bar series. So this tooltip we will all use item.value[1] instead of item.value
+   * 
+   * Additionally, apply a different style fo the bars for predicted series.
+   */
   getCustomTooltip(params: any, seriesType: string): string {
     // Filter out items with value 0
-    const visibleParams = params.filter((item: any) => item.value !== 0);
+    const visibleParams = params.filter((item: any) => isArray(item.value) ?  item.value[1] !== 0 : item.value !== 0);
     
     // If series type is bar chart, calculate total
     let tooltip = `${params[0].axisValueLabel}<br>`;
@@ -190,7 +197,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           </div>
           <div style="width: 16px;"></div>
           <div style="flex: 1; text-align: right;">
-            <strong>${this.currencyPipe.transform(item.value, this.currencyService.getSelectedCurrency())}</strong>
+            <strong>${this.currencyPipe.transform(item.value[1], this.currencyService.getSelectedCurrency())}</strong>
           </div>
         </div>`).join('');
     }
@@ -251,11 +258,36 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
 
   /** Get Income Growth & Expense Trends data */
   private _getIncomeGrowthAndExpenseSeries(totalExpenses: number[], totalNetIncome: number[]): LineSeriesOption[] {
+    // Split the data into actual and predicted segments
+    const actualExpenses = [];
+    const predictedExpenses = [];
+    const actualNetIncome = [];
+    const predictedNetIncome = [];
+    
+    /** Map Series into [x, y] pairs. Because prediction series starts after real series. */
+    for (let i = 0; i < this.chartData.length; i++) {
+      if (this.chartData[i].isPrediction) {
+        // Pad the prediction series with the last value of the real series
+        if (predictedExpenses.length === 0 && actualExpenses.length > 0) {
+          const lastIndex = actualExpenses[actualExpenses.length - 1][0];
+          const lastValue = actualExpenses[actualExpenses.length - 1][1];
+          predictedExpenses.push([lastIndex, lastValue]);
+          predictedNetIncome.push([lastIndex, actualNetIncome[actualNetIncome.length - 1][1]]);
+        }
+        predictedExpenses.push([i, totalExpenses[i]]);
+        predictedNetIncome.push([i, totalNetIncome[i]]);
+      } else {
+        actualExpenses.push([i, totalExpenses[i]]);
+        actualNetIncome.push([i, totalNetIncome[i]]);
+      }
+    }
+  
+  
     const trendSeries: LineSeriesOption[] = [
       {
         name: 'Expenses',
         type: 'line',
-        data: totalExpenses.map(value => Math.round(value * 100) / 100),
+        data: actualExpenses.map(([x, y]) => [x, Math.round(y * 100) / 100]),
         smooth: true,
         showSymbol: false,
         itemStyle: {
@@ -270,16 +302,33 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           opacity: 0.3
         }
       },
-
+      {
+        name: 'Predicted Expenses',
+        type: 'line',
+        data: predictedExpenses.map(([x, y]) => [x, Math.round(y * 100) / 100]),
+        smooth: true,
+        showSymbol: false,
+        itemStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
+        },
+        lineStyle: {
+          width: 2,
+          type: 'dashed',
+          color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
+        },
+        areaStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
+          opacity: 0.3
+        }
+      },
       {
         name: 'Net Income',
         type: 'line',
-        data: totalNetIncome.map(value => Math.round(value * 100) / 100),
+        data: actualNetIncome.map(([x, y]) => [x, Math.round(y * 100) / 100]),
         smooth: true,
         showSymbol: false,
         itemStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
-
         },
         lineStyle: {
           width: 2,
@@ -290,7 +339,25 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           opacity: 0.3
         }
       },
+      {
+        name: 'Predicted Net Income',
+        type: 'line',
+        data: predictedNetIncome.map(([x, y]) => [x, Math.round(y * 100) / 100]),
+        smooth: true,
+        showSymbol: false,
+        itemStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
+        },
+        lineStyle: {
+          width: 2,
+          type: 'dashed',
+          color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green for income
+        },
+        areaStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green
+          opacity: 0.3
+        }
+      },
     ];
-    return trendSeries
-  }
-}
+    return trendSeries;
+  }}

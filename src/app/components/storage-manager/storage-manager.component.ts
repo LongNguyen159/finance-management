@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { Abnormality, AbnormalityAnalysis, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityAnalysis, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, ForecastData, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -11,9 +11,9 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, getNextMonths, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
-import { takeUntil } from 'rxjs';
+import { forkJoin, Subscription, takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
@@ -99,10 +99,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     { value: 'show-all', label: 'All time' }
   ];
 
-  /** New properties for selecting month range */
+  /** Start Month: The start of selected range.
+   * End Month: The end of selected range.
+   * All in YYYY-MM format.
+   * Fallback: If user selects a range that has no data, it will fallback to the available range
+   * (months range with data)
+   */
   startMonth: string = '';
   endMonth: string = '';
 
+  /** Start Month and End Month (YYYY-MM) converted to Date object. 
+   * For Calendar Picker to use.
+  */
   startMonthDate: Date = new Date();
   endMonthDate: Date = new Date();
 
@@ -116,6 +124,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   /** Chart data to plot the surplus and balance of each month  */
   trendsLineChartData: TrendsLineChartData[] = [];
+  private projectionsSubscription: Subscription | null = null;
+
 
   treeMapData: TreeNode[] = [];
 
@@ -127,7 +137,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Annomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
   anomalyReports: AbnormalityAnalysis[] = [];
   anomalyReportsExpanded: boolean = false;
-  
+
 
   /** Cache month infos to avoid repeated processing. If data changes (hasDataChanged = true on subscription changes),
    * we will re-process the data.
@@ -359,9 +369,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#endregion
 
   //#region Chart Data
-  /** After filtering, we need to re-populate the chart data */
-
-  /** Populate Chart data, tree map, and trends line */
+  /** After filtering, we need to re-populate the chart data.
+   * Populate Chart data: surplus line chart, tree map, total income-expense bar chart,
+   * trend line chart, and anomalies detection.
+   */
   populateChartData(allMonths: string[] = []) {
     // Filter and process data
     const filteredData = this.filterMonthlyData(this.allMonthsData, allMonths);
@@ -416,8 +427,120 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
             })),
           };
         });
+
+
+        this.gatherCalculatedMetrics();
       });
+  }
+
+
+  gatherCalculatedMetrics() {
+    const avgMonthlyIncome = this.totalNetIncome / this.allFilteredMonths.length;
+    const avgMonthlyExpense = this.totalExpenses / this.allFilteredMonths.length;
+    const avgMonthlySurplus = avgMonthlyIncome - avgMonthlyExpense;
+  
+    const avgSpendOnShopping = this.anomalyReports.find(category => category.categoryName === ExpenseCategory.Shopping)?.averageSpending || 0;
+  
+    const monthlyIncomeData = this.trendsLineChartData.map(entry => entry.totalNetIncome);
+    const monthlyExpensesData = this.trendsLineChartData.map(entry => entry.totalExpenses);
+  
+    // Prevent double subscription
+    if (this.projectionsSubscription) {
+      this.projectionsSubscription.unsubscribe();
     }
+  
+    // Fetch projections for income and expenses
+    const incomeProjection$ = this.predictionService.getPrediction(monthlyIncomeData);
+    const expenseProjection$ = this.predictionService.getPrediction(monthlyExpensesData);
+  
+    // Synchronize projections using forkJoin
+    this.projectionsSubscription = forkJoin([incomeProjection$, expenseProjection$]).subscribe(([incomeData, expenseData]) => {
+      const incomeForecast = incomeData.forecast[0];
+      const expenseForecast = expenseData.forecast[0];
+  
+      const nextMonths = getNextMonths(this.endMonth, 5);
+  
+      const projectedData: TrendsLineChartData[] = nextMonths.map((month, index) => {
+        // Avoid duplicate entries
+        if (this.trendsLineChartData.some(data => data.month === month)) {
+          return null
+        }
+  
+        const totalNetIncome = incomeForecast[index] || 0;
+        const totalExpenses = expenseForecast[index] || 0;
+  
+        // Calculate projected surplus
+        const surplus = totalNetIncome - totalExpenses;
+  
+        // Estimate category-level expenses based on historical proportions
+        const categoryProportions = this.calculateCategoryProportions();
+        const categories = Object.keys(categoryProportions).map(categoryName => ({
+          name: categoryName,
+          value: totalExpenses * categoryProportions[categoryName]
+        }));
+  
+        return {
+          month,
+          totalNetIncome,
+          totalExpenses,
+          isPrediction: true,
+          balance: 0, // Placeholder value
+          surplus,
+          categories
+        };
+      }).filter((entry): entry is TrendsLineChartData => entry !== null);
+      // Get the last balance from the existing data
+      let lastBalance = this.trendsLineChartData.length > 0 ? this.trendsLineChartData[this.trendsLineChartData.length - 1].balance : 0;
+
+      // Compute the balance for each month
+      for (let i = 0; i < projectedData.length; i++) {
+        if (i === 0) {
+          // For the first month, balance is the last balance + the current surplus
+          projectedData[i].balance = lastBalance + projectedData[i].surplus;
+        } else {
+          // For subsequent months, balance is the previous month's balance + current month's surplus
+          projectedData[i].balance = projectedData[i - 1].balance + projectedData[i].surplus;
+        }
+      }
+
+  
+      // Add projected data to the chart
+      this.trendsLineChartData.push(...projectedData);
+      /** Reassign to trigger change detection in template.
+       * Pushing directly modify the array, so the reference is the same,
+       * hence Angular does not detect the change.
+       */
+      this.trendsLineChartData = [...this.trendsLineChartData];
+    });
+    
+    console.log('Anomaly Reports:', this.anomalyReports);
+    console.log('Average Monthly Income:', avgMonthlyIncome);
+    console.log('Average Monthly Expense:', avgMonthlyExpense);
+    console.log('Average Monthly Surplus:', avgMonthlySurplus);
+    console.log('Average Spend on Shopping:', avgSpendOnShopping);
+  }
+  
+  // Utility: Calculate category proportions based on historical data
+  calculateCategoryProportions(): { [categoryName: string]: number } {
+    const totalExpenses = this.trendsLineChartData.reduce((sum, data) => sum + data.totalExpenses, 0);
+    const categoryTotals: { [categoryName: string]: number } = {};
+  
+    // Accumulate totals for each category
+    this.trendsLineChartData.forEach(data => {
+      data.categories.forEach(category => {
+        categoryTotals[category.name] = (categoryTotals[category.name] || 0) + category.value;
+      });
+    });
+  
+    // Calculate proportions
+    const proportions: { [categoryName: string]: number } = {};
+    for (const category in categoryTotals) {
+      proportions[category] = categoryTotals[category] / totalExpenses;
+    }
+  
+    return proportions;
+  }
+
     
   /** Plot the raw values & fitted values of the selected category.
    * @param categoryName: string: Name of the category (raw, with system prefix to pinpoint instead of confusion)

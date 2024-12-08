@@ -18,6 +18,8 @@ server.use(express.json());
 // Define API endpoint for ARIMA prediction
 server.post('/predict', (req, res) => {
   const data = req.body.data;
+  const monthsToPredict = req.body.monthsToPredict || 5; // Default to 5 if not provided
+
 
   if (isArray(data) === false) {
     return res.status(400).json({ error: 'Data must be an array of numbers' });
@@ -30,7 +32,7 @@ server.post('/predict', (req, res) => {
   });
 
   model.train(data);
-  const forecast = model.predict(5); // Forecast the next 5 values
+  const forecast = model.predict(monthsToPredict); // Forecast the next 5 values
 
   // Send the prediction back as a response
   res.json({ forecast });

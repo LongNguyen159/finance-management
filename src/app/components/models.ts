@@ -262,7 +262,9 @@ export interface TrendsLineChartData {
   month: string
   surplus: number
   balance: number
-  
+
+  isPrediction: boolean
+
   totalNetIncome: number
   totalExpenses: number
   categories: PieData[]
