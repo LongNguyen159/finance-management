@@ -126,6 +126,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   trendsLineChartData: TrendsLineChartData[] = [];
   private projectionsSubscription: Subscription | null = null;
 
+  MONTHS_IN_ADVANCE_TO_PREDICT = 3;
+
 
   treeMapData: TreeNode[] = [];
 
@@ -439,7 +441,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const avgMonthlyExpense = this.totalExpenses / this.allFilteredMonths.length;
     const avgMonthlySurplus = avgMonthlyIncome - avgMonthlyExpense;
   
-    const avgSpendOnShopping = this.anomalyReports.find(category => category.categoryName === ExpenseCategory.Shopping)?.averageSpending || 0;
+    // const avgSpendOnShopping = this.anomalyReports.find(category => category.categoryName === ExpenseCategory.Shopping)?.averageSpending || 0;
   
     const monthlyIncomeData = this.trendsLineChartData.map(entry => entry.totalNetIncome);
     const monthlyExpensesData = this.trendsLineChartData.map(entry => entry.totalExpenses);
@@ -450,15 +452,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     }
   
     // Fetch projections for income and expenses
-    const incomeProjection$ = this.predictionService.getPrediction(monthlyIncomeData);
-    const expenseProjection$ = this.predictionService.getPrediction(monthlyExpensesData);
+    const incomeProjection$ = this.predictionService.getPrediction(monthlyIncomeData, this.MONTHS_IN_ADVANCE_TO_PREDICT);
+    const expenseProjection$ = this.predictionService.getPrediction(monthlyExpensesData, this.MONTHS_IN_ADVANCE_TO_PREDICT);
   
     // Synchronize projections using forkJoin
     this.projectionsSubscription = forkJoin([incomeProjection$, expenseProjection$]).subscribe(([incomeData, expenseData]) => {
       const incomeForecast = incomeData.forecast[0];
       const expenseForecast = expenseData.forecast[0];
   
-      const nextMonths = getNextMonths(this.endMonth, 5);
+      const nextMonths = getNextMonths(this.endMonth, this.MONTHS_IN_ADVANCE_TO_PREDICT);
   
       const projectedData: TrendsLineChartData[] = nextMonths.map((month, index) => {
         // Avoid duplicate entries
@@ -512,12 +514,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
        */
       this.trendsLineChartData = [...this.trendsLineChartData];
     });
-    
-    console.log('Anomaly Reports:', this.anomalyReports);
-    console.log('Average Monthly Income:', avgMonthlyIncome);
-    console.log('Average Monthly Expense:', avgMonthlyExpense);
-    console.log('Average Monthly Surplus:', avgMonthlySurplus);
-    console.log('Average Spend on Shopping:', avgSpendOnShopping);
   }
   
   // Utility: Calculate category proportions based on historical data

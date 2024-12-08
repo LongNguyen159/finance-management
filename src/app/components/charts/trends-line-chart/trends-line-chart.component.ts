@@ -161,7 +161,11 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           },
         },
       },
-      dataZoom: this.showCategories ? [{type: 'inside'}] : [],
+      dataZoom: [
+        {
+          type: 'inside',
+        }
+      ],
       series: this.showCategories ? this._getCategoriesSeries() : this._getIncomeGrowthAndExpenseSeries(totalExpenses, totalNetIncome),
     };
 

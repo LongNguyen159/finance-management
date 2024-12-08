@@ -110,7 +110,12 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           },
         },
       },
-      series: []
+      series: [],
+      dataZoom: [
+        {
+          type: 'inside',
+        }
+      ]
     };
 
   }
