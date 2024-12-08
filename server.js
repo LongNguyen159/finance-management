@@ -10,6 +10,7 @@ const cors = require('cors');
 const { isArray } = require('mathjs');
 const server = express();
 const port = 3000;
+const isArray = require('mathjs').isArray;
 
 server.use(cors()); // Add this line before your routes
 // Middleware to parse JSON body data
