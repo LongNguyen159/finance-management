@@ -103,22 +103,6 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
             color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
           }
         }, 
-        // {
-        //   name: 'Lower Bound',
-        //   lineStyle: {
-        //     opacity: 1,
-        //     width: 4,
-        //     color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
-        //   }
-        // },
-        // {
-        //   name: 'Upper Bound',
-        //   lineStyle: {
-        //     opacity: 1,
-        //     width: 4,
-        //     color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
-        //   }
-        // }
       ]
       },
       xAxis: {

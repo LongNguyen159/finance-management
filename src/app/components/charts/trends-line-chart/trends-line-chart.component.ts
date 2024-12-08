@@ -112,6 +112,29 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           fontSize: 12,
         },
         formatter: (name: string) => removeSystemPrefix(name),
+        data: [{
+          name: 'Net Income',
+        }, {
+          name: 'Predicted Net Income',
+          lineStyle: {
+            opacity: 1,
+            width: 4,
+            color: 'inherit',
+          }
+
+        }, 
+        {
+          name: 'Expenses',
+        }, 
+        {
+          name: 'Predicted Expenses',
+          lineStyle: {
+            opacity: 1,
+            width: 4,
+            color: 'inherit',
+          }
+        }, 
+      ]
       },
       xAxis: {
         type: 'category',
@@ -318,7 +341,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         },
         areaStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
-          opacity: 0.3
+          opacity: 0.1
         }
       },
       {
@@ -355,7 +378,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         },
         areaStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.greenDarkMode : this.colorService.greenLightMode, // Green
-          opacity: 0.3
+          opacity: 0.1
         }
       },
     ];
