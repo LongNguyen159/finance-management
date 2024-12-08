@@ -60,7 +60,32 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           width: 10,
           inactiveWidth: 8,
           cap: 'round',
-        }
+        },
+        data: [
+          {
+            name: 'Surplus',
+          }, 
+          {
+            name: 'Balance',
+          }, 
+          {
+            name: 'Predicted Surplus',
+            lineStyle: {
+              opacity: 1,
+              width: 4,
+              color: 'inherit',
+            }
+          }, 
+          
+          {
+            name: 'Predicted Balance',
+            lineStyle: {
+              opacity: 1,
+              width: 4,
+              color: 'inherit',
+            }
+          }, 
+        ]
       },
       xAxis: {
         type: 'category',
@@ -103,7 +128,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         </div>
         <div style="width: 22px;"></div>
         <div style="flex: 1; text-align: right;">
-          <strong>${this.currencyPipe.transform(item.value, this.currencyService.getSelectedCurrency())}</strong>
+          <strong>${this.currencyPipe.transform(item.value[1], this.currencyService.getSelectedCurrency())}</strong>
         </div>
       </div>`).join('');
   
@@ -121,6 +146,32 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
     const surplusValues = this.chartData.map(data => data.surplus);
     const balanceValues = this.chartData.map(data => data.balance);
 
+
+    // Split the data into actual and predicted segments
+    const actualSurplusValues = [];
+    const predictedSurplusValues = [];
+    const actualBalance = [];
+    const predictedBalance = [];
+    
+    /** Map Series into [x, y] pairs. Because prediction series starts after real series. */
+    for (let i = 0; i < this.chartData.length; i++) {
+      if (this.chartData[i].isPrediction) {
+        // Pad the prediction series with the last value of the real series
+        if (predictedSurplusValues.length === 0 && actualSurplusValues.length > 0) {
+          const lastIndex = actualSurplusValues[actualSurplusValues.length - 1][0];
+          const lastValue = actualSurplusValues[actualSurplusValues.length - 1][1];
+          predictedSurplusValues.push([lastIndex, lastValue]);
+          predictedBalance.push([lastIndex, actualBalance[actualBalance.length - 1][1]]);
+        }
+        predictedSurplusValues.push([i, surplusValues[i]]);
+        predictedBalance.push([i, balanceValues[i]]);
+      } else {
+        actualSurplusValues.push([i, surplusValues[i]]);
+        actualBalance.push([i, balanceValues[i]]);
+      }
+    }
+  
+
     this.mergeOptions = {
       ...this.getBaseOption(),
       xAxis: {
@@ -136,7 +187,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         {
           name: 'Surplus',
           type: 'line',
-          data: surplusValues,
+          data: actualSurplusValues.map(([x, y]) => [x, Math.round(y * 100) / 100]),
           smooth: true,
           showSymbol: false,
           itemStyle: {
@@ -153,7 +204,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         {
           name: 'Balance',
           type: 'line',
-          data: balanceValues,
+          data: actualBalance.map(([x, y]) => [x, Math.round(y * 100) / 100]),
           smooth: true,
           showSymbol: false,
           itemStyle: {
@@ -165,6 +216,44 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           },
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.3)' : 'rgba(70, 130, 180, 0.3)', // Light blue for background
+          },
+        },
+
+        {
+          name: 'Predicted Balance',
+          type: 'line',
+          data: predictedBalance.map(([x, y]) => [x, Math.round(y * 100) / 100]),
+          smooth: true,
+          showSymbol: false,
+          itemStyle: {
+            color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
+          },
+          lineStyle: {
+            width: 2,
+            type: 'dashed',
+            color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4',
+          },
+          areaStyle: {
+            color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.2)' : 'rgba(70, 130, 180, 0.2)', // Light blue for background
+          },
+        },
+
+        {
+          name: 'Predicted Surplus',
+          type: 'line',
+          data: predictedSurplusValues.map(([x, y]) => [x, Math.round(y * 100) / 100]),
+          smooth: true,
+          showSymbol: false,
+          itemStyle: {
+            color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00', // Orange for both dark and light modes
+          },
+          lineStyle: {
+            width: 2,
+            type: 'dashed',
+            color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00',
+          },
+          areaStyle: {
+            color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.2)' : 'rgba(255, 165, 0, 0.2)', // Light orange for background
           },
         },
       ]
