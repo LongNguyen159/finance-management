@@ -437,9 +437,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
 
   gatherCalculatedMetrics() {
-    const avgMonthlyIncome = this.totalNetIncome / this.allFilteredMonths.length;
-    const avgMonthlyExpense = this.totalExpenses / this.allFilteredMonths.length;
-    const avgMonthlySurplus = avgMonthlyIncome - avgMonthlyExpense;
+    // const avgMonthlyIncome = this.totalNetIncome / this.allFilteredMonths.length;
+    // const avgMonthlyExpense = this.totalExpenses / this.allFilteredMonths.length;
+    // const avgMonthlySurplus = avgMonthlyIncome - avgMonthlyExpense;
   
     // const avgSpendOnShopping = this.anomalyReports.find(category => category.categoryName === ExpenseCategory.Shopping)?.averageSpending || 0;
   

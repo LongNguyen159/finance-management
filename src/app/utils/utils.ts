@@ -587,7 +587,7 @@ export const MONTHS_TO_PREDICT = 5;
  * 
  */
 /** Detect the trend of the data.
- * @param data The input data to analyze
+ * @param rawData The input data to analyze
  * @param degree The degree of the polynomial regression curve (default: 1 for linear)
  * @param smoothingWindow The window size for smoothing the data (default: 5)
  * @param sensitivity The sensitivity factor for detecting trend strength (default: 1.5)
@@ -598,7 +598,7 @@ export const MONTHS_TO_PREDICT = 5;
  * @returns A TrendAnalysis object with the analysis results
  */
 async function detectTrend(
-  data: number[],
+  rawData: number[],
   degree: number = 1,
   smoothingWindow: number = 5,
   sensitivity: number = 1.5,
@@ -607,12 +607,12 @@ async function detectTrend(
   uiService: UiService
 ): Promise<TrendAnalysis> {
   // Step 0: Handle insufficient data
-  if (data.length <= 1) {
+  if (rawData.length <= 1) {
     return {
       trend: 'neutral',
       strength: 'weak',
       growthRate: 0,
-      smoothedData: data,
+      smoothedData: rawData,
       predictedValues: null,
       fittedValues: [],
       model: 'Insufficient data for analysis',
@@ -625,7 +625,7 @@ async function detectTrend(
       trend: 'neutral',
       strength: 'weak',
       growthRate: 0,
-      smoothedData: data,
+      smoothedData: rawData,
       fittedValues: [],
       predictedValues: null,
       model: 'Single occurrence detected',
@@ -634,10 +634,7 @@ async function detectTrend(
   }
 
   // Step 1: Smooth the data using a moving average
-  const smoothedData = _calculateEMA(data, smoothingWindow);
-
-  const rawX = data.map((_, index) => index);
-  const rawY = data;
+  const smoothedData = _calculateEMA(rawData, smoothingWindow);
 
   // Step 2: Prepare X and Y arrays for regression
   const dataX = smoothedData.map((_, index) => index);
@@ -654,22 +651,15 @@ async function detectTrend(
 
   let predictedValues: ForecastData | null = null;
   if (predictService) {
-    predictedValues = await _predictFutureValues(data, predictService, uiService);
+    predictedValues = await _predictFutureValues(smoothedData, predictService, uiService);
   }
 
 
   // Step 4: Analyze trend and strength
-  let growthRate = 0;
-
-  if (smoothedData[0] === 0) {
-    // If start is 0, growth rate could be calculated as total increase divided by the final value
-    growthRate = smoothedData[smoothedData.length - 1] * 100;  // End value * 100 (since start is 0)
-  } else {
-    growthRate = ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100;
-  }
+  const growthRate = calculateGrowthRate(smoothedData);
 
   // Step 5: Calculate the derivative manually
-  const slope = regression ? _calculateSlope(regression.coefficients, dataX.length) : 0;
+  const slope = regression ? calculateSlope(regression.coefficients) : 0;
 
   // Step 7: Determine trend and strength based on growth rate and average slope
   let trend: 'upward' | 'downward' | 'neutral' = 'neutral';
@@ -686,7 +676,7 @@ async function detectTrend(
   
   // Adjust trend or add warnings if avgSlope conflicts
   if ((growthRate > 0 && slope < 0) || (growthRate < 0 && slope > 0)) {
-    console.warn('Conflicting indicators: growthRate and avgSlope differ');
+    console.warn('Conflicting indicators: growthRate and slope differ');
     // Optionally, refine classification based on weights
     const trendIndicator = 0.7 * growthRate + 0.3 * slope;
     if (trendIndicator > 0) {
@@ -722,18 +712,29 @@ async function detectTrend(
   };
 }
 
+function calculateGrowthRate(smoothedData: number[]): number {
+  let growthRate = 0;
+
+  // Handle edge case where the first value is zero
+  if (smoothedData[0] === 0) {
+    const peakValue = Math.max(...smoothedData); // Find the peak value
+    if (peakValue !== 0) {
+      growthRate = ((smoothedData[smoothedData.length - 1] - peakValue) / peakValue) * 100;
+    }
+  } else {
+    // Standard growth/decay calculation
+    growthRate = ((smoothedData[smoothedData.length - 1] - smoothedData[0]) / smoothedData[0]) * 100;
+  }
+
+  return growthRate;
+}
+
 
 /** Calculate the slope of a linear function y = mx + b */
-function _calculateSlope(coefficients: number[], dataLength: number): number {
-  // Assuming the coefficients represent a linear function
-  // Derivative of a linear function is just the coefficient of x (first degree term)
-
-  // Calculate the slope between the first and last data points
-  const startY = coefficients[0]; // y at x = 0
-  const endY = coefficients[0] + coefficients[1] * (dataLength - 1); // y at x = dataLength-1
-  const avgSlope = (endY - startY) / (dataLength - 1);
-
-  return avgSlope;
+function calculateSlope(coefficients: number[]): number {
+  // The slope of the linear regression is the coefficient of x
+  const slope = coefficients[1]; // c1
+  return slope;
 }
 //#endregion
 
