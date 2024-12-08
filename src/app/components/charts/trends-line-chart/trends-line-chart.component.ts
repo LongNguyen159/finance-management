@@ -112,29 +112,31 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           fontSize: 12,
         },
         formatter: (name: string) => removeSystemPrefix(name),
-        data: [{
-          name: 'Net Income',
-        }, {
-          name: 'Predicted Net Income',
-          lineStyle: {
-            opacity: 1,
-            width: 4,
-            color: 'inherit',
-          }
-
-        }, 
-        {
-          name: 'Expenses',
-        }, 
-        {
-          name: 'Predicted Expenses',
-          lineStyle: {
-            opacity: 1,
-            width: 4,
-            color: 'inherit',
-          }
-        }, 
-      ]
+        data: [
+          {
+            name: 'Net Income',
+          }, 
+          {
+            name: 'Expenses',
+          }, 
+          {
+            name: 'Predicted Net Income',
+            lineStyle: {
+              opacity: 1,
+              width: 4,
+              color: 'inherit',
+            }
+          }, 
+          
+          {
+            name: 'Predicted Expenses',
+            lineStyle: {
+              opacity: 1,
+              width: 4,
+              color: 'inherit',
+            }
+          }, 
+        ]
       },
       xAxis: {
         type: 'category',
