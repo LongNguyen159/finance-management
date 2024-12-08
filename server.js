@@ -7,7 +7,6 @@
 const express = require('express');
 const Arima = require('arima');
 const cors = require('cors');
-const { isArray } = require('mathjs');
 const server = express();
 const port = 3000;
 const isArray = require('mathjs').isArray;
