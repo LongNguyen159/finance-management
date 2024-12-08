@@ -1,8 +1,10 @@
-import { Component, Input, OnChanges, SimpleChanges, effect } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, effect, inject } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { TrendsLineChartData } from '../../models';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
+import { CurrencyPipe } from '@angular/common';
+import { CurrencyService } from '../../../services/currency.service';
 
 @Component({
   selector: 'app-total-surplus-line-chart',
@@ -10,6 +12,7 @@ import { BaseChartComponent } from '../../../base-components/base-chart/base-cha
   imports: [NgxEchartsDirective],
   providers: [
     provideEcharts(),
+    CurrencyPipe
   ],
   templateUrl: './total-surplus-line-chart.component.html',
   styleUrls: ['./total-surplus-line-chart.component.scss'],
@@ -19,6 +22,8 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
 
   chartOptions: EChartsOption = this.getBaseOption()
   mergeOptions: EChartsOption = {};
+  currencyPipe = inject(CurrencyPipe);
+  currencyService = inject(CurrencyService);
 
   constructor() {
     super()
@@ -38,6 +43,9 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         textStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
         },
+        formatter: (param: any) => {
+          return this.getCustomTooltip(param);
+        }
       },
       legend: {
         itemGap: 22,
@@ -80,6 +88,26 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
       series: []
     };
 
+  }
+
+  getCustomTooltip(params: any): string {
+    // Filter out items with value 0
+    const visibleParams = params
+    
+    // If series type is bar chart, calculate total
+    let tooltip = `${params[0].axisValueLabel}<br>`;
+    tooltip += visibleParams.map((item: any) => `
+      <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+        <div style="flex: 1; display: flex; align-items: center;">
+          ${item.marker} ${item.seriesName}:
+        </div>
+        <div style="width: 22px;"></div>
+        <div style="flex: 1; text-align: right;">
+          <strong>${this.currencyPipe.transform(item.value, this.currencyService.getSelectedCurrency())}</strong>
+        </div>
+      </div>`).join('');
+  
+    return tooltip;
   }
 
   ngOnChanges(changes: SimpleChanges): void {

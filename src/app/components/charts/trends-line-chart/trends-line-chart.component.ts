@@ -165,8 +165,6 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
       series: this.showCategories ? this._getCategoriesSeries() : this._getIncomeGrowthAndExpenseSeries(totalExpenses, totalNetIncome),
     };
 
-    console.log('chart data', this.chartData)
-
     this.mergeOptions = finalOptions;
   }
 
