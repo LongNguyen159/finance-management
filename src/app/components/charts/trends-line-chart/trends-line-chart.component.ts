@@ -55,7 +55,6 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
 
 
   updateChart() {
-    console.log("Show Categories: ", this.showCategories)
     const months = this.chartData.map(data => data.month);
     this.xAxisData = months;
     // Extract financial trends
