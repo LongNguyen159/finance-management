@@ -8,7 +8,7 @@ const express = require('express');
 const Arima = require('arima');
 const cors = require('cors');
 const server = express();
-const port = 3000;
+const port = 3223;
 const isArray = require('mathjs').isArray;
 
 server.use(cors()); // Add this line before your routes
@@ -26,9 +26,15 @@ server.post('/predict', (req, res) => {
   }
   // Set up ARIMA model
   const model = new Arima({
+    // auto: true, // Automatically find the best ARIMA configuration
+
+
     p: 1,   // AR part, start with 1 for capturing the previous value
     d: 1,   // Differencing, try 1 for a simple trend removal
-    q: 1    // MA part, start with 1 for modeling the error term
+    q: 1,    // MA part, start with 1 for modeling the error term
+
+    // P: 1, D: 1, Q: 1, // Seasonal params
+    // s: 3 // Monthly seasonality
   });
 
   model.train(data);

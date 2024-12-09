@@ -12,7 +12,7 @@ const Arima = require('arima');
 const cors = require('cors');
 const server = express();
 const isArray = require('mathjs').isArray;
-const port = 3000;
+const port = 3223;
 
 
 server.use(cors()); // Add this line before your routes
