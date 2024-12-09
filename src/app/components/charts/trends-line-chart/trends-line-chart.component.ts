@@ -55,6 +55,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
 
 
   updateChart() {
+    console.log("Show Categories: ", this.showCategories)
     const months = this.chartData.map(data => data.month);
     this.xAxisData = months;
     // Extract financial trends
@@ -112,7 +113,8 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           fontSize: 12,
         },
         formatter: (name: string) => removeSystemPrefix(name),
-        data: [
+        data: !this.showCategories ? 
+        [
           {
             name: 'Net Income',
           }, 
@@ -136,6 +138,8 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
               color: 'inherit',
             }
           }, 
+        ] : [
+          ...this.chartData.flatMap(data => data.categories.map(cat => cat.name))
         ]
       },
       xAxis: {
