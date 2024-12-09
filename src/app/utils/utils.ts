@@ -281,7 +281,6 @@ export async function detectAbnormalities(
     
     const result = await detectTrend(values, 1, 5, 2, isSingleOccurrence, predictService, uiService);
 
-
     if (result.trend == 'upward' && fluctuation < 0.5) {
       abnormalities.push({
         type: AbnormalityType.Growth,
@@ -562,10 +561,12 @@ function _calculateEMA(data: number[], period: number): number[] {
   return ema;
 }
 
+export const MONTHS_TO_PREDICT = 5;
+
 
 async function _predictFutureValues(dataToPredict: number[], predictService: PredictService, uiService: UiService): Promise<ForecastData | null> {
   try {
-    const predictionObservable = predictService.getPrediction(dataToPredict).pipe(takeLast(1));
+    const predictionObservable = predictService.getPrediction(dataToPredict, MONTHS_TO_PREDICT).pipe(takeLast(1));
     const predictedValues= await firstValueFrom(predictionObservable);
     return predictedValues;
   } catch (error) {
@@ -577,7 +578,7 @@ async function _predictFutureValues(dataToPredict: number[], predictService: Pre
   }
 }
 
-export const MONTHS_TO_PREDICT = 5;
+
 
 
 /**
@@ -654,6 +655,9 @@ async function detectTrend(
     predictedValues = await _predictFutureValues(smoothedData, predictService, uiService);
   }
 
+  
+  // const extendedData = extendTrend(regression, smoothedData, 1);
+
 
   // Step 4: Analyze trend and strength
   const growthRate = calculateGrowthRate(smoothedData);
@@ -727,6 +731,23 @@ function calculateGrowthRate(smoothedData: number[]): number {
   }
 
   return growthRate;
+}
+
+function extendTrend(regression: { coefficients: number[] } | null, currentData: number[], n: number): number[] {
+  if (!regression) {
+    return [];
+  }
+
+  const extendedData: number[] = [];
+  const startX = currentData.length; // Start where the current data ends
+
+  for (let i = 0; i < n; i++) {
+    const x = startX + i; // Future x values
+    const y = regression.coefficients.reduce((acc, coeff, index) => acc + coeff * Math.pow(x, index), 0); // Polynomial evaluation
+    extendedData.push(y);
+  }
+
+  return extendedData;
 }
 
 

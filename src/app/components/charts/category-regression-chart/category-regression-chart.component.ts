@@ -176,6 +176,7 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
     /** Push into xAxis the months to predict also, to contain the 'Prediction' line */
     const xAxisData: string[] = [...this.chartData.xAxisData];
     xAxisData.push(...nextMonths);
+    // const fittedValues = this.chartData.details.fittedValues;
   
     /** Map data to [index, value] pairs:
      * Because we want the "prediction" line to start from the last point of the raw data.
@@ -249,6 +250,19 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
             color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00',
           },
         },
+        // {
+        //   name: `Trend`,
+        //   type: 'line',
+        //   data: fittedValues.map((value, index) => [index, value]),
+        //   showSymbol: false,
+        //   itemStyle: {
+        //     color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
+        //   },
+        //   lineStyle: {
+        //     type: 'dashed',
+        //     color: this.colorService.isDarkMode() ? '#1e90ff' : '#4682b4', // Blue for both dark and light modes
+        //   },
+        // },
         {
           name: 'Upper Bound',
           type: 'line',
