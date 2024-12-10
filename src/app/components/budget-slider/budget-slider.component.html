@@ -24,7 +24,7 @@
         [max]="totalIncome"
         discrete
     >
-    <input #sliderStart matSliderStartThumb>
+    <input #sliderStart (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
     <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
 </mat-slider>
 <label>{{slider.value}}</label>

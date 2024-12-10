@@ -123,12 +123,13 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
   }
 
 
-  populateSliders() {
+  populateSliders(): void {
     // Populate sliders and store initial values
     this.sliders = this.averagePieData.map(data => ({
       name: data.name,
       value: roundToNearestHundreds(data.averageValue),
       max: this.totalIncome,
+      min: 0,
       weight: 1 // Default weight, can be user-adjusted
     }));
   
@@ -149,6 +150,19 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
 
   }
 
+  adjustMinValue(sliderName: string, minValue: string): void {
+    const min = parseFloat(minValue);
+    // Find the item to update
+    const targetIndex = this.sliders.findIndex((item) => item.name === sliderName);
+    if (targetIndex === -1) {
+      console.error("Item not found");
+      return;
+    }
+  
+    // Update the target value
+    this.sliders[targetIndex].min = min;
+  }
+
   adjustSliders(name: string, newValue: number): void {
     // Find the item to update
     const targetIndex = this.sliders.findIndex((item) => item.name === name);
@@ -157,13 +171,13 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
       return;
     }
   
-    // Update the target value
-    const originalValue = this.sliders[targetIndex].value;
-    this.sliders[targetIndex].value = roundToNearestHundreds(newValue);
+    // Update the target value but respect min value
+    const slider = this.sliders[targetIndex];
+    const originalValue = slider.value;
+    slider.value = Math.max(roundToNearestHundreds(newValue), (slider.min || 0)); // Ensure value >= min
   
     // Calculate the new total sum
     const currentSum = this.sliders.reduce((sum, item) => sum + item.value, 0);
-  
     this.totalExpenses = roundToNearestHundreds(currentSum);
   
     const maxSum = this.totalIncome - this.targetSurplus;
@@ -179,7 +193,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
   
       if (totalWeight === 0) {
         console.error("Cannot adjust other items because their weights sum to 0");
-        this.sliders[targetIndex].value = roundToNearestHundreds(originalValue); // Revert to the original value
+        slider.value = roundToNearestHundreds(originalValue); // Revert to the original value
         return;
       }
   
@@ -187,7 +201,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
       this.sliders.forEach((item, index) => {
         if (index !== targetIndex) {
           const adjustment = (item.weight / totalWeight) * excess;
-          item.value = Math.max(roundToNearestHundreds(item.value - adjustment), 0); // Ensure no negative values
+          item.value = Math.max(
+            roundToNearestHundreds(item.value - adjustment),
+            (item.min || 0) // Respect min value
+          );
         }
       });
   
