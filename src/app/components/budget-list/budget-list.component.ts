@@ -41,15 +41,18 @@ export class BudgetListComponent implements OnInit{
     this.budgets = this.budgetService.getBudgets()
   }
 
+  /** Hover logic to display coloured border */
   onMouseEnter(category: string) {
     this.hoveredCategory = category;
   }
 
+  /** Hover logic to display coloured border */
   onMouseLeave() {
     this.hoveredCategory = null;
   }
 
 
+  /** Open Edit values dialog for a category */
   onBudgetClick(category: string) {
     const _category = category as ExpenseCategory;
     const categoryDetails = this.expenseCategoryDetails.find(cat => cat.value === category);
@@ -69,18 +72,29 @@ export class BudgetListComponent implements OnInit{
     });
   }
 
+  /** Display budget value in the template.
+   * @returns Budget value with currency symbol
+   */
   getBudgetValue(category: string): string {
     const budgetValue = this.budgets.find(budget => budget.category === category)?.value;
     return budgetValue ? this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()) + budgetValue.toLocaleString('en-US') : ' _';
   }
   
 
-
+  /** Get budget value of a Category.
+   * @param category Category to get budget value for
+   * 
+   * @returns Budget value for the category
+   */
   getCurrentBudget(category: ExpenseCategory): number {
     const budgets = this.budgetService.getBudgets();
     return budgets.find(budget => budget.category === category)?.value || 0;
   }
 
+  /** Update budget value for a category.
+   * @param category Category to update budget for
+   * @param value New budget value
+   */
   updateBudget(category: ExpenseCategory, value: number) {
     const budgetIndex = this.budgets.findIndex(budget => budget.category === category);
 
