@@ -281,6 +281,12 @@ export interface TreeNode {
 //#endregion
 
 
+
+
+//#region Abnormality Detection
+// Represents the result of analyzing a category for abnormalities
+
+
 export interface CategoryAnalysis {
   name: string;
   averageSpending: number;
@@ -295,8 +301,6 @@ export interface CategoryInsight {
 }
 
 
-//#region Abnormality Detection
-// Represents the result of analyzing a category for abnormalities
 export interface AbnormalityAnalysis {
   name: string;  // The name of the category being analyzed
   categoryName: string;  // Raw category name (include system prefix for internal lookups)
@@ -394,4 +398,11 @@ export const AbnormalityConfig: Record<AbnormalityType, { colorDark: string; col
 //#endregion
 
 
-
+//#region Slider
+export interface BudgetSlider {
+  name: string
+  value: number
+  min?: number
+  max?: number
+  weight: number // Higher weight means higher priority => Less likely to be changed
+}

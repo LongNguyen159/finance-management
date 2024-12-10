@@ -114,6 +114,11 @@ export function parseLocaleStringToNumber(localeString: string): number {
   return parseFloat(localeString.replace(/[^0-9.-]+/g, ''))
 }
 
+/** Round numbers to nearest 2 points decimal with maths. If integer, no decimals. */
+export function roundToNearestHundreds(num: number): number {
+  return Math.round((num) * 100) / 100;
+}
+
 
 /** Process string input like '110 + 50' to '160'
 * @param amount The string input to process

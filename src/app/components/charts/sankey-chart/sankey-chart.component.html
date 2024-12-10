@@ -3,7 +3,7 @@
         Income Flow and Expense Allocation
     </h2>
     @if (showTooltip) {
-        <button mat-icon-button class="!flex custom-position" matTooltip="Tip: You can click on the chart to edit values directly.">
+        <button mat-icon-button class="!flex custom-position" [matTooltip]="'Tip: You can click on the chart to edit values directly || Info: Trends below show your current spending compared to last month.'">
             <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
         </button>
     }

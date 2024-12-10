@@ -1,0 +1,31 @@
+<div>
+    Income: {{ totalIncome }}
+</div>
+<div>
+    Expenses: {{ totalExpenses }}
+</div>
+
+<div>
+    Target Savings {{ targetSurplus  }}
+</div>
+
+<div class="mb-6">
+    Current Savings: {{ totalIncome - totalExpenses }}
+</div>
+
+
+<button mat-button (click)="resetSliders()">
+    Reset Sliders
+</button>
+@for (slider of sliders; track $index) {
+    <h3>{{ slider.name }}</h3>
+    <mat-slider
+        class="!w-[70%]"
+        [max]="totalIncome"
+        discrete
+    >
+    <input #sliderStart matSliderStartThumb>
+    <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+</mat-slider>
+<label>{{slider.value}}</label>
+}
