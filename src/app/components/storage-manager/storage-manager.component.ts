@@ -134,7 +134,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   totalNetIncome: number = 0;
   totalExpenses: number = 0;
 
-  showReports: boolean = true;
+  /** Show report section */
+  showReports: boolean = false;
 
   /** Annomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
   anomalyReports: AbnormalityAnalysis[] = [];
