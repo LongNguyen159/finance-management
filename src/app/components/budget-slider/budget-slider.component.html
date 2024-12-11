@@ -22,6 +22,10 @@
     Undo
 </button>
 
+<button mat-button (click)="autoFit = !autoFit">
+    {{ autoFit ? 'Disable' : 'Enable' }} Auto Fit
+</button>
+
 
 <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
 <div >
@@ -37,11 +41,15 @@
                     class="!w-[60%]"
                     [max]="slider.max"
                     discrete
+                    [disabled]="slider.locked"
                 >   
                     <input #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
                     <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                 </mat-slider>
                 <label>{{slider.value}}</label>
+                <button mat-button (click)="toggleLockSlider(slider.name)">
+                    {{ slider.locked ? 'Unlock' : 'Lock' }}
+                </button>
             </div>
         </div>
     }

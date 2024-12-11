@@ -24,7 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
 })
-export class BudgetSliderComponent extends BasePageComponent implements OnInit{
+export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
@@ -58,6 +58,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
   initialSliders: any[] = []; // To store the initial slider values
   sliderHistory: any[][] = []
   maxHistorySize: number = 15
+
+  autoFit: boolean = false; // Auto-fit sliders to stay within target surplus
   //#endregion
   
   ngOnInit(): void {
@@ -147,6 +149,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
         value: roundToNearestHundreds(data.averageValue),
         min: 0,
         max: roundToNearestHundreds(dynamicMax), // Dynamic max scaling
+
+        locked: false, // Default unlocked
         weight: 1 // Default weight, can be user-adjusted
       };
     });
@@ -207,8 +211,16 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
 
   //#region Slider adjustments
 
-  /** IMPORTANT: Remember to save slider state on slider changes. */
+  toggleLockSlider(sliderName: string) {
+    const targetIndex = this.sliders.findIndex((item) => item.name === sliderName);
+    if (targetIndex === -1) {
+      console.error("Item not found");
+      return;
+    }
+    this.sliders[targetIndex].locked = !this.sliders[targetIndex].locked;
+  }
 
+  /** IMPORTANT: Remember to save slider state on slider changes. */
   /** Modify the min value of the slider */
   adjustMinValue(sliderName: string, minValue: string): void {
     this.saveState() // Save the current state before making changes
@@ -236,50 +248,72 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
       console.error("Item not found");
       return;
     }
-  
+
     // Update the target value but respect min value
     const slider = this.sliders[targetIndex];
     const originalValue = slider.value;
-    slider.value = Math.max(roundToNearestHundreds(newValue), (slider.min || 0)); // Ensure value >= min
-  
+    slider.value = Math.max(roundToNearestHundreds(newValue), slider.min || 0); // Ensure value >= min
+
     // Calculate the new total sum
     const currentSum = this.sliders.reduce((sum, item) => sum + item.value, 0);
     this.totalExpenses = roundToNearestHundreds(currentSum);
-  
+
     const maxSum = this.totalIncome - this.targetSurplus;
-  
+
     // Check if the sum exceeds the max allowed value
     if (currentSum > maxSum) {
       const excess = currentSum - maxSum;
-  
-      // Calculate total weight of items to adjust
+
+      // Calculate total weight of items to adjust (excluding locked sliders)
       const totalWeight = this.sliders
-        .filter((_, index) => index !== targetIndex) // Exclude the updated item
+        .filter((_, index) => index !== targetIndex && !this.sliders[index].locked) // Exclude updated and locked items
         .reduce((sum, item) => sum + item.weight, 0);
-  
+
       if (totalWeight === 0) {
-        console.error("Cannot adjust other items because their weights sum to 0");
+        console.error("Cannot adjust other items because their weights sum to 0 or all are locked");
         slider.value = roundToNearestHundreds(originalValue); // Revert to the original value
         return;
       }
-  
-      // Adjust other values proportionally
+
+      // Adjust other values proportionally (downwards)
       this.sliders.forEach((item, index) => {
-        if (index !== targetIndex) {
+        if (index !== targetIndex && !item.locked) {
           const adjustment = (item.weight / totalWeight) * excess;
           item.value = Math.max(
             roundToNearestHundreds(item.value - adjustment),
-            (item.min || 0) // Respect min value
+            item.min || 0 // Respect min value
           );
         }
       });
-  
-      // Recheck to ensure the sum is within the limit due to rounding
-      const adjustedSum = this.sliders.reduce((sum, item) => sum + item.value, 0);
-      if (adjustedSum > maxSum) {
-        console.warn("Adjustment could not fully bring the total under the maximum");
+    } else if (this.autoFit && currentSum < maxSum) {
+      // Adjust other sliders up to stay closer to maxSum
+      const deficit = maxSum - currentSum;
+
+      // Calculate total weight of items to adjust (excluding locked sliders)
+      const totalWeight = this.sliders
+        .filter((_, index) => index !== targetIndex && !this.sliders[index].locked) // Exclude updated and locked items
+        .reduce((sum, item) => sum + item.weight, 0);
+
+      if (totalWeight > 0) {
+        // Adjust other values proportionally (upwards)
+        this.sliders.forEach((item, index) => {
+          if (index !== targetIndex && !item.locked) {
+            const adjustment = (item.weight / totalWeight) * deficit;
+            item.value = Math.min(
+              roundToNearestHundreds(item.value + adjustment),
+              item.max || maxSum // Respect max value, if defined
+            );
+          }
+        });
       }
     }
+
+    // Recheck to ensure the sum is within the limit due to rounding
+    const adjustedSum = this.sliders.reduce((sum, item) => sum + item.value, 0);
+    if (adjustedSum > maxSum) {
+      console.warn("Adjustment could not fully bring the total under the maximum");
+    }
   }
+  
   //#endregion
 }

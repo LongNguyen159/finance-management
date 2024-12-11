@@ -404,5 +404,6 @@ export interface BudgetSlider {
   value: number
   min?: number
   max?: number
+  locked: boolean
   weight: number // Higher weight means higher priority => Less likely to be changed
 }
