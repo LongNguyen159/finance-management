@@ -26,8 +26,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 })
 export class BudgetSliderComponent extends BasePageComponent implements OnInit{
   dataService = inject(DataService)
-
-  
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
   filteredMonthsByYear: { [key: string]: string[] } = {};
@@ -35,19 +33,32 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
 
 
   MONTHS_TO_CALCULATE_AVG = 12
-  sliders: BudgetSlider[] = [];
-  averagePieData: { name: string, averageValue: number }[] = [];
 
+
+  //#region Income/Expense/Surplus
+  // Average Income/Expense gathered to populate the sliders on init
   averageIncome: number = 0
   averageExpense: number = 0
 
+  // Pie Category data that contains average values to populate sliders on init
+  averagePieData: { name: string, averageValue: number }[] = [];
 
+  /** User defined metrics: Income and target surplus.
+   * Total expenses are calculated based on the sliders.
+   */
   totalIncome: number = 2000
   targetSurplus: number = 200
 
   totalExpenses: number = 0
-  private initialSliders: any[] = []; // To store the initial slider values
+  //#endregion
 
+
+  //#region Sliders
+  sliders: BudgetSlider[] = [];
+  initialSliders: any[] = []; // To store the initial slider values
+  sliderHistory: any[][] = []
+  maxHistorySize: number = 15
+  //#endregion
   
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe((allMonthsData: MonthlyData) => {
@@ -81,7 +92,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
       return acc + this.allMonthsData[month].totalExpenses;
     }, 0);
 
-    console.log('coresponding month data:', this.filteredMonths.map(month => this.allMonthsData[month]));
   
     const totalUsableIncome = this.filteredMonths.reduce((acc, month) => {
       return acc + this.allMonthsData[month].totalUsableIncome;
@@ -142,22 +152,67 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
     });
   
     this.initialSliders = JSON.parse(JSON.stringify(this.sliders)); // Deep copy for reset
+    this.saveState(); // Save initial state
     console.log('Sliders:', this.sliders);
   }
 
+  //#region Save/Undo/Reset
+  /** Save current state of sliders into history buffer, this allows for `undo` to work. */
+  saveState(): void {
+    // Deep copy the current sliders state
+    const currentState = JSON.parse(JSON.stringify(this.sliders));
+    this.sliderHistory.push(currentState);
+
+    // Maintain history size
+    if (this.sliderHistory.length > this.maxHistorySize) {
+      this.sliderHistory.shift(); // Remove the oldest state
+    }
+  }
+
+  /** Revert to previous state. */
+  undo(): void {
+    if (this.sliderHistory.length > 1) {
+      // Remove the latest state and revert to the previous state
+      this.sliderHistory.pop();
+      const previousState = this.sliderHistory[this.sliderHistory.length - 1];
+      this.sliders = JSON.parse(JSON.stringify(previousState)); // Deep copy
+      this.recalculateExpenses()
+    } else {
+      console.warn('No more states to undo!');
+    }
+  }
+
+  /** Reset sliders to their initial state. (Populated by `populateSliders()`) */
   resetSliders(): void {
     if (this.initialSliders.length === 0) {
       console.error("Initial sliders not available for reset");
       return;
     }
+  
     // Restore sliders to their initial state
-    this.sliders = JSON.parse(JSON.stringify(this.initialSliders)); // Deep copy to avoid reference issues
-    this.recalculateExpenses()
-    console.log('Sliders reset to initial values:', this.sliders);
+    const resetState = JSON.parse(JSON.stringify(this.initialSliders)); // Deep copy to avoid reference issues
+  
+    // Check if the current state matches the reset state
+    const currentState = JSON.stringify(this.sliders);
+    if (currentState !== JSON.stringify(resetState)) {
+      this.sliders = resetState; // Apply the reset state
+      this.saveState(); // Save the reset state to history
+      this.recalculateExpenses();
+    } else {
+      console.info("Sliders are already in the reset state, no need to save again.");
+    }
+  }  
+  //#endregion
 
-  }
 
+  //#region Slider adjustments
+
+  /** IMPORTANT: Remember to save slider state on slider changes. */
+
+  /** Modify the min value of the slider */
   adjustMinValue(sliderName: string, minValue: string): void {
+    this.saveState() // Save the current state before making changes
+
     const min = parseFloat(minValue);
     // Find the item to update
     const targetIndex = this.sliders.findIndex((item) => item.name === sliderName);
@@ -170,7 +225,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
     this.sliders[targetIndex].min = min;
   }
 
+  /** Readjust the sliders so that the total stays below target surplus defined by user. */
   adjustSliders(name: string, newValue: number): void {
+    // Save the current state before making changes
+    this.saveState();
+
     // Find the item to update
     const targetIndex = this.sliders.findIndex((item) => item.name === name);
     if (targetIndex === -1) {
@@ -222,8 +281,5 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
       }
     }
   }
-  
-  
-
-
+  //#endregion
 }

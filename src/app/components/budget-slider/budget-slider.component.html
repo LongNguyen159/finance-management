@@ -17,6 +17,12 @@
 <button mat-button (click)="resetSliders()">
     Reset Sliders
 </button>
+
+<button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
+    Undo
+</button>
+
+
 <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
 <div >
     @for (slider of sliders; track $index) {
@@ -31,8 +37,8 @@
                     class="!w-[60%]"
                     [max]="slider.max"
                     discrete
-                >
-                    <input #sliderStart (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
+                >   
+                    <input #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
                     <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                 </mat-slider>
                 <label>{{slider.value}}</label>
