@@ -6,7 +6,7 @@ import { InputListDialogComponent } from '../components/dialogs/input-list-dialo
 import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expense-dialog/insert-expense-dialog.component';
 import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/insights-dialog.component';
 import { PatternAnalysisDialogComponent } from '../components/dialogs/pattern-analysis-dialog/pattern-analysis-dialog.component';
-import { AbnormalityChartdata } from '../components/models';
+import { AbnormalityChartData } from '../components/models';
 
 @Injectable({
   providedIn: 'root'
@@ -43,7 +43,7 @@ export class DialogsService {
   }
 
 
-  openPatternAnalysisDialog(chartData: AbnormalityChartdata) {
+  openPatternAnalysisDialog(chartData: AbnormalityChartData) {
     this.dialog.open(PatternAnalysisDialogComponent, {
       width: '75rem',
       height: '83vh',

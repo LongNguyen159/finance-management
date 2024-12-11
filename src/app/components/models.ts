@@ -354,7 +354,7 @@ export interface Abnormality {
 }
 
 
-export interface AbnormalityChartdata {
+export interface AbnormalityChartData {
   rawValues: number[];
   xAxisData: string[];
   categoryName: string

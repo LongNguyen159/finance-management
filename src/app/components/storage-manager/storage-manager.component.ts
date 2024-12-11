@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { Abnormality, AbnormalityAnalysis, AbnormalityChartdata, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, ForecastData, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
+import { Abnormality, AbnormalityAnalysis, AbnormalityChartData, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, ForecastData, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -550,7 +550,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     }
 
     // Extract raw values & fitted values and open the dialog to plot them.
-    const chartData: AbnormalityChartdata = {
+    const chartData: AbnormalityChartData = {
       categoryName: removeSystemPrefix(categoryName),
       rawValues: matchingCategory.rawValues,
       xAxisData: matchingCategory.xAxisData,

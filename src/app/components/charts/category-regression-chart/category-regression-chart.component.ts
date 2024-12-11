@@ -1,7 +1,7 @@
 import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { AbnormalityChartdata } from '../../models';
+import { AbnormalityChartData } from '../../models';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
 import { evaluateMetrics, getNextMonths, MONTHS_TO_PREDICT } from '../../../utils/utils';
@@ -25,7 +25,7 @@ import { BaseChartComponent } from '../../../base-components/base-chart/base-cha
   styleUrl: './category-regression-chart.component.scss'
 })
 export class CategoryRegressionChartComponent extends BaseChartComponent implements OnChanges {
-  @Input() chartData: AbnormalityChartdata
+  @Input() chartData: AbnormalityChartData
 
   currencyService = inject(CurrencyService)
   currencyPipe = inject(CurrencyPipe)

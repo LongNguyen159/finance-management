@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { AbnormalityChartdata } from '../../models';
+import { AbnormalityChartData } from '../../models';
 import { CategoryRegressionChartComponent } from "../../charts/category-regression-chart/category-regression-chart.component";
 
 @Component({
@@ -15,6 +15,6 @@ import { CategoryRegressionChartComponent } from "../../charts/category-regressi
 export class PatternAnalysisDialogComponent {
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: AbnormalityChartdata
+    @Inject(MAT_DIALOG_DATA) public data: AbnormalityChartData
   ) {}
 }
