@@ -123,18 +123,25 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit{
   }
 
 
-  populateSliders(): void {
-    // Populate sliders and store initial values
-    this.sliders = this.averagePieData.map(data => ({
-      name: data.name,
-      value: roundToNearestHundreds(data.averageValue),
-      max: this.totalIncome,
-      min: 0,
-      weight: 1 // Default weight, can be user-adjusted
-    }));
+  populateSliders() {
+    const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
   
-    // Store the initial slider values
-    this.initialSliders = JSON.parse(JSON.stringify(this.sliders)); // Deep copy to preserve original values
+    this.sliders = this.averagePieData.map(data => {
+      const percentage = data.averageValue / totalCategoryValues; // Relative size of category
+
+      // Scaled max: Choose income % or average value * 1.5, whichever is higher
+      const dynamicMax = Math.max(this.totalIncome * percentage * 3, (data.averageValue + 1) * 1.5); 
+  
+      return {
+        name: data.name,
+        value: roundToNearestHundreds(data.averageValue),
+        min: 0,
+        max: roundToNearestHundreds(dynamicMax), // Dynamic max scaling
+        weight: 1 // Default weight, can be user-adjusted
+      };
+    });
+  
+    this.initialSliders = JSON.parse(JSON.stringify(this.sliders)); // Deep copy for reset
     console.log('Sliders:', this.sliders);
   }
 

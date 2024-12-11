@@ -17,15 +17,26 @@
 <button mat-button (click)="resetSliders()">
     Reset Sliders
 </button>
-@for (slider of sliders; track $index) {
-    <h3>{{ slider.name }}</h3>
-    <mat-slider
-        class="!w-[70%]"
-        [max]="totalIncome"
-        discrete
-    >
-    <input #sliderStart (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
-    <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
-</mat-slider>
-<label>{{slider.value}}</label>
-}
+<!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
+<div >
+    @for (slider of sliders; track $index) {
+        <!-- class="flex flex-col h-[400px] items-center justify-between slider-container" -->
+        <div class="flex flex-col">
+            <div>
+                <h3>{{ slider.name }}</h3>
+            </div>
+            <div class="flex flex-row gap-2 items-center w-full">
+                <!-- style="width: 300px !important;display: flex !important; flex-direction: column; justify-content: center; transform: rotate(-90deg);" -->
+                <mat-slider
+                    class="!w-[60%]"
+                    [max]="slider.max"
+                    discrete
+                >
+                    <input #sliderStart (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
+                    <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                </mat-slider>
+                <label>{{slider.value}}</label>
+            </div>
+        </div>
+    }
+</div>
