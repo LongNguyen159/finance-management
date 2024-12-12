@@ -40,8 +40,8 @@
             <span>{{ allSlidersLocked ? 'Unlock All' : 'Lock All' }}</span>
         </button>
         
-        <button mat-button (click)="autoFit = !autoFit">
-            Always fit Target Surplus: {{ autoFit ? 'On' : 'Off' }}
+        <button mat-button (click)="autoFit = !autoFit" matTooltip="Bring the sliders both up and down so that current savings always close to target savings" [matTooltipShowDelay]="800">
+            Always fit Target Savings: {{ autoFit ? 'On' : 'Off' }}
         </button>
 
         <button mat-button (click)="resetSliders()">
