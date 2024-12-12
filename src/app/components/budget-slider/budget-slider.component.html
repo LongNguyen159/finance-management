@@ -2,9 +2,10 @@
     <form [formGroup]="form">
         <div class="flex flex-row gap-2 items-center">
             <mat-form-field>
+                <mat-label>Time frame</mat-label>
                 <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
-                    <mat-option value="monthly">Monthly</mat-option>
-                    <mat-option value="yearly">Yearly</mat-option>
+                    <mat-option value="monthly">1 Month</mat-option>
+                    <mat-option value="yearly">1 Year</mat-option>
                 </mat-select>
             </mat-form-field>
     
