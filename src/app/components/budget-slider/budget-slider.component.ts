@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
 import { takeUntil } from 'rxjs';
-import { BudgetSlider, MonthlyData, SYSTEM_PREFIX } from '../models';
+import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX } from '../models';
 import { CommonModule } from '@angular/common';
 import {MatSliderModule} from '@angular/material/slider';
 import { removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
@@ -10,6 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { ColorService } from '../../services/color.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-budget-slider',
@@ -20,21 +23,20 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
-    MatSelectModule
+    MatSelectModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
 })
 export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
+  colorService = inject(ColorService)
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
   filteredMonthsByYear: { [key: string]: string[] } = {};
   filteredMonths: string[] = [];
-
-  MONTHS_TO_CALCULATE_AVG = 12
-
-  calculationBasis: 'monthly' | 'yearly' = 'monthly'; // Add this property
 
   //#region Income/Expense/Surplus
   // Average Income/Expense gathered to populate the sliders on init
@@ -50,6 +52,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   totalExpenses: number = 0
 
+  MONTHS_TO_CALCULATE_AVG = 12
+
+  calculationBasis: 'monthly' | 'yearly' = 'monthly';
   multiplier: number = 1
   //#endregion
 
@@ -126,7 +131,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     }, {} as { [key: string]: { total: number, count: number } });
 
     this.averagePieData = Object.keys(aggregatedPieData).map(name => ({
-      name: removeSystemPrefix(name),
+      name: name,
       averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * multiplier * 100) / 100
     }));
     this.populateSliders();
@@ -139,20 +144,27 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   populateSliders() {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
   
-    this.sliders = this.averagePieData.map(data => {
-      const percentage = data.averageValue / totalCategoryValues; // Relative size of category
+    this.sliders = this.averagePieData.map(category => {
+
+      const percentage = category.averageValue / totalCategoryValues; // Relative size of category
 
       // Scaled max: Choose income % or average value * 1.5, whichever is higher
-      const dynamicMax = Math.max(this.averageIncome * percentage * 3, (data.averageValue + 1) * 1.5); 
-  
+      const dynamicMax = Math.max(this.averageIncome * percentage * 3, (category.averageValue + 1) * 1.5); 
+
+      const categoryDetails = expenseCategoryDetails[category.name as ExpenseCategory];
+
       return {
-        name: data.name,
-        value: roundToNearestHundreds(data.averageValue),
+        name: removeSystemPrefix(category.name),
+        value: roundToNearestHundreds(category.averageValue),
         min: 0,
         max: roundToNearestHundreds(dynamicMax), // Dynamic max scaling
 
         locked: false, // Default unlocked
-        weight: 1 // Default weight, can be user-adjusted
+        weight: 1, // Default weight, can be user-adjusted
+
+        icon: categoryDetails.icon,
+        colorDark: categoryDetails.colorDark,
+        colorLight: categoryDetails.colorLight,
       };
     });
   

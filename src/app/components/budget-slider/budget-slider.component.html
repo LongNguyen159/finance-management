@@ -37,28 +37,31 @@
 
 
 <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
-<div >
+<div class="grid grid-cols-2 gap-x-10">
     @for (slider of sliders; track $index) {
         <!-- class="flex flex-col h-[400px] items-center justify-between slider-container" -->
         <div class="flex flex-col">
-            <div>
+            <div class="flex flex-row items-center gap-2">
+                @if (slider.icon) {
+                    <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                }
                 <h3>{{ slider.name }}</h3>
             </div>
             <div class="flex flex-row gap-2 items-center w-full">
                 <!-- style="width: 300px !important;display: flex !important; flex-direction: column; justify-content: center; transform: rotate(-90deg);" -->
                 <mat-slider
-                    class="!w-[60%]"
+                    class="!w-[70%]"
                     [max]="slider.max"
                     discrete
                     [disabled]="slider.locked"
                 >   
-                    <input #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)" matSliderStartThumb>
+                    <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
                     <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                 </mat-slider>
-                <label>{{slider.value}}</label>
-                <button mat-button (click)="toggleLockSlider(slider.name)">
-                    {{ slider.locked ? 'Unlock' : 'Lock' }}
+                <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" matTooltip="Lock value so it doesn't move" [matTooltipShowDelay]="800">
+                    <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                 </button>
+                <label>{{slider.value}}</label>
             </div>
         </div>
     }

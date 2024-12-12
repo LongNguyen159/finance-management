@@ -406,4 +406,7 @@ export interface BudgetSlider {
   max?: number
   locked: boolean
   weight: number // Higher weight means higher priority => Less likely to be changed
+  icon?: string
+  colorDark?: string
+  colorLight?: string
 }
