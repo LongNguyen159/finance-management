@@ -54,6 +54,7 @@
                     [max]="slider.max"
                     discrete
                     [disabled]="slider.locked"
+                    [displayWith]="formatBigNumbersFrom1K"
                 >   
                     <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
                     <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
@@ -61,7 +62,7 @@
                 <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" matTooltip="Lock value so it doesn't move" [matTooltipShowDelay]="800">
                     <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                 </button>
-                <label>{{slider.value}}</label>
+                <label>{{ formatBigNumbers(slider.value) }}</label>
             </div>
         </div>
     }

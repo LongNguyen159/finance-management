@@ -5,11 +5,11 @@ import { takeUntil } from 'rxjs';
 import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX } from '../models';
 import { CommonModule } from '@angular/common';
 import {MatSliderModule} from '@angular/material/slider';
-import { removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
+import { formatBigNumber, removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ColorService } from '../../services/color.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -74,13 +74,14 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     })  
   }
 
+  /** Recalculate Metrics and populate the sliders with appropriate values for the selected time frame. */
   onCalculationBasisChange(option: 'monthly' | 'yearly') {
     this.calculationBasis = option
     this.multiplier = option === 'yearly' ? 12 : 1;
     this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
   }
 
-
+  /** Gather the metrics from last N months to populate the sliders initially. */
   getMetricsFromLastNMonths(lastNMonths: number) {
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
@@ -137,10 +138,14 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.populateSliders();
   }
 
+  /** Recalculate Total Expenses. Use this function when user undo or reset sliders.  */
   recalculateExpenses() {
     this.totalExpenses = roundToNearestHundreds(this.sliders.reduce((acc, item) => acc + item.value, 0));
   }
 
+  /** Populate Sliders with initial values (untouched).
+   * The intial values come from average from the last N months.
+   */
   populateSliders() {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
   
@@ -237,6 +242,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   adjustMinValue(sliderName: string, minValue: string): void {
     this.saveState() // Save the current state before making changes
 
+    /** Input is in string value, parse to float values */
     const min = parseFloat(minValue);
     // Find the item to update
     const targetIndex = this.sliders.findIndex((item) => item.name === sliderName);
@@ -326,6 +332,16 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       console.warn("Adjustment could not fully bring the total under the maximum");
     }
   }
-  
+  //#endregion
+
+  //#region Formatting
+  formatBigNumbers(value: number): string {
+    return formatBigNumber(value);
+  }
+
+  formatBigNumbersFrom1K(value: number): string {
+    return formatBigNumber(value, '', 1000);
+  }
+
   //#endregion
 }
