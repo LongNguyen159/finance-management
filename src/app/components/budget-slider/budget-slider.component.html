@@ -1,33 +1,36 @@
-<div class="my-4 py-4">
-    <form [formGroup]="form">
-        <div class="flex flex-row gap-2 items-center">
-            <mat-form-field>
-                <mat-label>Time frame</mat-label>
-                <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
-                    <mat-option value="monthly">1 Month</mat-option>
-                    <mat-option value="yearly">1 Year</mat-option>
-                </mat-select>
-            </mat-form-field>
-    
-            <mat-form-field appearance="fill">
-              <mat-label>Average Income</mat-label>
-              <input matInput type="number" formControlName="averageIncome" />
-              <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
-            </mat-form-field>
-    
-            <mat-form-field appearance="fill">
-              <mat-label>Target Savings</mat-label>
-              <input matInput type="number" formControlName="targetSavings" />
-            </mat-form-field>
-        </div>  
-    </form>
-    <div>
-        Expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }}
-    </div>
-    
-    <div class="mb-6">
-        Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
-    </div>
+<div class="py-4">
+    <h2 class="text-2xl font-bold mb-4 text-center">Smart Budget Allocator</h2>
+    <div class="flex flex-col items-center">
+        <div>
+            <form [formGroup]="form">
+                <div class="grid grid-cols-3 gap-x-2">
+                    <mat-form-field>
+                        <mat-label>Time frame</mat-label>
+                        <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
+                            <mat-option value="monthly">1 Month</mat-option>
+                            <mat-option value="yearly">1 Year</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="fill">
+                      <mat-label>Target Savings</mat-label>
+                      <input matInput type="number" formControlName="targetSavings" />
+                    </mat-form-field>
+
+
+                    <mat-form-field appearance="fill">
+                      <mat-label>Average Income</mat-label>
+                      <input matInput type="number" formControlName="averageIncome" />
+                      <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                    </mat-form-field>
+                </div>
+            </form>
+        </div>
+
+        <div class="mb-2 py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
+            Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+        </div>
+    </div>    
       
     <!-- ACTION BUTTONS -->
     <div class="flex flex-row w-full justify-end gap-2 mb-4">        
@@ -50,12 +53,12 @@
             <span [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'">Reset Sliders</span>
         </button>
     </div>
+    <div class="mb-4">
+        Total Expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }}
+    </div>
     
-    
-    <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
     <div class="grid grid-cols-2 gap-x-10">
         @for (slider of sliders; track $index) {
-            <!-- class="flex flex-col h-[400px] items-center justify-between slider-container" -->
             <div class="flex flex-col">
                 <div class="flex flex-row items-center gap-2">
                     @if (slider.icon) {
@@ -64,7 +67,6 @@
                     <h3>{{ slider.name }}</h3>
                 </div>
                 <div class="flex flex-row gap-2 items-center w-full">
-                    <!-- style="width: 300px !important;display: flex !important; flex-direction: column; justify-content: center; transform: rotate(-90deg);" -->
                     <mat-slider
                         class="!w-[70%]"
                         [max]="slider.max"
