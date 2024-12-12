@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
-import { takeUntil } from 'rxjs';
+import { debounceTime, Subject, takeUntil } from 'rxjs';
 import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX } from '../models';
 import { CommonModule } from '@angular/common';
 import {MatSliderModule} from '@angular/material/slider';
@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ColorService } from '../../services/color.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { CurrencyService } from '../../services/currency.service';
 
 @Component({
   selector: 'app-budget-slider',
@@ -25,7 +27,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    ReactiveFormsModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
@@ -33,22 +36,21 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   colorService = inject(ColorService)
+  currencyService = inject(CurrencyService)
+  
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
   filteredMonthsByYear: { [key: string]: string[] } = {};
   filteredMonths: string[] = [];
 
   //#region Income/Expense/Surplus
-  // Average Income/Expense gathered to populate the sliders on init
-  averageIncome: number = 0 // Can be changed by user for more accurate calculations
-
   // Pie Category data that contains average values to populate sliders on init
   averagePieData: { name: string, averageValue: number }[] = [];
 
   /** User defined metrics: Income and target surplus.
    * Total expenses are calculated based on the sliders.
    */
-  targetSurplus: number = 200
+  targetSurplus: number = 0
 
   totalExpenses: number = 0
 
@@ -56,6 +58,15 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   calculationBasis: 'monthly' | 'yearly' = 'monthly';
   multiplier: number = 1
+
+  // Average Income/Expense gathered to populate the sliders on init
+  averageIncome: number = 0 // Can be changed by user for more accurate calculations
+  form = new FormGroup({
+    averageIncome: new FormControl(1), // Initial value
+    targetSavings: new FormControl(this.targetSurplus), // Initial value
+  });
+
+
   //#endregion
 
   //#region Sliders
@@ -71,15 +82,29 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe((allMonthsData: MonthlyData) => {
       this.allMonthsData = allMonthsData;
       this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
-    })  
+    })
+
+    this.form.get('averageIncome')?.valueChanges
+      .pipe(debounceTime(300)) // Add debounce to reduce frequent updates
+      .subscribe((value) => {
+        this.averageIncome = value ?? 0; // Update the displayed value
+      });
+
+    this.form.get('targetSavings')?.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe((value) => {
+        this.targetSurplus = value ?? 0;
+      });
   }
 
+  //#region Input Changes
   /** Recalculate Metrics and populate the sliders with appropriate values for the selected time frame. */
   onCalculationBasisChange(option: 'monthly' | 'yearly') {
     this.calculationBasis = option
     this.multiplier = option === 'yearly' ? 12 : 1;
     this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
   }
+  //#endregion
 
   /** Gather the metrics from last N months to populate the sliders initially. */
   getMetricsFromLastNMonths(lastNMonths: number) {
@@ -117,6 +142,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
     this.totalExpenses = roundToNearestHundreds(averageExpenses * multiplier);
     this.averageIncome = roundToNearestHundreds(averageUsableIncome * multiplier);
+
+    // Update the form values
+    this.form.get('averageIncome')?.setValue(this.averageIncome);
 
     const aggregatedPieData = this.filteredMonths.reduce((acc, month) => {
       this.allMonthsData[month].pieData.forEach(item => {

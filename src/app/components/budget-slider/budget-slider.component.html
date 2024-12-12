@@ -1,69 +1,76 @@
-<div>
-    Income: {{ averageIncome }}
-</div>
-<div>
-    Expenses: {{ totalExpenses }}
-</div>
-
-<div>
-    Target Savings {{ targetSurplus  }}
-</div>
-
-<div class="mb-6">
-    Current Savings: {{ averageIncome - totalExpenses }}
-</div>
-
-<div>
-    <mat-form-field>
-        <!-- <mat-label>Calculation</mat-label> -->
-        <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
-            <mat-option value="monthly">Monthly</mat-option>
-            <mat-option value="yearly">Yearly</mat-option>
-        </mat-select>
-      </mat-form-field>
-</div>
-
-<button mat-button (click)="resetSliders()">
-    Reset Sliders
-</button>
-
-<button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
-    Undo
-</button>
-
-<button mat-button (click)="autoFit = !autoFit">
-    {{ autoFit ? 'Disable' : 'Enable' }} Auto Fit
-</button>
-
-
-<!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
-<div class="grid grid-cols-2 gap-x-10">
-    @for (slider of sliders; track $index) {
-        <!-- class="flex flex-col h-[400px] items-center justify-between slider-container" -->
-        <div class="flex flex-col">
-            <div class="flex flex-row items-center gap-2">
-                @if (slider.icon) {
-                    <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
-                }
-                <h3>{{ slider.name }}</h3>
+<div class="my-4 py-4">
+    <form [formGroup]="form">
+        <div class="flex flex-row gap-2 items-center">
+            <mat-form-field>
+                <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
+                    <mat-option value="monthly">Monthly</mat-option>
+                    <mat-option value="yearly">Yearly</mat-option>
+                </mat-select>
+            </mat-form-field>
+    
+            <mat-form-field appearance="fill">
+              <mat-label>Average Income</mat-label>
+              <input matInput type="number" formControlName="averageIncome" />
+              <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+            </mat-form-field>
+    
+            <mat-form-field appearance="fill">
+              <mat-label>Target Savings</mat-label>
+              <input matInput type="number" formControlName="targetSavings" />
+            </mat-form-field>
+        </div>  
+    </form>
+    <div>
+        Expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }}
+    </div>
+    
+    <div class="mb-6">
+        Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+    </div>
+      
+    
+    <button mat-button (click)="resetSliders()">
+        Reset Sliders
+    </button>
+    
+    <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
+        Undo
+    </button>
+    
+    <button mat-button (click)="autoFit = !autoFit">
+        {{ autoFit ? 'Disable' : 'Enable' }} Auto Fit
+    </button>
+    
+    
+    <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
+    <div class="grid grid-cols-2 gap-x-10">
+        @for (slider of sliders; track $index) {
+            <!-- class="flex flex-col h-[400px] items-center justify-between slider-container" -->
+            <div class="flex flex-col">
+                <div class="flex flex-row items-center gap-2">
+                    @if (slider.icon) {
+                        <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                    }
+                    <h3>{{ slider.name }}</h3>
+                </div>
+                <div class="flex flex-row gap-2 items-center w-full">
+                    <!-- style="width: 300px !important;display: flex !important; flex-direction: column; justify-content: center; transform: rotate(-90deg);" -->
+                    <mat-slider
+                        class="!w-[70%]"
+                        [max]="slider.max"
+                        discrete
+                        [disabled]="slider.locked"
+                        [displayWith]="formatBigNumbersFrom1K"
+                    >   
+                        <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
+                        <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                    </mat-slider>
+                    <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" matTooltip="Lock value so it doesn't move" [matTooltipShowDelay]="800">
+                        <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
+                    </button>
+                    <label>{{ formatBigNumbers(slider.value) }}</label>
+                </div>
             </div>
-            <div class="flex flex-row gap-2 items-center w-full">
-                <!-- style="width: 300px !important;display: flex !important; flex-direction: column; justify-content: center; transform: rotate(-90deg);" -->
-                <mat-slider
-                    class="!w-[70%]"
-                    [max]="slider.max"
-                    discrete
-                    [disabled]="slider.locked"
-                    [displayWith]="formatBigNumbersFrom1K"
-                >   
-                    <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
-                    <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
-                </mat-slider>
-                <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" matTooltip="Lock value so it doesn't move" [matTooltipShowDelay]="800">
-                    <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
-                </button>
-                <label>{{ formatBigNumbers(slider.value) }}</label>
-            </div>
-        </div>
-    }
+        }
+    </div>
 </div>
