@@ -76,7 +76,7 @@
                 </div>
                 <div class="flex flex-row gap-2 items-center w-full">
                     <mat-slider
-                        class="!w-[65%]"
+                        class="!w-[50%]"
                         [max]="slider.max"
                         discrete
                         [disabled]="slider.locked"
@@ -89,7 +89,7 @@
                         <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                     </button>
                     <!-- <label>{{ formatBigNumbers(slider.value) }}</label> -->
-                    <mat-form-field appearance="outline" class="!w-[20%]">
+                    <mat-form-field appearance="outline" class="!w-40">
                         <!-- <mat-label>Set Value</mat-label> -->
                         <input 
                           matInput 
