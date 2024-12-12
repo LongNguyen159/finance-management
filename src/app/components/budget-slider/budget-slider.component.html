@@ -74,7 +74,7 @@
                         <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
                         <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                     </mat-slider>
-                    <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" matTooltip="Lock value so it doesn't move" [matTooltipShowDelay]="800">
+                    <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
                         <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                     </button>
                     <label>{{ formatBigNumbers(slider.value) }}</label>
