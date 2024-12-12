@@ -76,7 +76,7 @@
                 </div>
                 <div class="flex flex-row gap-2 items-center w-full">
                     <mat-slider
-                        class="!w-[70%]"
+                        class="!w-[65%]"
                         [max]="slider.max"
                         discrete
                         [disabled]="slider.locked"
@@ -95,7 +95,11 @@
                           matInput 
                           type="number" 
                           [(ngModel)]="slider.value"
+                          [value]="slider.value"
                           (input)="adjustSliders(slider.name, slider.value)">
+                        @if (calculationBasis == 'monthly') {
+                            <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                        }
                     </mat-form-field>
                 </div>
             </div>

@@ -322,7 +322,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const slider = this.sliders[targetIndex];
     const originalValue = slider.value;
     slider.value = Math.max(roundToNearestHundreds(newValue), slider.min || 0); // Ensure value >= min
-  
+    if (newValue < 0) {
+      console.log('Value cannot be negative, resetting to 0');
+      slider.value = 0; // Ensure value is not negative
+    }
     // Dynamically adjust max to always be slightly above the current value
     if (newValue >= (slider.max || 1) - 1) {
       slider.max = Math.ceil(newValue + (newValue * 0.2)); // Add a buffer, e.g., 100
