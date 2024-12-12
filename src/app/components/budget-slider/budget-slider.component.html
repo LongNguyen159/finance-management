@@ -32,11 +32,17 @@
 
     <div class="flex flex-row items-center justify-between  mb-6">
         <div class="flex flex-row items-center gap-2 w-full">
-            <div class="py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
-                Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
-            </div>
+            <div class="py-3 px-6 rounded-2xl border-[2px] border-solid"
+            [ngClass]="{
+              '!border-neutral-500': colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+              '!border-neutral-400': !colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+              'border-red-400': colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus),
+              'border-red-700': !colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus)
+            }">
+         Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+       </div>
         
-            <div class="py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
+            <div class="py-3 px-6 rounded-2xl border-[2px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
                 Target Savings: {{ targetSurplus | currency: currencyService.getSelectedCurrency() }}
             </div>
         </div>
