@@ -76,6 +76,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   maxHistorySize: number = 15
 
   autoFit: boolean = false; // Auto-fit sliders to stay within target surplus
+  allSlidersLocked: boolean = false; // Lock all sliders at once
   //#endregion
   
   ngOnInit(): void {
@@ -84,6 +85,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
     })
 
+    /** Input changes */
     this.form.get('averageIncome')?.valueChanges
       .pipe(debounceTime(300)) // Add debounce to reduce frequent updates
       .subscribe((value) => {
@@ -254,6 +256,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }  
   //#endregion
 
+
   //#region Slider adjustments
 
   toggleLockSlider(sliderName: string) {
@@ -264,6 +267,18 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     }
     this.sliders[targetIndex].locked = !this.sliders[targetIndex].locked;
   }
+
+  toggleLockAllSliders() {
+    this.allSlidersLocked = !this.allSlidersLocked;
+
+    if (this.allSlidersLocked) {
+      this.sliders.forEach((item) => item.locked = true);
+    } else {
+      this.sliders.forEach((item) => item.locked = false);
+    }
+  }
+
+
 
   /** IMPORTANT: Remember to save slider state on slider changes. */
   /** Modify the min value of the slider */

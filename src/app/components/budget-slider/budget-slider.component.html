@@ -28,18 +28,27 @@
         Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
     </div>
       
+    <!-- ACTION BUTTONS -->
+    <div class="flex flex-row w-full justify-end gap-2 mb-4">        
+        <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
+            <mat-icon fontSet="material-symbols-outlined">undo</mat-icon>
+            <span>Undo</span>
+        </button>
     
-    <button mat-button (click)="resetSliders()">
-        Reset Sliders
-    </button>
-    
-    <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
-        Undo
-    </button>
-    
-    <button mat-button (click)="autoFit = !autoFit">
-        {{ autoFit ? 'Disable' : 'Enable' }} Auto Fit
-    </button>
+        <button mat-button (click)="toggleLockAllSliders()">
+            <mat-icon fontSet="material-symbols-outlined">{{ allSlidersLocked ? 'lock_open' : 'lock' }}</mat-icon>
+            <span>{{ allSlidersLocked ? 'Unlock All' : 'Lock All' }}</span>
+        </button>
+        
+        <button mat-button (click)="autoFit = !autoFit">
+            Always fit Target Surplus: {{ autoFit ? 'On' : 'Off' }}
+        </button>
+
+        <button mat-button (click)="resetSliders()">
+            <mat-icon [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'" fontSet="material-symbols-outlined">refresh</mat-icon>
+            <span [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'">Reset Sliders</span>
+        </button>
+    </div>
     
     
     <!-- class="flex flex-row items-stretch justify-evenly overflow-auto" -->
