@@ -1,5 +1,5 @@
 <div>
-    Income: {{ totalIncome }}
+    Income: {{ averageIncome }}
 </div>
 <div>
     Expenses: {{ totalExpenses }}
@@ -10,9 +10,18 @@
 </div>
 
 <div class="mb-6">
-    Current Savings: {{ totalIncome - totalExpenses }}
+    Current Savings: {{ averageIncome - totalExpenses }}
 </div>
 
+<div>
+    <mat-form-field>
+        <!-- <mat-label>Calculation</mat-label> -->
+        <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
+            <mat-option value="monthly">Monthly</mat-option>
+            <mat-option value="yearly">Yearly</mat-option>
+        </mat-select>
+      </mat-form-field>
+</div>
 
 <button mat-button (click)="resetSliders()">
     Reset Sliders

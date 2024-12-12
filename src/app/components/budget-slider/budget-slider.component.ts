@@ -9,6 +9,7 @@ import { removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-budget-slider',
@@ -18,8 +19,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatSliderModule,
     MatButtonModule,
     MatInputModule,
-    MatFormFieldModule
-
+    MatFormFieldModule,
+    MatSelectModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
@@ -31,14 +32,13 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   filteredMonthsByYear: { [key: string]: string[] } = {};
   filteredMonths: string[] = [];
 
-
   MONTHS_TO_CALCULATE_AVG = 12
 
+  calculationBasis: 'monthly' | 'yearly' = 'monthly'; // Add this property
 
   //#region Income/Expense/Surplus
   // Average Income/Expense gathered to populate the sliders on init
-  averageIncome: number = 0
-  averageExpense: number = 0
+  averageIncome: number = 0 // Can be changed by user for more accurate calculations
 
   // Pie Category data that contains average values to populate sliders on init
   averagePieData: { name: string, averageValue: number }[] = [];
@@ -46,12 +46,12 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** User defined metrics: Income and target surplus.
    * Total expenses are calculated based on the sliders.
    */
-  totalIncome: number = 2000
   targetSurplus: number = 200
 
   totalExpenses: number = 0
-  //#endregion
 
+  multiplier: number = 1
+  //#endregion
 
   //#region Sliders
   sliders: BudgetSlider[] = [];
@@ -67,6 +67,12 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       this.allMonthsData = allMonthsData;
       this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
     })  
+  }
+
+  onCalculationBasisChange(option: 'monthly' | 'yearly') {
+    this.calculationBasis = option
+    this.multiplier = option === 'yearly' ? 12 : 1;
+    this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
   }
 
 
@@ -89,26 +95,22 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       return acc;
     }, [] as string[]);
 
-  
     const totalExpenses = this.filteredMonths.reduce((acc, month) => {
       return acc + this.allMonthsData[month].totalExpenses;
     }, 0);
 
-  
     const totalUsableIncome = this.filteredMonths.reduce((acc, month) => {
       return acc + this.allMonthsData[month].totalUsableIncome;
     }, 0);
-  
+
     const averageExpenses = totalExpenses / this.filteredMonths.length;
     const averageUsableIncome = totalUsableIncome / this.filteredMonths.length;
-  
 
-    this.averageExpense = roundToNearestHundreds(averageExpenses)
+    // Adjust based on calculation basis
+    const multiplier = this.multiplier;
 
-    this.totalExpenses = roundToNearestHundreds(averageExpenses)
-
-    this.averageIncome = roundToNearestHundreds(averageUsableIncome)
-
+    this.totalExpenses = roundToNearestHundreds(averageExpenses * multiplier);
+    this.averageIncome = roundToNearestHundreds(averageUsableIncome * multiplier);
 
     const aggregatedPieData = this.filteredMonths.reduce((acc, month) => {
       this.allMonthsData[month].pieData.forEach(item => {
@@ -122,10 +124,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       });
       return acc;
     }, {} as { [key: string]: { total: number, count: number } });
-  
+
     this.averagePieData = Object.keys(aggregatedPieData).map(name => ({
       name: removeSystemPrefix(name),
-      averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * 100) / 100
+      averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * multiplier * 100) / 100
     }));
     this.populateSliders();
   }
@@ -134,7 +136,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.totalExpenses = roundToNearestHundreds(this.sliders.reduce((acc, item) => acc + item.value, 0));
   }
 
-
   populateSliders() {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
   
@@ -142,7 +143,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       const percentage = data.averageValue / totalCategoryValues; // Relative size of category
 
       // Scaled max: Choose income % or average value * 1.5, whichever is higher
-      const dynamicMax = Math.max(this.totalIncome * percentage * 3, (data.averageValue + 1) * 1.5); 
+      const dynamicMax = Math.max(this.averageIncome * percentage * 3, (data.averageValue + 1) * 1.5); 
   
       return {
         name: data.name,
@@ -208,7 +209,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }  
   //#endregion
 
-
   //#region Slider adjustments
 
   toggleLockSlider(sliderName: string) {
@@ -258,7 +258,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const currentSum = this.sliders.reduce((sum, item) => sum + item.value, 0);
     this.totalExpenses = roundToNearestHundreds(currentSum);
 
-    const maxSum = this.totalIncome - this.targetSurplus;
+    const maxSum = this.averageIncome - this.targetSurplus;
 
     // Check if the sum exceeds the max allowed value
     if (currentSum > maxSum) {
