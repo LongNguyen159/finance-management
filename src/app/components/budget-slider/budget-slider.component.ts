@@ -167,6 +167,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       name: name,
       averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * multiplier * 100) / 100
     }));
+
+
     this.populateSliders();
   }
 
@@ -180,25 +182,27 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
    */
   populateSliders() {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
+    const minMaxThreshold = this.averageIncome * 0.05; // Minimum 5% of income
   
-    this.sliders = this.averagePieData.map(category => {
-
-      const percentage = category.averageValue / totalCategoryValues; // Relative size of category
-
-      // Scaled max: Choose income % or average value * 1.5, whichever is higher
-      const dynamicMax = Math.max(this.averageIncome * percentage * 3, (category.averageValue + 1) * 1.5); 
-
-      const categoryDetails = expenseCategoryDetails[category.name as ExpenseCategory];
-
+    const allCategories = Object.values(ExpenseCategory) as string[];
+  
+    this.sliders = allCategories.map((categoryName) => {
+      const matchingData = this.averagePieData.find(data => data.name === categoryName);
+      const averageValue = matchingData ? matchingData.averageValue : 0;
+      const percentage = totalCategoryValues ? averageValue / totalCategoryValues : 0;
+  
+      const dynamicMax = this.averageIncome * Math.max(percentage * 3, 0.05); // Scaled or 5% of income
+      const max = Math.max(dynamicMax, minMaxThreshold); // Ensure minimum threshold
+  
+      const categoryDetails = expenseCategoryDetails[categoryName as ExpenseCategory];
+  
       return {
-        name: removeSystemPrefix(category.name),
-        value: roundToNearestHundreds(category.averageValue),
+        name: removeSystemPrefix(categoryName),
+        value: roundToNearestHundreds(averageValue),
         min: 0,
-        max: roundToNearestHundreds(dynamicMax), // Dynamic max scaling
-
+        max: roundToNearestHundreds(max),
         locked: this.allSlidersLocked,
         weight: 1, // Default weight, can be user-adjusted
-
         icon: categoryDetails.icon,
         colorDark: categoryDetails.colorDark,
         colorLight: categoryDetails.colorLight,
@@ -209,6 +213,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.saveState(); // Save initial state
     console.log('Sliders:', this.sliders);
   }
+  
 
   //#region Save/Undo/Reset
   /** Save current state of sliders into history buffer, this allows for `undo` to work. */
