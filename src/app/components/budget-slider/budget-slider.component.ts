@@ -13,7 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ColorService } from '../../services/color.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { MatDividerModule } from '@angular/material/divider';
 
@@ -30,7 +30,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatIconModule,
     MatTooltipModule,
     ReactiveFormsModule,
-    MatDividerModule
+    MatDividerModule,
+    FormsModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
@@ -321,6 +322,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const slider = this.sliders[targetIndex];
     const originalValue = slider.value;
     slider.value = Math.max(roundToNearestHundreds(newValue), slider.min || 0); // Ensure value >= min
+  
+    // Dynamically adjust max to always be slightly above the current value
+    if (newValue >= (slider.max || 1) - 1) {
+      slider.max = Math.ceil(newValue + (newValue * 0.2)); // Add a buffer, e.g., 100
+    }
 
     // Calculate the new total sum
     const currentSum = this.sliders.reduce((sum, item) => sum + item.value, 0);

@@ -26,36 +26,46 @@
                 </div>
             </form>
         </div>
-
-        <div class="py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
-            Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
-        </div>
     </div>    
       
     <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
-    <!-- ACTION BUTTONS -->
-    <div class="flex flex-row w-full justify-end gap-2 mb-6">        
-        <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
-            <mat-icon fontSet="material-symbols-outlined">undo</mat-icon>
-            <span>Undo</span>
-        </button>
-    
-        <button mat-button (click)="toggleLockAllSliders()">
-            <mat-icon fontSet="material-symbols-outlined">{{ allSlidersLocked ? 'lock_open' : 'lock' }}</mat-icon>
-            <span>{{ allSlidersLocked ? 'Unlock All' : 'Lock All' }}</span>
-        </button>
-        
-        <button mat-button (click)="autoFit = !autoFit" matTooltip="Bring the sliders both up and down so that current savings always close to target savings" [matTooltipShowDelay]="800">
-            Always fit Target Savings: {{ autoFit ? 'On' : 'Off' }}
-        </button>
 
-        <button mat-button (click)="resetSliders()">
-            <mat-icon [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'" fontSet="material-symbols-outlined">refresh</mat-icon>
-            <span [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'">Reset Sliders</span>
-        </button>
+    <div class="flex flex-row items-center justify-between  mb-6">
+        <div class="flex flex-row items-center gap-2 w-full">
+            <div class="py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
+                Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+            </div>
+        
+            <div class="py-3 px-6 rounded-2xl border-[1px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
+                Target Savings: {{ targetSurplus | currency: currencyService.getSelectedCurrency() }}
+            </div>
+        </div>
+        
+        <!-- ACTION BUTTONS -->
+        <div class="flex flex-row w-full justify-end gap-2 flex-wrap">        
+            <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
+                <mat-icon fontSet="material-symbols-outlined">undo</mat-icon>
+                <span>Undo</span>
+            </button>
+        
+            <button mat-button (click)="toggleLockAllSliders()">
+                <mat-icon fontSet="material-symbols-outlined">{{ allSlidersLocked ? 'lock_open' : 'lock' }}</mat-icon>
+                <span>{{ allSlidersLocked ? 'Unlock All' : 'Lock All' }}</span>
+            </button>
+            
+            <button mat-button (click)="autoFit = !autoFit" matTooltip="Bring the sliders both up and down so that current savings always close to target savings" [matTooltipShowDelay]="800">
+                Always fit Target Savings: {{ autoFit ? 'On' : 'Off' }}
+            </button>
+    
+            <button mat-button (click)="resetSliders()">
+                <mat-icon [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'" fontSet="material-symbols-outlined">refresh</mat-icon>
+                <span [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'">Reset Sliders</span>
+            </button>
+        </div>
     </div>
  
-    <div class="grid grid-cols-2 gap-x-10">
+    <!-- SLIDERS -->
+    <div class="grid grid-cols-2 gap-x-10 h-[70vh] overflow-auto">
         @for (slider of sliders; track $index) {
             <div class="flex flex-col">
                 <div class="flex flex-row items-center gap-2">
@@ -78,7 +88,15 @@
                     <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
                         <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                     </button>
-                    <label>{{ formatBigNumbers(slider.value) }}</label>
+                    <!-- <label>{{ formatBigNumbers(slider.value) }}</label> -->
+                    <mat-form-field appearance="outline" class="!w-[20%]">
+                        <!-- <mat-label>Set Value</mat-label> -->
+                        <input 
+                          matInput 
+                          type="number" 
+                          [(ngModel)]="slider.value"
+                          (input)="adjustSliders(slider.name, slider.value)">
+                    </mat-form-field>
                 </div>
             </div>
         }
