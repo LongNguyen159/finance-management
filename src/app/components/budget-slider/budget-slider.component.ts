@@ -15,6 +15,7 @@ import { ColorService } from '../../services/color.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-budget-slider',
@@ -28,7 +29,8 @@ import { CurrencyService } from '../../services/currency.service';
     MatSelectModule,
     MatIconModule,
     MatTooltipModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDividerModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
@@ -194,7 +196,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         min: 0,
         max: roundToNearestHundreds(dynamicMax), // Dynamic max scaling
 
-        locked: false, // Default unlocked
+        locked: this.allSlidersLocked,
         weight: 1, // Default weight, can be user-adjusted
 
         icon: categoryDetails.icon,
