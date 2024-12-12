@@ -101,7 +101,7 @@
                           matInput 
                           type="number" 
                           [(ngModel)]="slider.value"
-                          [value]="slider.value"
+                          [min]="slider.min || 0"
                           (input)="adjustSliders(slider.name, slider.value)">
                         @if (calculationBasis == 'monthly') {
                             <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
