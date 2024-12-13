@@ -409,4 +409,5 @@ export interface BudgetSlider {
   icon?: string
   colorDark?: string
   colorLight?: string
+  isEssential?: boolean
 }

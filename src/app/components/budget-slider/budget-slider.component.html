@@ -1,4 +1,112 @@
 <div class="py-4">
+    <h2 class="text-2xl font-bold mb-4 text-center">Smart Budget Planner - Guided Mode</h2>
+    <mat-horizontal-stepper [linear]="true" #stepper>
+        <!-- Step 1: Define Income -->
+        <mat-step [stepControl]="form.controls['averageIncome']">
+        <form [formGroup]="form">
+            <ng-template matStepLabel>Define Income</ng-template>
+            <p>Based on our calculation, here is your average monthly income:</p>
+            <mat-form-field appearance="fill">
+            <mat-label>Average Income</mat-label>
+            <input matInput type="number" formControlName="averageIncome" />
+            <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+            </mat-form-field>
+            <div class="flex justify-end">
+            <button mat-button matStepperNext>Next</button>
+            </div>
+        </form>
+        </mat-step>
+
+        <!-- Step 2: Define Essential Categories -->
+        <mat-step>
+        <ng-template matStepLabel>Define Essential Categories</ng-template>
+        <p>Which categories are essential to you?</p>
+        <mat-selection-list #essentialCategoryList>
+            <mat-list-option *ngFor="let category of allCategories" [value]="category">
+            {{ removeSystemPrefix(category) }}
+            </mat-list-option>
+        </mat-selection-list>
+        <div class="flex justify-between">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button (click)="saveEssentialCategories(essentialCategoryList.selectedOptions.selected)" matStepperNext>
+            Next
+            </button>
+        </div>
+        </mat-step>
+
+        <!-- Step 3: Define Values for Essential Categories -->
+        <mat-step>
+        <ng-template matStepLabel>Define Values for Essential Categories</ng-template>
+        <p>Based on our calculations, here are your monthly expenses on the essential categories:</p>
+        <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
+            @for (slider of essentialSliders; track $index) {
+                <div class="flex flex-col">
+                    <div class="flex flex-row items-center gap-2">
+                        @if (slider.icon) {
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                        }
+                        <h3>{{ removeSystemPrefix(slider.name) }}</h3>
+                    </div>
+                    <div class="flex flex-row gap-2 items-center w-full">
+                        <mat-form-field appearance="fill">
+                            <mat-label>Amount</mat-label>
+                            <input 
+                              matInput 
+                              type="number" 
+                              [(ngModel)]="slider.value"
+                              [min]="slider.min || 0"
+                              (input)="adjustSliders(slider.name, slider.value)">
+                            @if (calculationBasis == 'monthly') {
+                                <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                            }
+                        </mat-form-field>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="flex justify-between">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button matStepperNext>Next</button>
+        </div>
+        </mat-step>
+
+        <!-- Step 4: Include Non-Essential Categories -->
+        <mat-step>
+        <ng-template matStepLabel>Include Non-Essential Categories</ng-template>
+        <p>I want to know how much I can spend on...</p>
+        <mat-selection-list #nonEssentialCategoryList>
+            <mat-list-option *ngFor="let category of nonEssentialCategories" [value]="category">
+            {{ removeSystemPrefix(category) }}
+            </mat-list-option>
+        </mat-selection-list>
+        <div class="flex justify-between">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-button (click)="saveNonEssentialCategories(nonEssentialCategoryList.selectedOptions.selected)" matStepperNext>
+                Next
+            </button>
+        </div>
+        </mat-step>
+
+        <!-- Step 5: Define Target Surplus -->
+        <mat-step [stepControl]="form.controls['targetSavings']">
+        <form [formGroup]="form">
+            <ng-template matStepLabel>Define Target Surplus</ng-template>
+            <p>Set your desired target surplus:</p>
+            <mat-form-field appearance="fill">
+            <mat-label>Target Surplus</mat-label>
+            <input matInput type="number" formControlName="targetSavings" />
+            </mat-form-field>
+            <div class="flex justify-between">
+            <button mat-button matStepperPrevious>Back</button>
+            <!-- <button mat-button (click)="finalizePlan()" matStepperNext>Finish</button> -->
+            <button mat-button matStepperNext>Finish</button>
+            </div>
+        </form>
+        </mat-step>
+    </mat-horizontal-stepper>
+</div>
+
+<div class="py-4">
     <h2 class="text-2xl font-bold mb-4 text-center">Smart Budget Planner</h2>
     <div class="flex flex-col items-center">
         <div>
@@ -71,14 +179,14 @@
     </div>
  
     <!-- SLIDERS -->
-    <div class="grid grid-cols-2 gap-x-10 h-[70vh] overflow-auto">
-        @for (slider of sliders; track $index) {
+    <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
+        @for (slider of visibleSliders; track $index) {
             <div class="flex flex-col">
                 <div class="flex flex-row items-center gap-2">
                     @if (slider.icon) {
                         <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
                     }
-                    <h3>{{ slider.name }}</h3>
+                    <h3>{{ removeSystemPrefix(slider.name) }}</h3>
                 </div>
                 <div class="flex flex-row gap-2 items-center w-full">
                     <mat-slider
