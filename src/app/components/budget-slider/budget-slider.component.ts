@@ -159,6 +159,24 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       .subscribe((value) => {
         this.targetSurplus = value ?? 0;
       });
+
+    /** Retrieve Essential Categories selection from Local Storage */
+    const savedEssentialCategories = JSON.parse(localStorage.getItem('essentialCategories') || '[]');
+    if (savedEssentialCategories.length > 0) {
+      this.essentialCategories = savedEssentialCategories;
+
+      // Create sliders for saved essential categories
+      this.essentialSliders = this.essentialCategories.map(category => this.createSlider(category, true));
+
+      // Ensure master sliders include the saved essential sliders
+      this.masterSliders = [
+        ...this.essentialSliders,
+        ...this.masterSliders.filter(slider => !this.essentialCategories.includes(slider.name))
+      ];
+
+      this.nonEssentialCategories = this.allCategories.filter(c => !this.essentialCategories.includes(c));
+      // this.syncSliders();
+    }
   }
 
   //#region Input Changes
@@ -272,7 +290,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   
     this.initialSliders = JSON.parse(JSON.stringify(this.masterSliders)); // Deep copy for reset
     this.saveState(); // Save initial state
-    console.log('Master Sliders on Init:', this.masterSliders);
   }
 
   /** Get categories details based on name (with system prefix) */
@@ -294,6 +311,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   
   saveEssentialCategories(categories: MatListOption[]): void {
     this.essentialCategories = categories.map(c => c.value);
+  
+    // Save essential categories to local storage
+    localStorage.setItem('essentialCategories', JSON.stringify(this.essentialCategories));
   
     // Create essential sliders and update master sliders with the correct flag
     this.essentialSliders = this.essentialCategories.map(category => this.createSlider(category, true));
@@ -339,10 +359,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.hiddenSliders = this.masterSliders.filter(slider =>
       slider.isEssential || !includedNonEssential.includes(slider.name)
     );
-  
-    // Debugging: Check the contents of visibleSliders and hiddenSliders
-    console.log('Visible Sliders:', this.visibleSliders);
-    console.log('Hidden Sliders:', this.hiddenSliders);
   
     this.syncSliders(); // Ensure the UI reflects changes
   }
@@ -516,7 +532,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       console.warn("Adjustment left the total above the maximum allowed.");
     }
 
-    console.log('Master Sliders after adjustment:', this.masterSliders);
   
     // Sync visible sliders with updated values from masterSliders
     this.syncSliders()
@@ -537,7 +552,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const adjustmentAmount = maxSum - currentSum;
 
     if (adjustmentAmount === 0) {
-        console.log("No adjustment needed.");
+        this.uiService.showSnackBar("No adjustment needed", "OK");
         return;
     }
 
