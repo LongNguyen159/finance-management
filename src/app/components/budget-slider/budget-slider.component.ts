@@ -16,8 +16,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { MatDividerModule } from '@angular/material/divider';
-import {MatStepperModule} from '@angular/material/stepper';
-import {MatListModule, MatListOption} from '@angular/material/list';
+import {MatStepper, MatStepperModule} from '@angular/material/stepper';
+import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/material/list';
 
 
 @Component({
@@ -108,6 +108,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   essentialCategories: string[] = [];
   /** Store all non-essential categories. (allCategories - essentialCategories = nonEssentialCategories) */
   nonEssentialCategories: string[] = [];
+
+  configFinished: boolean = false;
   
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe((allMonthsData: MonthlyData) => {
@@ -255,6 +257,17 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
 
 
+  //#region Stepper Navigation
+
+  /** Save essential categories selection on user checkbox change. */
+  onEssentialCategoriesChange(event: MatSelectionListChange): void {
+    this.saveEssentialCategories(event.source.selectedOptions.selected);
+  }
+
+  onNonEssentialCategoriesChange(event: MatSelectionListChange): void {
+    this.saveNonEssentialCategories(event.source.selectedOptions.selected);
+  }
+  
   saveEssentialCategories(categories: MatListOption[]): void {
     this.essentialCategories = categories.map(c => c.value);
 
@@ -306,6 +319,13 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         isEssential: isEssential,
     };
   }
+
+  finishConfig() {
+    this.configFinished = true;
+    this.autoAdjustSliders()
+  }
+
+  //#endregion
 
 
   //#region Save/Undo/Reset
