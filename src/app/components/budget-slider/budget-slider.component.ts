@@ -95,6 +95,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   /** All categories. */
   allCategories = Object.values(ExpenseCategory) as string[];
+  expenseCategoryDetails = expenseCategoryDetails
+  
 
   /** Categories to show only in the final sliders.
    * The categories which are not included will still add their value up to the total expenses, they are just hidden for clarity.
@@ -244,6 +246,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.initialSliders = JSON.parse(JSON.stringify(this.masterSliders)); // Deep copy for reset
     this.saveState(); // Save initial state
     console.log('Master Sliders on Init:', this.masterSliders);
+  }
+
+  /** Get categories details based on name (with system prefix) */
+  getCategoriesDetails(categoryName: string) {
+    return expenseCategoryDetails[categoryName as ExpenseCategory]
   }
 
 
