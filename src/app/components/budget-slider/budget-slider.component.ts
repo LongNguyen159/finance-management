@@ -83,6 +83,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   /** Visible sliders. The total expense will still include the hidden sliders, that is why we used master sliders to calculate the total. */
   visibleSliders: BudgetSlider[] = [];
+  hiddenSliders: BudgetSlider[] = [];
   essentialSliders: BudgetSlider[] = [];
 
   initialSliders: any[] = []; // To store the initial slider values
@@ -259,10 +260,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
     this.essentialSliders = this.essentialCategories.map(category => this.createSlider(category, true));
 
-    // Merge essential sliders into master sliders
+    // Merge essential sliders into master sliders, so that essential categories are locked.
     this.masterSliders = [
-        ...this.essentialSliders,
-        ...this.masterSliders.filter(slider => !this.essentialCategories.includes(slider.name))
+      ...this.essentialSliders,
+      ...this.masterSliders.filter(slider => !this.essentialCategories.includes(slider.name))
     ];
 
     /** Populate non essential categories for next step */
@@ -271,26 +272,17 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   saveNonEssentialCategories(categories: MatListOption[]): void {
     const includedNonEssential = categories.map(c => c.value);
-    this.categoriesToInclude = [...this.essentialCategories, ...includedNonEssential];
+    this.categoriesToInclude = includedNonEssential; // Only include non-essentials in visible sliders
 
-    this.visibleSliders = this.categoriesToInclude.map(category => {
-      const isEssential = this.essentialCategories.includes(category);
-      
-      if (isEssential) {
-          const existingSlider = this.essentialSliders.find(slider => slider.name === category)!;
-          // Preserve the value and override other properties
-          const newSlider = this.createSlider(category, true);
-          return { ...newSlider, value: existingSlider.value, locked: true };
-      }
+    // Filter master sliders into visible and hidden
+    this.visibleSliders = this.masterSliders.filter(slider => 
+        !slider.isEssential && this.categoriesToInclude.includes(slider.name)
+    );
 
-      return this.createSlider(category, false);
-    });
-
-    // Merge visible sliders into master sliders
-    this.masterSliders = [
-        ...this.visibleSliders,
-        ...this.masterSliders.filter(slider => !this.categoriesToInclude.includes(slider.name))
-    ];
+    this.hiddenSliders = this.masterSliders.filter(slider => 
+        slider.isEssential || !this.categoriesToInclude.includes(slider.name)
+    );
+    this.syncSliders()
   }
 
   private createSlider(category: string, isEssential: boolean): any {
@@ -407,94 +399,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
 
   /** Readjust the sliders so that the total stays below target surplus defined by user. */
-  // adjustSliders(name: string, newValue: number): void {
-  //   // Save the current state before making changes
-  //   this.saveState();
-
-  //   // Find the item to update
-  //   const targetIndex = this.masterSliders.findIndex((item) => item.name === name);
-  //   if (targetIndex === -1) {
-  //     console.error("Item not found");
-  //     return;
-  //   }
-
-  //   // Update the target value but respect min value
-  //   const slider = this.masterSliders[targetIndex];
-  //   const originalValue = slider.value;
-  //   slider.value = Math.max(roundToNearestHundreds(newValue), slider.min || 0); // Ensure value >= min
-  //   if (newValue < 0) {
-  //     console.log('Value cannot be negative, resetting to 0');
-  //     slider.value = 0; // Ensure value is not negative
-  //   }
-  //   // Dynamically adjust max to always be slightly above the current value
-  //   if (newValue >= (slider.max || 1) - 1) {
-  //     slider.max = Math.ceil(newValue + (newValue * 0.2)); // Add a buffer, e.g., 100
-  //   }
-
-  //   // Calculate the new total sum
-  //   const currentSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
-  //   this.totalExpenses = roundToNearestHundreds(currentSum);
-
-  //   const maxSum = this.averageIncome - this.targetSurplus;
-
-  //   // Check if the sum exceeds the max allowed value
-  //   if (currentSum > maxSum) {
-  //     const excess = currentSum - maxSum;
-
-  //     // Calculate total weight of items to adjust (excluding locked sliders)
-  //     const totalWeight = this.masterSliders
-  //       .filter((_, index) => index !== targetIndex && !this.masterSliders[index].locked) // Exclude updated and locked items
-  //       .reduce((sum, item) => sum + item.weight, 0);
-
-  //     if (totalWeight === 0) {
-  //       console.error("Cannot adjust other items because their weights sum to 0 or all are locked");
-  //       slider.value = roundToNearestHundreds(originalValue); // Revert to the original value
-  //       return;
-  //     }
-
-  //     // Adjust other values proportionally (downwards)
-  //     this.masterSliders.forEach((item, index) => {
-  //       if (index !== targetIndex && !item.locked) {
-  //         const adjustment = (item.weight / totalWeight) * excess;
-  //         item.value = Math.max(
-  //           roundToNearestHundreds(item.value - adjustment),
-  //           item.min || 0 // Respect min value
-  //         );
-  //       }
-  //     });
-  //   } else if (this.autoFit && currentSum < maxSum) {
-  //     // Adjust other sliders up to stay closer to maxSum
-  //     const deficit = maxSum - currentSum;
-
-  //     // Calculate total weight of items to adjust (excluding locked sliders)
-  //     const totalWeight = this.masterSliders
-  //       .filter((_, index) => index !== targetIndex && !this.masterSliders[index].locked) // Exclude updated and locked items
-  //       .reduce((sum, item) => sum + item.weight, 0);
-
-  //     if (totalWeight > 0) {
-  //       // Adjust other values proportionally (upwards)
-  //       this.masterSliders.forEach((item, index) => {
-  //         if (index !== targetIndex && !item.locked) {
-  //           const adjustment = (item.weight / totalWeight) * deficit;
-  //           item.value = Math.min(
-  //             roundToNearestHundreds(item.value + adjustment),
-  //             item.max || maxSum // Respect max value, if defined
-  //           );
-  //         }
-  //       });
-  //     }
-  //   }
-
-  //   // Recheck to ensure the sum is within the limit due to rounding
-  //   const adjustedSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
-  //   if (adjustedSum > maxSum) {
-  //     console.warn("Adjustment could not fully bring the total under the maximum");
-  //   }
-  // }
-
-
-
-
   adjustSliders(name: string, newValue: number): void {
     // Save the current state before making changes
     this.saveState();
@@ -536,8 +440,66 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     console.log('Master Sliders after adjustment:', this.masterSliders);
   
     // Sync visible sliders with updated values from masterSliders
-    this.syncVisibleSliders();
+    this.syncSliders()
   }
+
+  autoAdjustSliders(): void {
+    // Save the current state before making changes
+    this.saveState();
+    
+    // Calculate the max sum (target surplus)
+    const maxSum = this.averageIncome - this.targetSurplus;
+    
+    // Calculate the current total sum of all slider values
+    const currentSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
+    
+    // Calculate the amount of adjustment needed
+    const adjustmentAmount = maxSum - currentSum;
+
+  
+    if (adjustmentAmount === 0) {
+      console.log("No adjustment needed.");
+      return;
+    }
+  
+    // Get all sliders that are not locked
+    const adjustableSliders = this.masterSliders.filter((item) => !item.locked);
+    
+    // Calculate the total weight of the adjustable sliders
+    const totalWeight = adjustableSliders.reduce((sum, item) => sum + item.weight, 0);
+  
+    if (totalWeight === 0) {
+      console.error("No adjustable sliders available.");
+      return;
+    }
+  
+    // Distribute the adjustment across the sliders based on their weight
+    adjustableSliders.forEach((slider) => {
+      const adjustment = (slider.weight / totalWeight) * adjustmentAmount;
+  
+      if (adjustment > 0) {
+        // Increase slider value but ensure it doesn't exceed its max
+        slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
+      } else {
+        // Decrease slider value but ensure it doesn't go below its min
+        slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
+      }
+    });
+  
+    // Recalculate the total expenses after adjustment
+    const finalSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
+    
+    // Check if the final sum exceeds the max allowed value
+    if (finalSum > maxSum) {
+      console.warn("Adjustment left the total above the maximum allowed.");
+    }
+  
+    // Sync the visible sliders with the updated master sliders
+    this.syncSliders()
+    
+    console.log('Master Sliders after auto adjustment:', this.masterSliders);
+  }
+  
 
 
   adjustOtherSliders(amount: number, targetSlider: any, action: "reduce" | "increase"): void {
@@ -564,6 +526,29 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         item.value = Math.min(roundToNearestHundreds(item.value + adjustment), item.max || Infinity);
       }
     });
+  }
+
+  syncSliders(): void {
+    // Update only the values in visible sliders based on the master sliders
+    this.visibleSliders.forEach((visibleSlider) => {
+      const masterSlider = this.masterSliders.find((item) => item.name === visibleSlider.name);
+      if (masterSlider) {
+        visibleSlider.value = masterSlider.value; // Override only the value
+      }
+    });
+  
+    // Recalculate expenses after syncing
+    this.recalculateExpenses();
+  
+    // Update hidden sliders based on the latest changes
+    this.hiddenSliders = this.masterSliders.filter(slider => 
+      slider.isEssential || !this.categoriesToInclude.includes(slider.name)
+    );
+  
+    // Ensure the visible sliders are synced with the categories to include
+    this.visibleSliders = this.masterSliders.filter(slider => 
+      !slider.isEssential && this.categoriesToInclude.includes(slider.name)
+    );
   }
 
   syncVisibleSliders(): void {

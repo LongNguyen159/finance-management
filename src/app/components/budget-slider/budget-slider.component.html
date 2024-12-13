@@ -1,6 +1,6 @@
 <div class="py-4">
     <h2 class="text-2xl font-bold mb-4 text-center">Smart Budget Planner - Guided Mode</h2>
-    <mat-stepper [linear]="true" orientation="vertical" #stepper>
+    <mat-stepper [linear]="true" orientation="horizontal" #stepper>
         <!-- Step 1: Define Income -->
         <mat-step [stepControl]="form.controls['averageIncome']">
         <form [formGroup]="form">
@@ -129,8 +129,7 @@
             </mat-form-field>
             <div class="flex justify-between">
             <button mat-button matStepperPrevious>Back</button>
-            <!-- <button mat-button (click)="finalizePlan()" matStepperNext>Finish</button> -->
-            <button mat-button matStepperNext>Finish</button>
+            <button mat-button (click)="autoAdjustSliders()" matStepperNext>Finish</button>
             </div>
         </form>
         </mat-step>
@@ -251,6 +250,49 @@
         }
     </div>
     <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+    <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
+
+
+        @for (slider of hiddenSliders; track $index) {
+            <div class="flex flex-col">
+                <div class="flex flex-row items-center gap-2">
+                    @if (slider.icon) {
+                        <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                    }
+                    <h3>{{ removeSystemPrefix(slider.name) }}</h3>
+                </div>
+                <div class="flex flex-row gap-2 items-center w-full">
+                    <mat-slider
+                        class="!w-[50%]"
+                        [max]="slider.max"
+                        discrete
+                        [disabled]="slider.locked"
+                        [displayWith]="formatBigNumbersFrom1K"
+                    >   
+                        <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
+                        <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                    </mat-slider>
+                    <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
+                        <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
+                    </button>
+                    <!-- <label>{{ formatBigNumbers(slider.value) }}</label> -->
+                    <mat-form-field appearance="outline" class="!w-40">
+                        <!-- <mat-label>Set Value</mat-label> -->
+                        <input 
+                          matInput 
+                          type="number" 
+                          [(ngModel)]="slider.value"
+                          [min]="slider.min || 0"
+                          (input)="adjustSliders(slider.name, slider.value)">
+                        @if (calculationBasis == 'monthly') {
+                            <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                        }
+                    </mat-form-field>
+                </div>
+            </div>
+        }
+    </div>
+
     <!-- <div class="mt-4 text-center">
         Total Expenses: {{ totalExpenses | currency: currencyService.getSelectedCurrency() }}
     </div> -->
