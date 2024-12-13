@@ -235,11 +235,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);
     const minMaxThreshold = this.averageIncome * 0.05; // Minimum 5% of income
   
-    const allCategories = Object.values(ExpenseCategory) as string[];
-    const categoriesToInclude = ['Food', 'Shopping', 'Entertainment'];
+    const allCategories = Object.values(ExpenseCategory) as string[]
     
     this.masterSliders = allCategories
-      // .filter((categoryName) => categoriesToInclude.includes(removeSystemPrefix(categoryName))) // Filter by your desired categories
       .map((categoryName) => {
         const matchingData = this.averagePieData.find(data => data.name === categoryName);
         const averageValue = matchingData ? matchingData.averageValue : 0;
@@ -287,53 +285,75 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   
   saveEssentialCategories(categories: MatListOption[]): void {
     this.essentialCategories = categories.map(c => c.value);
-
+  
+    // Create essential sliders and update master sliders with the correct flag
     this.essentialSliders = this.essentialCategories.map(category => this.createSlider(category, true));
-
+  
     // Merge essential sliders into master sliders, so that essential categories are locked.
     this.masterSliders = [
       ...this.essentialSliders,
       ...this.masterSliders.filter(slider => !this.essentialCategories.includes(slider.name))
     ];
-
-    /** Populate non essential categories for next step */
+  
+    /** Populate non-essential categories for the next step */
     this.nonEssentialCategories = this.allCategories.filter(c => !this.essentialCategories.includes(c));
   }
-
+  
   saveNonEssentialCategories(categories: MatListOption[]): void {
     const includedNonEssential = categories.map(c => c.value);
     this.categoriesToInclude = includedNonEssential; // Only include non-essentials in visible sliders
-
-    // Filter master sliders into visible and hidden. Visible sliders are non-essential categories selected by user.
-    this.visibleSliders = this.masterSliders.filter(slider => 
-        !slider.isEssential && this.categoriesToInclude.includes(slider.name)
+  
+    // Reset visibleSliders and hiddenSliders to avoid appending
+    this.visibleSliders = [];
+    this.hiddenSliders = [];
+  
+    // Explicitly update the isEssential flag of sliders for non-essential categories
+    this.masterSliders.forEach(slider => {
+      // Update the slider's isEssential flag based on whether it's in the non-essential list
+      if (!includedNonEssential.includes(slider.name)) {
+        slider.isEssential = true;
+        slider.locked = true; // Lock if it's now essential
+      } else {
+        slider.isEssential = false;
+        slider.locked = false; // Unlock if it's non-essential
+      }
+    });
+  
+    // Filter master sliders into visible and hidden based on the updated isEssential flag
+    this.visibleSliders = this.masterSliders.filter(slider =>
+      !slider.isEssential && includedNonEssential.includes(slider.name)
     );
-
-    this.hiddenSliders = this.masterSliders.filter(slider => 
-        slider.isEssential || !this.categoriesToInclude.includes(slider.name)
+  
+    this.hiddenSliders = this.masterSliders.filter(slider =>
+      slider.isEssential || !includedNonEssential.includes(slider.name)
     );
-    this.syncSliders()
+  
+    // Debugging: Check what sliders are in visibleSliders
+    console.log('Visible Sliders:', this.visibleSliders);
+    console.log('Hidden Sliders:', this.hiddenSliders);
+  
+    this.syncSliders(); // Ensure the UI reflects changes
   }
-
+  
   private createSlider(category: string, isEssential: boolean): any {
     const matchingData = this.averagePieData.find(data => data.name === category);
     const value = matchingData ? matchingData.averageValue : 0;
     const minMaxThreshold = this.averageIncome * 0.05; // Minimum 5% of income
     const max = Math.max((value + 1) * 1.5, minMaxThreshold);
-
+  
     const categoryDetails = expenseCategoryDetails[category as ExpenseCategory];
-
+  
     return {
-        name: category,
-        value: roundToNearestHundreds(value),
-        min: 0,
-        max: roundToNearestHundreds(max),
-        locked: isEssential, // Lock essential categories
-        weight: isEssential ? 0.2 : 20, // Higher weight for non essential categories
-        icon: categoryDetails.icon,
-        colorDark: categoryDetails.colorDark,
-        colorLight: categoryDetails.colorLight,
-        isEssential: isEssential,
+      name: category,
+      value: roundToNearestHundreds(value),
+      min: 0,
+      max: roundToNearestHundreds(max),
+      locked: isEssential, // Lock essential categories
+      weight: isEssential ? 0.2 : 20, // Higher weight for non-essential categories
+      icon: categoryDetails.icon,
+      colorDark: categoryDetails.colorDark,
+      colorLight: categoryDetails.colorLight,
+      isEssential: isEssential,
     };
   }
 

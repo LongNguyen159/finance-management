@@ -66,7 +66,7 @@
                         <span class="text-center" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">No essential categories selected. You can proceed next, or go back to select essential categories.</span>
                     </div>
                 } @else {
-                    @for (slider of essentialSliders; track $index) {
+                    @for (slider of essentialSliders; track slider.name) {
                         <div class="flex flex-col py-4">
                             <div class="flex flex-row items-center gap-2">
                                 @if (slider.icon) {
@@ -105,8 +105,8 @@
             <p class="my-4">I want to know how much I can spend on...</p>
     
             <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
-                @for (category of nonEssentialCategories; track $index) {
-                    <mat-list-option [value]="category" [selected]="nonEssentialCategories.includes(category)">
+                @for (category of nonEssentialCategories; track category) {
+                    <mat-list-option [value]="category">
                         <div class="flex flex-row gap-2 items-center">
                             <mat-icon
                                 fontSet="material-symbols-outlined" 
@@ -222,7 +222,7 @@
      
         <!-- Visible Sliders (Chosen Sliders by user in the stepper) -->
         <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
-            @for (slider of visibleSliders; track $index) {
+            @for (slider of visibleSliders; track slider.name) {
                 <div class="flex flex-col">
                     <div class="flex flex-row items-center gap-2">
                         @if (slider.icon) {
@@ -277,7 +277,7 @@
                 @if (panelOpenState()) {
                     <!-- Hidden Sliders (The remaining sliders) -->
                     <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
-                        @for (slider of hiddenSliders; track $index) {
+                        @for (slider of hiddenSliders; track slider.name) {
                             <div class="flex flex-col">
                                 <div class="flex flex-row items-center gap-2">
                                     @if (slider.icon) {
