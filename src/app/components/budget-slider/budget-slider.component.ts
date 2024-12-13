@@ -348,7 +348,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       this.sliderHistory.pop();
       const previousState = this.sliderHistory[this.sliderHistory.length - 1];
       this.masterSliders = JSON.parse(JSON.stringify(previousState)); // Deep copy
-      this.recalculateExpenses()
+      this.syncSliders()
     } else {
       console.warn('No more states to undo!');
     }
@@ -368,8 +368,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const currentState = JSON.stringify(this.masterSliders);
     if (currentState !== JSON.stringify(resetState)) {
       this.masterSliders = resetState; // Apply the reset state
+      this.syncSliders()
       this.saveState(); // Save the reset state to history
-      this.recalculateExpenses();
     } else {
       console.info("Sliders are already in the reset state, no need to save again.");
     }
@@ -386,6 +386,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       return;
     }
     this.masterSliders[targetIndex].locked = !this.masterSliders[targetIndex].locked;
+    this.syncSliders()
   }
 
   toggleLockAllSliders() {
@@ -396,6 +397,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     } else {
       this.masterSliders.forEach((item) => item.locked = false);
     }
+    this.syncSliders()
   }
 
 
