@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
@@ -21,6 +21,7 @@ import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/mat
 import { MatExpansionModule } from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { UiService } from '../../services/ui.service';
+import { MatCardModule } from '@angular/material/card';
 
 
 @Component({
@@ -41,10 +42,12 @@ import { UiService } from '../../services/ui.service';
     MatStepperModule,
     MatListModule,
     MatExpansionModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCardModule
   ],
   templateUrl: './budget-slider.component.html',
-  styleUrl: './budget-slider.component.scss'
+  styleUrl: './budget-slider.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
@@ -127,6 +130,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** Store all non-essential categories. (allCategories - essentialCategories = nonEssentialCategories) */
   nonEssentialCategories = this.allCategories.filter(c => !this.essentialCategories.includes(c));
 
+  /** Just for display purpose.
+   * False: Show Guide Stepper
+   * True: Show Final Sliders
+   */
   configFinished: boolean = false;
   //#endregion
   
@@ -586,7 +593,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     // Check if the final sum exceeds the max allowed value
     if (finalSum > maxSum) {
       console.warn("Adjustment left the total above the maximum allowed.");
-      this.uiService.showSnackBar("System cannot adjust sliders to satisfy the target savings", "OK");
     }
 
     // Sync the visible sliders with the updated master sliders
