@@ -304,7 +304,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const includedNonEssential = categories.map(c => c.value);
     this.categoriesToInclude = includedNonEssential; // Only include non-essentials in visible sliders
 
-    // Filter master sliders into visible and hidden
+    // Filter master sliders into visible and hidden. Visible sliders are non-essential categories selected by user.
     this.visibleSliders = this.masterSliders.filter(slider => 
         !slider.isEssential && this.categoriesToInclude.includes(slider.name)
     );
@@ -329,7 +329,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         min: 0,
         max: roundToNearestHundreds(max),
         locked: isEssential, // Lock essential categories
-        weight: isEssential ? 20 : 1, // Higher weight for essential categories
+        weight: isEssential ? 0.2 : 20, // Higher weight for non essential categories
         icon: categoryDetails.icon,
         colorDark: categoryDetails.colorDark,
         colorLight: categoryDetails.colorLight,
@@ -493,59 +493,80 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   autoAdjustSliders(): void {
     // Save the current state before making changes
     this.saveState();
-    
+
     // Calculate the max sum (target surplus)
     const maxSum = this.averageIncome - this.targetSurplus;
-    
+
     // Calculate the current total sum of all slider values
     const currentSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
-    
+
     // Calculate the amount of adjustment needed
     const adjustmentAmount = maxSum - currentSum;
 
-  
     if (adjustmentAmount === 0) {
-      console.log("No adjustment needed.");
-      return;
+        console.log("No adjustment needed.");
+        return;
     }
-  
-    // Get all sliders that are not locked
-    const adjustableSliders = this.masterSliders.filter((item) => !item.locked);
-    
-    // Calculate the total weight of the adjustable sliders
-    const totalWeight = adjustableSliders.reduce((sum, item) => sum + item.weight, 0);
-  
+
+    // Separate sliders into visible and hidden
+    const visibleSliders = this.visibleSliders.filter((item) => !item.locked);
+    const hiddenSliders = this.hiddenSliders.filter((item) => !item.locked);
+
+    // Calculate the total weights for visible and hidden sliders
+    const visibleWeight = visibleSliders.reduce((sum, item) => sum + item.weight, 0);
+    const hiddenWeight = hiddenSliders.reduce((sum, item) => sum + item.weight, 0);
+    const totalWeight = visibleWeight + hiddenWeight;
+
     if (totalWeight === 0) {
-      console.error("No adjustable sliders available.");
-      return;
+        console.error("No adjustable sliders available.");
+        return;
     }
-  
-    // Distribute the adjustment across the sliders based on their weight
-    adjustableSliders.forEach((slider) => {
-      const adjustment = (slider.weight / totalWeight) * adjustmentAmount;
-  
-      if (adjustment > 0) {
-        // Increase slider value but ensure it doesn't exceed its max
-        slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
-      } else {
-        // Decrease slider value but ensure it doesn't go below its min
-        slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
-      }
+
+    // Define a priority ratio for visible sliders
+    const priorityFactor = 1.5; // Visible sliders get 1.5x the adjustment weight
+    const adjustedVisibleWeight = visibleWeight * priorityFactor;
+    const adjustedTotalWeight = adjustedVisibleWeight + hiddenWeight;
+
+    // Distribute adjustments to visible sliders
+    visibleSliders.forEach((slider) => {
+        const adjustment = (adjustedVisibleWeight > 0 ? (slider.weight * priorityFactor / adjustedTotalWeight) : 0) * adjustmentAmount;
+
+        if (adjustment > 0) {
+            // Increase slider value but ensure it doesn't exceed its max
+            slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
+        } else {
+            // Decrease slider value but ensure it doesn't go below its min
+            slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
+        }
     });
-  
+
+    // Distribute adjustments to hidden sliders
+    hiddenSliders.forEach((slider) => {
+        const adjustment = (hiddenWeight > 0 ? (slider.weight / adjustedTotalWeight) : 0) * adjustmentAmount;
+
+        if (adjustment > 0) {
+            // Increase slider value but ensure it doesn't exceed its max
+            slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
+        } else {
+            // Decrease slider value but ensure it doesn't go below its min
+            slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
+        }
+    });
+
     // Recalculate the total expenses after adjustment
     const finalSum = this.masterSliders.reduce((sum, item) => sum + item.value, 0);
-    
+
     // Check if the final sum exceeds the max allowed value
     if (finalSum > maxSum) {
-      console.warn("Adjustment left the total above the maximum allowed.");
+        console.warn("Adjustment left the total above the maximum allowed.");
     }
-  
+
     // Sync the visible sliders with the updated master sliders
-    this.syncSliders()
-    
+    this.syncSliders();
+
     console.log('Master Sliders after auto adjustment:', this.masterSliders);
   }
+
   
 
 
@@ -554,7 +575,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     const adjustableSliders = this.masterSliders.filter(
       (item) => item.name !== targetSlider.name && !item.locked
     );
-
   
     const totalWeight = adjustableSliders.reduce((sum, item) => sum + item.weight, 0);
   
@@ -564,9 +584,12 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       return;
     }
   
-    // Distribute the adjustment proportionally
+    // Distribute the adjustment based on the weight: higher weight = more effect
     adjustableSliders.forEach((item) => {
+      // The adjustment is directly proportional to weight (higher weight -> more adjustment)
       const adjustment = (item.weight / totalWeight) * amount;
+  
+      // Ensure the adjustment doesn't exceed min or max values
       if (action === "reduce") {
         item.value = Math.max(roundToNearestHundreds(item.value - adjustment), item.min || 0);
       } else if (action === "increase") {
@@ -574,6 +597,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       }
     });
   }
+  
 
   syncSliders(): void {
     // Update only the values in visible sliders based on the master sliders
