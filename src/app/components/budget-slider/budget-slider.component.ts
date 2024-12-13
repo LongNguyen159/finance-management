@@ -20,6 +20,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { UiService } from '../../services/ui.service';
 
 
 @Component({
@@ -49,6 +50,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   dataService = inject(DataService)
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
+  uiService = inject(UiService)
   
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
@@ -307,19 +309,22 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.visibleSliders = [];
     this.hiddenSliders = [];
   
-    // Explicitly update the isEssential flag of sliders for non-essential categories
+    // Update the sliders based on essential and inclusion status
     this.masterSliders.forEach(slider => {
-      // Update the slider's isEssential flag based on whether it's in the non-essential list
-      if (!includedNonEssential.includes(slider.name)) {
-        slider.isEssential = true;
-        slider.locked = true; // Lock if it's now essential
+      if (slider.isEssential) {
+        // Keep essential sliders locked
+        slider.locked = true;
+        slider.weight = 0.2; // Essentials have lower weight by default
       } else {
-        slider.isEssential = false;
-        slider.locked = false; // Unlock if it's non-essential
+        // Non-essential sliders are never locked
+        slider.locked = false;
+  
+        // Adjust weight: higher for included sliders
+        slider.weight = includedNonEssential.includes(slider.name) ? 40 : 10;
       }
     });
   
-    // Filter master sliders into visible and hidden based on the updated isEssential flag
+    // Filter master sliders into visible and hidden based on inclusion
     this.visibleSliders = this.masterSliders.filter(slider =>
       !slider.isEssential && includedNonEssential.includes(slider.name)
     );
@@ -328,7 +333,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       slider.isEssential || !includedNonEssential.includes(slider.name)
     );
   
-    // Debugging: Check what sliders are in visibleSliders
+    // Debugging: Check the contents of visibleSliders and hiddenSliders
     console.log('Visible Sliders:', this.visibleSliders);
     console.log('Hidden Sliders:', this.hiddenSliders);
   
@@ -510,6 +515,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     this.syncSliders()
   }
 
+  /** Auto adjust sliders. Slider with isEssential = true has less weight => less likely to be changed. */
   autoAdjustSliders(): void {
     // Save the current state before making changes
     this.saveState();
@@ -539,6 +545,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
     if (totalWeight === 0) {
         console.error("No adjustable sliders available.");
+        this.uiService.showSnackBar("No sliders to adjust", "OK");
         return;
     }
 
@@ -578,7 +585,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
     // Check if the final sum exceeds the max allowed value
     if (finalSum > maxSum) {
-        console.warn("Adjustment left the total above the maximum allowed.");
+      console.warn("Adjustment left the total above the maximum allowed.");
+      this.uiService.showSnackBar("System cannot adjust sliders to satisfy the target savings", "OK");
     }
 
     // Sync the visible sliders with the updated master sliders
@@ -642,15 +650,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     );
   }
 
-  syncVisibleSliders(): void {
-    this.visibleSliders.forEach((visibleSlider) => {
-      const masterSlider = this.masterSliders.find((item) => item.name === visibleSlider.name);
-      if (masterSlider) {
-        visibleSlider.value = masterSlider.value;
-      }
-    });
+
+  /** To pre-select the non essential categories in template */
+  get visibleSlidersName(): string[] {
+    return this.visibleSliders.map((item) => item.name);
   }
-  
   
   //#endregion
 

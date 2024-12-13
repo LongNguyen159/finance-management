@@ -106,7 +106,7 @@
     
             <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
                 @for (category of nonEssentialCategories; track category) {
-                    <mat-list-option [value]="category">
+                    <mat-list-option [value]="category" [selected]="visibleSlidersName.includes(category)">
                         <div class="flex flex-row gap-2 items-center">
                             <mat-icon
                                 fontSet="material-symbols-outlined" 
