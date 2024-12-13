@@ -22,6 +22,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { UiService } from '../../services/ui.service';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 
 @Component({
@@ -43,7 +44,8 @@ import { MatCardModule } from '@angular/material/card';
     MatListModule,
     MatExpansionModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
+    MatButtonToggleModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',
@@ -81,6 +83,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   form = new FormGroup({
     averageIncome: new FormControl(1), // Initial value
     targetSavings: new FormControl(this.targetSurplus), // Initial value
+    savingsType: new FormControl('absolute'), // Default to absolute
   });
 
 
@@ -154,11 +157,17 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       }
     });
 
-    this.form.get('targetSavings')?.valueChanges
-      .pipe(debounceTime(300))
-      .subscribe((value) => {
-        this.targetSurplus = value ?? 0;
-      });
+    this.form.valueChanges.pipe(debounceTime(300)).subscribe(() => {
+      const { averageIncome, targetSavings, savingsType } = this.form.value;
+  
+      if (savingsType === 'relative') {
+        // Convert percentage to absolute
+        this.targetSurplus = ((targetSavings || 1) / 100) * (averageIncome || 1);
+      } else {
+        // Directly use absolute value
+        this.targetSurplus = targetSavings ?? 1;
+      }
+    });
 
     /** Retrieve Essential Categories selection from Local Storage */
     const savedEssentialCategories = JSON.parse(localStorage.getItem('essentialCategories') || '[]');
