@@ -32,7 +32,7 @@
     
             <mat-selection-list #essentialCategoryList (selectionChange)="onEssentialCategoriesChange($event)">
                 @for (category of allCategories; track $index) {
-                    <mat-list-option [value]="category">
+                    <mat-list-option [value]="category" [selected]="essentialCategories.includes(category)">
                         <div class="flex flex-row gap-2 items-center">
                             <mat-icon
                                 fontSet="material-symbols-outlined" 
@@ -106,7 +106,7 @@
     
             <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
                 @for (category of nonEssentialCategories; track $index) {
-                    <mat-list-option [value]="category">
+                    <mat-list-option [value]="category" [selected]="nonEssentialCategories.includes(category)">
                         <div class="flex flex-row gap-2 items-center">
                             <mat-icon
                                 fontSet="material-symbols-outlined" 

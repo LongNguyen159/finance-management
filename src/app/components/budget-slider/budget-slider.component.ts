@@ -85,16 +85,25 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** All sliders */
   masterSliders: BudgetSlider[] = [];
 
-  /** Visible sliders. The total expense will still include the hidden sliders, that is why we used master sliders to calculate the total. */
+  /** Visible sliders. The total expense will still include the hidden sliders, that is why we used master sliders to calculate the total.
+   * Visible Sliders will show non-essential categories selected by user.
+   */
   visibleSliders: BudgetSlider[] = [];
+
+  /** Hidden sliders are all the remaining sliders. Hidden for clarity. User can choose to optinally show them. */
   hiddenSliders: BudgetSlider[] = [];
   essentialSliders: BudgetSlider[] = [];
 
-  initialSliders: any[] = []; // To store the initial slider values
+  /** To store intial sliders state. This is for undo and reset. */
+  initialSliders: any[] = []
   sliderHistory: any[][] = []
   maxHistorySize: number = 15
 
-  autoFit: boolean = false; // Auto-fit sliders to stay within target surplus
+  /** Auto Fit:
+   * - false: only bring other sliders down when one slider is increased
+   * - true: bring other sliders both up and down to make the total expense fit the target surplus.
+   */
+  autoFit: boolean = false;
   allSlidersLocked: boolean = false; // Lock all sliders at once
   panelOpenState = signal(false);
   //#endregion
@@ -114,7 +123,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** Store Essential Categories selected by user */
   essentialCategories: string[] = [];
   /** Store all non-essential categories. (allCategories - essentialCategories = nonEssentialCategories) */
-  nonEssentialCategories: string[] = [];
+  nonEssentialCategories = this.allCategories.filter(c => !this.essentialCategories.includes(c));
 
   configFinished: boolean = false;
   //#endregion
