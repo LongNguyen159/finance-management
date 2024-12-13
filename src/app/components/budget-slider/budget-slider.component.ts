@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
@@ -16,8 +16,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { MatDividerModule } from '@angular/material/divider';
-import {MatStepper, MatStepperModule} from '@angular/material/stepper';
+import { MatStepperModule } from '@angular/material/stepper';
 import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 
 @Component({
@@ -36,7 +38,9 @@ import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/mat
     MatDividerModule,
     FormsModule,
     MatStepperModule,
-    MatListModule
+    MatListModule,
+    MatExpansionModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss'
@@ -92,8 +96,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   autoFit: boolean = false; // Auto-fit sliders to stay within target surplus
   allSlidersLocked: boolean = false; // Lock all sliders at once
+  panelOpenState = signal(false);
   //#endregion
 
+  //#region Stepper Categories
+  isCategoriesLoading: boolean = false;
   /** All categories. */
   allCategories = Object.values(ExpenseCategory) as string[];
   expenseCategoryDetails = expenseCategoryDetails
@@ -110,6 +117,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   nonEssentialCategories: string[] = [];
 
   configFinished: boolean = false;
+  //#endregion
   
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe((allMonthsData: MonthlyData) => {
@@ -323,6 +331,14 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   finishConfig() {
     this.configFinished = true;
     this.autoAdjustSliders()
+  }
+
+
+  onPanelClick() {
+    this.isCategoriesLoading = true;
+  }
+  onPanelOpened() {
+    this.isCategoriesLoading = false;
   }
 
   //#endregion
