@@ -101,8 +101,8 @@
             <ng-template matStepLabel>Non-Essential Categories</ng-template>
     
             <p class="mt-4">I want to know how much I can spend on...</p>
-            @if (visibleSliders) {
-                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ visibleSliders.length }}</p>
+            @if (categoriesToInclude) {
+                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ categoriesToInclude.length }}</p>
             }
             <div class="max-h-[60vh] overflow-auto">
                 <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
