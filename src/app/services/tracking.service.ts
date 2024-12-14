@@ -20,7 +20,6 @@ export class TrackingService {
   /** Save tracking data to local storage and notify subscribers */
   saveTrackingData(newData: Tracker[]): void {
     if (newData.length === 0) {
-      console.log('No new data to save. Retaining existing tracking data.');
       return;
     }
 
@@ -51,8 +50,6 @@ export class TrackingService {
 
     // Update the BehaviorSubject to notify subscribers
     this.trackingDataSubject.next(finalData);
-
-    console.log('Tracking data merged and saved to local storage:', finalData);
   }
 
   /** Remove tracking data by name */
@@ -79,6 +76,5 @@ export class TrackingService {
   clearTrackingData(): void {
     localStorage.removeItem(this.localStorageKey);
     this.trackingDataSubject.next([]); // Notify subscribers about the change
-    console.log('Tracking data cleared from local storage.');
   }
 }

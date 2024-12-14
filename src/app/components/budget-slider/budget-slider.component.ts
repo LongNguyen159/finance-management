@@ -209,7 +209,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   //#endregion
 
   getCurrentYearMetrics() {
-    console.log("Get current year metrics called, processing...")
     const currentYear = this.currentDate.getFullYear();
 
     this.monthsOfCurrentYear = Object.keys(this.allMonthsData).reduce((acc, monthKey) => {
@@ -241,14 +240,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       name: category,
       totalValue: aggregatedPieData[category].total
     }))
-
-    console.log("aggregated data: ", this.aggregatedPieData)
   }
 
 
   /** Gather the metrics from last N months to populate the sliders initially. */
   getMetricsFromLastNMonths(lastNMonths: number) {
-    console.log("Get metrics from last N months called. Processing...")
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
     
@@ -310,8 +306,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       name: name,
       averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * multiplier * 100) / 100
     }));
-
-    console.log('Last N months done processing. Populating Sliders...')
     this.populateSliders();
   }
 
@@ -682,7 +676,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     // Sync the visible sliders with the updated master sliders
     this.syncSliders();
 
-    console.log('Master Sliders after auto adjustment:', this.masterSliders);
   }
 
   

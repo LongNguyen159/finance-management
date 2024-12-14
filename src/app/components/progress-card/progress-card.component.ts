@@ -37,9 +37,6 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.trackingService.trackingData$.pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      console.log('Received updated tracking data:', data);
-    })
   }
 
   /** Calculate and clamp the percentageSpent to a maximum of 100 */
