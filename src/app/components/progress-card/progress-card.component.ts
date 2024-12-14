@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import { TrackingService } from '../../services/tracking.service';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { takeUntil } from 'rxjs';
@@ -10,6 +10,9 @@ import { removeSystemPrefix } from '../../utils/utils';
 import { MatIconModule } from '@angular/material/icon';
 import { ExpenseCategory, expenseCategoryDetails } from '../models';
 import { CurrencyService } from '../../services/currency.service';
+import { MatButtonModule } from '@angular/material/button';
+import { UiService } from '../../services/ui.service';
+import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 
 
 @Component({
@@ -19,15 +22,18 @@ import { CurrencyService } from '../../services/currency.service';
     CommonModule,
     MatCardModule,
     MatProgressBarModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
   templateUrl: './progress-card.component.html',
-  styleUrl: './progress-card.component.scss'
+  styleUrl: './progress-card.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class ProgressCardComponent extends BasePageComponent implements OnInit {
   trackingService = inject(TrackingService);
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
+  uiService = inject(UiService)
 
 
   ngOnInit(): void {
@@ -47,6 +53,24 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
 
   getCategoryIconDetails(category: string) {
     return expenseCategoryDetails[category as ExpenseCategory];
+  }
+
+  deleteCategory(category: string) {
+    const dialogData: ConfirmDialogData = {
+      title: `Are you sure you want to delete tracker for ${removeSystemPrefix(category)}?`,
+      message: `You can set up a new tracker for this category in Smart Budget Planner anytime.`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      confirmColor: 'warn'
+    }
+    const dialogRef = this.uiService.openConfirmDialog(dialogData)
+
+    dialogRef.subscribe(result => {
+      if (result == true) {
+        this.trackingService.removeTrackingData(category);
+      }
+    })
+    
   }
 
 }

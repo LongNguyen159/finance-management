@@ -10,7 +10,7 @@ export class TrackingService {
   private readonly localStorageKey = 'trackedCategories';
 
   // BehaviorSubject to hold the tracking data
-  private trackingDataSubject = new BehaviorSubject<any[]>(this.getTrackingData());
+  private trackingDataSubject = new BehaviorSubject<Tracker[]>(this.getTrackingData());
 
   // Observable for components to subscribe to
   trackingData$: Observable<Tracker[]> = this.trackingDataSubject.asObservable();
@@ -18,7 +18,7 @@ export class TrackingService {
   constructor() { }
 
   /** Save tracking data to local storage and notify subscribers */
-  saveTrackingData(newData: any[]): void {
+  saveTrackingData(newData: Tracker[]): void {
     if (newData.length === 0) {
       console.log('No new data to save. Retaining existing tracking data.');
       return;
@@ -53,6 +53,20 @@ export class TrackingService {
     this.trackingDataSubject.next(finalData);
 
     console.log('Tracking data merged and saved to local storage:', finalData);
+  }
+
+  /** Remove tracking data by name */
+  removeTrackingData(name: string): void {
+    const currentData = this.getTrackingData();
+
+    // Filter out the category with the matching name
+    const updatedData = currentData.filter(item => item.name !== name);
+
+    // Save the updated data back to local storage
+    localStorage.setItem(this.localStorageKey, JSON.stringify(updatedData));
+
+    // Update the BehaviorSubject to notify subscribers
+    this.trackingDataSubject.next(updatedData);
   }
 
   /** Retrieve tracking data from local storage */
