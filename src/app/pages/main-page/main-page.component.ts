@@ -27,7 +27,6 @@ import { RoutePath } from '../../components/models';
 import { TreemapChartComponent } from "../../components/charts/treemap-chart/treemap-chart.component";
 import { calculateDifferences, getLastMonth, removeSystemPrefix } from '../../utils/utils';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BudgetSliderComponent } from "../../components/budget-slider/budget-slider.component";
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -36,7 +35,7 @@ import { BudgetSliderComponent } from "../../components/budget-slider/budget-sli
     NavbarComponent, MonthPickerComponent,
     MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
     MatSlideToggleModule, FormsModule, TreemapChartComponent,
-    MatTooltipModule, BudgetSliderComponent],
+    MatTooltipModule],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
   encapsulation: ViewEncapsulation.None,

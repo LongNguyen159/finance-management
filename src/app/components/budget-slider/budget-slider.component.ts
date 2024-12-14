@@ -23,6 +23,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { UiService } from '../../services/ui.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { TrackingService } from '../../services/tracking.service';
 
 
 @Component({
@@ -56,15 +57,19 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
   uiService = inject(UiService)
+  trackingService = inject(TrackingService)
   
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
-  filteredMonthsByYear: { [key: string]: string[] } = {};
+  /** Last N months */
   filteredMonths: string[] = [];
+
+  monthsOfCurrentYear: string[] = []
 
   //#region Income/Expense/Surplus
   // Pie Category data that contains average values to populate sliders on init
   averagePieData: { name: string, averageValue: number }[] = [];
+  aggregatedPieData: {name: string, totalValue: number}[] = []
 
   /** User defined metrics: Income and target surplus.
    * Total expenses are calculated based on the sliders.
@@ -140,10 +145,14 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   configFinished: boolean = false;
   //#endregion
   
+  
+
+
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe((allMonthsData: MonthlyData) => {
       this.allMonthsData = allMonthsData;
       this.getMetricsFromLastNMonths(this.MONTHS_TO_CALCULATE_AVG);
+      this.getCurrentYearMetrics()
     })
 
     /** Input changes */
@@ -197,11 +206,54 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
   //#endregion
 
+  getCurrentYearMetrics() {
+    console.log("Get current year metrics called, processing...")
+    const currentYear = this.currentDate.getFullYear();
+
+    this.monthsOfCurrentYear = Object.keys(this.allMonthsData).reduce((acc, monthKey) => {
+      const [year, monthStr] = monthKey.split('-').map(Number);      
+      const includeMonth = year === currentYear
+  
+      if (includeMonth) {
+        acc.push(monthKey);
+      }
+  
+      return acc;
+    }, [] as string[]);
+
+    const aggregatedPieData = this.monthsOfCurrentYear.reduce((acc, month) => {
+      this.allMonthsData[month].pieData.forEach(item => {
+        // Only extract categories data, exclude surplus and standalone items.
+        if (item.name.includes(SYSTEM_PREFIX)) {
+          if (!acc[item.name]) {
+            acc[item.name] = { total: 0, count: 0 };
+          }
+          acc[item.name].total += item.value;
+          acc[item.name].count += 1;
+        }
+      });
+      return acc;
+    }, {} as { [key: string]: { total: number, count: number } });
+
+    this.aggregatedPieData = Object.keys(aggregatedPieData).map(category => ({
+      name: category,
+      totalValue: aggregatedPieData[category].total
+    }))
+
+    console.log("aggregated data: ", this.aggregatedPieData)
+  }
+
+
   /** Gather the metrics from last N months to populate the sliders initially. */
   getMetricsFromLastNMonths(lastNMonths: number) {
+    console.log("Get metrics from last N months called. Processing...")
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
-  
+    
+    /** TODO:
+     * - Get metrics of current year. Currently: Getting metrics of last N months for avg calculation.
+     * But to setup for tracker, we track the values of current year, not last N months.
+     */
     this.filteredMonths = Object.keys(this.allMonthsData).reduce((acc, monthKey) => {
       const [year, monthStr] = monthKey.split('-').map(Number);
       const monthNumber = year * 12 + monthStr;
@@ -239,6 +291,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
     const aggregatedPieData = this.filteredMonths.reduce((acc, month) => {
       this.allMonthsData[month].pieData.forEach(item => {
+        // Only extract categories data, exclude surplus and standalone items.
         if (item.name.includes(SYSTEM_PREFIX)) {
           if (!acc[item.name]) {
             acc[item.name] = { total: 0, count: 0 };
@@ -250,12 +303,13 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       return acc;
     }, {} as { [key: string]: { total: number, count: number } });
 
+    // Populate average values for each category
     this.averagePieData = Object.keys(aggregatedPieData).map(name => ({
       name: name,
       averageValue: Math.round((aggregatedPieData[name].total / this.MONTHS_TO_CALCULATE_AVG) * multiplier * 100) / 100
     }));
 
-
+    console.log('Last N months done processing. Populating Sliders...')
     this.populateSliders();
   }
 
@@ -657,6 +711,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
   
 
+  /** Method to update sliders to reflect their correct values in the UI. */
   syncSliders(): void {
     // Update only the values in visible sliders based on the master sliders
     this.visibleSliders.forEach((visibleSlider) => {
@@ -679,6 +734,33 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       !slider.isEssential && this.categoriesToInclude.includes(slider.name)
     );
   }
+
+  /** Method to track all visible sliders */
+  trackVisibleSliders(showNoti: boolean = false, noti: string = 'Categories Tracked!') {
+    // Map tracking data for all visible sliders
+    const trackingData = this.visibleSliders.map(slider => {
+      const matchingCategory = this.aggregatedPieData.find(item => item.name === slider.name);
+      const currentSpending = matchingCategory?.totalValue || 0;
+      const targetSpending = slider.value * 12; // Annual target based on slider value
+
+      return {
+        name: slider.name,
+        currentSpending,
+        targetSpending,
+      };
+    });
+    
+
+    // Save the tracking data to a service
+    this.trackingService.saveTrackingData(trackingData);
+    if (showNoti) {
+      this.uiService.showSnackBar(noti)
+    }
+
+    console.log('Tracking data saved for visible sliders:', trackingData);
+  }
+
+
 
 
   /** To pre-select the non essential categories in template */
