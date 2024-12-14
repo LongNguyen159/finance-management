@@ -22,8 +22,10 @@
             <!-- Step 2: Define Essential Categories -->
             <mat-step>
             <ng-template matStepLabel>Essential Categories</ng-template>
-            <p class="my-4">Which categories are essential for you? (fix costs, categories where you can't reduce spending)</p>
-
+            <p class="mt-4">Which categories are essential for you? (fix costs, categories where you can't reduce spending)</p>
+            @if (essentialSliders) {
+                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ essentialSliders.length }}</p>
+            }
             <div class="max-h-[60vh] overflow-auto">
                 <mat-selection-list #essentialCategoryList (selectionChange)="onEssentialCategoriesChange($event)">
                     @for (category of allCategories; track $index) {
@@ -98,7 +100,10 @@
             <mat-step>
             <ng-template matStepLabel>Non-Essential Categories</ng-template>
     
-            <p class="my-4">I want to know how much I can spend on...</p>
+            <p class="mt-4">I want to know how much I can spend on...</p>
+            @if (visibleSliders) {
+                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ visibleSliders.length }}</p>
+            }
             <div class="max-h-[60vh] overflow-auto">
                 <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
                     @for (category of nonEssentialCategories; track category) {
