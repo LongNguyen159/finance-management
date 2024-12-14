@@ -19,16 +19,21 @@ export class TrackingService {
 
   /** Save tracking data to local storage and notify subscribers */
   saveTrackingData(newData: Tracker[]): void {
-    if (newData.length === 0) {
+    // Filter out any categories where the target spending is 0
+    const validData = newData.filter(item => item.targetSpending !== 0);
+  
+    if (validData.length === 0) {
+      console.log('No valid data to save (all categories have target spending of 0). Retaining existing tracking data.');
       return;
     }
-
+  
     const existingData = this.getTrackingData();
-
-    // Merge the existing data with the new data
-    const mergedData = newData.map(newItem => {
+  
+    // Merge the existing data with the valid new data
+    const mergedData = validData.map(newItem => {
       const existingItem = existingData.find(item => item.name === newItem.name);
       if (existingItem) {
+        // Update the existing category
         return {
           ...existingItem,
           currentSpending: newItem.currentSpending,
@@ -36,21 +41,25 @@ export class TrackingService {
           percentageSpent: newItem.percentageSpent
         };
       }
+      // Add the new category if it doesn't exist
       return newItem;
     });
-
+  
     const remainingCategories = existingData.filter(
-      item => !newData.some(newItem => newItem.name === item.name)
+      item => !validData.some(newItem => newItem.name === item.name)
     );
-
+  
     const finalData = [...mergedData, ...remainingCategories];
-
+  
     // Save the result back to local storage
     localStorage.setItem(this.localStorageKey, JSON.stringify(finalData));
-
+  
     // Update the BehaviorSubject to notify subscribers
     this.trackingDataSubject.next(finalData);
+  
+    console.log('Tracking data merged and saved to local storage:', finalData);
   }
+  
 
   /** Remove tracking data by name */
   removeTrackingData(name: string): void {
