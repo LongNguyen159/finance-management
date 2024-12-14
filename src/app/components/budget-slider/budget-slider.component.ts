@@ -644,11 +644,15 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         const adjustment = (adjustedVisibleWeight > 0 ? (slider.weight * priorityFactor / adjustedTotalWeight) : 0) * adjustmentAmount;
 
         if (adjustment > 0) {
-            // Increase slider value but ensure it doesn't exceed its max
-            slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
+          slider.value += adjustment;
+          if (slider.value > (slider.max || 0)) {
+              slider.max = slider.value * 1.2; // Extend the max value by 20%
+          }
+          // Increase slider value but ensure it doesn't exceed its max
+          slider.value = Math.min(roundToNearestHundreds(slider.value), slider.max || Infinity);
         } else {
-            // Decrease slider value but ensure it doesn't go below its min
-            slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
+          // Decrease slider value but ensure it doesn't go below its min
+          slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
         }
     });
 
@@ -657,11 +661,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         const adjustment = (hiddenWeight > 0 ? (slider.weight / adjustedTotalWeight) : 0) * adjustmentAmount;
 
         if (adjustment > 0) {
-            // Increase slider value but ensure it doesn't exceed its max
-            slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
+          // Increase slider value but ensure it doesn't exceed its max
+          slider.value = Math.min(roundToNearestHundreds(slider.value + adjustment), slider.max || Infinity);
         } else {
-            // Decrease slider value but ensure it doesn't go below its min
-            slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
+          // Decrease slider value but ensure it doesn't go below its min
+          slider.value = Math.max(roundToNearestHundreds(slider.value + adjustment), slider.min || 0);
         }
     });
 
