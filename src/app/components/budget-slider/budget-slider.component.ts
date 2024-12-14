@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
-import { debounceTime, Subject, takeUntil } from 'rxjs';
-import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX } from '../models';
+import { debounceTime, takeUntil } from 'rxjs';
+import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX, Tracker } from '../models';
 import { CommonModule } from '@angular/common';
 import {MatSliderModule} from '@angular/material/slider';
 import { formatBigNumber, removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
@@ -24,6 +24,7 @@ import { UiService } from '../../services/ui.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
+import { ProgressCardComponent } from "../progress-card/progress-card.component";
 
 
 @Component({
@@ -46,8 +47,9 @@ import { TrackingService } from '../../services/tracking.service';
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatButtonToggleModule
-  ],
+    MatButtonToggleModule,
+    ProgressCardComponent
+],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -742,28 +744,27 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** Method to track all visible sliders */
   trackVisibleSliders(showNoti: boolean = false, noti: string = 'Categories Tracked!') {
     // Map tracking data for all visible sliders
-    const trackingData = this.visibleSliders.map(slider => {
+    const trackingData: Tracker[] = this.visibleSliders.map(slider => {
       const matchingCategory = this.aggregatedPieData.find(item => item.name === slider.name);
       const currentSpending = matchingCategory?.totalValue || 0;
       const targetSpending = slider.value * 12; // Annual target based on slider value
-
+      const percentageSpent = targetSpending === 0 ? 0 : (currentSpending / targetSpending) * 100;
+  
       return {
         name: slider.name,
         currentSpending,
         targetSpending,
+        percentageSpent,
       };
     });
-    
-
+  
     // Save the tracking data to a service
     this.trackingService.saveTrackingData(trackingData);
     if (showNoti) {
-      this.uiService.showSnackBar(noti)
+      this.uiService.showSnackBar(noti);
     }
-
-    console.log('Tracking data saved for visible sliders:', trackingData);
   }
-
+  
 
 
 

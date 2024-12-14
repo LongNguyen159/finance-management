@@ -412,3 +412,12 @@ export interface BudgetSlider {
   colorLight?: string
   isEssential?: boolean
 }
+
+export interface Tracker {
+  name: string
+  currentSpending: number
+  targetSpending: number
+  percentageSpent: number
+}
+
+//#endregion

@@ -1,0 +1,41 @@
+<div class="flex flex-col gap-3">
+    @for (category of trackingService.trackingData$ | async; track category.name) {
+        <mat-card class="rounded-2xl px-2">
+            <mat-card-header>
+                <mat-card-title>
+                    <div class="flex flex-row gap-2 items-center mb-2">
+                        <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? getCategoryIconDetails(category.name).colorDark : getCategoryIconDetails(category.name).colorLight }">{{ getCategoryIconDetails(category.name).icon }}</mat-icon>
+                        <span class="!font-bold !text-2xl">{{ removeSystemPrefix(category.name) }}</span>
+                    </div>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="progress-info mb-4 flex flex-row gap-4 w-full items-center justify-between">
+                    <p class="text-base">
+                        Spent: {{ category.currentSpending | currency:currencyService.getSelectedCurrency() }} ({{ category.percentageSpent.toFixed(2) }}%)
+                    </p>
+                    <p class="text-base">
+                        Target: {{ category.targetSpending | currency:currencyService.getSelectedCurrency() }}
+                    </p>
+
+                    @if (category.percentageSpent > 100) {
+                        <p class="text-base font-bold" [ngClass]="colorService.isDarkMode() ? 'negative-dark' : 'negative-light'">
+                            Exceeded by {{ (category.currentSpending - category.targetSpending) | currency:currencyService.getSelectedCurrency() }}
+                        </p>
+                    }
+                </div>
+                <mat-progress-bar
+                    [color]="category.percentageSpent > 100 ? 'warn' : 'primary'"
+                    mode="determinate"
+                    [value]="clampedPercentageSpent(category.percentageSpent)"
+                    class="mb-2">
+                </mat-progress-bar>
+                @if (category.percentageSpent > 100) {
+                    <div class="text-sm font-bold text-end" [ngClass]="colorService.isDarkMode() ? 'negative-dark' : 'negative-light'">
+                        You have exceeded the target by {{ (category.percentageSpent - 100).toFixed(2) }}%
+                    </div>
+                }
+            </mat-card-content>
+        </mat-card>
+    }
+</div>
