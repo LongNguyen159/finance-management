@@ -29,7 +29,7 @@
             <div class="max-h-[60vh] overflow-auto">
                 <mat-selection-list #essentialCategoryList (selectionChange)="onEssentialCategoriesChange($event)">
                     @for (category of allCategories; track $index) {
-                        <mat-list-option [value]="category" [selected]="essentialCategories.includes(category)">
+                        <mat-list-option [checkboxPosition]="'before'" [value]="category" [selected]="essentialCategories.includes(category)">
                             <div class="flex flex-row gap-2 items-center">
                                 <mat-icon
                                     fontSet="material-symbols-outlined" 
@@ -107,7 +107,7 @@
             <div class="max-h-[60vh] overflow-auto">
                 <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
                     @for (category of nonEssentialCategories; track category) {
-                        <mat-list-option [value]="category" [selected]="visibleSlidersName.includes(category)">
+                        <mat-list-option [checkboxPosition]="'before'" [value]="category" [selected]="visibleSlidersName.includes(category)">
                             <div class="flex flex-row gap-2 items-center">
                                 <mat-icon
                                     fontSet="material-symbols-outlined" 
