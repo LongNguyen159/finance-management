@@ -1,7 +1,6 @@
-<app-progress-card></app-progress-card>
-
 @if (!configFinished) {
-    <div class="py-4">
+    <div class="pb-4">
+        <h2 class="text-2xl font-bold text-center mb-4">How much can I spend on something?</h2>
         <mat-stepper class="rounded-xl py-3 px-2 custom-stepper-header" [linear]="false" orientation="horizontal" #stepper>
             <!-- Step 1: Define Income -->
             <mat-step [stepControl]="form.controls['averageIncome']">
@@ -15,6 +14,12 @@
                 <input matInput type="number" formControlName="averageIncome" />
                 <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
                 </mat-form-field>
+
+                <div class="my-4">
+                    <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+                        TIP: You can skip directly to step 4 if this is not the first time you use this feature and just want to know how much you can spend on something.
+                    </p>
+                </div>
                 <div class="flex justify-end">
                 <button mat-button matStepperNext>Next</button>
                 </div>
@@ -211,7 +216,7 @@
                 </div>
             </div>    
             @if (configFinished) {
-                <button class="mb-4" mat-stroked-button (click)="configFinished = !configFinished">
+                <button class="mb-4" mat-stroked-button (click)="openPlanner()">
                     Open Planner
                 </button>
             }

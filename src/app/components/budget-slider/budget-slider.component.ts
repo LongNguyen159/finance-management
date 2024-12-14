@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild, ViewEncapsulation } from '@angular/core';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
 import { debounceTime, takeUntil } from 'rxjs';
@@ -16,7 +16,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CurrencyService } from '../../services/currency.service';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import {MatListModule, MatListOption, MatSelectionListChange} from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
@@ -48,7 +48,6 @@ import { ProgressCardComponent } from "../progress-card/progress-card.component"
     MatProgressSpinnerModule,
     MatCardModule,
     MatButtonToggleModule,
-    ProgressCardComponent
 ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',
@@ -60,6 +59,14 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   currencyService = inject(CurrencyService)
   uiService = inject(UiService)
   trackingService = inject(TrackingService)
+
+  @ViewChild('stepper') stepper: MatStepper;
+  /** Retries count for stepper. Max attempts: 3.
+   * This is to handle the case where the stepper is not available immediately after the component is initialized.
+   * So we retry until the stepper is available.
+   */
+  private retryCount: number = 0;
+  private maxRetries: number = 3;
   
   allMonthsData: MonthlyData
   currentDate: Date = new Date();
@@ -358,6 +365,28 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
 
   //#region Stepper Navigation
+
+  openPlanner() {
+    this.configFinished = !this.configFinished;
+    this.navigateToStep(3);
+  }
+
+  navigateToStep(stepIndex: number) {
+    if (this.stepper) {
+      // If the stepper is available, set the selected index immediately
+      this.stepper.selectedIndex = stepIndex;
+    } else {
+      // If stepper is not available, retry until maxRetries are reached
+      if (this.retryCount < this.maxRetries) {
+        this.retryCount++;
+        setTimeout(() => {
+          this.navigateToStep(stepIndex);  // Retry navigating
+        }, 100);
+      } else {
+        console.warn('Max retries reached. Could not navigate to step.');
+      }
+    }
+  }
 
   /** Save essential categories selection on user checkbox change. */
   onEssentialCategoriesChange(event: MatSelectionListChange): void {
