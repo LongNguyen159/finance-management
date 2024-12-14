@@ -49,6 +49,14 @@
                     <span>Finance Manager</span>
                 </a>
             }
+
+
+            <a mat-menu-item [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">calculate</mat-icon>
+                <span>Smart Budget Planner</span>
+            </a>
+
+
         
             <!-- Settings link -->
             <button mat-menu-item (click)="dialogService.openSettingsDialog()" class="flex flex-row justify-center items-center gap-2">

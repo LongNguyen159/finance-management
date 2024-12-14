@@ -50,7 +50,8 @@ export enum RoutePath {
   WelcomePage = '/welcome',
   WhatsNewPage = '/updates',
   FinanceManagerPage = '/storage',
-  HighlightedFeaturesPage = '/highlights'
+  HighlightedFeaturesPage = '/highlights',
+  SmartBudgeterPage = '/smart-budgeter',
 }
 
 //#endregion
