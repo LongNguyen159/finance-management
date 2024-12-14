@@ -1,6 +1,24 @@
-
-
 .app-menu.mat-mdc-menu-panel {
     max-width: none !important;
     width: 16rem !important;
+}
+
+.active-link-dark {
+    background-color: rgb(55 72 100) !important;
+    font-weight: bold !important;
+}
+
+.active-link-dark:hover {
+    background-color: rgb(64, 84, 116) !important;
+    font-weight: bold !important;
+}
+
+.active-link-light {
+    background-color: rgb(180, 197, 246) !important;
+    font-weight: bold !important;
+}
+
+.active-link-light:hover {
+    background-color: rgb(196, 211, 252) !important;
+    font-weight: bold !important;
 }
