@@ -50,11 +50,17 @@
                     <h2 class="font-bold">
                         Budget vs Actual Spending
                     </h2>
-                    @if(budgets.length !== 0) {
-                        <button mat-button (click)="navigateToBudgetList()">
-                            Edit Budgets
+                    <div class="flex flex-row items-center gap-2">
+                        @if(budgets.length !== 0) {
+                            <button mat-button (click)="navigateToBudgetList()">
+                                Edit Budgets
+                            </button>
+                        }
+                        <button mat-button (click)="dialogService.openTrackerDialog()">
+                            <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                            <span>View Year Progress</span>
                         </button>
-                    }
+                    </div>
 
                     @if (indicators.length == 0 && budgets.length !== 0) {
                         <p class="mt-4">

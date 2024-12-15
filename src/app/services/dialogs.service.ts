@@ -7,6 +7,7 @@ import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expen
 import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/insights-dialog.component';
 import { PatternAnalysisDialogComponent } from '../components/dialogs/pattern-analysis-dialog/pattern-analysis-dialog.component';
 import { AbnormalityChartData } from '../components/models';
+import { TrackerDialogComponent } from '../components/dialogs/tracker-dialog/tracker-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +44,7 @@ export class DialogsService {
   }
 
 
+  
   openPatternAnalysisDialog(chartData: AbnormalityChartData) {
     this.dialog.open(PatternAnalysisDialogComponent, {
       width: '75rem',
@@ -50,6 +52,18 @@ export class DialogsService {
       maxHeight: '90vh',
       maxWidth: '98vw',
       data: chartData
+    })
+  }
+
+  /** Open Tracker dialog, content are the current progress vs target year spending, defined by 
+   * the smart budgeter.
+   */
+  openTrackerDialog() {
+    this.dialog.open(TrackerDialogComponent, {
+      width: '75rem',
+      height: '83vh',
+      maxHeight: '90vh',
+      maxWidth: '98vw',
     })
   }
 
