@@ -789,7 +789,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     }
   }
   
-
+  
 
 
   /** To pre-select the non essential categories in template */

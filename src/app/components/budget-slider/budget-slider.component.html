@@ -124,14 +124,21 @@
                 <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
                     @for (category of nonEssentialCategories; track category) {
                         <mat-list-option [checkboxPosition]="'before'" [value]="category" [selected]="visibleSlidersName.includes(category)">
-                            <div class="flex flex-row gap-2 items-center">
-                                <mat-icon
-                                    fontSet="material-symbols-outlined" 
-                                    [ngStyle]="{ color: colorService.isDarkMode() ? getCategoriesDetails(category).colorDark : getCategoriesDetails(category).colorLight }"
-                                >{{ getCategoriesDetails(category).icon }}</mat-icon>
-                                <span>
-                                    {{ removeSystemPrefix(category) }}
-                                </span>
+                            <div class="flex flex-row gap-2 items-center justify-between">
+                                <div class="flex flex-row gap-2 items-center">
+                                    <mat-icon
+                                        fontSet="material-symbols-outlined" 
+                                        [ngStyle]="{ color: colorService.isDarkMode() ? getCategoriesDetails(category).colorDark : getCategoriesDetails(category).colorLight }"
+                                    >{{ getCategoriesDetails(category).icon }}</mat-icon>
+                                    <span>
+                                        {{ removeSystemPrefix(category) }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        Tracking: 120/1.2K (15%)
+                                    </span>
+                                </div>
                             </div>
                         </mat-list-option>
                     }
@@ -252,7 +259,7 @@
             <h2 class="text-2xl font-bold">Here's the plan we've created for you</h2>
             <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Adjust as needed</p>
         </div>
-        <div class="flex flex-row items-center justify-between sticky py-4 mb-4 top-16 z-50 bg-[rgb(34,34,34)]">
+        <div class="flex flex-row items-center justify-between sticky py-4 mb-4 top-16 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
             <div class="flex flex-row items-center gap-2 w-full">
                 <div class="py-3 px-6 rounded-2xl border-[2px] border-solid"
                 [ngClass]="{
