@@ -1,18 +1,18 @@
 <div class="flex flex-col gap-3">
     @if ((trackingService.trackingData$ | async)?.length === 0) {
-        <div class="flex flex-col w-full justify-center items-center gap-2 top-[50%]">
-            No tracking data available.
+        <div class="flex flex-col w-full justify-center items-center gap-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+            No tracking data available. You can create some in Smart Budget Planner.
         </div>
         <div class="flex flex-row w-full justify-center items-center gap-2">
             <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" (click)="navigateToBudgetPlanner()" class="flex flex-row justify-center items-center gap-2">
-                <mat-icon fontSet="material-symbols-outlined">calculate</mat-icon>
+                <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
                 <span>Open Smart Budget Planner</span>
             </a>
         </div>
     } @else {
         <div class="flex flex-row w-full justify-end items-center gap-2">
             <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-2">
-                <mat-icon fontSet="material-symbols-outlined">calculate</mat-icon>
+                <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
                 <span>Open Smart Budget Planner</span>
             </a>
         </div>

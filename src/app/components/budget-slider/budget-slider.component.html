@@ -20,7 +20,7 @@
                 <input matInput type="number" formControlName="averageIncome" />
                 <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
                 <mat-hint>
-                    Approx. {{ formatBigNumbers(averageIncome * 12, currencyService.getCurrencySymbol()) }} in year
+                    Approx. {{ formatBigNumbers(averageIncome * 12) }} in year
                 </mat-hint>
                 </mat-form-field>
 
@@ -168,12 +168,12 @@
 
                             @if (form.get('savingsType')?.value === 'relative') {
                                 <mat-hint>
-                                    Approx. Savings: {{ targetSurplus | currency:currencyService.getSelectedCurrency() }} ({{ targetSurplus * 12 | currency:currencyService.getSelectedCurrency() }} in year)
+                                    Approx. Savings: {{ formatBigNumbersFrom1K(targetSurplus) }} ({{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year)
                                 </mat-hint>
                             }
                             @if (form.get('savingsType')?.value == 'absolute') {
                                 <mat-hint>
-                                    {{ targetSurplus * 12 | currency:currencyService.getSelectedCurrency() }} in year
+                                    {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
                                 </mat-hint>
                             }
                         </mat-form-field>
@@ -325,7 +325,7 @@
                                     [max]="slider.max"
                                     discrete
                                     [disabled]="slider.locked"
-                                    [displayWith]="formatBigNumbersFrom1K"
+                                    [displayWith]="formatBigNumbersFrom1KNoCurrency"
                                 >   
                                     <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
                                     <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
@@ -419,8 +419,7 @@
                                         }
                                     </mat-form-field>
                                 </div>
-                            </div>
-                            
+                            </div>                            
                         }
                     </div>
                 }

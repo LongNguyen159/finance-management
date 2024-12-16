@@ -800,11 +800,15 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   //#endregion
 
   //#region Formatting
-  formatBigNumbers(value: number, currencySymbol: string = ''): string {
-    return formatBigNumber(value);
+  formatBigNumbers(value: number): string {
+    return formatBigNumber(value, this.currencyService.getCurrencySymbol());
   }
 
   formatBigNumbersFrom1K(value: number): string {
+    return formatBigNumber(value, this.currencyService.getCurrencySymbol(), 1000);
+  }
+
+  formatBigNumbersFrom1KNoCurrency(value: number): string {
     return formatBigNumber(value, '', 1000);
   }
 
