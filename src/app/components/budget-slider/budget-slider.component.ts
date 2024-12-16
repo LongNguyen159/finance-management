@@ -772,7 +772,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
 
   /** Method to track all visible sliders */
-  trackVisibleSliders(showNoti: boolean = false, noti: string = 'Categories Tracked!') {
+  trackVisibleSliders(showNoti: boolean = false, noti: string = 'Tracked categories updated!') {
     // Map tracking data for all visible sliders
     const trackingData: Tracker[] = this.visibleSliders.map(slider => {
       const matchingCategory = this.aggregatedPieData.find(item => item.name === slider.name);

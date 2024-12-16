@@ -362,7 +362,7 @@
 
             </mat-card-content>
             <mat-card-actions>
-                <div class="flex flex-row w-full justify-end p-2 gap-2">
+                <div class="flex flex-row w-full justify-end p-2 mt-4 gap-2">
                     <button mat-button (click)="dialogService.openTrackerDialog()">
                         <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
                         <span>View Tracked Progress</span>
@@ -406,7 +406,7 @@
                                         [max]="slider.max"
                                         discrete
                                         [disabled]="slider.locked"
-                                        [displayWith]="formatBigNumbersFrom1K"
+                                        [displayWith]="formatBigNumbersFrom1KNoCurrency"
                                     >   
                                         <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
                                         <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
@@ -414,15 +414,15 @@
                                     <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
                                         <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
                                     </button>
-                                    <!-- <label>{{ formatBigNumbers(slider.value) }}</label> -->
+                                    <!-- Slider Value -->
                                     <mat-form-field appearance="outline" class="!w-40">
-                                        <!-- <mat-label>Set Value</mat-label> -->
                                         <input 
                                             matInput 
                                             type="number" 
                                             [(ngModel)]="slider.value"
                                             [min]="slider.min || 0"
-                                            (input)="adjustSliders(slider.name, slider.value)">
+                                            (input)="adjustSliders(slider.name, slider.value)"
+                                            >
                                         @if (calculationBasis == 'monthly') {
                                             <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
                                         }
