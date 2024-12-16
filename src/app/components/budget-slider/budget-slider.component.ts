@@ -25,6 +25,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
 import { ProgressCardComponent } from "../progress-card/progress-card.component";
+import { DialogsService } from '../../services/dialogs.service';
 
 
 @Component({
@@ -59,6 +60,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   currencyService = inject(CurrencyService)
   uiService = inject(UiService)
   trackingService = inject(TrackingService)
+  dialogService = inject(DialogsService)
 
   @ViewChild('stepper') stepper: MatStepper;
   /** Retries count for stepper. Max attempts: 3.

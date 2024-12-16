@@ -1,6 +1,12 @@
 @if (!configFinished) {
     <div class="pb-4">
-        <h2 class="text-2xl font-bold text-center mb-4">How much can I spend on something?</h2>
+        <h2 class="text-2xl font-bold text-center">How much can I spend on something?</h2>
+        <div class="flex flex-row w-full justify-center items-center mb-4 mt-2">
+            <button mat-button (click)="dialogService.openTrackerDialog()">
+                <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                <span>View Tracker Progress</span>
+            </button>
+        </div>
         <mat-stepper class="rounded-xl py-3 px-2 custom-stepper-header" [linear]="false" orientation="horizontal" #stepper>
             <!-- Step 1: Define Income -->
             <mat-step [stepControl]="form.controls['averageIncome']">
@@ -276,6 +282,9 @@
      
         <!-- Visible Sliders (Chosen Sliders by user in the stepper) -->
         <mat-card class="mb-6">
+            <mat-card-header class="!mb-6">
+                <mat-card-title class="!font-bold !text-xl">Highlighted Categories</mat-card-title>
+            </mat-card-header>
             <mat-card-content>
                 <!-- sliders -->
                 <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
@@ -295,8 +304,8 @@
                                     [disabled]="slider.locked"
                                     [displayWith]="formatBigNumbersFrom1K"
                                 >   
-                                    <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
-                                    <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                                    <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
+                                    <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                                 </mat-slider>
                                 <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
                                     <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
@@ -321,7 +330,11 @@
 
             </mat-card-content>
             <mat-card-actions>
-                <div class="flex flex-row w-full justify-end p-2">
+                <div class="flex flex-row w-full justify-end p-2 gap-2">
+                    <button mat-button (click)="dialogService.openTrackerDialog()">
+                        <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                        <span>View Tracker Progress</span>
+                    </button>
                     @if (visibleSliders.length > 0) {
                         <button mat-flat-button (click)="trackVisibleSliders(true)">
                             Track Categories
@@ -335,7 +348,7 @@
         <mat-accordion>
             <mat-expansion-panel (opened)="panelOpenState.set(true); onPanelClick()" (afterExpand)="onPanelOpened()" (closed)="panelOpenState.set(false)">
                 <mat-expansion-panel-header>
-                    <mat-panel-title>All Categories</mat-panel-title>
+                    <mat-panel-title class="!text-xl !font-bold">All Categories</mat-panel-title>
                     @if (isCategoriesLoading) {
                         <mat-panel-description>
                             <span class="mr-4">Loading Categories...</span>
@@ -346,7 +359,7 @@
                 <!-- Lazy Load Content with @if render -->
                 @if (panelOpenState()) {
                     <!-- Hidden Sliders (The remaining sliders) -->
-                    <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
+                    <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto mt-6">
                         @for (slider of hiddenSliders; track slider.name) {
                             <div class="flex flex-col">
                                 <div class="flex flex-row items-center gap-2">
@@ -363,8 +376,8 @@
                                         [disabled]="slider.locked"
                                         [displayWith]="formatBigNumbersFrom1K"
                                     >   
-                                        <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)">
-                                        <input matSliderEndThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                                        <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
+                                        <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
                                     </mat-slider>
                                     <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
                                         <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
