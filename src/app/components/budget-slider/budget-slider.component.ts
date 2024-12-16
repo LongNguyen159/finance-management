@@ -800,7 +800,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   //#endregion
 
   //#region Formatting
-  formatBigNumbers(value: number): string {
+  formatBigNumbers(value: number, currencySymbol: string = ''): string {
     return formatBigNumber(value);
   }
 

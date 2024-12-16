@@ -19,9 +19,12 @@
                 <mat-label>Average monthly Income</mat-label>
                 <input matInput type="number" formControlName="averageIncome" />
                 <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                <mat-hint>
+                    Approx. {{ formatBigNumbers(averageIncome * 12, currencyService.getCurrencySymbol()) }} in year
+                </mat-hint>
                 </mat-form-field>
 
-                <div class="my-4">
+                <div class="mb-4 mt-6">
                     <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
                         TIP: You can skip directly to step 4 if this is not the first time you use this feature and just want to know how much you can spend on something.
                     </p>
@@ -156,11 +159,23 @@
                         <mat-form-field appearance="fill">
                             <mat-label>Saving Goal</mat-label>
                             <input matInput type="number" [min]="0" formControlName="targetSavings" />
-                            <span *ngIf="form.get('savingsType')?.value === 'relative'" matTextSuffix>%</span>
-                            <span *ngIf="form.get('savingsType')?.value === 'absolute'" matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
-                            <mat-hint *ngIf="form.get('savingsType')?.value === 'relative'">
-                                Approx. Savings: {{ targetSurplus | currency:currencyService.getSelectedCurrency() }}
-                            </mat-hint>
+                            @if (form.get('savingsType')?.value === 'relative') {
+                                <span matTextSuffix>%</span>
+                            }
+                            @if (form.get('savingsType')?.value == 'absolute') {
+                                <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                            }
+
+                            @if (form.get('savingsType')?.value === 'relative') {
+                                <mat-hint>
+                                    Approx. Savings: {{ targetSurplus | currency:currencyService.getSelectedCurrency() }} ({{ targetSurplus * 12 | currency:currencyService.getSelectedCurrency() }} in year)
+                                </mat-hint>
+                            }
+                            @if (form.get('savingsType')?.value == 'absolute') {
+                                <mat-hint>
+                                    {{ targetSurplus * 12 | currency:currencyService.getSelectedCurrency() }} in year
+                                </mat-hint>
+                            }
                         </mat-form-field>
 
                         <div class="flex items-center mb-4 ml-2">
@@ -170,7 +185,7 @@
                             </mat-button-toggle-group>
                         </div>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between mt-4">
                         <button mat-button matStepperPrevious>Back</button>
                         <button mat-flat-button (click)="finishConfig()" matStepperNext>Calculate Saving Plan</button>
                     </div>
@@ -198,6 +213,9 @@
                               <mat-label>Average monthly Income</mat-label>
                               <input matInput type="number" formControlName="averageIncome" />
                               <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                              <mat-hint>
+                                Approx. {{ formatBigNumbers(averageIncome * 12) }} in year
+                            </mat-hint>
                             </mat-form-field>
                               
                             <!-- Target Savings -->
