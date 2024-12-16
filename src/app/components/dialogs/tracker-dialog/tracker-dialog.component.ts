@@ -25,4 +25,11 @@ export class TrackerDialogComponent extends BasePageComponent implements OnInit 
       }
     });
   }
+
+  onNavigateToSmartBudgeter(isNavigate: boolean) {
+    if (!isNavigate) {
+      return
+    }
+    this.dialogRef.close()
+  }
 }

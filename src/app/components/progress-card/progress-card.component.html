@@ -4,7 +4,7 @@
             No tracking data available.
         </div>
         <div class="flex flex-row w-full justify-center items-center gap-2">
-            <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-2">
+            <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" (click)="navigateToBudgetPlanner()" class="flex flex-row justify-center items-center gap-2">
                 <mat-icon fontSet="material-symbols-outlined">calculate</mat-icon>
                 <span>Open Smart Budget Planner</span>
             </a>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { TrackingService } from '../../services/tracking.service';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { CommonModule } from '@angular/common';
@@ -31,6 +31,9 @@ import { RouterModule } from '@angular/router';
   encapsulation: ViewEncapsulation.None
 })
 export class ProgressCardComponent extends BasePageComponent implements OnInit {
+
+  @Output() navigateToSmartBudgeter = new EventEmitter<boolean>(false)
+
   trackingService = inject(TrackingService);
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
@@ -71,6 +74,10 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
       }
     })
     
+  }
+
+  navigateToBudgetPlanner() {
+    this.navigateToSmartBudgeter.emit(true)
   }
 
 }
