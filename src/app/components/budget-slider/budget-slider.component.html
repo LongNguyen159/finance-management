@@ -134,10 +134,12 @@
                                         {{ removeSystemPrefix(category) }}
                                     </span>
                                 </div>
-                                <div>
-                                    <span>
-                                        Tracking: 120/1.2K (15%)
-                                    </span>
+                                <div [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+                                    @if (getTrackedCategory(category)) {
+                                        <span>
+                                            Tracking: {{ formatBigNumbersFrom1K((getTrackedCategory(category)?.currentSpending || 0)) }}/{{ formatBigNumbersFrom1K((getTrackedCategory(category)?.targetSpending || 0)) }} ({{ (getTrackedCategory(category)?.percentageSpent || 0).toFixed(2) }}%)
+                                        </span>
+                                    }
                                 </div>
                             </div>
                         </mat-list-option>

@@ -137,6 +137,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   /** All categories. */
   allCategories = Object.values(ExpenseCategory) as string[];
   expenseCategoryDetails = expenseCategoryDetails
+
+  trackedCategories: Tracker[] = []
   
 
   /** Categories to show only in the final sliders.
@@ -206,6 +208,10 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       this.nonEssentialCategories = this.allCategories.filter(c => !this.essentialCategories.includes(c));
       // this.syncSliders();
     }
+
+    this.trackingService.trackingData$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingData => {
+      this.trackedCategories = trackingData
+    })
   }
 
   //#region Input Changes
@@ -788,8 +794,12 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       this.uiService.showSnackBar(noti);
     }
   }
+
+  getTrackedCategory(categoryName: string) {
+    return this.trackedCategories.find(item => item.name == categoryName)
+  }
   
-  
+
 
 
   /** To pre-select the non essential categories in template */
