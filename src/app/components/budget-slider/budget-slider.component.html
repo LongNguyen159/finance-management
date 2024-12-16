@@ -4,7 +4,7 @@
         <div class="flex flex-row w-full justify-center items-center mb-4 mt-2">
             <button mat-button (click)="dialogService.openTrackerDialog()">
                 <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
-                <span>View Tracker Progress</span>
+                <span>View Spending Progress</span>
             </button>
         </div>
         <mat-stepper class="rounded-xl py-3 px-2 custom-stepper-header" [linear]="false" orientation="horizontal" #stepper>
@@ -305,7 +305,12 @@
             </mat-card-header>
             <mat-card-content>
                 <!-- sliders -->
-                <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto">
+                @if (visibleSliders.length == 0) {
+                    <div class="flex flex-row w-full justify-center my-4 items-center">
+                        <span class="text-center" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">No categories selected. Click 'Open Planner' to select desired categories</span>
+                    </div>
+                }
+                <div class="grid grid-cols-2 gap-x-10 w-full max-h-[70vh] overflow-auto">
                     @for (slider of visibleSliders; track slider.name) {
                         <div class="flex flex-col">
                             <div class="flex flex-row items-center gap-2">
@@ -351,7 +356,7 @@
                 <div class="flex flex-row w-full justify-end p-2 gap-2">
                     <button mat-button (click)="dialogService.openTrackerDialog()">
                         <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
-                        <span>View Tracker Progress</span>
+                        <span>View Tracked Progress</span>
                     </button>
                     @if (visibleSliders.length > 0) {
                         <button mat-flat-button (click)="trackVisibleSliders(true)">
