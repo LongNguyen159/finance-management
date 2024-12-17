@@ -229,13 +229,25 @@
                               
                             <!-- Target Savings -->
                             <mat-form-field appearance="fill">
-                                <mat-label>Target Savings</mat-label>
+                                <mat-label>Saving Goal</mat-label>
                                 <input matInput type="number" [min]="0" formControlName="targetSavings" />
-                                <span *ngIf="form.get('savingsType')?.value === 'relative'" matTextSuffix>%</span>
-                                <span *ngIf="form.get('savingsType')?.value === 'absolute'" matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
-                                <mat-hint *ngIf="form.get('savingsType')?.value === 'relative'">
-                                    Approx. Savings: {{ targetSurplus | currency:currencyService.getSelectedCurrency() }}
-                                </mat-hint>
+                                @if (form.get('savingsType')?.value === 'relative') {
+                                    <span matTextSuffix>%</span>
+                                }
+                                @if (form.get('savingsType')?.value == 'absolute') {
+                                    <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                                }
+    
+                                @if (form.get('savingsType')?.value === 'relative') {
+                                    <mat-hint>
+                                        Approx. Savings: {{ formatBigNumbersFrom1K(targetSurplus) }} ({{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year)
+                                    </mat-hint>
+                                }
+                                @if (form.get('savingsType')?.value == 'absolute') {
+                                    <mat-hint>
+                                        {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
+                                    </mat-hint>
+                                }
                             </mat-form-field>
 
                             <div class="flex items-center mb-4 ml-2">
