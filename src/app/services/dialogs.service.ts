@@ -25,7 +25,7 @@ export class DialogsService {
   openSettingsDialog() {
     this.dialog.open(SettingsDialogComponent, {
         width: '45rem',
-        maxWidth: '100vw',
+        maxWidth: '98vw',
         height: '35rem',
         maxHeight: '90vh',
     })
@@ -35,7 +35,7 @@ export class DialogsService {
   openInsertIntoDialog(entryToModify: {name: string, value: number} ) {
     this.dialog.open(InsertExpenseDialogComponent, {
         width: '40rem',
-        maxWidth: '60vw',
+        maxWidth: '90vw',
         // minHeight: '23rem',
         // height: '27rem',
         // maxHeight: '90vh',
