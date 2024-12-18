@@ -7,3 +7,8 @@
 .custom-stepper-header .mat-horizontal-stepper-header-container {
     gap: 4px;
 }
+
+.mat-card-background {
+    background: var(--mdc-elevated-card-container-color);
+    border-color: var(--mdc-elevated-card-container-color);
+}
