@@ -24,8 +24,8 @@ import { UiService } from '../../services/ui.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
-import { ProgressCardComponent } from "../progress-card/progress-card.component";
 import { DialogsService } from '../../services/dialogs.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 
 @Component({
@@ -49,6 +49,7 @@ import { DialogsService } from '../../services/dialogs.service';
     MatProgressSpinnerModule,
     MatCardModule,
     MatButtonToggleModule,
+    MatCheckboxModule
 ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',

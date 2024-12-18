@@ -392,16 +392,24 @@
 
             </mat-card-content>
             <mat-card-actions>
-                <div class="flex flex-row w-full justify-end p-2 mt-4 gap-2">
-                    <button mat-stroked-button (click)="dialogService.openTrackerDialog()">
-                        <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
-                        <span>View Tracked Progress</span>
-                    </button>
-                    @if (visibleSliders.length > 0) {
-                        <button mat-flat-button (click)="trackVisibleSliders(true)">
-                            Track Categories
+                <div class="flex flex-row w-full justify-between items-center py-2 mt-2">
+                    <div class="flex flex-row">
+                        <mat-checkbox>
+                            <span [style.color]="colorService.isDarkMode() ? colorService.darkTextPrimary : colorService.lightTextPrimary ">Save Tracked Categories to Budgets</span>
+                        </mat-checkbox>
+                    </div>
+
+                    <div class="flex flex-row w-full justify-end gap-2">
+                        <button mat-stroked-button (click)="dialogService.openTrackerDialog()">
+                            <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                            <span>View Tracked Progress</span>
                         </button>
-                    }
+                        @if (visibleSliders.length > 0) {
+                            <button mat-flat-button (click)="trackVisibleSliders(true)">
+                                Track Categories
+                            </button>
+                        }
+                    </div>
                 </div>
             </mat-card-actions>
         </mat-card>
