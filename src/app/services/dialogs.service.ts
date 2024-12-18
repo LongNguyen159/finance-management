@@ -25,7 +25,7 @@ export class DialogsService {
   openSettingsDialog() {
     this.dialog.open(SettingsDialogComponent, {
         width: '45rem',
-        maxWidth: '60vw',
+        maxWidth: '100vw',
         height: '35rem',
         maxHeight: '90vh',
     })
