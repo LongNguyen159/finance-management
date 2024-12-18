@@ -273,20 +273,33 @@
             <h2 class="text-2xl font-bold">Here's the plan we've created for you</h2>
             <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Adjust as needed</p>
         </div>
-        <div class="flex flex-row items-center justify-between sticky py-4 mb-4 top-16 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
-            <div class="flex flex-row items-center gap-2 w-full">
-                <div class="py-3 px-6 rounded-2xl border-[2px] border-solid"
-                [ngClass]="{
-                  '!border-neutral-500': colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
-                  '!border-neutral-400': !colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
-                  'border-red-400': colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus),
-                  'border-red-700': !colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus)
-                }">
-             Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
-           </div>
-            
-                <div class="py-3 px-6 rounded-2xl border-[2px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
-                    Target Savings: {{ targetSurplus | currency: currencyService.getSelectedCurrency() }}
+        <div class="flex flex-row items-start justify-between sticky py-4 mb-4 top-16 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
+            <div class="flex flex-row gap-2 w-full">
+                <div class="flex flex-col items-start gap-1">
+                    <div class="py-3 px-6 rounded-2xl border-[2px] border-solid"
+                        [ngClass]="{
+                        '!border-neutral-500': colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+                        '!border-neutral-400': !colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+                        'border-red-400': colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus),
+                        'border-red-700': !colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus)
+                        }">
+                        Current Savings: {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+                    </div>
+                    <div class="text-xs pl-4">
+                        <span>
+                            {{ formatBigNumbersFrom1K((averageIncome - totalExpenses) * 12) }} in year
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-start gap-1">
+                    <div class="py-3 px-6 rounded-2xl border-[2px] border-solid" [ngClass]="colorService.isDarkMode() ? '!border-neutral-500' : '!border-neutral-400'">
+                        Target Savings: {{ targetSurplus | currency: currencyService.getSelectedCurrency() }}
+                    </div>
+                    <div class="text-xs pl-4">
+                        <span>
+                            {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
+                        </span>
+                    </div>
                 </div>
             </div>
             
