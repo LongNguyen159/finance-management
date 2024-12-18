@@ -5,6 +5,7 @@ import { TrendsLineChartData } from '../../models';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
+import { MONTHS_TO_PREDICT } from '../../../utils/utils';
 
 @Component({
   selector: 'app-total-surplus-line-chart',
@@ -175,7 +176,6 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         actualBalance.push([i, balanceValues[i]]);
       }
     }
-  
 
     this.mergeOptions = {
       ...this.getBaseOption(),
@@ -205,6 +205,25 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.3)' : 'rgba(255, 165, 0, 0.3)', // Light orange for background
           },
+          markArea: {
+            itemStyle: {
+              color: predictedBalance.length > 0 ? 'rgba(225, 225, 225, 0.1)' : 'rgba(255, 173, 177, 0)',
+            },
+            label: {
+              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            },
+            data: [
+              [
+                {
+                  name: predictedBalance.length > 0 ? 'Predicted' : '',
+                  xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
+                },
+                {
+                  xAxis: months[months.length - 1]
+                }
+              ],
+            ]
+          },
         },
         {
           name: 'Balance',
@@ -221,6 +240,26 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           },
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.3)' : 'rgba(70, 130, 180, 0.3)', // Light blue for background
+          },
+
+          markArea: {
+            itemStyle: {
+              color: 'rgba(255, 255, 255, 0)'
+            },
+            label: {
+              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            },
+            data: [
+              [
+                {
+                  name: 'Actual',
+                  xAxis: months[0]
+                },
+                {
+                  xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
+                }
+              ],
+            ]
           },
         },
 
@@ -259,9 +298,9 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           },
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.2)' : 'rgba(255, 165, 0, 0.2)', // Light orange for background
-          },
+          }
         },
-      ]
+      ],
     };
   }
 }

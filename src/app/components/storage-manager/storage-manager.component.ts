@@ -11,7 +11,7 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, getNextMonths, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, getNextMonths, MONTHS_TO_PREDICT, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
 import { forkJoin, Subscription, takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
@@ -126,7 +126,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   trendsLineChartData: TrendsLineChartData[] = [];
   private projectionsSubscription: Subscription | null = null;
 
-  MONTHS_IN_ADVANCE_TO_PREDICT = 3;
+  MONTHS_IN_ADVANCE_TO_PREDICT = MONTHS_TO_PREDICT;
 
 
   treeMapData: TreeNode[] = [];

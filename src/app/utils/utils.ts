@@ -566,7 +566,7 @@ function _calculateEMA(data: number[], period: number): number[] {
   return ema;
 }
 
-export const MONTHS_TO_PREDICT = 5;
+export const MONTHS_TO_PREDICT = 3;
 
 
 async function _predictFutureValues(dataToPredict: number[], predictService: PredictService, uiService: UiService): Promise<ForecastData | null> {
