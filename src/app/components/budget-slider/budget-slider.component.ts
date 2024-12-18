@@ -119,11 +119,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   isSaveToBudgets: boolean = false
 
-  /** Hidden sliders are all the remaining sliders. Hidden for clarity. User can choose to optinally show them. */
+  /** Hidden sliders are all the remaining sliders. Hidden for clarity. User can choose to optionally show them. */
   hiddenSliders: BudgetSlider[] = [];
   essentialSliders: BudgetSlider[] = [];
 
-  /** To store intial sliders state. This is for undo and reset. */
+  /** To store initial sliders state. This is for undo and reset. */
   initialSliders: any[] = []
   sliderHistory: any[][] = []
   maxHistorySize: number = 15
@@ -335,7 +335,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
 
   /** Populate Sliders with initial values (untouched).
-   * The intial values come from average from the last N months.
+   * The initial values come from average from the last N months.
    */
   populateSliders() {
     const totalCategoryValues = this.averagePieData.reduce((sum, data) => sum + data.averageValue, 0);

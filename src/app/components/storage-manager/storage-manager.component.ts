@@ -137,7 +137,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Show report section */
   showReports: boolean = false;
 
-  /** Annomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
+  /** Anomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
   anomalyReports: AbnormalityAnalysis[] = [];
   anomalyReportsExpanded: boolean = false;
 
@@ -405,7 +405,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return dateA.getTime() - dateB.getTime();
     });
 
-    /** Get Anomalies Dections */
+    /** Get Anomalies Detection */
     detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService, this.uiService)
       .then(insights => {
         this.anomalyReports = insights;
@@ -607,7 +607,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
   }
 
-  /** Helper function: Compute surplus chart data (cummulate balance) */
+  /** Helper function: Compute surplus chart data (cummulative balance) */
   private computeSurplusChartData(sortedData: Array<any>) {
     let previousBalance = 0;
     return sortedData.map(entry => {
@@ -875,7 +875,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
   //#region Getters
 
-  /** Dislay first half and second half in the template */
+  /** Display first half and second half in the template */
   get firstHalf() {
     return this.anomalyReports.slice(0, Math.ceil(this.anomalyReports.length / 2));
   }
