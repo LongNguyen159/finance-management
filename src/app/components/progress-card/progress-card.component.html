@@ -49,12 +49,18 @@
                             </p>
                         }
                     </div>
-                    <mat-progress-bar
-                        [color]="category.percentageSpent > 100 ? 'warn' : 'primary'"
-                        mode="determinate"
-                        [value]="clampedPercentageSpent(category.percentageSpent)"
-                        class="!mb-2">
-                    </mat-progress-bar>
+
+                    <div class="flex flex-row w-full pb-2">
+                        <mat-progress-bar
+                            [ngClass]="{
+                                'custom-mat-progress-bar-color-red-dark': category.percentageSpent > 100 && colorService.isDarkMode(),
+                                'custom-mat-progress-bar-color-red-light': category.percentageSpent > 100 && !colorService.isDarkMode()
+                            }"
+                            color="primary"
+                            mode="determinate"
+                            [value]="clampedPercentageSpent(category.percentageSpent)">
+                        </mat-progress-bar>
+                    </div>
                     <!-- @if (category.percentageSpent > 100) {
                         <div class="text-sm font-bold text-end" [ngClass]="colorService.isDarkMode() ? 'negative-dark' : 'negative-light'">
                             You have exceeded the target by {{ (category.percentageSpent - 100).toFixed(2) }}%

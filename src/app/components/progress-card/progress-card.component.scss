@@ -1,3 +1,11 @@
 .custom-card-header .mat-mdc-card-header-text {
     width: 100%;
 }
+
+.custom-mat-progress-bar-color-red-dark .mdc-linear-progress__bar-inner {
+    border-color: rgb(248, 113, 113) !important;
+}
+
+.custom-mat-progress-bar-color-red-light .mdc-linear-progress__bar-inner {
+    border-color: #ba1a1a !important;
+}
