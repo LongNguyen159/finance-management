@@ -509,6 +509,13 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
       // Add projected data to the chart
       this.trendsLineChartData.push(...projectedData);
+
+      // Sort the categories based on value
+      this.trendsLineChartData.forEach(item => {
+        item.categories.sort((a, b) => b.value - a.value);
+      });
+
+
       /** Reassign to trigger change detection in template.
        * Pushing directly modify the array, so the reference is the same,
        * hence Angular does not detect the change.
