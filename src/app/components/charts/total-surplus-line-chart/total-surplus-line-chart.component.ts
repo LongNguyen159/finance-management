@@ -205,9 +205,11 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.3)' : 'rgba(255, 165, 0, 0.3)', // Light orange for background
           },
-          markArea: {
+
+          
+          markArea: predictedBalance.length > 0 ? {
             itemStyle: {
-              color: predictedBalance.length > 0 ? 'rgba(225, 225, 225, 0.1)' : 'rgba(255, 173, 177, 0)',
+              color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
             },
             label: {
               color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
@@ -215,7 +217,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             data: [
               [
                 {
-                  name: predictedBalance.length > 0 ? 'Predicted' : '',
+                  name: 'Predicted',
                   xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
                 },
                 {
@@ -223,7 +225,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
                 }
               ],
             ]
-          },
+          } : undefined,
         },
         {
           name: 'Balance',
