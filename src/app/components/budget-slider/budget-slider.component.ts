@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal, ViewChild, ViewEncapsulation } from 
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { DataService } from '../../services/data.service';
 import { debounceTime, takeUntil } from 'rxjs';
-import { BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX, Tracker } from '../models';
+import { Budget, BudgetSlider, ExpenseCategory, expenseCategoryDetails, MonthlyData, SYSTEM_PREFIX, Tracker } from '../models';
 import { CommonModule } from '@angular/common';
 import {MatSliderModule} from '@angular/material/slider';
 import { formatBigNumber, removeSystemPrefix, roundToNearestHundreds } from '../../utils/utils';
@@ -26,6 +26,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
 import { DialogsService } from '../../services/dialogs.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { BudgetService } from '../../services/budget.service';
 
 
 @Component({
@@ -62,6 +63,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   uiService = inject(UiService)
   trackingService = inject(TrackingService)
   dialogService = inject(DialogsService)
+  budgetService = inject(BudgetService)
 
   @ViewChild('stepper') stepper: MatStepper;
   /** Retries count for stepper. Max attempts: 3.
@@ -114,6 +116,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
    * Visible Sliders will show non-essential categories selected by user.
    */
   visibleSliders: BudgetSlider[] = [];
+
+  isSaveToBudgets: boolean = false
 
   /** Hidden sliders are all the remaining sliders. Hidden for clarity. User can choose to optinally show them. */
   hiddenSliders: BudgetSlider[] = [];
@@ -791,6 +795,22 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   
     // Save the tracking data to a service
     this.trackingService.saveTrackingData(trackingData);
+
+    // Update budgets if user choose to
+    if (this.isSaveToBudgets) {
+      const budgetsData: Budget[] = trackingData.map(item => ({
+        category: item.name as ExpenseCategory,
+        value: Math.round((item.targetSpending / 12) * 100) / 100 // Target spending is in yearly, convert to monthly to save in Budgets
+      }))
+      const allBudgets = this.budgetService.getBudgets()
+  
+      const mergedBudgets = this.combineBudgets(allBudgets, budgetsData)
+  
+  
+      this.budgetService.saveBudgets(mergedBudgets)
+    }
+
+
     if (showNoti) {
       this.uiService.showSnackBar(noti);
     }
@@ -826,6 +846,24 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   removeSystemPrefix(name: string): string {
     return removeSystemPrefix(name);
   }
+
+  combineBudgets(existing: Budget[], incoming: Budget[]) {
+    const categoryMap = new Map();
+  
+    // Populate the map with existing items
+    existing.forEach(item => {
+      categoryMap.set(item.category, item.value);
+    });
+  
+    // Replace or add incoming items
+    incoming.forEach(item => {
+      // Always replace the value if the category exists
+      categoryMap.set(item.category, item.value);
+    });
+  
+    // Convert the map back to an array of objects
+    return Array.from(categoryMap, ([category, value]) => ({ category, value }));
+  };
 
   //#endregion
 }

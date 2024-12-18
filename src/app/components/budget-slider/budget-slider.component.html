@@ -394,7 +394,7 @@
             <mat-card-actions>
                 <div class="flex flex-row w-full justify-between items-center py-2 mt-2">
                     <div class="flex flex-row">
-                        <mat-checkbox>
+                        <mat-checkbox [(ngModel)]="isSaveToBudgets">
                             <span [style.color]="colorService.isDarkMode() ? colorService.darkTextPrimary : colorService.lightTextPrimary ">Save Tracked Categories to Budgets</span>
                         </mat-checkbox>
                     </div>
