@@ -122,7 +122,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
             name: 'Expenses',
           }, 
           {
-            name: 'Predicted Net Income',
+            name: 'Forecasted Net Income',
             lineStyle: {
               opacity: 1,
               width: 4,
@@ -131,7 +131,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           }, 
           
           {
-            name: 'Predicted Expenses',
+            name: 'Forecasted Expenses',
             lineStyle: {
               opacity: 1,
               width: 4,
@@ -280,7 +280,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         data: [
           [
             {
-              name: 'Predicted',
+              name: 'Forecast',
               xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT)]
             },
             {
@@ -364,7 +364,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           data: [
             [
               {
-                name: 'Predicted',
+                name: 'Forecast',
                 xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT + 1)]
               },
               {
@@ -375,7 +375,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         } : undefined
       },
       {
-        name: 'Predicted Expenses',
+        name: 'Forecasted Expenses',
         type: 'line',
         data: predictedExpenses.map(([x, y]) => [x, Math.round(y * 100) / 100]),
         smooth: true,
@@ -412,7 +412,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         }
       },
       {
-        name: 'Predicted Net Income',
+        name: 'Forecasted Net Income',
         type: 'line',
         data: predictedNetIncome.map(([x, y]) => [x, Math.round(y * 100) / 100]),
         smooth: true,

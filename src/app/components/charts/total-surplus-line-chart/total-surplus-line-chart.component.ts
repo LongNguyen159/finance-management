@@ -70,7 +70,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             name: 'Balance',
           }, 
           {
-            name: 'Predicted Surplus',
+            name: 'Forecasted Surplus',
             lineStyle: {
               opacity: 1,
               width: 4,
@@ -79,7 +79,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           }, 
           
           {
-            name: 'Predicted Balance',
+            name: 'Forecasted Balance',
             lineStyle: {
               opacity: 1,
               width: 4,
@@ -206,7 +206,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.3)' : 'rgba(255, 165, 0, 0.3)', // Light orange for background
           },
 
-          
+
           markArea: predictedBalance.length > 0 ? {
             itemStyle: {
               color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
@@ -217,7 +217,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             data: [
               [
                 {
-                  name: 'Predicted',
+                  name: 'Forecast',
                   xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
                 },
                 {
@@ -266,7 +266,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         },
 
         {
-          name: 'Predicted Balance',
+          name: 'Forecasted Balance',
           type: 'line',
           data: predictedBalance.map(([x, y]) => [x, Math.round(y * 100) / 100]),
           smooth: true,
@@ -285,7 +285,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
         },
 
         {
-          name: 'Predicted Surplus',
+          name: 'Forecasted Surplus',
           type: 'line',
           data: predictedSurplusValues.map(([x, y]) => [x, Math.round(y * 100) / 100]),
           smooth: true,

@@ -88,7 +88,7 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
             color: this.colorService.isDarkMode() ? '#ff7f50' : '#ff6f00',
           },
         }, {
-          name: 'Prediction',
+          name: 'Forecast',
           lineStyle: {
             opacity: 1,
             width: 4,
@@ -233,7 +233,7 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
           'Lower Bound': this.isBoundSelected,
           'Upper & Lower Bound': this.isBoundSelected,
           'Actual Spending': true,  // Assuming it's always visible
-          'Prediction': true,      // Assuming it's always visible
+          'Forecast': true,      // Assuming it's always visible
         },
       },
       series: [
@@ -311,7 +311,7 @@ export class CategoryRegressionChartComponent extends BaseChartComponent impleme
         },
 
         {
-          name: `Prediction`,
+          name: `Forecast`,
           type: 'line',
           data: predictedDataMapped,
           showSymbol: false,
