@@ -244,8 +244,9 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.3)' : 'rgba(70, 130, 180, 0.3)', // Light blue for background
           },
 
-          markArea: {
+          markArea: predictedBalance.length > 0 ? {
             itemStyle: {
+              opacity: 0,
               color: 'rgba(255, 255, 255, 0)'
             },
             label: {
@@ -262,7 +263,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
                 }
               ],
             ]
-          },
+          } : undefined,
         },
 
         {
