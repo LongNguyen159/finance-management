@@ -3,7 +3,7 @@ import { BarSeriesOption, EChartsOption, EChartsType, LineSeriesOption, SeriesOp
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
 import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 import { TrendsLineChartData } from '../../models';
-import { removeSystemPrefix } from '../../../utils/utils';
+import { MONTHS_TO_PREDICT, removeSystemPrefix } from '../../../utils/utils';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
 import { isArray } from 'mathjs';
@@ -32,6 +32,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
   
 
   xAxisData: string[] = []
+  isPredictionAvailable: boolean = false
 
   constructor() {
     super()
@@ -268,6 +269,26 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         opacity: 0.9,
       },
       stack: this.stackCategories ? 'categories' : '',
+      markArea: this.isPredictionAvailable ? {
+        itemStyle: {
+          opacity: 0.2,
+          color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
+        },
+        label: {
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
+        data: [
+          [
+            {
+              name: 'Predicted',
+              xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT)]
+            },
+            {
+              xAxis: this.xAxisData[this.xAxisData.length - 1]
+            }
+          ],
+        ]
+      } : undefined,
       data: this.xAxisData.map(month => {
         // Find the month's data
         const monthData = this.chartData.find(data => data.month === month);
@@ -311,6 +332,8 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         actualNetIncome.push([i, totalNetIncome[i]]);
       }
     }
+
+    this.isPredictionAvailable = predictedExpenses.length > 0 || predictedNetIncome.length > 0;
   
   
     const trendSeries: LineSeriesOption[] = [
@@ -330,7 +353,26 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         areaStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
           opacity: 0.3
-        }
+        },
+        markArea: predictedNetIncome.length > 0 ? {
+          itemStyle: {
+            color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)', // Adjust color for light mode
+          },
+          label: {
+            color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          },
+          data: [
+            [
+              {
+                name: 'Predicted',
+                xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT + 1)]
+              },
+              {
+                xAxis: this.xAxisData[this.xAxisData.length - 1]
+              }
+            ],
+          ]
+        } : undefined
       },
       {
         name: 'Predicted Expenses',
