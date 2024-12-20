@@ -16,9 +16,9 @@
             </p>
         </div>
         <div class="flex flex-row w-full justify-end items-center gap-2">
-            <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-2" (click)="navigateToBudgetPlanner()">
+            <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-1" (click)="navigateToBudgetPlanner()">
                 <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
-                <span>Open Smart Budget Planner</span>
+                <span>Edit Plan</span>
             </a>
         </div>
         @for (category of trackingService.trackingCategories$ | async; track category.name) {
