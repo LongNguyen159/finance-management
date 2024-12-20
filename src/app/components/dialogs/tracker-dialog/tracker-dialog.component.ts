@@ -18,6 +18,8 @@ export class TrackerDialogComponent extends BasePageComponent implements OnInit 
   router = inject(Router)
   dialogRef = inject(MatDialogRef);
 
+  currentYear = new Date().getFullYear();
+
   ngOnInit(): void {
     this.router.events.pipe(takeUntil(this.componentDestroyed$)).subscribe(event => {
       if (event instanceof NavigationStart) {
