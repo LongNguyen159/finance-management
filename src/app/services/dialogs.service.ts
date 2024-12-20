@@ -8,6 +8,7 @@ import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/i
 import { PatternAnalysisDialogComponent } from '../components/dialogs/pattern-analysis-dialog/pattern-analysis-dialog.component';
 import { AbnormalityChartData } from '../components/models';
 import { TrackerDialogComponent } from '../components/dialogs/tracker-dialog/tracker-dialog.component';
+import { TrackerSelectorDialogComponent } from '../components/dialogs/tracker-selector-dialog/tracker-selector-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +42,17 @@ export class DialogsService {
         // maxHeight: '90vh',
         data: entryToModify
     })
+  }
+
+  openTrackerSelectorDialog() {
+    const dialogRef = this.dialog.open(TrackerSelectorDialogComponent, {
+      width: '75rem',
+      height: '83vh',
+      maxHeight: '90vh',
+      maxWidth: '98vw',
+    })
+
+    return dialogRef.afterClosed();
   }
 
 

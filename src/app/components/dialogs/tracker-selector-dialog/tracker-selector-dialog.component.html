@@ -1,0 +1,28 @@
+<h2 mat-dialog-title class="!font-bold text-2xl">Choose Categories to track</h2>
+<mat-dialog-content>
+  <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+    Selected: {{ selectedCategories.length }} / {{ allCategories.length }}
+  </p>
+  <button mat-button (click)="toggleSelectAll(categoryList)">
+    {{ isAllSelected ? 'Deselect All' : 'Select All' }}
+  </button>
+  <mat-selection-list #categoryList (selectionChange)="onCategorySelection(categoryList.selectedOptions.selected)">
+    @for (category of allCategories; track category.label) {
+        <mat-list-option [checkboxPosition]="'before'" [value]="category.value" [selected]="selectedCategories.includes(category.value)">
+            <div class="flex flex-row gap-2 items-center">
+                <mat-icon
+                    fontSet="material-symbols-outlined" 
+                    [ngStyle]="{ color: colorService.isDarkMode() ? category.colorDark : category.colorLight }"
+                >{{ category.icon }}</mat-icon>
+                <span>
+                    {{ category.label }}
+                </span>
+            </div>
+        </mat-list-option>
+    }
+  </mat-selection-list>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-stroked-button [mat-dialog-close]="false">Cancel</button>
+  <button mat-flat-button (click)="onDialogClose()" [disabled]="selectedCategories.length == 0">Track ({{ selectedCategories.length }})</button>
+</mat-dialog-actions>

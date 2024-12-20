@@ -105,7 +105,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     savingsType: new FormControl('absolute'), // Default to absolute
   });
 
-
   //#endregion
 
   //#region Sliders
@@ -143,6 +142,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   allCategories = Object.values(ExpenseCategory) as string[];
   expenseCategoryDetails = expenseCategoryDetails
 
+
+  categoriesToTrack: string[] = []
   trackedCategories: Tracker[] = []
   
 
@@ -776,10 +777,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     );
   }
 
-  /** Method to track all visible sliders */
-  trackVisibleSliders(showNoti: boolean = false, noti: string = 'Tracked categories updated!') {
-    // Map tracking data for all visible sliders
-    const trackingData: Tracker[] = this.visibleSliders.map(slider => {
+  /** Method to track selected sliders */
+  trackSliders(showNoti: boolean = true, noti: string = 'Tracked categories updated!') {
+    
+    // Track only the selected categories
+    const trackingData: Tracker[] = this.masterSliders.filter(slider => this.categoriesToTrack.includes(slider.name)).map(slider => {
       const matchingCategory = this.aggregatedPieData.find(item => item.name === slider.name);
       const currentSpending = matchingCategory?.totalValue || 0;
       const targetSpending = slider.value * 12; // Annual target based on slider value
@@ -818,6 +820,24 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
   getTrackedCategory(categoryName: string) {
     return this.trackedCategories.find(item => item.name == categoryName)
+  }
+
+  openSelectCategoriesDialog() {
+    /** Pre-select the dialog with highlighted categories (visible sliders). The dialog
+     * uses `categoriesToTrack` signal to pre-select the categories.
+     */
+    this.trackingService.categoriesToTrack.set(this.visibleSliders.map(item => item.name))
+
+    // Open the dialog and subscribe to the results
+    const afterClosed$ = this.dialogService.openTrackerSelectorDialog()
+
+    afterClosed$.subscribe((dialogResults: string[]) => {
+      // Selected Categories
+      if (dialogResults) {
+        this.categoriesToTrack = dialogResults
+        this.trackSliders()
+      }
+    })
   }
   
 

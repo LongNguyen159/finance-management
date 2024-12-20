@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Tracker } from '../components/models';
 
@@ -15,10 +15,12 @@ export class TrackingService {
   // Observable for components to subscribe to
   trackingData$: Observable<Tracker[]> = this.trackingDataSubject.asObservable();
 
+  categoriesToTrack = signal<string[]>([])
+
   constructor() { }
 
   /** Save tracking data to local storage and notify subscribers */
-  saveTrackingData(newData: Tracker[]): void {
+  saveTrackingData(newData: Tracker[], mergeNewIntoExisting: boolean = false): void {
     // Filter out any categories where the target spending is 0
     const validData = newData.filter(item => item.targetSpending !== 0);
   
@@ -27,29 +29,36 @@ export class TrackingService {
       return;
     }
   
-    const existingData = this.getTrackingData();
+    let finalData: Tracker[];
   
-    // Merge the existing data with the valid new data
-    const mergedData = validData.map(newItem => {
-      const existingItem = existingData.find(item => item.name === newItem.name);
-      if (existingItem) {
-        // Update the existing category
-        return {
-          ...existingItem,
-          currentSpending: newItem.currentSpending,
-          targetSpending: newItem.targetSpending,
-          percentageSpent: newItem.percentageSpent
-        };
-      }
-      // Add the new category if it doesn't exist
-      return newItem;
-    });
+    if (mergeNewIntoExisting) {
+      const existingData = this.getTrackingData();
   
-    const remainingCategories = existingData.filter(
-      item => !validData.some(newItem => newItem.name === item.name)
-    );
+      // Merge the existing data with the valid new data
+      const mergedData = validData.map(newItem => {
+        const existingItem = existingData.find(item => item.name === newItem.name);
+        if (existingItem) {
+          // Update the existing category
+          return {
+            ...existingItem,
+            currentSpending: newItem.currentSpending,
+            targetSpending: newItem.targetSpending,
+            percentageSpent: newItem.percentageSpent
+          };
+        }
+        // Add the new category if it doesn't exist
+        return newItem;
+      });
   
-    const finalData = [...mergedData, ...remainingCategories];
+      const remainingCategories = existingData.filter(
+        item => !validData.some(newItem => newItem.name === item.name)
+      );
+  
+      finalData = [...mergedData, ...remainingCategories];
+    } else {
+      // Override everything with valid new data
+      finalData = validData;
+    }
   
     // Save the result back to local storage
     localStorage.setItem(this.localStorageKey, JSON.stringify(finalData));
@@ -57,8 +66,14 @@ export class TrackingService {
     // Update the BehaviorSubject to notify subscribers
     this.trackingDataSubject.next(finalData);
   
-    console.log('Tracking data merged and saved to local storage:', finalData);
+    console.log(
+      mergeNewIntoExisting
+        ? 'Tracking data merged and saved to local storage:'
+        : 'Tracking data overridden and saved to local storage:',
+      finalData
+    );
   }
+  
   
 
   /** Remove tracking data by name */
