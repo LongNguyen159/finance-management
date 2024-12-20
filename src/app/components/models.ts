@@ -261,6 +261,7 @@ export interface SurplusBalanceLineChartData {
 
 export interface TrendsLineChartData {
   month: string
+  isMissing: boolean // Flag to indicate missing data
   surplus: number
   balance: number
 

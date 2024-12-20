@@ -398,6 +398,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     // Adjust chart scale
     this.getScaleValue();
 
+    // Include missing months in the chart data
+    this.includeMissingMonths();
+
     const sortedArray = allMonths.sort((a, b) => {
       const dateA = new Date(a + '-01'); // Append a dummy day to ensure valid date
       const dateB = new Date(b + '-01');
@@ -405,8 +408,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return dateA.getTime() - dateB.getTime();
     });
 
-    /** Get Anomalies Detection */
-    detectAbnormalities(this.trendsLineChartData, sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService, this.uiService)
+
+    /** Get Anomalies Detection. Filter out months with missing data (no input from users) to ensure prediction accuracy. */
+    detectAbnormalities(this.trendsLineChartData.filter(item => !item.isMissing), sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService, this.uiService)
       .then(insights => {
         this.anomalyReports = insights;
         /** Add configs (colour, icons, etc.) for display purposes */
@@ -624,7 +628,39 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     });
   }
 
+  /** Helper function to find the missing months in the selected time frame. If found missing, 
+   * set all values to 0 and flag them isMissing = true.
+   */
+  includeMissingMonths() {
+    const allMonthsSet = new Set(this.allFilteredMonths);
+    const startDate = new Date(this.startMonthDate.getFullYear(), this.startMonthDate.getMonth(), 1);
+    const endDate = new Date(this.endMonthDate.getFullYear(), this.endMonthDate.getMonth(), 1);
+    const missingMonths: string[] = [];
+  
+    for (let date = new Date(startDate); date <= endDate; date.setMonth(date.getMonth() + 1)) {
+      const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!allMonthsSet.has(monthStr)) {
+        missingMonths.push(monthStr);
+      }
+    }
+    console.log('Missing Months:', missingMonths);
+  
+    missingMonths.forEach(month => {
+      this.trendsLineChartData.push({
+        month,
+        totalNetIncome: 0,
+        totalExpenses: 0,
+        surplus: 0,
+        balance: 0,
+        categories: [],
+        isPrediction: false,
+        isMissing: true
+      });
+    });
 
+    // Sort the trendsLineChartData to ensure missing months are in the correct order
+    this.trendsLineChartData.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  }
 
   //#region Tree Map
   /** Check TreeMapData of each month: Call DataService if TreeMapData does not exist, use TreeMapData directly if it exists */

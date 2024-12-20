@@ -154,28 +154,57 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
 
 
     // Split the data into actual and predicted segments
-    const actualSurplusValues = [];
-    const predictedSurplusValues = [];
-    const actualBalance = [];
-    const predictedBalance = [];
-    
-    /** Map Series into [x, y] pairs. Because prediction series starts after real series. */
-    for (let i = 0; i < this.chartData.length; i++) {
-      if (this.chartData[i].isPrediction) {
-        // Pad the prediction series with the last value of the real series
-        if (predictedSurplusValues.length === 0 && actualSurplusValues.length > 0) {
-          const lastIndex = actualSurplusValues[actualSurplusValues.length - 1][0];
-          const lastValue = actualSurplusValues[actualSurplusValues.length - 1][1];
-          predictedSurplusValues.push([lastIndex, lastValue]);
-          predictedBalance.push([lastIndex, actualBalance[actualBalance.length - 1][1]]);
+    const {
+      actualSurplusValues,
+      predictedSurplusValues,
+      actualBalance,
+      predictedBalance,
+      missingMonths,
+    } = this.chartData.reduce(
+      (acc, data, index) => {
+        if (data.isPrediction) {
+          // Pad the prediction series with the last actual value
+          if (!acc.hasPredictionStarted && acc.actualSurplusValues.length > 0) {
+            const lastActualIndex = acc.actualSurplusValues.at(-1)![0];
+            const lastActualSurplus = acc.actualSurplusValues.at(-1)![1];
+            const lastActualBalance = acc.actualBalance.at(-1)![1];
+  
+            acc.predictedSurplusValues.push([lastActualIndex, lastActualSurplus]);
+            acc.predictedBalance.push([lastActualIndex, lastActualBalance]);
+            acc.hasPredictionStarted = true;
+          }
+          acc.predictedSurplusValues.push([index, surplusValues[index]]);
+          acc.predictedBalance.push([index, balanceValues[index]]);
+        } else if (data.isMissing) {
+          acc.missingMonths.push(index);
+        } else {
+          acc.actualSurplusValues.push([index, surplusValues[index]]);
+          acc.actualBalance.push([index, balanceValues[index]]);
         }
-        predictedSurplusValues.push([i, surplusValues[i]]);
-        predictedBalance.push([i, balanceValues[i]]);
-      } else {
-        actualSurplusValues.push([i, surplusValues[i]]);
-        actualBalance.push([i, balanceValues[i]]);
+        return acc;
+      },
+      {
+        actualSurplusValues: [] as [number, number][],
+        predictedSurplusValues: [] as [number, number][],
+        actualBalance: [] as [number, number][],
+        predictedBalance: [] as [number, number][],
+        missingMonths: [] as number[],
+        hasPredictionStarted: false,
       }
-    }
+    );
+  
+
+    const markAreas: any = missingMonths.map(index => (
+      [
+        {
+          name: 'Missing',
+          xAxis: months[index]
+        },
+        {
+          xAxis: months[index + 1]
+        }
+      ]
+    ));
 
     this.mergeOptions = {
       ...this.getBaseOption(),
@@ -206,7 +235,6 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.3)' : 'rgba(255, 165, 0, 0.3)', // Light orange for background
           },
 
-
           markArea: predictedBalance.length > 0 ? {
             itemStyle: {
               color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
@@ -224,6 +252,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
                   xAxis: months[months.length - 1]
                 }
               ],
+              ...markAreas
             ]
           } : undefined,
         },
