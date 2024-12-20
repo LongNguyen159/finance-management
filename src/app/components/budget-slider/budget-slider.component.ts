@@ -778,7 +778,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   }
 
   /** Method to track selected sliders */
-  trackSliders(showNoti: boolean = true, noti: string = 'Tracked categories updated!') {
+  trackSliders(showNoti: boolean = true, noti: string = `Plan Saved! You can view them in 'View Tracked Plan'`) {
     
     // Track only the selected categories
     const trackingData: Tracker[] = this.masterSliders.filter(slider => this.categoriesToTrack.includes(slider.name)).map(slider => {
@@ -814,7 +814,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
 
 
     if (showNoti) {
-      this.uiService.showSnackBar(noti);
+      this.uiService.showSnackBar(noti, "Ok", 5000);
     }
   }
 
