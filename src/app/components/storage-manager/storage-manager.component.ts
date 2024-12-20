@@ -643,7 +643,6 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
         missingMonths.push(monthStr);
       }
     }
-    console.log('Missing Months:', missingMonths);
   
     missingMonths.forEach(month => {
       this.trendsLineChartData.push({
