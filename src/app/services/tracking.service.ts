@@ -11,9 +11,11 @@ export class TrackingService {
 
   // BehaviorSubject to hold the tracking data
   private trackingDataSubject = new BehaviorSubject<Tracker[]>(this.getTrackingData());
+  private trackingMetaDataSubject = new BehaviorSubject<{ targetSurplus: number; avgIncome: number }>(this.getAdditionalData());
 
   // Observable for components to subscribe to
-  trackingData$: Observable<Tracker[]> = this.trackingDataSubject.asObservable();
+  trackingCategories$: Observable<Tracker[]> = this.trackingDataSubject.asObservable();
+  trackingMetaData$: Observable<{ targetSurplus: number; avgIncome: number }> = this.trackingMetaDataSubject.asObservable();
 
   categoriesToTrack = signal<string[]>([]);
 
@@ -71,6 +73,7 @@ export class TrackingService {
 
     // Update the BehaviorSubject to notify subscribers
     this.trackingDataSubject.next(finalData);
+    this.trackingMetaDataSubject.next({ targetSurplus, avgIncome });
 
     console.log(
       mergeNewIntoExisting
@@ -101,6 +104,7 @@ export class TrackingService {
 
     // Update the BehaviorSubject to notify subscribers
     this.trackingDataSubject.next(updatedData);
+    this.trackingMetaDataSubject.next({ targetSurplus, avgIncome });
   }
 
   /** Retrieve tracking data from local storage */
@@ -138,6 +142,7 @@ export class TrackingService {
   clearTrackingData(): void {
     localStorage.removeItem(this.localStorageKey);
     this.trackingDataSubject.next([]); // Notify subscribers about the change
+    this.trackingMetaDataSubject.next({ targetSurplus: 0, avgIncome: 0 }); // Notify subscribers about the change
     console.log('Tracking data cleared from local storage.');
   }
 }

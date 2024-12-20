@@ -213,7 +213,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       // this.syncSliders();
     }
 
-    this.trackingService.trackingData$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingData => {
+    this.trackingService.trackingCategories$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingData => {
       this.trackedCategories = trackingData
     })
   }
@@ -794,7 +794,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     });
 
     // Save the tracking data to a service
-    this.trackingService.saveTrackingData(trackingData, this.targetSurplus, this.averageIncome);
+    this.trackingService.saveTrackingData(trackingData, (this.averageIncome - this.totalExpenses), this.averageIncome);
 
     if (showNoti) {
       this.uiService.showSnackBar(noti, "Ok", 5000);
