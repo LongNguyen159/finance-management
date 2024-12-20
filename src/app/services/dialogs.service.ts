@@ -4,6 +4,10 @@ import { DidYouKnowDialogComponent } from '../components/dialogs/did-you-know-di
 import { SettingsDialogComponent } from '../components/dialogs/settings-dialog/settings-dialog.component';
 import { InputListDialogComponent } from '../components/dialogs/input-list-dialog/input-list-dialog.component';
 import { InsertExpenseDialogComponent } from '../components/dialogs/insert-expense-dialog/insert-expense-dialog.component';
+import { InsightsDialogComponent } from '../components/dialogs/insights-dialog/insights-dialog.component';
+import { PatternAnalysisDialogComponent } from '../components/dialogs/pattern-analysis-dialog/pattern-analysis-dialog.component';
+import { AbnormalityChartData } from '../components/models';
+import { TrackerDialogComponent } from '../components/dialogs/tracker-dialog/tracker-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +25,7 @@ export class DialogsService {
   openSettingsDialog() {
     this.dialog.open(SettingsDialogComponent, {
         width: '45rem',
-        maxWidth: '60vw',
+        maxWidth: '98vw',
         height: '35rem',
         maxHeight: '90vh',
     })
@@ -31,11 +35,44 @@ export class DialogsService {
   openInsertIntoDialog(entryToModify: {name: string, value: number} ) {
     this.dialog.open(InsertExpenseDialogComponent, {
         width: '40rem',
-        maxWidth: '60vw',
+        maxWidth: '90vw',
         // minHeight: '23rem',
         // height: '27rem',
         // maxHeight: '90vh',
         data: entryToModify
+    })
+  }
+
+
+  
+  openPatternAnalysisDialog(chartData: AbnormalityChartData) {
+    this.dialog.open(PatternAnalysisDialogComponent, {
+      width: '75rem',
+      height: '83vh',
+      maxHeight: '90vh',
+      maxWidth: '98vw',
+      data: chartData
+    })
+  }
+
+  /** Open Tracker dialog, content are the current progress vs target year spending, defined by 
+   * the smart budgeter.
+   */
+  openTrackerDialog() {
+    this.dialog.open(TrackerDialogComponent, {
+      width: '75rem',
+      height: '83vh',
+      maxHeight: '90vh',
+      maxWidth: '98vw',
+    })
+  }
+
+  openInsightsDialog() {
+    this.dialog.open(InsightsDialogComponent, {
+      width: '55rem',
+        maxWidth: '70vw',
+        height: '35rem',
+        maxHeight: '90vh',
     })
   }
 

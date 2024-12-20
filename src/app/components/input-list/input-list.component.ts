@@ -502,7 +502,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
      * be repopulated by the service anyway.
      */
     const sum: number | null = processStringAmountToNumber(linkGroup?.value.value || '0')
-    console.log('Sum:', sum)
 
     if (sum == null) {
       this.uiService.showSnackBar('Invalid value!', 'Dismiss')
@@ -536,8 +535,6 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
       this.linkForm.setErrors({ invalidValues: true });
       return;
       // Optionally, show an error to the user or handle it appropriately here
-    } else {
-      console.log('All values are valid numbers');
     }
 
     this.taxNodeExists = this._hasTaxNode(updatedFormData);
@@ -882,8 +879,8 @@ export class InputListComponent extends BasePageComponent implements OnInit, Aft
     
     if (!query || query.trim() === '') {
       this.filterQuery = ''; // Reset filter query.
-      this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
       this.isSearching = false;
+      this.filteredLinkIds = this.linkArray.controls.map(item => item.get('id')?.value || ''); // Reset filtered links to be all entries.
       return
     }
     

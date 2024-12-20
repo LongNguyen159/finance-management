@@ -1,10 +1,10 @@
-import { Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, effect, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { EChartsOption } from 'echarts';
 import { NgxEchartsDirective, provideEcharts } from 'ngx-echarts';
-import { ColorService } from '../../../services/color.service';
 import { formatBigNumber } from '../../../utils/utils';
 import { CurrencyPipe } from '@angular/common';
 import { CurrencyService } from '../../../services/currency.service';
+import { BaseChartComponent } from '../../../base-components/base-chart/base-chart.component';
 @Component({
   selector: 'app-budget-gauge-chart',
   standalone: true,
@@ -16,13 +16,12 @@ import { CurrencyService } from '../../../services/currency.service';
   templateUrl: './budget-gauge-chart.component.html',
   styleUrl: './budget-gauge-chart.component.scss'
 })
-export class BudgetGaugeChartComponent implements OnChanges {
+export class BudgetGaugeChartComponent extends BaseChartComponent implements OnChanges {
   @Input() budget: number = 0
   @Input() actualSpending: number = 1
   @Input() title: string = ''
   @Input() color: string = '#000'
 
-  colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
 
   chartOptions: EChartsOption = this.getBaseOptions()
@@ -31,6 +30,7 @@ export class BudgetGaugeChartComponent implements OnChanges {
   spendingPercentage: number = 0
 
   constructor() {
+    super()
     effect(() => {
       this.updateChart()
     })

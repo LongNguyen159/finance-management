@@ -35,7 +35,6 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
 
   @Input() actionsPosition: 'top' | 'bottom' = 'bottom'
 
-  colorService = inject(ColorService)
   currencyPipe = inject(CurrencyPipe)
   uiService = inject(UiService)
   currencyService = inject(CurrencyService)
@@ -59,16 +58,62 @@ export class TreemapChartComponent extends BaseChartComponent implements OnInit,
 
   getBaseOptions(): EChartsOption {
     return { 
-      color: this.colorService.isDarkMode() ? this.colorService.chartColorPaletteDark : this.colorService.chartColorPaletteLight,
+      color: this.colorService.isDarkMode() 
+        ? this.colorService.chartColorPaletteDark 
+        : this.colorService.chartColorPaletteLight,
       tooltip: {
+        borderWidth: 2,
+        borderRadius: 12,
+        backgroundColor: this.colorService.isDarkMode() ? this.colorService.darkBackgroundSecondary : this.colorService.lightBackgroundPrimary,
+        textStyle: {
+          color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+        },
         formatter: (info: any) => {
           const value = this.currencyPipe.transform(info.value, this.currencyService.getSelectedCurrency());
-          return `${removeSystemPrefix(info.name) || 'Total'}: <strong>${value} (${((info.value / this.totalNetIncome) * 100).toFixed(2)}%)</strong>`;
+          const shareOfTotal = ((info.value / this.totalNetIncome) * 100).toFixed(2);
+  
+          // Get parent node details
+          const parentNode = info?.treePathInfo?.[info.treePathInfo.length - 2];
+          const parentName = parentNode ? removeSystemPrefix(parentNode.name) : '';
+          const parentValue = parentNode?.value || null;
+          const shareOfParent = parentValue 
+            ? ((info.value / parentValue) * 100).toFixed(2) 
+            : 'N/A';
+  
+          return `
+            <div style="text-align: left; font-size: 14px; line-height: 1.5;">
+              <div style="display: flex; justify-content: space-between;">
+                <span><strong>${removeSystemPrefix(info.name) || 'Total'}</strong></span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Value:</span>
+                &nbsp;
+                <span><strong>${value}</strong></span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                  <span>Share of Total:</span>
+                  &nbsp;
+                  <span><strong>${shareOfTotal}%</strong></span>
+                </div>
+              ${
+                parentName
+                  ? `<div style="display: flex; justify-content: space-between;">
+                       <span>Share of ${parentName}:</span>
+                       &nbsp;
+                       <span><strong>${shareOfParent}%</strong></span>
+                     </div>`
+                  : ''
+              }
+            </div>`;
         },
       },
       series: [],
     };
   }
+  
+  
+  
+  
 
   /** Map the color to series. This function helps persist color between the same series when switching
    * between treemap and sunburst charts. 

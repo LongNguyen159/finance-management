@@ -33,25 +33,9 @@
     background-color: #353535 !important; /* Darker gray for dark mode */
 }
 
-/** Highlighted text style */
-/* Light Mode Styles */
-.income-light {
-    color: green; /* Light mode income color */
-  }
-  
-  .expense-light, .expense-light {
-    color: rgb(217, 24, 24); /* Light mode tax and expense color */
-  }
-  
-  /* Dark Mode Styles */
-  .income-dark {
-    color: lightgreen; /* Dark mode income color */
-  }
-  
-  .expense-dark, .expense-dark {
-    color: lightcoral; /* Dark mode tax and expense color */
-  }
 
-  .mat-mdc-select-arrow-wrapper {
-    margin-right: 1rem !important;
-  }
+.custom-header.mat-expansion-panel-header {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    height: auto !important;
+}

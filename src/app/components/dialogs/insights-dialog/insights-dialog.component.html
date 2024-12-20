@@ -1,0 +1,18 @@
+<h2 mat-dialog-title class="!font-bold text-2xl">What do the patterns tell you?</h2>
+<mat-dialog-content class="mat-typography">
+    <div class="p-4">
+        <div *ngFor="let pattern of patternsData" class="insight">
+            <div class="flex flex-row items-center gap-2">
+                <mat-icon class="!flex items-center" fontSet="material-symbols-outlined" [style.color]="colorService.isDarkMode() ? pattern.colorDark : pattern.colorLight">
+                    {{ pattern.icon }}
+                </mat-icon>
+                <h2>{{ pattern.type }}</h2>
+            </div>
+            <p class="!text-base">{{ pattern.description }}</p>
+            <mat-divider class="w-full !my-4" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button [mat-dialog-close]="true" cdkFocusInitial>Got it!</button>
+</mat-dialog-actions>

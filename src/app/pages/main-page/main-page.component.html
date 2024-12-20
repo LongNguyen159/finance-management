@@ -9,21 +9,35 @@
                 <!-- SANKEY CHART -->
                 <section>
                     <div class="flex flex-row w-full items-center justify-end gap-2">
-                        <!-- <button mat-button (click)="dialogService.openInsertIntoDialog()">
-                            <mat-icon>add</mat-icon>
-                            <span>Insert Into</span>
-                        </button> -->
                         <div class="flex flex-row items-center gap-1">
-                            <div class="text-sm">Vertical View</div>
+                            <!-- <div class="text-sm">Vertical View</div>
                             <div>
                                 <mat-slide-toggle [(ngModel)]="isSankeyVertical" color="primary" labelPosition="before"></mat-slide-toggle>
-                            </div>
+                            </div> -->
+                            <button mat-button (click)="isSankeyVertical = !isSankeyVertical">
+                                <mat-icon fontSet="material-symbols-outlined">{{ isSankeyVertical ? 'swap_horiz' : 'swap_vert' }}</mat-icon>
+                                {{ isSankeyVertical ? 'Horizontal View' : 'Vertical View' }}
+                            </button>
+                        </div>
+
+                        <div class="flex flex-row items-center gap-1">
+                            <!-- <div class="text-sm">Show Trends</div>
+                            <div>
+                                <mat-slide-toggle matTooltip="Show trends compared to last month" [matTooltipShowDelay]="800" [(ngModel)]="isShowInsights" color="primary" labelPosition="before"></mat-slide-toggle>
+                            </div> -->
+
+                            <button mat-button (click)="isShowInsights = !isShowInsights">
+                                <mat-icon fontSet="material-symbols-outlined">{{ isShowInsights ? 'hide_source' : 'show_chart' }}</mat-icon>
+                                {{ isShowInsights ? 'Hide Trends' : 'Show Trends' }}
+                            </button>
                         </div>
                     </div>
                     <app-sankey-chart
                         [sankeyData]="entriesOfOneMonth.sankeyData"
                         [remainingBalance]="entriesOfOneMonth.remainingBalance"
                         [orientation]="isSankeyVertical ? 'vertical' : 'horizontal'"
+                        [showInsights]="isShowInsights"
+                        [monthInsights]="monthInsights"
                     ></app-sankey-chart>
                 </section>
 
@@ -33,14 +47,23 @@
 
                 <!-- BUDGET VS ACTUAL SPENDING -->
                 <div class="flex flex-col w-full items-center justify-center">
+                    @if(budgets.length !== 0) {
+                        <div class="flex flex-row w-full justify-end">
+                            <button mat-button (click)="navigateToBudgetList()">
+                                <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+                                <span>Edit Budgets</span>
+                            </button>
+                        </div>
+                    }
                     <h2 class="font-bold">
                         Budget vs Actual Spending
                     </h2>
-                    @if(budgets.length !== 0) {
-                        <button mat-button (click)="navigateToBudgetList()">
-                            Edit Budgets
+                    <div class="flex flex-row items-center gap-2">
+                        <button mat-button (click)="dialogService.openTrackerDialog()">
+                            <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                            <span>View Spending Progress</span>
                         </button>
-                    }
+                    </div>
 
                     @if (indicators.length == 0 && budgets.length !== 0) {
                         <p class="mt-4">

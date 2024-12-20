@@ -60,7 +60,7 @@
       <!-- SEARCH BAR -->
       <div class="flex flex-row w-full justify-center"> 
         <mat-form-field appearance="outline" floatLabel="always">
-          <input #inputValue matInput (input)="filterLinks(inputValue.value)" placeholder="Search">
+          <input #inputValue matInput (input)="filterLinks(inputValue.value)" [value]="filterQuery" placeholder="Search">
           <mat-icon matPrefix fontSet="material-symbols-outlined">search</mat-icon>
         </mat-form-field>
       </div>
@@ -127,7 +127,19 @@
                 <p class="text-center">No fix costs pasted. Click "Paste Fix Costs", or start by "Edit Fix Costs" if you haven't defined any.</p>
               </div>
             }
+            
+            @if (filteredLinkIds.length == 0) {
+              <div class="flex flex-col items-center justify-center w-full">
+                <p class="text-center text-lg">No results found.</p>
+                <button mat-stroked-button (click)="filterLinks('')">
+                  <span>Clear search</span>
+                  <mat-icon fontSet="material-symbols-outlined">remove</mat-icon>
+                </button>
+              </div>
+            }
+
             <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
+              <!-- SEARCH RESULTS -->
               @if (linkGroup.get('isFixCost')?.value && filteredLinkIds.includes(linkGroup.get('id')?.value)) {
                 <!-- Target -->
                 <mat-form-field appearance="fill">
@@ -160,7 +172,8 @@
                 <!-- Value -->
                 <mat-form-field appearance="fill">
                   <mat-label>Amount</mat-label>
-                  <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" />
+                  <!-- <input matInput formControlName="value" type="number" placeholder="Value" (blur)="updateInput()" /> -->
+                  <input matInput class="!w-max" formControlName="value" type="text" placeholder="Value" (keypress)="validateKeyPress($event)" (paste)="validatePaste($event)" (keydown.enter)="updateInput(linkGroup)" (blur)="updateInput(linkGroup)" />
           
                   <mat-error *ngIf="linkGroup.get('value')?.hasError('min')">
                     Amount must be greater than or equal 0.
@@ -220,6 +233,7 @@
         <mat-card-content>
           <div *ngFor="let linkGroup of linkArray.controls; let i = index" [formGroupName]="i" class="link-row">
 
+            <!-- SEARCH RESULTS -->
             @if (!linkGroup.get('isFixCost')?.value && filteredLinkIds.includes(linkGroup.get('id')?.value)) {
               <!-- Target -->
               <mat-form-field appearance="fill">

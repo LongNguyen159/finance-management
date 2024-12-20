@@ -1,5 +1,5 @@
 <div class="flex flex-col" [ngClass]="colorService.isDarkMode() ? 'dark-background' : 'light-background'">
-    <app-navbar [showHighlights]="false" [showLogo]="false" [showAddInput]="false" class="navbar">
+    <app-navbar [showLogo]="false" [showAddInput]="false" class="navbar">
     </app-navbar>
 
     <div class="p-6 flex flex-row w-full justify-center mb-20">
@@ -14,9 +14,7 @@
         <div class="feature-card grid-display">
             <div class="text-section">
                 <h2 class="font-bold mb-4 text-3xl">Easy Sankey - Because Creating Sankey Should Be Simple.</h2>
-                <p>
-                    Creating professional Sankey diagrams as simple as a few clicks.
-                </p>
+                <p>Interactive Edit supported: Simply edit values by directly clicking on the chart.</p>
             </div>
             <div class="image-section">
                 <img class="object-cover h-full w-[600px] image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/sankey-dark.png' : 'assets/images/sankey-light.png'" alt="whats-new">
@@ -37,42 +35,28 @@
         </div>
 
 
-
         <div class="feature-card grid-display">
-            <div class="text-section">
-                <h2 class="font-bold mb-4 text-3xl">Dark Mode</h2>
-                <p>
-                    Enjoy a comfortable viewing experience with Dark Mode.
-                </p>
-            </div>
-            <div class="image-section">
-                <img src="assets/images/darkmode-1.png" alt="whats-new" class="object-cover h-full image">
-            </div>
-        </div>
-
-
-        <div class="feature-card grid-display">
-            <div class="image-section">
-                <img class="object-cover h-full w-[600px] image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/inline-calc-dark.png' : 'assets/images/inline-calc-light.png'" alt="whats-new">
-            </div>
             <div class="text-section">
                 <h2 class="font-bold mb-4 text-3xl">Inline Calculator</h2>
                 <p>
                     Perform quick calculations on the fly with the Inline Calculator. Easy Sankey does the math for you.
                 </p>
             </div>
+            <div class="image-section">
+                <img class="object-cover h-full w-[600px] image" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/inline-calc-dark.png' : 'assets/images/inline-calc-light.png'" alt="whats-new">
+            </div>
         </div>
 
 
         <div class="feature-card grid-display">
+            <div class="image-section">
+                <img class="object-cover h-full w-[600px] image image-border p-3" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/budget-dark.png' : 'assets/images/budget-light.png'" alt="whats-new">
+            </div>
             <div class="text-section">
                 <h2 class="font-bold mb-4 text-3xl">Budgets vs Actual Spending</h2>
                 <p>
                     Set spending limits in the 'Budgets' section of the 'Finance Manager' and track your progress with real-time radar and gauge charts. Compare budgeted vs. actual spending to stay on track!
                 </p>
-            </div>
-            <div class="image-section">
-                <img class="object-cover h-full w-[600px] image image-border p-3" [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'" [src]="colorService.isDarkMode() ? 'assets/images/budget-dark.png' : 'assets/images/budget-light.png'" alt="whats-new">
             </div>
         </div>
         
@@ -81,17 +65,19 @@
 
 
         <div class="feature-card grid-display">
-            <div class="image-section">
-                <img class="object-cover h-full w-[800px] image p-3 pt-4"
-                [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'"
-                [src]="colorService.isDarkMode() ? 'assets/images/manager-dark.png' : 'assets/images/manager-light.png'"
-                alt="Finance Manager">
-            </div>
+           
             <div class="text-section">
                 <h2 class="font-bold mb-4 text-3xl">Finance Manager - All in One Place.</h2>
                 <p>
                     Stay on top of your finances with the 'Finance Manager'. Monitor your income and expenses, set budgets for each category, and define fixed costs for recurring expenses—all in one place.
                 </p>
+            </div>
+
+            <div class="image-section">
+                <img class="object-cover h-full w-[800px] image p-3 pt-4"
+                [ngClass]="colorService.isDarkMode() ? 'image-border' : 'image-border-light'"
+                [src]="colorService.isDarkMode() ? 'assets/images/manager-dark.png' : 'assets/images/manager-light.png'"
+                alt="Finance Manager">
             </div>
         </div>
 

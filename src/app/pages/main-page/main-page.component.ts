@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, Input, OnChanges, OnInit, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SingleMonthData, TreeNode } from '../../components/models';
+import { DifferenceItem, MonthlyData, SingleMonthData, TreeNode } from '../../components/models';
 import { takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { NavbarComponent } from "../../components/navbar/navbar.component";
@@ -25,6 +25,8 @@ import { BudgetService } from '../../services/budget.service';
 import { Router } from '@angular/router';
 import { RoutePath } from '../../components/models';
 import { TreemapChartComponent } from "../../components/charts/treemap-chart/treemap-chart.component";
+import { calculateDifferences, getLastMonth, removeSystemPrefix } from '../../utils/utils';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-main-page',
   standalone: true,
@@ -32,9 +34,11 @@ import { TreemapChartComponent } from "../../components/charts/treemap-chart/tre
     MatButtonModule, CommonModule, MatIconModule, MatMenuModule, MatDividerModule,
     NavbarComponent, MonthPickerComponent,
     MatChipsModule, BudgetRadarChartComponent, BudgetGaugeChartComponent,
-    MatSlideToggleModule, FormsModule, TreemapChartComponent],
+    MatSlideToggleModule, FormsModule, TreemapChartComponent,
+    MatTooltipModule],
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.scss',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Default
 })
 export class MainPageComponent extends BasePageComponent implements OnInit, OnChanges {
@@ -64,17 +68,19 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
   pieChartDataBrutto: {name: string, value: number}[] = []
   pieChartDataNetto: {name: string, value: number}[] = []
 
-  isDarkmode: boolean = false
-
   categories: ExpenseCategoryDetails[] = Object.values(expenseCategoryDetails)
+
+  monthInsights: DifferenceItem[] = []
 
   budgets: Budget[] = []
   spending: Budget[] = []
   treeMapData: TreeNode[] = []
 
   indicators: ExpenseCategoryDetails[] = []
+
   showGaugeChart: boolean = true
   isSankeyVertical: boolean = false
+  isShowInsights: boolean = true
 
   viewTreeMap: boolean = false
   
@@ -116,6 +122,8 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
         this.treeMapData = data.treeMapData
 
         this.getBudgetData()
+
+        this.getMonthInsights(data.month, getLastMonth(data.month))
   
         if (this.entriesOfOneMonth.totalTax == 0) {
           this.showGrossIncomePieChart = false
@@ -132,6 +140,15 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
         }
       }
     })
+  }
+
+  /** Get insights of current month compared to last month to show the differences in percentages in template */
+  getMonthInsights(currentMonth: string, previousMonth: string = '') {
+    if (!previousMonth || !currentMonth || !this.monthlyData[previousMonth] || !this.monthlyData[currentMonth]) {
+      this.monthInsights = calculateDifferences([], [])
+      return
+    }
+    this.monthInsights = calculateDifferences(this.monthlyData[currentMonth].pieData, this.monthlyData[previousMonth].pieData)
   }
 
 
@@ -189,5 +206,9 @@ export class MainPageComponent extends BasePageComponent implements OnInit, OnCh
 
   toggleLayout() {
     this.isVerticalLayout = !this.isVerticalLayout;
+  }
+
+  removeSystemPrefix(name: string): string {
+    return removeSystemPrefix(name)
   }
 }

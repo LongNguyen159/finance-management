@@ -1,0 +1,62 @@
+<div class="flex flex-row w-full items-center justify-end">
+    <button mat-button (click)="isBoundSelected = !isBoundSelected; updateChart()">
+        {{ isBoundSelected ? 'Hide uncertainty' : 'Show uncertainty' }}
+    </button>
+
+</div>
+<div
+    echarts
+    [options]="chartOption"
+    [merge]="mergeOption"
+    style="height: 400px; width: 100%;"
+    (chartInit)="onChartInit($event)"
+>
+</div>
+
+@if (!chartData.details.isSingleOccurrence) {
+    <div class="flex flex-row items-center justify-center gap-4 text-xl font-bold w-full mb-4">
+        <mat-chip-set>
+            <mat-chip>
+                <span>
+                    Trend: 
+                </span>
+                <span [ngClass]="{
+                    'positive-dark': colorService.isDarkMode() && chartData.details.trend === 'downward',
+                    'positive-light': !colorService.isDarkMode() && chartData.details.trend === 'downward',
+                    'negative-dark': colorService.isDarkMode() && chartData.details.trend === 'upward',
+                    'negative-light': !colorService.isDarkMode() && chartData.details.trend === 'upward'
+                }">
+                    {{ trendDescription }}
+                </span>
+            </mat-chip>
+    
+            <mat-chip>
+                Intensity: {{ chartData.details.strength }}
+            </mat-chip>
+    
+            <mat-chip>
+                <span>Growth Rate: </span>
+                <span [ngClass]="{
+                    'positive-dark': colorService.isDarkMode() && chartData.details.trend === 'downward',
+                    'positive-light': !colorService.isDarkMode() && chartData.details.trend === 'downward',
+                    'negative-dark': colorService.isDarkMode() && chartData.details.trend === 'upward',
+                    'negative-light': !colorService.isDarkMode() && chartData.details.trend === 'upward'
+                }">
+                    {{ chartData.details.growthRate.toFixed(2) }}%
+                </span>
+            </mat-chip>
+        </mat-chip-set>
+    </div>
+    
+    <div class="flex flex-row w-full justify-center text-base">
+        <p>
+            {{ insights }}
+        </p>
+    </div>
+} @else {
+    <div class="flex flex-row w-full justify-center text-base">
+        <p>
+            No trend & forecasts available. {{chartData.categoryName}} has only one occurrence.
+        </p>
+    </div>
+}

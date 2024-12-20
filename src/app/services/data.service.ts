@@ -477,7 +477,7 @@ export class DataService {
         if (emitObservable) {
             this.processedSingleMonthEntries$.next(this.monthlyData[month]) // emit single month data
             
-            this.multiMonthEntries$.next(this.monthlyData) // emit all months data
+            // this.multiMonthEntries$.next(this.monthlyData) // emit all months data
         }
 
         if (showSnackbarWhenDone && !this.isDemo()) {

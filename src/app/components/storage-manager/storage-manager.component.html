@@ -24,7 +24,7 @@
   </div>
 
   <!-- SURPLUS & BALANCE LINE CHART -->
-  <app-total-surplus-line-chart class="w-full" [chartData]="surplusChartData"></app-total-surplus-line-chart>
+  <app-total-surplus-line-chart class="w-full" [chartData]="trendsLineChartData"></app-total-surplus-line-chart>
 
   <!-- ALL TIME BALANCE -->
   <h3 class="font-bold flex flex-row w-full justify-center items-center gap-2">
@@ -33,6 +33,7 @@
         {{ calculateTotalSurplusAllTimeFiltered() }}
     </span>
   </h3>
+
 
   <div class="flex flex-row w-full justify-end">
     <button mat-button (click)="showReports = !showReports">
@@ -46,11 +47,199 @@
   @if (showReports) {
     <!-- REPORTING/INSIGHTS SECTION -->
     <section class="mb-3">
+
+      <!-- Chart Container -->
       <div class="flex flex-col items-center">
+
         <!-- INCOME/EXPENSE RATIO CHART -->
         <div class="flex flex-col w-full justify-center items-center mb-14">
-          <h2 class="text-2xl font-bold text-center mt-4">Income - Expense Ratio</h2>
+          <h2 class="text-2xl font-bold text-center mt-4">Total Income - Total Expense</h2>
           <app-income-expense-ratio-chart class="w-full" [totalExpense]="totalExpenses" [totalIncome]="totalNetIncome"></app-income-expense-ratio-chart>
+        </div>
+
+        <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+
+        <!-- INCOME GROWTH & EXPENSE TRENDS -->
+        <div class="flex flex-col w-full">
+          <!-- actions buttons -->
+          <div class="flex flex-row w-full justify-end gap-2">
+            @if (!showIncomeGrowth) {
+              <button mat-button (click)="stackCategories = !stackCategories">
+                <mat-icon fontSet="material-symbols-outlined">{{ stackCategories ? 'bar_chart_4_bars' : 'stacked_bar_chart' }}</mat-icon>
+                {{ stackCategories ? 'Span Categories' : 'Stack Categories' }}
+              </button>
+            }
+            <button mat-button (click)="showIncomeGrowth = !showIncomeGrowth">
+              <mat-icon fontSet="material-symbols-outlined">{{ showIncomeGrowth ? 'bar_chart' : 'trending_up' }}</mat-icon>
+              {{ showIncomeGrowth ? 'View Category Trends' : 'View Income Growth' }}
+            </button>
+          </div>
+          <app-trends-line-chart class="w-full" [chartData]="trendsLineChartData" [showCategories]="!showIncomeGrowth" [stackCategories]="stackCategories"></app-trends-line-chart>
+
+
+          <!-- ANOMALIES REPORT -->
+          <section>
+            <div class="flex flex-col w-full justify-center items-center gap-2 mb-4 mt-4">
+              <h2 class="font-bold text-2xl text-center">Spending Pattern Analysis</h2>
+              <button mat-button (click)="openInsightsDialog()">
+                <div class="flex flex-row gap-2 items-center">
+                  <mat-icon fontSet="material-symbols-outlined">lightbulb_2</mat-icon>
+                  <span>Insights</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="flex flex-row w-full justify-end mb-2">
+              <button mat-button (click)="toggleAnomalyReports()">
+                <mat-icon>{{ anomalyReportsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                {{ anomalyReportsExpanded ? 'Close All' : 'Open All' }}
+              </button>
+            </div>
+
+            @if (firstHalf.length == 0 || secondHalf.length == 0) {
+              <p class="text-center">
+                No anomalies detected.
+              </p>
+            }
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Left Column (1st Set of Categories) -->
+              <div class="w-full flex flex-col gap-3">
+                @for (category of firstHalf; track $index) {
+                  <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
+                    <mat-expansion-panel-header class="custom-header">
+                      <mat-panel-title class="!text-xl">
+                        <div class="flex flex-row items-center gap-2">
+                          <span class="flex flex-row items-center">
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryConfig?.colorDark : category.categoryConfig?.colorLight }">{{ category.categoryConfig?.icon }}</mat-icon>
+                          </span>
+                          <span class="flex flex-row items-center">{{ category.name }}</span>
+                        </div>
+                      </mat-panel-title>
+                      @if (category.averageSpending && category.averageSpending > 0) {
+                        <mat-panel-description>Monthly average: {{ category.averageSpending | currency: currencyService.getSelectedCurrency() }}</mat-panel-description>
+                      }
+                    </mat-expansion-panel-header>
+            
+                    <mat-card-content>
+                      <div class="flex flex-row w-full justify-start pb-2">
+                        <button mat-button (click)="$event.stopPropagation(); getCategoryPlotData(category.categoryName)">
+                          Show Analysis
+                        </button>
+                      </div>
+                      <table class="w-full border-collapse border-spacing-0 border border-gray-300 dark:border-gray-700">
+                        @if (category.abnormalities && category.abnormalities.length > 0) {
+                          <thead>
+                            <tr>
+                              <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Type</th>
+                              <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Description</th>
+                            </tr>
+                          </thead>
+                        } @else {
+                          <p class="text-center">
+                            No anomalies detected.
+                          </p>
+                        }
+                        <tbody>
+                          @for (abnormality of category.abnormalities; track $index) {
+                            <tr [ngClass]="{
+                                  'bg-gray-100': !colorService.isDarkMode(),
+                                  'odd:bg-gray-200': !colorService.isDarkMode(),
+                                  'even:bg-white': !colorService.isDarkMode(),
+
+                                  'bg-gray-800': colorService.isDarkMode(),
+                                  'odd:bg-gray-700': colorService.isDarkMode(),
+                                  'even:bg-gray-900': colorService.isDarkMode()
+                                }">
+                              <td class="px-4 py-2 flex items-center gap-2">
+                                <mat-icon
+                                  fontSet="material-symbols-outlined"
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.config?.colorDark : abnormality.config?.colorLight }">
+                                  {{ abnormality.config?.icon }}
+                                </mat-icon>
+                                <strong>{{ abnormality.type }}</strong>
+                              </td>
+                              <td class="px-4 py-2">
+                                <span class="whitespace-pre-line">{{ abnormality.description }}</span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </mat-card-content>
+                  </mat-expansion-panel>
+                }
+              </div>
+            
+              <!-- Right Column (2nd Set of Categories) -->
+              <div class="w-full flex flex-col gap-3">
+                @for (category of secondHalf; track $index) {
+                  <mat-expansion-panel class="no-shadows" [expanded]="anomalyReportsExpanded">
+                    <mat-expansion-panel-header class="custom-header">
+                      <mat-panel-title class="!text-xl">
+                        <div class="flex flex-row items-center gap-2">
+                          <span class="flex flex-row items-center">
+                            <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? category.categoryConfig?.colorDark : category.categoryConfig?.colorLight }">{{ category.categoryConfig?.icon }}</mat-icon>
+                          </span>
+                          <span class="flex flex-row items-center">{{ category.name }}</span>
+                        </div>
+                      </mat-panel-title>
+                      @if (category.averageSpending && category.averageSpending > 0) {
+                        <mat-panel-description>Monthly average: {{ category.averageSpending | currency: currencyService.getSelectedCurrency() }}</mat-panel-description>
+                      }
+                    </mat-expansion-panel-header>
+            
+                    <mat-card-content>
+                      <div class="flex flex-row w-full justify-start pb-2">
+                        <button mat-button (click)="$event.stopPropagation(); getCategoryPlotData(category.categoryName)">
+                          Show Analysis
+                        </button>
+                      </div>
+                      <table class="w-full border-collapse border-spacing-0 border border-gray-300 dark:border-gray-700">
+                        @if (category.abnormalities && category.abnormalities.length > 0) {
+                          <thead>
+                            <tr>
+                              <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Type</th>
+                              <th class="px-4 py-2 text-left border-b border-gray-300 dark:border-gray-700">Description</th>
+                            </tr>
+                          </thead>
+                        } @else {
+                          <p class="text-center">
+                            No anomalies detected.
+                          </p>
+                        }
+                        <tbody>
+                          @for (abnormality of category.abnormalities; track $index) {
+                            <tr [ngClass]="{
+                                  'bg-gray-100': !colorService.isDarkMode(),
+                                  'odd:bg-gray-200': !colorService.isDarkMode(),
+                                  'even:bg-white': !colorService.isDarkMode(),
+
+                                  'bg-gray-800': colorService.isDarkMode(),
+                                  'odd:bg-gray-700': colorService.isDarkMode(),
+                                  'even:bg-gray-900': colorService.isDarkMode()
+                                }">
+                              <td class="px-4 py-2 flex items-center gap-2">
+                                <mat-icon
+                                  fontSet="material-symbols-outlined"
+                                  [ngStyle]="{ color: colorService.isDarkMode() ? abnormality.config?.colorDark : abnormality.config?.colorLight }">
+                                  {{ abnormality.config?.icon }}
+                                </mat-icon>
+                                <strong>{{ abnormality.type }}</strong>
+                              </td>
+                              <td class="px-4 py-2">
+                                <span class="whitespace-pre-line">{{ abnormality.description }}</span>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </mat-card-content>
+                  </mat-expansion-panel>
+                }
+              </div>
+            </div>
+          </section>
         </div>
 
 
@@ -181,7 +370,7 @@
                 @if (panel.expanded) {
                   <!-- TOTAL INCOME/TOTAL EXPENSE CHART -->
                   <div class="w-full self-center">
-                    <app-income-expense-ratio-chart [gridLeft]="'2%'" [gridRight]="'5%'" [totalIncome]="localStorageData[month].totalUsableIncome" [totalExpense]="localStorageData[month].totalExpenses"
+                    <app-income-expense-ratio-chart [gridLeft]="'2%'" [gridRight]="'5%'" [totalIncome]="allMonthsData[month].totalUsableIncome" [totalExpense]="allMonthsData[month].totalExpenses"
                     ></app-income-expense-ratio-chart>
                   </div>
 
@@ -193,10 +382,10 @@
                           <p>
                             {{ input.name }}: 
                             <span [ngClass]="{
-                              'income-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
-                              'income-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
-                              'expense-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
-                              'expense-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
+                              'positive-light': input.type === entryTypeEnums.Income && !colorService.isDarkMode(),
+                              'positive-dark': input.type === entryTypeEnums.Income && colorService.isDarkMode(),
+                              'negative-light': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && !colorService.isDarkMode(),
+                              'negative-dark': (input.type === entryTypeEnums.Tax || input.type === entryTypeEnums.Expense) && colorService.isDarkMode()
                             }">
                               {{ isFormatBigNumbers ? formatBigNumbersTemplate(input.value) : input.value | currency: currencyService.getSelectedCurrency() }}
                             </span>

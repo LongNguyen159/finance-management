@@ -1,0 +1,476 @@
+@if (!configFinished) {
+    <div class="pb-4">
+        <h2 class="text-2xl font-bold text-center">How much can I spend on something?</h2>
+        <div class="flex flex-row w-full justify-center items-center mb-4 mt-2">
+            <button mat-button (click)="dialogService.openTrackerDialog()">
+                <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                <span>View Spending Progress</span>
+            </button>
+        </div>
+        <mat-stepper class="rounded-xl py-3 px-2 custom-stepper-header" [linear]="false" orientation="horizontal" #stepper>
+            <!-- Step 1: Define Income -->
+            <mat-step [stepControl]="form.controls['averageIncome']">
+            <form [formGroup]="form">
+                <ng-template matStepLabel>Income</ng-template>
+    
+                <p class="my-4">Based on historical data, this is your average monthly income. You can adjust it as needed.</p>
+    
+                <mat-form-field appearance="fill">
+                <mat-label>Average monthly Income</mat-label>
+                <input matInput type="number" formControlName="averageIncome" />
+                <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                <mat-hint>
+                    Approx. {{ formatBigNumbers(averageIncome * 12) }} in year
+                </mat-hint>
+                </mat-form-field>
+
+                <div class="mb-4 mt-6">
+                    <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+                        TIP: You can skip directly to step 4 if this is not the first time you use this feature and just want to know how much you can spend on something.
+                    </p>
+                </div>
+                <div class="flex justify-end">
+                <button mat-button matStepperNext>Next</button>
+                </div>
+            </form>
+            </mat-step>
+    
+            <!-- Step 2: Define Essential Categories -->
+            <mat-step>
+            <ng-template matStepLabel>Essential Categories</ng-template>
+            <p class="mt-4">Which categories are essential for you? (fix costs, categories where you can't reduce spending)</p>
+            @if (essentialSliders) {
+                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ essentialSliders.length }}</p>
+            }
+            <div class="max-h-[60vh] overflow-auto">
+                <mat-selection-list #essentialCategoryList (selectionChange)="onEssentialCategoriesChange($event)">
+                    @for (category of allCategories; track $index) {
+                        <mat-list-option [checkboxPosition]="'before'" [value]="category" [selected]="essentialCategories.includes(category)">
+                            <div class="flex flex-row gap-2 items-center">
+                                <mat-icon
+                                    fontSet="material-symbols-outlined" 
+                                    [ngStyle]="{ color: colorService.isDarkMode() ? getCategoriesDetails(category).colorDark : getCategoriesDetails(category).colorLight }"
+                                >{{ getCategoriesDetails(category).icon }}</mat-icon>
+                                <span>
+                                    {{ removeSystemPrefix(category) }}
+                                </span>
+                            </div>
+                        </mat-list-option>
+                    }
+                </mat-selection-list>
+            </div>
+    
+            <div class="flex justify-between">
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button (click)="saveEssentialCategories(essentialCategoryList.selectedOptions.selected)" matStepperNext>
+                Next
+                </button>
+            </div>
+            </mat-step>
+    
+            <!-- Step 3: Define Values for Essential Categories -->
+            <mat-step>
+            <ng-template matStepLabel>Essential Categories Adjustment</ng-template>
+            <p class="my-4">Based on historical data, here are your average monthly expenses on the essential categories:</p>
+            <div class="flex flex-row gap-2 flex-wrap max-h-[70vh] overflow-auto">
+    
+                <!-- Essential Categories Input -->
+                @if (essentialSliders.length == 0) {
+                    <div class="flex flex-col w-full my-4 items-center">
+                        <span class="text-center" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">No essential categories selected. You can proceed next, or go back to select essential categories.</span>
+                    </div>
+                } @else {
+                    @for (slider of essentialSliders; track slider.name) {
+                        <div class="flex flex-col py-4">
+                            <div class="flex flex-row items-center gap-2">
+                                @if (slider.icon) {
+                                    <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                                }
+                                <h3>{{ removeSystemPrefix(slider.name) }}</h3>
+                            </div>
+                            <div class="flex flex-row gap-2 items-center w-full">
+                                <mat-form-field appearance="fill">
+                                    <mat-label>Amount</mat-label>
+                                    <input 
+                                      matInput 
+                                      type="number" 
+                                      [(ngModel)]="slider.value"
+                                      [min]="slider.min || 0"
+                                      (input)="adjustSliders(slider.name, slider.value)">
+                                    @if (calculationBasis == 'monthly') {
+                                        <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                                    }
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="flex justify-between">
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext>Next</button>
+            </div>
+            </mat-step>
+    
+            <!-- Step 4: Include Non-Essential Categories -->
+            <mat-step>
+            <ng-template matStepLabel>Non-Essential Categories</ng-template>
+    
+            <p class="mt-4">I want to know how much I can spend on...</p>
+            @if (categoriesToInclude) {
+                <p class="text-base mb-4 mt-2" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Selected: {{ categoriesToInclude.length }}</p>
+            }
+            <div class="max-h-[60vh] overflow-auto">
+                <mat-selection-list #nonEssentialCategoryList (selectionChange)="onNonEssentialCategoriesChange($event)">
+                    @for (category of nonEssentialCategories; track category) {
+                        <mat-list-option [checkboxPosition]="'before'" [value]="category" [selected]="visibleSlidersName.includes(category)">
+                            <div class="flex flex-row gap-2 items-center justify-between">
+                                <div class="flex flex-row gap-2 items-center">
+                                    <mat-icon
+                                        fontSet="material-symbols-outlined" 
+                                        [ngStyle]="{ color: colorService.isDarkMode() ? getCategoriesDetails(category).colorDark : getCategoriesDetails(category).colorLight }"
+                                    >{{ getCategoriesDetails(category).icon }}</mat-icon>
+                                    <span>
+                                        {{ removeSystemPrefix(category) }}
+                                    </span>
+                                </div>
+                                <div [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">
+                                    @if (getTrackedCategory(category)) {
+                                        <span>
+                                            Tracking: {{ formatBigNumbersFrom1K((getTrackedCategory(category)?.currentSpending || 0)) }}/{{ formatBigNumbersFrom1K((getTrackedCategory(category)?.targetSpending || 0)) }} ({{ (getTrackedCategory(category)?.percentageSpent || 0).toFixed(2) }}%)
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </mat-list-option>
+                    }
+                </mat-selection-list>
+            </div>
+
+            <div class="flex justify-between">
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button (click)="saveNonEssentialCategories(nonEssentialCategoryList.selectedOptions.selected)" matStepperNext>
+                    Next
+                </button>
+            </div>
+            </mat-step>
+    
+            <!-- Step 5: Define Target Surplus -->
+            <mat-step [stepControl]="form.controls['targetSavings']">
+                <form [formGroup]="form">
+                    <ng-template matStepLabel>Savings</ng-template>
+    
+                    <p class="my-4">How much do you plan to save monthly?</p>
+
+
+                    <div class="flex flex-row gap-2">                        
+                        <!-- Target Savings -->
+                        <mat-form-field appearance="fill">
+                            <mat-label>Saving Goal</mat-label>
+                            <input matInput type="number" [min]="0" formControlName="targetSavings" />
+                            @if (form.get('savingsType')?.value === 'relative') {
+                                <span matTextSuffix>%</span>
+                            }
+                            @if (form.get('savingsType')?.value == 'absolute') {
+                                <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                            }
+
+                            @if (form.get('savingsType')?.value === 'relative') {
+                                <mat-hint>
+                                    Approx. Savings: {{ formatBigNumbersFrom1K(targetSurplus) }} ({{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year)
+                                </mat-hint>
+                            }
+                            @if (form.get('savingsType')?.value == 'absolute') {
+                                <mat-hint>
+                                    {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
+                                </mat-hint>
+                            }
+                        </mat-form-field>
+
+                        <div class="flex items-center mb-4 ml-2">
+                            <mat-button-toggle-group formControlName="savingsType" aria-label="Savings Type Toggle">
+                                <mat-button-toggle value="absolute">Absolute ({{ currencyService.getCurrencySymbol() }}) </mat-button-toggle>
+                              <mat-button-toggle value="relative">Relative (%)</mat-button-toggle>
+                            </mat-button-toggle-group>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-4">
+                        <button mat-button matStepperPrevious>Back</button>
+                        <button mat-flat-button (click)="finishConfig()" matStepperNext>Calculate Saving Plan</button>
+                    </div>
+                </form>
+            </mat-step>
+        </mat-stepper>
+    </div>
+} @else {
+    <div class="py-4">
+        <div class="flex flex-row gap-4 mb-4 items-center flex-wrap">
+            <h2 class="text-2xl font-bold mb-4">Quick Adjust: </h2>
+            <div class="flex flex-col items-start">
+                <div>
+                    <form [formGroup]="form">
+                        <div class="flex flex-row gap-2">
+                            <!-- <mat-form-field>
+                                <mat-label>Time frame</mat-label>
+                                <mat-select [value]="calculationBasis" (valueChange)="onCalculationBasisChange($event)">
+                                    <mat-option value="monthly">1 Month</mat-option>
+                                    <mat-option value="yearly">1 Year</mat-option>
+                                </mat-select>
+                            </mat-form-field> -->
+        
+                            <mat-form-field appearance="fill">
+                              <mat-label>Average monthly Income</mat-label>
+                              <input matInput type="number" formControlName="averageIncome" />
+                              <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                              <mat-hint>
+                                Approx. {{ formatBigNumbers(averageIncome * 12) }} in year
+                            </mat-hint>
+                            </mat-form-field>
+                              
+                            <!-- Target Savings -->
+                            <mat-form-field appearance="fill">
+                                <mat-label>Saving Goal</mat-label>
+                                <input matInput type="number" [min]="0" formControlName="targetSavings" />
+                                @if (form.get('savingsType')?.value === 'relative') {
+                                    <span matTextSuffix>%</span>
+                                }
+                                @if (form.get('savingsType')?.value == 'absolute') {
+                                    <span matTextPrefix>{{ currencyService.getCurrencySymbol(currencyService.getSelectedCurrency()) }}&nbsp;</span>
+                                }
+    
+                                @if (form.get('savingsType')?.value === 'relative') {
+                                    <mat-hint>
+                                        Approx. Savings: {{ formatBigNumbersFrom1K(targetSurplus) }} ({{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year)
+                                    </mat-hint>
+                                }
+                                @if (form.get('savingsType')?.value == 'absolute') {
+                                    <mat-hint>
+                                        {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
+                                    </mat-hint>
+                                }
+                            </mat-form-field>
+
+                            <div class="flex items-center mb-4 ml-2">
+                                <mat-button-toggle-group formControlName="savingsType" aria-label="Savings Type Toggle">
+                                  <mat-button-toggle value="absolute">Absolute ({{ currencyService.getCurrencySymbol() }}) </mat-button-toggle>
+                                  <mat-button-toggle value="relative">Relative (%)</mat-button-toggle>
+                                </mat-button-toggle-group>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>    
+            @if (configFinished) {
+                <button class="mb-4" mat-stroked-button (click)="openPlanner()">
+                    Open Planner
+                </button>
+            }
+        </div>
+          
+        <mat-divider class="!my-6 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider>
+
+        <div class="flex flex-col items-center mb-6 gap-2">
+            <h2 class="text-2xl font-bold">Here's the plan we've created for you</h2>
+            <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Adjust as needed</p>
+        </div>
+        <div class="flex flex-row items-start justify-between sticky py-3 top-16 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
+            <div class="flex flex-row gap-2 w-full">
+                <div class="flex flex-col items-start gap-1">
+                    <div class="flex flex-row gap-1 py-3 px-6 rounded-2xl border-[2px] border-solid mat-card-background">
+                        <span>
+                            Current Savings: 
+                        </span>
+                        <span class="font-bold" [ngClass]="{
+                            
+                            'text-red-400': colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus),
+                            'text-red-700': !colorService.isDarkMode() && (averageIncome - totalExpenses < targetSurplus),
+                            'positive-dark': colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+                            'positive-light': !colorService.isDarkMode() && (averageIncome - totalExpenses >= targetSurplus),
+                            }">
+                            {{ averageIncome - totalExpenses | currency: currencyService.getSelectedCurrency() }}
+                        </span>
+                    </div>
+                    <div class="text-xs pl-4">
+                        <span>
+                            {{ formatBigNumbersFrom1K((averageIncome - totalExpenses) * 12) }} in year
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-start gap-1">
+                    <div class="py-3 px-6 rounded-2xl border-[2px] border-solid mat-card-background">
+                        Target Savings: <strong>{{ targetSurplus | currency: currencyService.getSelectedCurrency() }}</strong>
+                    </div>
+                    <div class="text-xs pl-4">
+                        <span>
+                            {{ formatBigNumbersFrom1K(targetSurplus * 12) }} in year
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ACTION BUTTONS -->
+            <div class="flex flex-row w-full justify-end gap-2 flex-wrap">        
+                <button mat-button (click)="undo()" [disabled]="sliderHistory.length <= 1">
+                    <mat-icon fontSet="material-symbols-outlined">undo</mat-icon>
+                    <span>Undo</span>
+                </button>
+            
+                <button mat-button (click)="toggleLockAllSliders()">
+                    <mat-icon fontSet="material-symbols-outlined">{{ allSlidersLocked ? 'lock_open' : 'lock' }}</mat-icon>
+                    <span>{{ allSlidersLocked ? 'Unlock All' : 'Lock All' }}</span>
+                </button>
+
+                
+                <!-- <button mat-button (click)="autoFit = !autoFit" matTooltip="Bring the sliders both up and down so that current savings always close to target savings" [matTooltipShowDelay]="800">
+                    Always fit Target Savings: {{ autoFit ? 'On' : 'Off' }}
+                </button> -->
+
+                <button mat-button (click)="autoAdjustSliders()">
+                    <mat-icon fontSet="material-symbols-outlined">done_all</mat-icon>
+                    <span>Auto Adjust</span>
+                </button>
+        
+                <button mat-button (click)="resetSliders()">
+                    <mat-icon [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'" fontSet="material-symbols-outlined">refresh</mat-icon>
+                    <span [ngClass]="colorService.isDarkMode() ? 'negative-dark': 'negative-light'">Reset Sliders</span>
+                </button>
+            </div>
+        </div>
+     
+        <!-- Visible Sliders (Chosen Sliders by user in the stepper) -->
+        <mat-card class="mb-6">
+            <mat-card-header class="!mb-6">
+                <mat-card-title class="!font-bold !text-xl">Highlighted Categories</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <!-- sliders -->
+                @if (visibleSliders.length == 0) {
+                    <div class="flex flex-row w-full justify-center my-4 items-center">
+                        <span class="text-center" [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">No categories selected. Click 'Open Planner' to select desired categories</span>
+                    </div>
+                }
+                <div class="grid grid-cols-2 gap-x-10 w-full max-h-[70vh] overflow-auto">
+                    @for (slider of visibleSliders; track slider.name) {
+                        <div class="flex flex-col">
+                            <div class="flex flex-row items-center gap-2">
+                                @if (slider.icon) {
+                                    <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                                }
+                                <h3>{{ removeSystemPrefix(slider.name) }}</h3>
+                            </div>
+                            <div class="flex flex-row gap-2 items-center w-full">
+                                <mat-slider
+                                    class="!w-[50%]"
+                                    [max]="slider.max"
+                                    discrete
+                                    [disabled]="slider.locked"
+                                    [displayWith]="formatBigNumbersFrom1KNoCurrency"
+                                >   
+                                    <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
+                                    <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                                </mat-slider>
+                                <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
+                                    <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
+                                </button>
+                                <!-- <label>{{ formatBigNumbers(slider.value) }}</label> -->
+                                <mat-form-field appearance="outline" class="!w-40">
+                                    <!-- <mat-label>Set Value</mat-label> -->
+                                    <input 
+                                      matInput 
+                                      type="number" 
+                                      [(ngModel)]="slider.value"
+                                      [min]="slider.min || 0"
+                                      (input)="adjustSliders(slider.name, slider.value)">
+                                    @if (calculationBasis == 'monthly') {
+                                        <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                                    }
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </mat-card-content>
+            <mat-card-actions>
+                <div class="flex flex-row w-full justify-between items-center py-2 mt-2">
+                    <div class="flex flex-row">
+                        <mat-checkbox [(ngModel)]="isSaveToBudgets">
+                            <span [style.color]="colorService.isDarkMode() ? colorService.darkTextPrimary : colorService.lightTextPrimary ">Save Highlighted Categories to Budgets</span>
+                        </mat-checkbox>
+                    </div>
+
+                    <div class="flex flex-row w-full justify-end gap-2">
+                        <button mat-stroked-button (click)="dialogService.openTrackerDialog()">
+                            <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                            <span>View Tracked Progress</span>
+                        </button>
+                        @if (visibleSliders.length > 0) {
+                            <button mat-flat-button (click)="trackVisibleSliders(true)">
+                                Track Categories
+                            </button>
+                        }
+                    </div>
+                </div>
+            </mat-card-actions>
+        </mat-card>
+
+        <!-- <mat-divider class="!my-10 w-full" [ngClass]="colorService.isDarkMode() ? '!border-gray-700' : '!border-gray-300'"></mat-divider> -->
+        <mat-accordion>
+            <mat-expansion-panel (opened)="panelOpenState.set(true); onPanelClick()" (afterExpand)="onPanelOpened()" (closed)="panelOpenState.set(false)">
+                <mat-expansion-panel-header>
+                    <mat-panel-title class="!text-xl !font-bold">All Categories</mat-panel-title>
+                    @if (isCategoriesLoading) {
+                        <mat-panel-description>
+                            <span class="mr-4">Loading Categories...</span>
+                            <mat-spinner [diameter]="25" [strokeWidth]="5"></mat-spinner>
+                        </mat-panel-description>
+                    }
+                </mat-expansion-panel-header>
+                <!-- Lazy Load Content with @if render -->
+                @if (panelOpenState()) {
+                    <!-- Hidden Sliders (The remaining sliders) -->
+                    <div class="grid grid-cols-2 gap-x-10 max-h-[70vh] overflow-auto mt-6">
+                        @for (slider of hiddenSliders; track slider.name) {
+                            <div class="flex flex-col">
+                                <div class="flex flex-row items-center gap-2">
+                                    @if (slider.icon) {
+                                        <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? slider.colorDark : slider.colorLight }">{{ slider.icon }}</mat-icon>
+                                    }
+                                    <h3>{{ removeSystemPrefix(slider.name) }}</h3>
+                                </div>
+                                <div class="flex flex-row gap-2 items-center w-full">
+                                    <mat-slider
+                                        class="!w-[50%]"
+                                        [max]="slider.max"
+                                        discrete
+                                        [disabled]="slider.locked"
+                                        [displayWith]="formatBigNumbersFrom1KNoCurrency"
+                                    >   
+                                        <!-- <input matSliderStartThumb #sliderStart [value]="slider.min" (valueChange)="adjustMinValue(slider.name, sliderStart.value)"> -->
+                                        <input matSliderThumb [value]="slider.value" (valueChange)="adjustSliders(slider.name, $event)">
+                                    </mat-slider>
+                                    <button mat-icon-button class="!flex" (click)="toggleLockSlider(slider.name)" [matTooltip]="slider.locked ? 'Unlock values to let them move again' : 'Lock value so it doesn\'t move'" [matTooltipShowDelay]="800">
+                                        <mat-icon fontSet="material-symbols-outlined">{{ slider.locked ? 'lock_open' : 'lock' }}</mat-icon>
+                                    </button>
+                                    <!-- Slider Value -->
+                                    <mat-form-field appearance="outline" class="!w-40">
+                                        <input 
+                                            matInput 
+                                            type="number" 
+                                            [(ngModel)]="slider.value"
+                                            [min]="slider.min || 0"
+                                            (input)="adjustSliders(slider.name, slider.value)"
+                                            >
+                                        @if (calculationBasis == 'monthly') {
+                                            <mat-hint>{{ formatBigNumbersFrom1K(slider.value * 12) }} in year</mat-hint>
+                                        }
+                                    </mat-form-field>
+                                </div>
+                            </div>                            
+                        }
+                    </div>
+                }
+            </mat-expansion-panel>
+        </mat-accordion>
+    </div>
+}

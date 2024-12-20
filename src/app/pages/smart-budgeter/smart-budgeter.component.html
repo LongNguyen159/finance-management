@@ -1,0 +1,9 @@
+
+<div class="flex flex-col">
+    <app-navbar class="navbar" [showLogo]="false">
+        <span class="font-bold text-lg" [ngClass]="colorService.isDarkMode() ? 'text-darkmode-blue' : 'text-lightmode-blue'">Smart Budget Planner</span>
+    </app-navbar>
+    <div class="p-4">
+        <app-budget-slider></app-budget-slider>
+    </div>
+</div>

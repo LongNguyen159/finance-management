@@ -21,7 +21,7 @@ export class CurrencyService {
   getSelectedCurrency(): string {
     return localStorage.getItem(this.currencyKey) || this.defaultCurrency;
   }
-  getCurrencySymbol(currency: string): string {
+  getCurrencySymbol(currency: string = this.getSelectedCurrency()): string {
       return this.currencySymbols[currency] || '';
   }
 

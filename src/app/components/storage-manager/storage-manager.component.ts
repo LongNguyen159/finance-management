@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation }
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DataService } from '../../services/data.service';
-import { MonthlyData, SurplusBalanceLineChartData, TreeNode } from '../models';
+import { Abnormality, AbnormalityAnalysis, AbnormalityChartData, AbnormalityConfig, AbnormalityType, ExpenseCategory, expenseCategoryDetails, ForecastData, MonthlyData, SingleMonthData, TreeNode, TrendsLineChartData } from '../models';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -11,9 +11,9 @@ import { UiService } from '../../services/ui.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { MatSelectModule } from '@angular/material/select';
-import { formatBigNumber, formatYYYYMMtoDate, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
+import { detectAbnormalities, formatBigNumber, formatYYYYMMtoDate, getNextMonths, MONTHS_TO_PREDICT, parseLocaleStringToNumber, removeSystemPrefix, sortYearsDescending } from '../../utils/utils';
 import { TotalSurplusLineChartComponent } from "../charts/total-surplus-line-chart/total-surplus-line-chart.component";
-import { takeUntil } from 'rxjs';
+import { forkJoin, Subscription, takeUntil } from 'rxjs';
 import { BasePageComponent } from '../../base-components/base-page/base-page.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MainPageDialogComponent } from '../dialogs/main-page-dialog/main-page-dialog.component';
@@ -27,6 +27,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { TreemapChartComponent } from "../charts/treemap-chart/treemap-chart.component";
 import { MatDividerModule } from '@angular/material/divider';
 import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-picker.component";
+import { TrendsLineChartComponent } from "../charts/trends-line-chart/trends-line-chart.component";
+import { DialogsService } from '../../services/dialogs.service';
+import { PredictService } from '../../services/predict.service';
 
 @Component({
   selector: 'app-storage-manager',
@@ -38,7 +41,7 @@ import { SimpleMonthPickerComponent } from "../simple-month-picker/simple-month-
     MatTooltipModule,
     MatMenuModule, TreemapChartComponent,
     MatDividerModule,
-    SimpleMonthPickerComponent],
+    SimpleMonthPickerComponent, TrendsLineChartComponent],
   providers: [
     CurrencyPipe,
   ],
@@ -54,9 +57,11 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   dialog = inject(MatDialog);
   currencyPipe = inject(CurrencyPipe);
   currencyService = inject(CurrencyService);
+  dialogService = inject(DialogsService)
+  predictionService = inject(PredictService)
 
   /** Months data stored in local storage */
-  localStorageData: MonthlyData = {};
+  allMonthsData: MonthlyData = {};
 
   /** Extract stored months and years */
   storedMonths: string[] = [];
@@ -72,11 +77,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   /** Display settings.
    * Format big numbers: Whether to format large numbers with K, M, B (minimum value: 10K)
    * Scale bar chart: Whether to scale the bar chart across all months to have the same xAxis for visual comparison.
+   * Highlight surplus: Whether to highlight surplus in green (positive) or red (negative).
    */
   isFormatBigNumbers: boolean = false;
   isBarChartScaled: boolean = true;
-
   isHighlightSurplus: boolean = false;
+
+  /** Display settings for the charts.
+   * Show income growth: Whether to show the income growth chart.
+   * Stack categories: Whether to stack the categories in the income-expense ratio chart
+   **/
+  showIncomeGrowth: boolean = true
+  stackCategories: boolean = true
 
   /** Available time frame options for the dropdown menu */
   availableOptions: { value: string, label: string }[] = [
@@ -87,10 +99,18 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     { value: 'show-all', label: 'All time' }
   ];
 
-  /** New properties for selecting month range */
+  /** Start Month: The start of selected range.
+   * End Month: The end of selected range.
+   * All in YYYY-MM format.
+   * Fallback: If user selects a range that has no data, it will fallback to the available range
+   * (months range with data)
+   */
   startMonth: string = '';
   endMonth: string = '';
 
+  /** Start Month and End Month (YYYY-MM) converted to Date object. 
+   * For Calendar Picker to use.
+  */
   startMonthDate: Date = new Date();
   endMonthDate: Date = new Date();
 
@@ -103,15 +123,28 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   allFilteredMonths: string[] = [];
 
   /** Chart data to plot the surplus and balance of each month  */
-  surplusChartData: SurplusBalanceLineChartData[] = [];
+  trendsLineChartData: TrendsLineChartData[] = [];
+  private projectionsSubscription: Subscription | null = null;
+
+  MONTHS_IN_ADVANCE_TO_PREDICT = MONTHS_TO_PREDICT;
+
 
   treeMapData: TreeNode[] = [];
 
   totalNetIncome: number = 0;
   totalExpenses: number = 0;
 
+  /** Show report section */
   showReports: boolean = false;
 
+  /** Anomalies Report, used Machine Learning and Statistic to detect Spikes and predict future values */
+  anomalyReports: AbnormalityAnalysis[] = [];
+  anomalyReportsExpanded: boolean = false;
+
+
+  /** Cache month infos to avoid repeated processing. If data changes (hasDataChanged = true on subscription changes),
+   * we will re-process the data.
+   */
   private monthInfoCache: { [key: string]: { name: string, type: string, value: number }[] } = {};
   hasDataChanged: boolean = false;
 
@@ -119,7 +152,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   ngOnInit(): void {
     /** Get all months data and refresh data if input changes */
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(data => {
-      this.localStorageData = data;
+      this.allMonthsData = data;
       this.refreshData();
       this.filterMonths();
     })
@@ -137,14 +170,13 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#region Retrieve Data
   /** Refresh data by get stored months again. */
   refreshData() {
-    // this.localStorageData = this.dataService.getMonthlyDataFromLocalStorage();
     this.hasDataChanged = true;
-    this.storedMonths = Object.keys(this.localStorageData);
+    this.storedMonths = Object.keys(this.allMonthsData);
     this.storedYears = this.getStoredYears();
   }
 
   getStoredYears(): string[] {
-    const years = Object.keys(this.localStorageData).map(month => month.split('-')[0]);
+    const years = Object.keys(this.allMonthsData).map(month => month.split('-')[0]);
     const sortedYears = sortYearsDescending(Array.from(new Set(years))); 
     return sortedYears
   }
@@ -152,7 +184,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   getStoredMonths(): { [key: string]: string[] } {
     const monthsByYear: { [key: string]: string[] } = {};
     // Iterate over the months stored in localStorageData
-    for (const month in this.localStorageData) {
+    for (const month in this.allMonthsData) {
       const year = month.split('-')[0];
 
       // Initialize the year key if it doesn't exist
@@ -180,7 +212,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     const currentYear = this.currentDate.getFullYear();
     const currentMonth = this.currentDate.getMonth() + 1; // 1-based
   
-    this.filteredMonthsByYear = Object.keys(this.localStorageData).reduce((acc, monthKey) => {
+    this.filteredMonthsByYear = Object.keys(this.allMonthsData).reduce((acc, monthKey) => {
       /** Since monthKey is in YYYY-MM format, we can split them using '-' here to get the year and the month. */
       const [year, monthStr] = monthKey.split('-').map(Number);
 
@@ -314,7 +346,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
       return this.monthInfoCache[month];
     }
 
-    const currentMonthData = this.localStorageData[month];
+    const currentMonthData = this.allMonthsData[month];
     if (!currentMonthData) {
       return [];
     }
@@ -340,75 +372,296 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#endregion
 
   //#region Chart Data
-  /** After filtering, we need to re-populate the chart data */
+  /** After filtering, we need to re-populate the chart data.
+   * Populate Chart data: surplus line chart, tree map, total income-expense bar chart,
+   * trend line chart, and anomalies detection.
+   */
   populateChartData(allMonths: string[] = []) {
-    // Filter the local storage data using filterMonthlyData
-    const filteredData = this.filterMonthlyData(this.localStorageData, allMonths);
+    // Filter and process data
+    const filteredData = this.filterMonthlyData(this.allMonthsData, allMonths);
 
-    // Calculate total net income and total expenses
-    const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
-      (totals, month) => {
-        totals.totalNetIncome += month.totalUsableIncome;
-        totals.totalExpenses += month.totalExpenses;
-        return totals;
-      },
-      { totalNetIncome: 0, totalExpenses: 0 } // Initial accumulator values
-    );
-    this.totalNetIncome = totalNetIncome;
-    this.totalExpenses = totalExpenses;
+    // Calculate and update total net income and expenses
+    this.updateTotals(filteredData);
 
-    this.treeMapData = this.aggregateYearlyTree(filteredData)
-  
-    // Map the filtered data to extract surplus and add balance
-    const mappedData = Object.entries(filteredData).map(([month, value]) => ({
-      month,
-      surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
-    }));
-  
-    // Sort the data by month in chronological order
-    const sortedData = mappedData.sort((a, b) => {
-      const dateA = new Date(a.month);
-      const dateB = new Date(b.month);
+    // Aggregate yearly tree map data
+    this.treeMapData = this.aggregateYearlyTree(filteredData);
+
+    // Prepare sorted surplus data
+    const sortedData = this.prepareSortedTrendsData(filteredData);
+
+    // Handle and validate date range
+    this.updateDateRange(sortedData);
+
+    // Compute and update surplus chart data
+    this.trendsLineChartData = this.computeSurplusChartData(sortedData);
+
+    // Adjust chart scale
+    this.getScaleValue();
+
+    // Include missing months in the chart data
+    this.includeMissingMonths();
+
+    const sortedArray = allMonths.sort((a, b) => {
+      const dateA = new Date(a + '-01'); // Append a dummy day to ensure valid date
+      const dateB = new Date(b + '-01');
+      
       return dateA.getTime() - dateB.getTime();
     });
 
-    
-    /** Get the start and end month of the custom range.
-     * We do it here because it's sorted.
-    */
-    const sortedMonths = sortedData.map(entry => entry.month);
-    /** Edge case: User select date that does not satisfy start <= end: sorted months would return [].
-     */
-    if ((this.startMonth && this.endMonth) && (!sortedMonths.includes(this.startMonth) || !sortedMonths.includes(this.endMonth))) {
-      this.uiService.showSnackBar('No data found for the selected range. Showing available range instead.', 'OK', 5000);
-    }
+
+    /** Get Anomalies Detection. Filter out months with missing data (no input from users) to ensure prediction accuracy. */
+    detectAbnormalities(this.trendsLineChartData.filter(item => !item.isMissing), sortedArray, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency()), this.predictionService, this.uiService)
+      .then(insights => {
+        this.anomalyReports = insights;
+        /** Add configs (colour, icons, etc.) for display purposes */
+        this.anomalyReports = this.anomalyReports.map(category => {
+          // Lookup category icon and color from the expenseCategoryDetails based on category.name
+          const categoryDetails = expenseCategoryDetails[category.categoryName as ExpenseCategory];
+          
+          // Add category-specific icon and color at root level
+          return {
+            ...category,
+            categoryConfig: {
+              label: categoryDetails?.label || category.categoryName,  // Fallback label
+              value: categoryDetails?.value || category.categoryName,  // Fallback value
+              icon: categoryDetails?.icon || 'category',  // Fallback icon
+              colorLight: categoryDetails?.colorLight || '#757575',  // Fallback color
+              colorDark: categoryDetails?.colorDark || '#BDBDBD',  // Fallback color
+            },
+            abnormalities: category.abnormalities.map((abnormality: Abnormality) => ({
+              ...abnormality,
+              config: this.getAnomaliesConfig(abnormality.type),  // Keep anomaly type-related icon and color logic
+            })),
+          };
+        });
 
 
-    this.startMonth = sortedMonths[0] || '';
-    this.endMonth = sortedMonths[sortedMonths.length - 1] || '';    
-
-    this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
-    this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
-
-
-  
-    // Calculate cumulative balance
-    let previousBalance = 0; // Initial balance can be customized
-    this.surplusChartData = sortedData.map((entry) => {
-      const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
-      previousBalance = balance;
-      return {
-        ...entry,
-        balance,
-      };
-    });
-  
-    // Rescale the chart when filters change
-    this.getScaleValue();
+        this.gatherCalculatedMetrics();
+      });
   }
 
 
+  gatherCalculatedMetrics() {
+    // const avgMonthlyIncome = this.totalNetIncome / this.allFilteredMonths.length;
+    // const avgMonthlyExpense = this.totalExpenses / this.allFilteredMonths.length;
+    // const avgMonthlySurplus = avgMonthlyIncome - avgMonthlyExpense;
+  
+    // const avgSpendOnShopping = this.anomalyReports.find(category => category.categoryName === ExpenseCategory.Shopping)?.averageSpending || 0;
+  
+    const monthlyIncomeData = this.trendsLineChartData.map(entry => entry.totalNetIncome);
+    const monthlyExpensesData = this.trendsLineChartData.map(entry => entry.totalExpenses);
+  
+    // Prevent double subscription
+    if (this.projectionsSubscription) {
+      this.projectionsSubscription.unsubscribe();
+    }
+  
+    // Fetch projections for income and expenses
+    const incomeProjection$ = this.predictionService.getPrediction(monthlyIncomeData, this.MONTHS_IN_ADVANCE_TO_PREDICT);
+    const expenseProjection$ = this.predictionService.getPrediction(monthlyExpensesData, this.MONTHS_IN_ADVANCE_TO_PREDICT);
+  
+    // Synchronize projections using forkJoin
+    this.projectionsSubscription = forkJoin([incomeProjection$, expenseProjection$]).subscribe(([incomeData, expenseData]) => {
+      const incomeForecast = incomeData.forecast[0];
+      const expenseForecast = expenseData.forecast[0];
+  
+      const nextMonths = getNextMonths(this.endMonth, this.MONTHS_IN_ADVANCE_TO_PREDICT);
+  
+      const projectedData: TrendsLineChartData[] = nextMonths.map((month, index) => {
+        // Avoid duplicate entries
+        if (this.trendsLineChartData.some(data => data.month === month)) {
+          return null
+        }
+  
+        const totalNetIncome = incomeForecast[index] || 0;
+        const totalExpenses = expenseForecast[index] || 0;
+  
+        // Calculate projected surplus
+        const surplus = totalNetIncome - totalExpenses;
+  
+        // Estimate category-level expenses based on historical proportions
+        const categoryProportions = this.calculateCategoryProportions();
+        const categories = Object.keys(categoryProportions).map(categoryName => ({
+          name: categoryName,
+          value: totalExpenses * categoryProportions[categoryName]
+        }));
+  
+        return {
+          month,
+          totalNetIncome,
+          totalExpenses,
+          isPrediction: true,
+          balance: 0, // Placeholder value
+          surplus,
+          categories
+        };
+      }).filter((entry): entry is TrendsLineChartData => entry !== null);
+      // Get the last balance from the existing data
+      let lastBalance = this.trendsLineChartData.length > 0 ? this.trendsLineChartData[this.trendsLineChartData.length - 1].balance : 0;
 
+      // Compute the balance for each month
+      for (let i = 0; i < projectedData.length; i++) {
+        if (i === 0) {
+          // For the first month, balance is the last balance + the current surplus
+          projectedData[i].balance = lastBalance + projectedData[i].surplus;
+        } else {
+          // For subsequent months, balance is the previous month's balance + current month's surplus
+          projectedData[i].balance = projectedData[i - 1].balance + projectedData[i].surplus;
+        }
+      }
+
+  
+      // Add projected data to the chart
+      this.trendsLineChartData.push(...projectedData);
+
+      // Sort the categories based on value
+      this.trendsLineChartData.forEach(item => {
+        item.categories.sort((a, b) => b.value - a.value);
+      });
+
+
+      /** Reassign to trigger change detection in template.
+       * Pushing directly modify the array, so the reference is the same,
+       * hence Angular does not detect the change.
+       */
+      this.trendsLineChartData = [...this.trendsLineChartData];
+    });
+  }
+  
+  // Utility: Calculate category proportions based on historical data
+  calculateCategoryProportions(): { [categoryName: string]: number } {
+    const totalExpenses = this.trendsLineChartData.reduce((sum, data) => sum + data.totalExpenses, 0);
+    const categoryTotals: { [categoryName: string]: number } = {};
+  
+    // Accumulate totals for each category
+    this.trendsLineChartData.forEach(data => {
+      data.categories.forEach(category => {
+        categoryTotals[category.name] = (categoryTotals[category.name] || 0) + category.value;
+      });
+    });
+  
+    // Calculate proportions
+    const proportions: { [categoryName: string]: number } = {};
+    for (const category in categoryTotals) {
+      proportions[category] = categoryTotals[category] / totalExpenses;
+    }
+  
+    return proportions;
+  }
+
+    
+  /** Plot the raw values & fitted values of the selected category.
+   * @param categoryName: string: Name of the category (raw, with system prefix to pinpoint instead of confusion)
+   */
+  getCategoryPlotData(categoryName: string) {
+    const matchingCategory = this.anomalyReports.find(category => category.categoryName === categoryName);
+
+    if (!matchingCategory) {
+      return;
+    }
+
+    // Extract raw values & fitted values and open the dialog to plot them.
+    const chartData: AbnormalityChartData = {
+      categoryName: removeSystemPrefix(categoryName),
+      rawValues: matchingCategory.rawValues,
+      xAxisData: matchingCategory.xAxisData,
+      details: matchingCategory.detailedAnalysis,
+    }
+    this.dialogService.openPatternAnalysisDialog(chartData)
+  }
+
+  /** Helper function: Calculate and update total net income and expenses */
+  private updateTotals(filteredData: Record<string, SingleMonthData>) {
+    const { totalNetIncome, totalExpenses } = Object.values(filteredData).reduce(
+      (totals, month) => ({
+        totalNetIncome: totals.totalNetIncome + month.totalUsableIncome,
+        totalExpenses: totals.totalExpenses + month.totalExpenses,
+      }),
+      { totalNetIncome: 0, totalExpenses: 0 }
+    );
+
+    this.totalNetIncome = totalNetIncome;
+    this.totalExpenses = totalExpenses;
+  }
+
+  /** Helper function: Prepare sorted surplus data */
+  private prepareSortedTrendsData(filteredData: Record<string, SingleMonthData>) {
+    return Object.entries(filteredData).map(([month, value]) => ({
+      month,
+      totalNetIncome: value.totalUsableIncome,
+      totalExpenses: value.totalExpenses,
+      surplus: parseLocaleStringToNumber(value.remainingBalance) || 0,
+      categories: value.pieData.filter(item => item.name !== this.dataService.REMAINING_BALANCE_LABEL)
+    }))
+    .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  }
+
+  /** Helper function: Update start and end months based on sorted data */
+  private updateDateRange(sortedData: Array<{ month: string }>) {
+    const sortedMonths = sortedData.map(entry => entry.month);
+
+    if (
+      (this.startMonth &&
+      this.endMonth) &&
+      (!sortedMonths.includes(this.startMonth) || !sortedMonths.includes(this.endMonth))
+    ) {
+      this.uiService.showSnackBar(
+        'No data found for the selected range. Showing available range instead.',
+        'OK',
+        5000
+      );
+    }
+
+    this.startMonth = sortedMonths[0] || '';
+    this.endMonth = sortedMonths.at(-1) || '';
+    this.startMonthDate = formatYYYYMMtoDate(this.startMonth);
+    this.endMonthDate = formatYYYYMMtoDate(this.endMonth);
+  }
+
+  /** Helper function: Compute surplus chart data (cummulative balance) */
+  private computeSurplusChartData(sortedData: Array<any>) {
+    let previousBalance = 0;
+    return sortedData.map(entry => {
+      const balance = Math.round((previousBalance + entry.surplus) * 100) / 100;
+      previousBalance = balance;
+      return { ...entry, balance };
+    });
+  }
+
+  /** Helper function to find the missing months in the selected time frame. If found missing, 
+   * set all values to 0 and flag them isMissing = true.
+   */
+  includeMissingMonths() {
+    const allMonthsSet = new Set(this.allFilteredMonths);
+    const startDate = new Date(this.startMonthDate.getFullYear(), this.startMonthDate.getMonth(), 1);
+    const endDate = new Date(this.endMonthDate.getFullYear(), this.endMonthDate.getMonth(), 1);
+    const missingMonths: string[] = [];
+  
+    for (let date = new Date(startDate); date <= endDate; date.setMonth(date.getMonth() + 1)) {
+      const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!allMonthsSet.has(monthStr)) {
+        missingMonths.push(monthStr);
+      }
+    }
+  
+    missingMonths.forEach(month => {
+      this.trendsLineChartData.push({
+        month,
+        totalNetIncome: 0,
+        totalExpenses: 0,
+        surplus: 0,
+        balance: 0,
+        categories: [],
+        isPrediction: false,
+        isMissing: true
+      });
+    });
+
+    // Sort the trendsLineChartData to ensure missing months are in the correct order
+    this.trendsLineChartData.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+  }
+
+  //#region Tree Map
   /** Check TreeMapData of each month: Call DataService if TreeMapData does not exist, use TreeMapData directly if it exists */
   aggregateYearlyTree(savedData: MonthlyData): TreeNode[] {
     const monthlyTrees: TreeNode[][] = [];
@@ -467,8 +720,9 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   
     return result;
   }
+  //#endregion
   
-
+  //#region Scale Bar Chart
   /** Scale the bar chart across all months to have the same xAxis.
    * This is useful for comparing income and expenses across different months.
    * 
@@ -477,7 +731,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    */
   getScaleValue() {
     /** Get all showing months (Filtered month by selected time frame) */
-    const showingMonths = this.filterDataByKeys(this.localStorageData, this.allFilteredMonths);
+    const showingMonths = this.filterDataByKeys(this.allMonthsData, this.allFilteredMonths);
     // Get largest value of either total income or total expenses among the showing months
     const largestValue = this._findLargestValue(showingMonths);
 
@@ -517,6 +771,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   }
   //#endregion
 
+  //#endregion
+
 
 
   //#region Surplus Calculation
@@ -530,7 +786,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
     if (months) {
       for (const month of months) {
-        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+        const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
         const numericBalance: number = parseLocaleStringToNumber(balanceString);
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
       }
@@ -547,7 +803,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
 
         if (months) {
             for (const month of months) {
-                const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+                const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
                 const numericBalance: number = parseLocaleStringToNumber(balanceString);
                 totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
             }
@@ -561,8 +817,8 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   calculateTotalSurplusAllTime(): string {
     let totalSurplus = 0;
 
-    for (const month in this.localStorageData) {
-        const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    for (const month in this.allMonthsData) {
+        const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
         const numericBalance: number = parseLocaleStringToNumber(balanceString);
         totalSurplus += isNaN(numericBalance) ? 0 : numericBalance;
     }
@@ -576,7 +832,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
   //#region Formatting
   /** Get remaining balance formatted to big numbers */
   getFormattedRemainingBalance(month: string): string {
-    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return this.isFormatBigNumbers ? formatBigNumber(numericBalance, this.currencyService.getCurrencySymbol(this.currencyService.getSelectedCurrency())) : this.currencyPipe.transform(numericBalance, this.currencyService.getSelectedCurrency()) || numericBalance.toLocaleString('en-US');
   }
@@ -613,6 +869,10 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     this.isBarChartScaled = !this.isBarChartScaled;
     this.getScaleValue();
   }
+
+  toggleAnomalyReports() {
+    this.anomalyReportsExpanded = !this.anomalyReportsExpanded;
+  }
   //#endregion
 
 
@@ -647,7 +907,7 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
    */
   getMonthsDetails(month: string) {
     this.dialog.open(MainPageDialogComponent, {
-      data: this.localStorageData[month],
+      data: this.allMonthsData[month],
       width: '100%',
       height: '80vh',
       maxWidth: '100vw',
@@ -655,6 +915,21 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     })
   }
 
+  //#region Getters
+
+  /** Display first half and second half in the template */
+  get firstHalf() {
+    return this.anomalyReports.slice(0, Math.ceil(this.anomalyReports.length / 2));
+  }
+
+  get secondHalf() {
+    return this.anomalyReports.slice(Math.ceil(this.anomalyReports.length / 2));
+  }
+
+
+  getAnomaliesConfig(type: AbnormalityType) {
+    return AbnormalityConfig[type];
+  }
 
   isPositiveBalance(): boolean {
     const balanceNumber = parseLocaleStringToNumber(this.calculateTotalSurplusAllTimeFiltered());
@@ -673,8 +948,15 @@ export class StorageManagerComponent extends BasePageComponent implements OnInit
     if (!this.isHighlightSurplus) {
       return ''
     }
-    const balanceString: string = this.localStorageData[month].remainingBalance || '0';
+    const balanceString: string = this.allMonthsData[month].remainingBalance || '0';
     const numericBalance: number = parseLocaleStringToNumber(balanceString);
     return numericBalance >= 0 ? 'positive-balance' : 'negative-balance';
+  }
+
+
+  //#endregion
+
+  openInsightsDialog() {
+    this.dialogService.openInsightsDialog()
   }
 }

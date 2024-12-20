@@ -44,11 +44,19 @@
         <mat-menu #settingsMenu="matMenu" class="app-menu">
             <!-- Finance Manager link -->
             @if (showStorage) {
-                <a mat-menu-item [routerLink]="RoutePath.FinanceManagerPage" class="flex flex-row justify-center items-center gap-2">
+                <a mat-menu-item [routerLink]="RoutePath.FinanceManagerPage" [routerLinkActive]="colorService.isDarkMode() ? 'active-link-dark' : 'active-link-light'" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon fontSet="material-symbols-outlined">monitoring</mat-icon>
                     <span>Finance Manager</span>
                 </a>
             }
+
+
+            <a mat-menu-item [routerLink]="RoutePath.SmartBudgeterPage" [routerLinkActive]="colorService.isDarkMode() ? 'active-link-dark' : 'active-link-light'"  class="flex flex-row justify-center items-center gap-2">
+                <mat-icon fontSet="material-symbols-outlined">calculate</mat-icon>
+                <span>Smart Budget Planner</span>
+            </a>
+
+
         
             <!-- Settings link -->
             <button mat-menu-item (click)="dialogService.openSettingsDialog()" class="flex flex-row justify-center items-center gap-2">
@@ -68,7 +76,7 @@
     
             <!-- Help link -->
             @if(showOpenDocs) {
-                <a mat-menu-item [routerLink]="RoutePath.Docs" class="flex flex-row justify-center items-center gap-2">
+                <a mat-menu-item [routerLink]="RoutePath.Docs" [routerLinkActive]="colorService.isDarkMode() ? 'active-link-dark' : 'active-link-light'" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon fontSet="material-symbols-outlined">help</mat-icon>
                     <span>How to use?</span>
                 </a>
@@ -77,14 +85,14 @@
 
             <!-- View Features link -->
             @if (showUpdates) {
-                <a mat-menu-item [routerLink]="RoutePath.WhatsNewPage" class="flex flex-row justify-center items-center gap-2"> 
+                <a mat-menu-item [routerLink]="RoutePath.WhatsNewPage" [routerLinkActive]="colorService.isDarkMode() ? 'active-link-dark' : 'active-link-light'" class="flex flex-row justify-center items-center gap-2"> 
                     <mat-icon fontSet="material-symbols-outlined">new_releases</mat-icon>
                     <span>What's New</span>
                 </a>
             }
 
             @if (showHighlights) {
-                <a mat-menu-item [routerLink]="RoutePath.HighlightedFeaturesPage" class="flex flex-row justify-center items-center gap-2">
+                <a mat-menu-item [routerLink]="RoutePath.HighlightedFeaturesPage" [routerLinkActive]="colorService.isDarkMode() ? 'active-link-dark' : 'active-link-light'" class="flex flex-row justify-center items-center gap-2">
                     <mat-icon fontSet="material-symbols-outlined">kid_star</mat-icon>
                     <span>View Features</span>
                 </a>
