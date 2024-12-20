@@ -405,11 +405,13 @@
 
             </mat-card-content>
             <mat-card-actions>
-                <div class="flex flex-row w-full justify-between items-center py-2 mt-2">
-                    <div class="flex flex-row">
-                        <mat-checkbox [(ngModel)]="isSaveToBudgets">
-                            <span [style.color]="colorService.isDarkMode() ? colorService.darkTextPrimary : colorService.lightTextPrimary ">Save to Budgets</span>
-                        </mat-checkbox>
+                <div class="flex flex-row w-full justify-between items-center py-2 px-4 mt-2">
+                    <div class="flex flex-row w-full justify-end items-center gap-2">
+                        @if (visibleSliders.length > 0) {
+                            <button mat-flat-button (click)="saveToBudgets()">
+                                <span>Save to Budgets</span>
+                            </button>
+                        }
                     </div>
                 </div>
             </mat-card-actions>

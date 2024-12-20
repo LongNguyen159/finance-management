@@ -25,7 +25,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
 import { DialogsService } from '../../services/dialogs.service';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BudgetService } from '../../services/budget.service';
 
 
@@ -49,9 +48,8 @@ import { BudgetService } from '../../services/budget.service';
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatButtonToggleModule,
-    MatCheckboxModule
-],
+    MatButtonToggleModule
+  ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -798,25 +796,28 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     // Save the tracking data to a service
     this.trackingService.saveTrackingData(trackingData);
 
-    // Update budgets if user choose to
-    if (this.isSaveToBudgets) {
-      const budgetsData: Budget[] = trackingData.map(item => ({
-        category: item.name as ExpenseCategory,
-        value: Math.round((item.targetSpending / 12) * 100) / 100 // Target spending is in yearly, convert to monthly to save in Budgets
-      }))
-      const allBudgets = this.budgetService.getBudgets()
-  
-      const mergedBudgets = this.combineBudgets(allBudgets, budgetsData)
-  
-  
-      this.budgetService.saveBudgets(mergedBudgets)
-    }
-
-
     if (showNoti) {
       this.uiService.showSnackBar(noti, "Ok", 5000);
     }
   }
+
+
+  /** Save highlighted categories to budgets. */
+  saveToBudgets() {
+    const budgetsToAdd: Budget[] = this.visibleSliders.map(item => ({
+      category: item.name as ExpenseCategory,
+      value: Math.round((item.value) * 100) / 100
+    }))
+    const allBudgets = this.budgetService.getBudgets()
+
+    const mergedBudgets = this.combineBudgets(allBudgets, budgetsToAdd)
+
+    this.budgetService.saveBudgets(mergedBudgets)
+
+    this.uiService.showSnackBar("Budgets saved!", "Ok");
+  }
+
+
 
   getTrackedCategory(categoryName: string) {
     return this.trackedCategories.find(item => item.name == categoryName)
@@ -867,6 +868,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     return removeSystemPrefix(name);
   }
 
+  /** Helper to merge incoming budget to existing budget. Current logic of budget service
+   * overrides all exisiting budgets with incoming budgets, that's why we use this function to merge them.
+   */
   combineBudgets(existing: Budget[], incoming: Budget[]) {
     const categoryMap = new Map();
   
