@@ -175,11 +175,13 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           }
           acc.predictedSurplusValues.push([index, surplusValues[index]]);
           acc.predictedBalance.push([index, balanceValues[index]]);
-        } else if (data.isMissing) {
-          acc.missingMonths.push(index);
         } else {
           acc.actualSurplusValues.push([index, surplusValues[index]]);
           acc.actualBalance.push([index, balanceValues[index]]);
+
+          if (data.isMissing) {
+            acc.missingMonths.push(index);
+          }
         }
         return acc;
       },
@@ -194,17 +196,20 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
     );
   
 
-    const markAreas: any = missingMonths.map(index => (
-      [
-        {
-          name: 'Missing',
-          xAxis: months[index]
-        },
-        {
-          xAxis: months[index + 1]
-        }
-      ]
-    ));
+    // const markAreas: any = missingMonths.map(index => (
+    //   [
+    //     {
+    //       xAxis: months[index - 1]
+    //     },
+    //     {
+    //       xAxis: months[index + 1]
+    //     }
+    //   ]
+    // ));
+
+    const markLine: any = missingMonths.map(i => ({
+      xAxis: months[i],
+    }))
 
     this.mergeOptions = {
       ...this.getBaseOption(),
@@ -252,9 +257,23 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
                   xAxis: months[months.length - 1]
                 }
               ],
-              ...markAreas
             ]
           } : undefined,
+
+          markLine: {
+            symbol: 'none',
+            label: {
+              formatter: 'Missing',
+              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            },
+            lineStyle: {
+              type: 'dashed',
+              cap: 'round',
+              width: 2,
+              color: '#a3a3a3',
+            },
+            data: markLine
+          }
         },
         {
           name: 'Balance',
@@ -272,29 +291,7 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.3)' : 'rgba(70, 130, 180, 0.3)', // Light blue for background
           },
-
-          markArea: predictedBalance.length > 0 ? {
-            itemStyle: {
-              opacity: 0,
-              color: 'rgba(255, 255, 255, 0)'
-            },
-            label: {
-              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-            },
-            data: [
-              [
-                {
-                  name: 'Actual',
-                  xAxis: months[0]
-                },
-                {
-                  xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
-                }
-              ],
-            ]
-          } : undefined,
         },
-
         {
           name: 'Forecasted Balance',
           type: 'line',

@@ -314,6 +314,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
     const predictedExpenses = [];
     const actualNetIncome = [];
     const predictedNetIncome = [];
+    const missingMonths = []
     
     /** Map Series into [x, y] pairs. Because prediction series starts after real series. */
     for (let i = 0; i < this.chartData.length; i++) {
@@ -327,13 +328,34 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         }
         predictedExpenses.push([i, totalExpenses[i]]);
         predictedNetIncome.push([i, totalNetIncome[i]]);
+
       } else {
         actualExpenses.push([i, totalExpenses[i]]);
         actualNetIncome.push([i, totalNetIncome[i]]);
-      }
+        if (this.chartData[i].isMissing) {
+          missingMonths.push(i)
+        }
+      } 
+      
     }
 
     this.isPredictionAvailable = predictedExpenses.length > 0 || predictedNetIncome.length > 0;
+
+    // const markAreas: any = missingMonths.map(index => (
+    //   [
+    //     {
+    //       xAxis: this.xAxisData[index - 1]
+    //     },
+    //     {
+    //       xAxis: this.xAxisData[index + 1]
+    //     }
+    //   ]
+    // ));
+
+
+    const markLines: any = missingMonths.flatMap(index => [
+      { xAxis: this.xAxisData[index] }
+    ]);    
   
   
     const trendSeries: LineSeriesOption[] = [
@@ -372,7 +394,22 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
               }
             ],
           ]
-        } : undefined
+        } : undefined,
+
+        markLine: {
+          data: markLines,
+          symbol: 'none',
+          label: {
+            formatter: 'Missing',
+            color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          },
+          lineStyle: {
+            type: 'dashed',
+            cap: 'round',
+            width: 2,
+            color: '#a3a3a3',
+          },
+        }
       },
       {
         name: 'Forecasted Expenses',
