@@ -271,7 +271,7 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
       stack: this.stackCategories ? 'categories' : '',
       markArea: this.isPredictionAvailable ? {
         itemStyle: {
-          opacity: 0.2,
+          opacity: 0.1,
           color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
         },
         label: {
