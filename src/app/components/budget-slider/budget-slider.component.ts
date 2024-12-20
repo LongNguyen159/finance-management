@@ -792,9 +792,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         percentageSpent,
       };
     });
-  
+
     // Save the tracking data to a service
-    this.trackingService.saveTrackingData(trackingData);
+    this.trackingService.saveTrackingData(trackingData, this.targetSurplus, this.averageIncome);
 
     if (showNoti) {
       this.uiService.showSnackBar(noti, "Ok", 5000);
