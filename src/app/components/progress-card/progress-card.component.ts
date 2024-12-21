@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { ColorService } from '../../services/color.service';
-import { removeSystemPrefix } from '../../utils/utils';
+import { getCurrentYearMetrics, removeSystemPrefix } from '../../utils/utils';
 import { MatIconModule } from '@angular/material/icon';
 import { ExpenseCategory, expenseCategoryDetails, RoutePath } from '../models';
 import { CurrencyService } from '../../services/currency.service';
@@ -13,6 +13,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { UiService } from '../../services/ui.service';
 import { ConfirmDialogData } from '../dialogs/confirm-dialog/confirm-dialog.component';
 import { RouterModule } from '@angular/router';
+import { DataService } from '../../services/data.service';
+import { takeUntil } from 'rxjs';
 
 
 @Component({
@@ -38,11 +40,16 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
   colorService = inject(ColorService)
   currencyService = inject(CurrencyService)
   uiService = inject(UiService)
+  dataService = inject(DataService)
 
   RoutePath = RoutePath
 
 
   ngOnInit(): void {
+    this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
+      const aggregatedCategoriesOfCurrentYear = getCurrentYearMetrics(allMonthsData)
+      this.trackingService.updateMultipleCurrentSpendings(aggregatedCategoriesOfCurrentYear)
+    })
   }
 
   /** Calculate and clamp the percentageSpent to a maximum of 100 */

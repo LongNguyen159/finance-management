@@ -1,4 +1,4 @@
-import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, ForecastData, PieData, SYSTEM_PREFIX, TrendAnalysis, TrendsLineChartData } from "../components/models";
+import { Abnormality, AbnormalityAnalysis, AbnormalityType, DifferenceItem, ForecastData, MonthlyData, PieData, SYSTEM_PREFIX, TrendAnalysis, TrendsLineChartData } from "../components/models";
 import { evaluate } from 'mathjs/number';
 import { PolynomialRegression } from 'ml-regression-polynomial';
 import { PredictService } from "../services/predict.service";
@@ -765,3 +765,43 @@ function calculateSlope(coefficients: number[]): number {
 //#endregion
 
 //#endregion
+
+
+/** Aggregate and return the current year spendings.
+ * @param allMonthsData The monthly data to aggregate
+ * 
+ * @returns An array of { name, totalValue } objects for each category
+ */
+export function getCurrentYearMetrics(allMonthsData: MonthlyData): { name: string, totalValue: number }[] {
+  const currentYear = new Date().getFullYear();
+
+  const monthsOfCurrentYear = Object.keys(allMonthsData).reduce((acc, monthKey) => {
+    const [year, monthStr] = monthKey.split('-').map(Number);      
+    const includeMonth = year === currentYear
+
+    if (includeMonth) {
+      acc.push(monthKey);
+    }
+
+    return acc;
+  }, [] as string[]);
+
+  const aggregatedPieData = monthsOfCurrentYear.reduce((acc, month) => {
+    allMonthsData[month].pieData.forEach(item => {
+      // Only extract categories data, exclude surplus and standalone items.
+      if (item.name.includes(SYSTEM_PREFIX)) {
+        if (!acc[item.name]) {
+          acc[item.name] = { total: 0, count: 0 };
+        }
+        acc[item.name].total += item.value;
+        acc[item.name].count += 1;
+      }
+    });
+    return acc;
+  }, {} as { [key: string]: { total: number, count: number } });
+
+  return Object.keys(aggregatedPieData).map(category => ({
+    name: category,
+    totalValue: aggregatedPieData[category].total
+  }))
+}

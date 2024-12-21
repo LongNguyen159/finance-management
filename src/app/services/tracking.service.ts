@@ -83,6 +83,44 @@ export class TrackingService {
     );
   }
 
+
+
+  /** Update the current spending for multiple categories */
+  updateMultipleCurrentSpendings(updates: { name: string; totalValue: number }[]): void {
+    // Get the current tracking data
+    const currentData = this.getTrackingData();
+
+    // Map through the current tracking data and update the matching categories
+    const updatedData = currentData.map(item => {
+      const update = updates.find(u => u.name === item.name); // Find the matching update
+      if (update) {
+        return {
+          ...item,
+          currentSpending: update.totalValue, // Update the current spending
+          percentageSpent: (update.totalValue / item.targetSpending) * 100 // Recalculate percentage spent
+        };
+      }
+      return item; // Return unchanged item if no update matches
+    });
+
+    // Retrieve existing targetSurplus and avgIncome
+    const { targetSurplus, avgIncome } = this.getAdditionalData();
+
+    // Save updated data back to local storage
+    const dataToSave = {
+      trackingCategories: updatedData,
+      targetSurplus,
+      avgIncome
+    };
+
+    localStorage.setItem(this.localStorageKey, JSON.stringify(dataToSave));
+
+    // Update the BehaviorSubject to notify subscribers
+    this.trackingDataSubject.next(updatedData);
+  }
+
+
+
   /** Remove tracking data by name */
   removeTrackingData(name: string): void {
     const currentData = this.getTrackingData();
