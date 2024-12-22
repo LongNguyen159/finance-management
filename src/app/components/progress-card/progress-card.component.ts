@@ -5,9 +5,9 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { ColorService } from '../../services/color.service';
-import { getCurrentYearMetrics, removeSystemPrefix } from '../../utils/utils';
+import { formatBigNumber, getCurrentYearMetrics, removeSystemPrefix } from '../../utils/utils';
 import { MatIconModule } from '@angular/material/icon';
-import { ExpenseCategory, expenseCategoryDetails, RoutePath } from '../models';
+import { ExpenseCategory, expenseCategoryDetails, RoutePath, Tracker } from '../models';
 import { CurrencyService } from '../../services/currency.service';
 import { MatButtonModule } from '@angular/material/button';
 import { UiService } from '../../services/ui.service';
@@ -44,12 +44,34 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
 
   RoutePath = RoutePath
 
+  aggregatedTrackers: Tracker
+
 
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
       const aggregatedCategoriesOfCurrentYear = getCurrentYearMetrics(allMonthsData)
       this.trackingService.updateMultipleCurrentSpendings(aggregatedCategoriesOfCurrentYear)
     })
+
+    this.trackingService.trackingCategories$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingCategories => {
+      this.aggregatedTrackers = this.aggregateTrackers(trackingCategories)
+    })
+  }
+
+  aggregateTrackers(trackers: Tracker[]): Tracker {
+    const totalCurrentSpending = trackers.reduce((sum, tracker) => sum + tracker.currentSpending, 0);
+    const totalTargetSpending = trackers.reduce((sum, tracker) => sum + tracker.targetSpending, 0);
+  
+    const percentageSpent = totalTargetSpending > 0 
+      ? (totalCurrentSpending / totalTargetSpending) * 100 
+      : 0;
+  
+    return {
+      name: "Total Spending",
+      currentSpending: totalCurrentSpending,
+      targetSpending: totalTargetSpending,
+      percentageSpent: percentageSpent
+    };
   }
 
   /** Calculate and clamp the percentageSpent to a maximum of 100 */
@@ -85,6 +107,10 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
 
   navigateToBudgetPlanner() {
     this.navigateToSmartBudgeter.emit(true)
+  }
+
+  formatBigNumber(number: number) {
+    return formatBigNumber(number, this.currencyService.getCurrencySymbol())
   }
 
 }

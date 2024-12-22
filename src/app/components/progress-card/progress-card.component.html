@@ -12,9 +12,58 @@
     } @else {
         <div>
             <p class="text-base">
-                This is your saved plan, aiming for <strong>{{ ((trackingService.trackingMetaData$ | async)?.targetSurplus || 0) * 12 | currency:currencyService.getSelectedCurrency() }}</strong> in annual savings, based on an average monthly income of <strong>{{ ((trackingService.trackingMetaData$ | async)?.avgIncome || 0) | currency:currencyService.getSelectedCurrency() }}</strong>.
+                This plan sets you up to save <strong>{{ formatBigNumber(((trackingService.trackingMetaData$ | async)?.targetSurplus || 0) * 12) }}</strong> annually, based on an average monthly income of <strong>{{ ((trackingService.trackingMetaData$ | async)?.avgIncome || 0) | currency:currencyService.getSelectedCurrency() }}</strong> (approx. {{ formatBigNumber(((trackingService.trackingMetaData$ | async)?.avgIncome || 0) * 12) }} yearly).
             </p>
         </div>
+
+        <mat-card class="rounded-2xl px-2">
+            <mat-card-header class="custom-card-header">
+                <mat-card-title>
+                    <div class="flex flex-row w-full justify-between items-center mb-2">
+                        <div class="flex flex-row gap-2 items-center">
+                            <!-- <mat-icon fontSet="material-symbols-outlined" [ngStyle]="{ color: colorService.isDarkMode() ? getCategoryIconDetails(category.name).colorDark : getCategoryIconDetails(category.name).colorLight }">{{ getCategoryIconDetails(category.name).icon }}</mat-icon> -->
+                            <span class="!font-bold !text-2xl">Total Spending</span>
+                        </div>
+                    </div>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="progress-info mb-4 flex flex-row gap-4 w-full items-center justify-between">
+                    <p>
+                        Spent: {{ aggregatedTrackers.currentSpending | currency:currencyService.getSelectedCurrency() }} / {{ aggregatedTrackers.targetSpending | currency:currencyService.getSelectedCurrency() }}
+                    </p>
+
+                    @if (aggregatedTrackers.percentageSpent <= 100) {
+                        <p>
+                            {{ (aggregatedTrackers.targetSpending - aggregatedTrackers.currentSpending) | currency:currencyService.getSelectedCurrency() }} left
+                        </p>
+                    }
+
+                    @if (aggregatedTrackers.percentageSpent > 100) {
+                        <p class="font-bold" [ngClass]="colorService.isDarkMode() ? 'negative-dark' : 'negative-light'">
+                            Exceeded by {{ (aggregatedTrackers.currentSpending - aggregatedTrackers.targetSpending) | currency:currencyService.getSelectedCurrency() }}
+                        </p>
+                    }
+                </div>
+
+                <div class="flex flex-row w-full pb-2">
+                    <mat-progress-bar
+                        [ngClass]="{
+                            'custom-mat-progress-bar-color-red-dark': aggregatedTrackers.percentageSpent > 100 && colorService.isDarkMode(),
+                            'custom-mat-progress-bar-color-red-light': aggregatedTrackers.percentageSpent > 100 && !colorService.isDarkMode()
+                        }"
+                        color="primary"
+                        mode="determinate"
+                        [value]="clampedPercentageSpent(aggregatedTrackers.percentageSpent)">
+                    </mat-progress-bar>
+                </div>
+                <p>
+                    ({{ aggregatedTrackers.percentageSpent.toFixed(2) }}%)
+                </p>
+            </mat-card-content>
+        </mat-card>
+
+
         <div class="flex flex-row w-full justify-end items-center gap-2">
             <a mat-button [routerLink]="RoutePath.SmartBudgeterPage" class="flex flex-row justify-center items-center gap-1" (click)="navigateToBudgetPlanner()">
                 <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
