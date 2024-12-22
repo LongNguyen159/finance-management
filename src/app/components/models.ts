@@ -421,4 +421,10 @@ export interface Tracker {
   percentageSpent: number
 }
 
+export interface TrackingMetaData {
+  targetSurplus: number
+  avgIncome: number
+  trackingCategories: Tracker[]
+}
+
 //#endregion

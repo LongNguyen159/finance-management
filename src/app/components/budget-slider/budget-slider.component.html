@@ -272,8 +272,21 @@
         <div class="flex flex-col items-center mb-6 gap-2">
             <h2 class="text-2xl font-bold">Here's the plan we've created for you</h2>
             <p [ngClass]="colorService.isDarkMode() ? '!text-neutral-400' : 'text-gray-500' ">Adjust as needed</p>
+
+
+            <div class="flex flex-row items-center gap-2 w-full justify-center">
+                <button mat-stroked-button (click)="dialogService.openTrackerDialog()">
+                    <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+                    <span>View Tracked Plan</span>
+                </button>
+                @if (visibleSliders.length > 0) {
+                    <button mat-flat-button (click)="openSelectCategoriesDialog()">
+                        Save this Plan
+                    </button>
+                }
+            </div>
         </div>
-        <div class="flex flex-row items-start justify-between sticky py-3 top-16 z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
+        <div class="flex flex-row items-start justify-between sticky py-3 top-[63px] z-50" [ngClass]="colorService.isDarkMode() ? 'bg-[rgb(34,34,34)]' : 'white'">
             <div class="flex flex-row gap-2 w-full">
                 <div class="flex flex-col items-start gap-1">
                     <div class="flex flex-row gap-1 py-3 px-6 rounded-2xl border-[2px] border-solid mat-card-background">
@@ -392,21 +405,11 @@
 
             </mat-card-content>
             <mat-card-actions>
-                <div class="flex flex-row w-full justify-between items-center py-2 mt-2">
-                    <div class="flex flex-row">
-                        <mat-checkbox [(ngModel)]="isSaveToBudgets">
-                            <span [style.color]="colorService.isDarkMode() ? colorService.darkTextPrimary : colorService.lightTextPrimary ">Save Highlighted Categories to Budgets</span>
-                        </mat-checkbox>
-                    </div>
-
-                    <div class="flex flex-row w-full justify-end gap-2">
-                        <button mat-stroked-button (click)="dialogService.openTrackerDialog()">
-                            <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
-                            <span>View Tracked Progress</span>
-                        </button>
+                <div class="flex flex-row w-full justify-between items-center py-2 px-4 mt-2">
+                    <div class="flex flex-row w-full justify-end items-center gap-2">
                         @if (visibleSliders.length > 0) {
-                            <button mat-flat-button (click)="trackVisibleSliders(true)">
-                                Track Categories
+                            <button mat-flat-button (click)="saveToBudgets()">
+                                <span>Save to Budgets</span>
                             </button>
                         }
                     </div>

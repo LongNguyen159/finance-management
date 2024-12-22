@@ -25,7 +25,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { TrackingService } from '../../services/tracking.service';
 import { DialogsService } from '../../services/dialogs.service';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BudgetService } from '../../services/budget.service';
 
 
@@ -49,9 +48,8 @@ import { BudgetService } from '../../services/budget.service';
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatButtonToggleModule,
-    MatCheckboxModule
-],
+    MatButtonToggleModule
+  ],
   templateUrl: './budget-slider.component.html',
   styleUrl: './budget-slider.component.scss',
   encapsulation: ViewEncapsulation.None
@@ -105,7 +103,6 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     savingsType: new FormControl('absolute'), // Default to absolute
   });
 
-
   //#endregion
 
   //#region Sliders
@@ -143,6 +140,8 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
   allCategories = Object.values(ExpenseCategory) as string[];
   expenseCategoryDetails = expenseCategoryDetails
 
+
+  categoriesToTrack: string[] = []
   trackedCategories: Tracker[] = []
   
 
@@ -214,7 +213,7 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
       // this.syncSliders();
     }
 
-    this.trackingService.trackingData$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingData => {
+    this.trackingService.trackingCategories$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingData => {
       this.trackedCategories = trackingData
     })
   }
@@ -776,10 +775,11 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     );
   }
 
-  /** Method to track all visible sliders */
-  trackVisibleSliders(showNoti: boolean = false, noti: string = 'Tracked categories updated!') {
-    // Map tracking data for all visible sliders
-    const trackingData: Tracker[] = this.visibleSliders.map(slider => {
+  /** Method to track selected sliders */
+  trackSliders(showNoti: boolean = true, noti: string = `Plan Saved! You can view them in 'View Tracked Plan'`) {
+    
+    // Track only the selected categories
+    const trackingData: Tracker[] = this.masterSliders.filter(slider => this.categoriesToTrack.includes(slider.name)).map(slider => {
       const matchingCategory = this.aggregatedPieData.find(item => item.name === slider.name);
       const currentSpending = matchingCategory?.totalValue || 0;
       const targetSpending = slider.value * 12; // Annual target based on slider value
@@ -792,32 +792,53 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
         percentageSpent,
       };
     });
-  
+
     // Save the tracking data to a service
-    this.trackingService.saveTrackingData(trackingData);
-
-    // Update budgets if user choose to
-    if (this.isSaveToBudgets) {
-      const budgetsData: Budget[] = trackingData.map(item => ({
-        category: item.name as ExpenseCategory,
-        value: Math.round((item.targetSpending / 12) * 100) / 100 // Target spending is in yearly, convert to monthly to save in Budgets
-      }))
-      const allBudgets = this.budgetService.getBudgets()
-  
-      const mergedBudgets = this.combineBudgets(allBudgets, budgetsData)
-  
-  
-      this.budgetService.saveBudgets(mergedBudgets)
-    }
-
+    this.trackingService.saveTrackingData(trackingData, (this.averageIncome - this.totalExpenses), this.averageIncome);
 
     if (showNoti) {
-      this.uiService.showSnackBar(noti);
+      this.uiService.showSnackBar(noti, "Ok", 5000);
     }
   }
 
+
+  /** Save highlighted categories to budgets. */
+  saveToBudgets() {
+    const budgetsToAdd: Budget[] = this.visibleSliders.map(item => ({
+      category: item.name as ExpenseCategory,
+      value: Math.round((item.value) * 100) / 100
+    }))
+    const allBudgets = this.budgetService.getBudgets()
+
+    const mergedBudgets = this.combineBudgets(allBudgets, budgetsToAdd)
+
+    this.budgetService.saveBudgets(mergedBudgets)
+
+    this.uiService.showSnackBar("Budgets saved!", "Ok");
+  }
+
+
+
   getTrackedCategory(categoryName: string) {
     return this.trackedCategories.find(item => item.name == categoryName)
+  }
+
+  openSelectCategoriesDialog() {
+    /** Pre-select the dialog with highlighted categories (visible sliders). The dialog
+     * uses `categoriesToTrack` signal to pre-select the categories.
+     */
+    this.trackingService.categoriesToTrack.set(this.visibleSliders.map(item => item.name))
+
+    // Open the dialog and subscribe to the results
+    const afterClosed$ = this.dialogService.openTrackerSelectorDialog()
+
+    afterClosed$.subscribe((dialogResults: string[]) => {
+      // Selected Categories
+      if (dialogResults) {
+        this.categoriesToTrack = dialogResults
+        this.trackSliders()
+      }
+    })
   }
   
 
@@ -847,6 +868,9 @@ export class BudgetSliderComponent extends BasePageComponent implements OnInit {
     return removeSystemPrefix(name);
   }
 
+  /** Helper to merge incoming budget to existing budget. Current logic of budget service
+   * overrides all exisiting budgets with incoming budgets, that's why we use this function to merge them.
+   */
   combineBudgets(existing: Budget[], incoming: Budget[]) {
     const categoryMap = new Map();
   
