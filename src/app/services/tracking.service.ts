@@ -119,6 +119,20 @@ export class TrackingService {
     this.trackingDataSubject.next(updatedData);
   }
 
+  /** Function to cleanup tracked categories: Reset value to 0 if no data of current year is found, but is defined in trackers.
+   * (categories that are being tracked but current year has no spending yet, but still has spending from last year)
+   */
+  cleanupTrackingCategories( categoriesOfCurrentYear: {name: string; totalValue: number;}[] ) {
+    const trackedCategories = this.getTrackingData();
+    const categoriesOfCurrentYearNames = categoriesOfCurrentYear.map(category => category.name);
+
+    trackedCategories.forEach(trackedCategory => {
+      if (!categoriesOfCurrentYearNames.includes(trackedCategory.name)) {
+        this.updateMultipleCurrentSpendings([{ name: trackedCategory.name, totalValue: 0 }]);
+      }
+    })
+  }
+
 
 
   /** Remove tracking data by name */

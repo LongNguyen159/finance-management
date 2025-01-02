@@ -240,26 +240,6 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
             color: this.colorService.isDarkMode() ? 'rgba(255, 127, 80, 0.3)' : 'rgba(255, 165, 0, 0.3)', // Light orange for background
           },
 
-          markArea: predictedBalance.length > 0 ? {
-            itemStyle: {
-              color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
-            },
-            label: {
-              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-            },
-            data: [
-              [
-                {
-                  name: 'Forecast',
-                  xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
-                },
-                {
-                  xAxis: months[months.length - 1]
-                }
-              ],
-            ]
-          } : undefined,
-
           markLine: {
             symbol: 'none',
             label: {
@@ -309,6 +289,25 @@ export class TotalSurplusLineChartComponent extends BaseChartComponent implement
           areaStyle: {
             color: this.colorService.isDarkMode() ? 'rgba(30, 144, 255, 0.2)' : 'rgba(70, 130, 180, 0.2)', // Light blue for background
           },
+          markArea: predictedBalance.length > 0 ? {
+            itemStyle: {
+              color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)',
+            },
+            label: {
+              color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+            },
+            data: [
+              [
+                {
+                  name: 'Forecast',
+                  xAxis: months[months.length - (MONTHS_TO_PREDICT + 1)]
+                },
+                {
+                  xAxis: months[months.length - 1]
+                }
+              ],
+            ]
+          } : undefined,
         },
 
         {
