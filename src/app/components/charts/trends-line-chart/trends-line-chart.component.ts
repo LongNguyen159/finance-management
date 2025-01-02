@@ -341,17 +341,6 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
 
     this.isPredictionAvailable = predictedExpenses.length > 0 || predictedNetIncome.length > 0;
 
-    // const markAreas: any = missingMonths.map(index => (
-    //   [
-    //     {
-    //       xAxis: this.xAxisData[index - 1]
-    //     },
-    //     {
-    //       xAxis: this.xAxisData[index + 1]
-    //     }
-    //   ]
-    // ));
-
 
     const markLines: any = missingMonths.flatMap(index => [
       { xAxis: this.xAxisData[index] }
@@ -376,25 +365,6 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
           opacity: 0.3
         },
-        markArea: predictedNetIncome.length > 0 ? {
-          itemStyle: {
-            color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)', // Adjust color for light mode
-          },
-          label: {
-            color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
-          },
-          data: [
-            [
-              {
-                name: 'Forecast',
-                xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT + 1)]
-              },
-              {
-                xAxis: this.xAxisData[this.xAxisData.length - 1]
-              }
-            ],
-          ]
-        } : undefined,
 
         markLine: {
           data: markLines,
@@ -428,7 +398,26 @@ export class TrendsLineChartComponent extends BaseChartComponent implements OnCh
         areaStyle: {
           color: this.colorService.isDarkMode() ? this.colorService.redDarkMode : this.colorService.redLightMode, // Red for expense
           opacity: 0.1
-        }
+        },
+        markArea: predictedNetIncome.length > 0 ? {
+          itemStyle: {
+            color: this.colorService.isDarkMode() ? 'rgba(225, 225, 225, 0.1)' : 'rgba(100, 100, 100, 0.1)', // Adjust color for light mode
+          },
+          label: {
+            color: this.colorService.isDarkMode() ? this.colorService.darkTextPrimary : this.colorService.lightTextPrimary,
+          },
+          data: [
+            [
+              {
+                name: 'Forecast',
+                xAxis: this.xAxisData[this.xAxisData.length - (MONTHS_TO_PREDICT + 1)]
+              },
+              {
+                xAxis: this.xAxisData[this.xAxisData.length - 1]
+              }
+            ],
+          ]
+        } : undefined,
       },
       {
         name: 'Net Income',
