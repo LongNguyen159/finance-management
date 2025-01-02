@@ -50,7 +50,9 @@ export class ProgressCardComponent extends BasePageComponent implements OnInit {
   ngOnInit(): void {
     this.dataService.getAllMonthsData().pipe(takeUntil(this.componentDestroyed$)).subscribe(allMonthsData => {
       const aggregatedCategoriesOfCurrentYear = getCurrentYearMetrics(allMonthsData)
-      this.trackingService.updateMultipleCurrentSpendings(aggregatedCategoriesOfCurrentYear)
+      
+      this.trackingService.cleanupTrackingCategories(aggregatedCategoriesOfCurrentYear) // Cleanup data for categories that are no longer present in the current year
+      this.trackingService.updateMultipleCurrentSpendings(aggregatedCategoriesOfCurrentYear) // Update current spending for all categories
     })
 
     this.trackingService.trackingCategories$.pipe(takeUntil(this.componentDestroyed$)).subscribe(trackingCategories => {
